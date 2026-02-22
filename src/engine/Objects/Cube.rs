@@ -126,7 +126,7 @@ impl CubeMesh {
         for vertex in self.vertices.iter_mut() {
             let mut pos = Vec3A::from(glam::Vec3::from(vertex.position));
             pos += delta;
-            vertex.position = glam::Vec3::from(pos).into();
+            vertex.position = glam::Vec3::from(pos);
         }
     }
 
@@ -147,7 +147,7 @@ impl CubeMesh {
             let pos = Vec3A::from(glam::Vec3::from(vertex.position));
             let local = pos - pivot_simd;
             let rotated = rot_matrix * local;
-            vertex.position = glam::Vec3::from(pivot_simd + rotated).into();
+            vertex.position = glam::Vec3::from(pivot_simd + rotated);
 
             let norm = Vec3A::new(vertex.normal.x, vertex.normal.y, vertex.normal.z);
             let rot_norm = rot_matrix * norm;
@@ -161,14 +161,14 @@ impl CubeMesh {
     /// 3. Recalculate mesh based on a change in scale.
     /// Logic: Calculates the ratio (new / old) and scales vertices relative to the pivot.
     pub fn recalculate_scale(&mut self, pivot: mq::Vec3, old_scale: mq::Vec3, new_scale: mq::Vec3) {
-        let pivot_simd = Vec3A::from(glam::Vec3::from(pivot));
-        let old_s = Vec3A::from(glam::Vec3::from(old_scale));
-        let new_s = Vec3A::from(glam::Vec3::from(new_scale));
+        let pivot_simd = Vec3A::from(pivot);
+        let old_s = Vec3A::from(old_scale);
+        let new_s = Vec3A::from(new_scale);
 
         let ratio = new_s / old_s;
 
         for vertex in self.vertices.iter_mut() {
-            let pos = Vec3A::from(glam::Vec3::from(vertex.position));
+            let pos = Vec3A::from(vertex.position);
             
             let offset = pos - pivot_simd;
             let final_pos = pivot_simd + (offset * ratio);

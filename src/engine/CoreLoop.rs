@@ -15,6 +15,7 @@ use crate::engine::CameraManager::CamMemory;
 use crate::engine::CameraManager::Camera;
 use crate::engine::CameraManager::set_camera;
 use crate::engine::CameraManager::set_default_camera;
+use crate::engine::Cubemap::cubemap_internal;
 use crate::engine::Objects::Cylinder::Cylinder;
 use crate::engine::Objects::ObjectManagement::ObjectStorage::ObjectKey;
 use crate::engine::Objects::Mesh::Mesh;
@@ -180,7 +181,7 @@ pub enum Command {
 
     DrawCube { pos: mq::Vec3, size: mq::Vec3, texture: Option<mq::Texture2D>, color: mq::Color},
 
-    DrawCubemap { pos: mq::Vec3, size: mq::Vec3, texture: Option<mq::Texture2D>, color: mq::Color},
+    DrawCubemap {texture: Option<mq::Texture2D>},
 
     DrawPoly{ x: f32, y: f32, sides: u8, radius: f32, rotation: f32, color: mq::Color},
 
@@ -445,9 +446,9 @@ pub async fn proccess_commands_loop() {
                     sm::switch_to_desired_shader(sm::ShaderKind::Basic);
                     mq::draw_cube(pos,size,texture.as_ref(),color)
                 }
-                Command::DrawCubemap {pos,size,texture,color} => {
+                Command::DrawCubemap {texture} => {
                     sm::switch_to_desired_shader(sm::ShaderKind::None);
-                    mq::draw_cube(pos,size,texture.as_ref(),color);
+                    cubemap_internal(texture);
         
                 }
         
@@ -521,7 +522,6 @@ pub async fn proccess_commands_loop() {
                 }
         
                 Command::NextFrame{physics_step, sender} => {
-                    let start=  Instant::now();
                     mq::next_frame().await;
                     crate::engine::SHADERS::shader_manager::new_frame_shader_update();
                     crate::engine::FrameInfo::update_frame_info();

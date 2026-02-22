@@ -16,8 +16,8 @@ pub fn shader_load() {
 
         let material: Material = load_material(
             ShaderSource::Glsl {
-                vertex: &VERTEX_SHADER_SRC,
-                fragment: &FRAGMENT_SHADER_SRC,
+                vertex: VERTEX_SHADER_SRC,
+                fragment: FRAGMENT_SHADER_SRC,
             },
             MaterialParams {
                 pipeline_params,
@@ -42,8 +42,8 @@ pub fn shader_load() {
         const VERTEX_SHADER_SKYBOX: &str = include_str!("Skybox/VERTEX.vert");
         let skybox_material = load_material(
             ShaderSource::Glsl {
-            vertex: &VERTEX_SHADER_SKYBOX,
-            fragment: &GRAGMENT_SHADER_SKYBOX,
+            vertex: VERTEX_SHADER_SKYBOX,
+            fragment: GRAGMENT_SHADER_SKYBOX,
         },
             MaterialParams {
                 // tell MQ to bind a cubemap to "u_skybox"

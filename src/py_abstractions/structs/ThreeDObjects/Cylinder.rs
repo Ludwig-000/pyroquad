@@ -79,8 +79,8 @@ impl Cylinder {
         let cube_handle: Py<Self> = Py::new(py, placeholder_struct)?; 
         
         let weak_ref_handle: Py<PyWeakref> = {
-            let bound_cube = cube_handle.bind(py); 
-            let weak_ref_ref = PyWeakrefReference::new(&bound_cube)?;
+            let bound_cylinder = cube_handle.bind(py); 
+            let weak_ref_ref = PyWeakrefReference::new(bound_cylinder)?;
             weak_ref_ref.cast_into::<PyWeakref>()?.unbind() 
         };
 

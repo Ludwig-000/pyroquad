@@ -75,19 +75,19 @@ impl From<PChannelError> for pyo3::PyErr {
         match value{
             PChannelError::DeadlockError=> {
                 PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(
-                    format!("Deadlock error encounterd. Waiting for a blocking channel that may never resolve, since the engine has not yet been initialized.
-                    Make sure to call 'activate_engine()' before making engine calls.")
+                    "Deadlock error encounterd. Waiting for a blocking channel that may never resolve, since the engine has not yet been initialized.
+                    Make sure to call 'activate_engine()' before making engine calls.".to_string()
                 )
             }
             PChannelError::PanicError=> {
                 PyErr::new::<pyo3::exceptions::PyBaseException, _>(
-                    format!("Fatal error. The engine crashed and could not recover.")
+                    "Fatal error. The engine crashed and could not recover.".to_string()
                 )
             }
             // I do not know when this would ever happen.
             PChannelError::SendError=> {
                 PyErr::new::<pyo3::exceptions::PyBaseException, _>(
-                    format!("Sender failed to resolve.")
+                    "Sender failed to resolve.".to_string()
                 )
             }
         }

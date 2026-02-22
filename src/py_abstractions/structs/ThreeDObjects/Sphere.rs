@@ -77,8 +77,8 @@ impl Sphere {
         let cube_handle: Py<Self> = Py::new(py, placeholder_struct)?; 
         
         let weak_ref_handle: Py<PyWeakref> = {
-            let bound_cube = cube_handle.bind(py); 
-            let weak_ref_ref = PyWeakrefReference::new(&bound_cube)?;
+            let bound_sphere = cube_handle.bind(py); 
+            let weak_ref_ref = PyWeakrefReference::new(bound_sphere)?;
             weak_ref_ref.cast_into::<PyWeakref>()?.unbind() 
         };
 
@@ -98,17 +98,14 @@ impl Sphere {
         let mut cube_ref = cube_handle.borrow_mut(py);
         cube_ref.key = key;
 
-        match collider_type.0{
-            InnerColliderOptions::Dynamic { gravity_scale, friction, restitution, density }=>{
-                let phys_struct = Physics {
-                    identity: weak_ref_handle,
-                    handle: key,
-                };
-                cube_ref.physics = Some(Py::new(py, phys_struct)?);
-            },
-            _ => {}
+        if let InnerColliderOptions::Dynamic { gravity_scale, friction, restitution, density } = collider_type.0{
+            let phys_struct = Physics {
+                identity: weak_ref_handle,
+                handle: key,
+            };
+            cube_ref.physics = Some(Py::new(py, phys_struct)?);
         }
-
+        
         drop(cube_ref);
 
         Ok(cube_handle)

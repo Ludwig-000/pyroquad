@@ -47,8 +47,8 @@ impl CamMemory{
     }
     pub fn push(&mut self, camera: &Camera){
         match &self.current_cam{
-            Camera::Camera2D(cam)=> self.last_2d_camera = Some(clone_camera2d(&cam)),
-            Camera::Camera3D(cam)=> self.last_3d_camera = Some(clone_camera3d(&cam)),
+            Camera::Camera2D(cam)=> self.last_2d_camera = Some(clone_camera2d(cam)),
+            Camera::Camera3D(cam)=> self.last_3d_camera = Some(clone_camera3d(cam)),
         }
         match camera{
             Camera::Camera2D(cam)=>{

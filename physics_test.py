@@ -53,7 +53,13 @@ cubes  =cube_gen()
 
 set_cursor_grab(True)
 show_mouse(False)
+
+
+
+
 while True:
+    if KeyCode.Escape in get_keys_pressed():
+        break
     cam.update()
     draw_grid(100,10,Color.YELLOW,Color.CYAN)
     draw_cube(Vec3.ZERO,Vec3.ONE,Color.PURE_BLUE)
