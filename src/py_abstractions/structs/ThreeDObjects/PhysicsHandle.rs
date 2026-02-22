@@ -247,8 +247,10 @@ impl Physics{
         };
         if !alive {
             return Err(PyErr::new::<pyo3::exceptions::PyException, _>(
-                format!("The object, which this physics class is attatched to, no longer exists.
-                A Physics handle may not outlive the Object it is linked to.")
+                
+                "The object, which this physics class is attatched to, no longer exists.
+                A Physics handle may not outlive the Object it is linked to."
+
             ));
         }
         Ok(())

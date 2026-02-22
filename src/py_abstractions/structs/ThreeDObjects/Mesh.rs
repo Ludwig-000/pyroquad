@@ -61,6 +61,7 @@ crate::implement_basic_setter_methods3D!(Mesh);
 crate::implement_check_collision3D!(Mesh);
 crate::implement_set_collider3D!(Mesh);
 crate::implement_tick3D!(Mesh, r#"Mesh.from_file_data(...)"#);
+crate::implement_manual_drawing_options3D!(Mesh, r#"Mesh.from_file_data(...)"#);
 crate::implement_remove_tick3D!(Mesh);
 crate::implement_Drop3D!(Mesh);
 

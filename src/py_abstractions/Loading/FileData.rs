@@ -59,7 +59,7 @@ impl FileData{
     /// 
     pub fn to_2DTexture(&self)-> PyResult<Texture2D>{
         let image = Textures_and_Images::image_from_bytes(&self.bytes)?;
-        Ok ( Texture2D::from_image(image)? ) 
+        Texture2D::new(image)
     }
 
     /// Attempts to parse the file data as a Sound.

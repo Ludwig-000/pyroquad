@@ -385,5 +385,69 @@ macro_rules! implement_Drop3D {
 
 
 
+#[macro_export]
+macro_rules! implement_manual_drawing_options3D {
+    ($name:ident,  $py_constructor:expr) => {
+        paste::paste! {
+
+            #[gen_stub_pymethods]
+            #[pymethods]
+            impl $name {
+                
+#[doc = 
+"
+Decides wether to draw the " $name " during all subsequent 'draw_all_objects()'.
+If set to false, this object will forever be invisible unless drawn manually, which will ignore this flag.
+
+ 
+Example:
+ 
+```
+...# we flicker the " $name " every second frame.
+>>>my" $name " = " $py_constructor "
+>>>flag = True
+>>>while True:
+>>>     flag = not flag
+>>>     my" $name ".set_draw_each_frame(flag)
+```
+"
+]
+                pub fn set_draw_each_frame(&self, drawing: bool){
+                    todo!()
+                }
+
+#[doc = 
+"
+This function will draw the " $name " right now.
+If 'set_draw_each_frame' is set to true,
+this will still be drawn during 'draw_all_objects()'
+ 
+Example:
+ 
+```
+...# we have turned an enemy invisible,
+... #but want to reveal him if he has been spottet for a short duration
+>>>enemy = " $py_constructor "
+>>>while True:
+>>>     
+>>>     if enemy_used_invisibility:
+>>>         enemy.set_draw_each_frame(False)
+>>>     if is_spottet:
+>>>         enemy.manually_draw_now()
+```
+"
+]
+                pub fn manually_draw_now(&self){
+                    todo!()
+                }
+            }
+        }
+
+    };
+}
+
+
+
+
 
 

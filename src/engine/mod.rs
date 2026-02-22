@@ -9,3 +9,4 @@ pub mod Objects;
 pub mod CoreLoop;
 pub mod FrameInfo;
 pub mod PChannel;
+pub mod CameraManager;

@@ -40,6 +40,7 @@ impl Loading {
         load::download_file(url)
     }
 
+
     #[staticmethod]
     pub fn load_multiple_files<'py>(py: Python<'py>, paths: &Bound<'_, PyDict>)-> PyResult<Bound<'py, PyDict>>{
         let mut var_names: Vec<String> = Vec::new();
@@ -97,13 +98,11 @@ where
     
     handles.into_iter().map(|handle| {
         
-        let inner_result = handle.join().map_err(|panic_payload| {
+       handle.join().map_err(|panic_payload| {
             PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(
                 format!("Worker thread panicked: {:?}", panic_payload)
             )
-        })?;
-
-        inner_result
+        })?
 
     }).collect()
 }

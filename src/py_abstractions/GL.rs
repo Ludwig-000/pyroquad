@@ -57,6 +57,7 @@ impl Into<mq::Vertex> for Vertex{
     }
 }
 
+
 #[gen_stub_pyclass_enum]
 #[pyclass]
 #[derive(Clone, Copy)]
@@ -189,7 +190,7 @@ impl InternalGL{
 
 
 
-pub enum GLENUM{
+pub enum GlEnum{
     ClearDrawCalls,
     DeletePipeline(GlPipeline),
     DepthTest(bool),
@@ -213,38 +214,38 @@ pub enum GLENUM{
 
 /// this shall only be called from inside Core loop.
 /// i am just too lazy to put it there.
-pub fn implement_GlEnum(en: GLENUM, gl: & mut mq::QuadGl){
+pub fn implement_GlEnum(en: GlEnum, gl: & mut mq::QuadGl){
     match en{
-        GLENUM::ClearDrawCalls => gl.clear_draw_calls(),
-        GLENUM::DeletePipeline(pipe)=> gl.delete_pipeline(pipe.0),
-        GLENUM::DepthTest(enable)=> gl.depth_test(enable),
-        GLENUM::DrawMode(draw_mode)=> {
+        GlEnum::ClearDrawCalls => gl.clear_draw_calls(),
+        GlEnum::DeletePipeline(pipe)=> gl.delete_pipeline(pipe.0),
+        GlEnum::DepthTest(enable)=> gl.depth_test(enable),
+        GlEnum::DrawMode(draw_mode)=> {
             let dm = match draw_mode{
                 DrawMode::Lines=> mq::DrawMode::Lines,
                 DrawMode::Triangles => mq::DrawMode::Triangles,
             };
             gl.draw_mode(dm);
         }
-        GLENUM::Geometry(geomentry)=> gl.geometry(&geomentry.vertices, &geomentry.indices),
-        GLENUM::GetViewport(sender)=> {
+        GlEnum::Geometry(geomentry)=> gl.geometry(&geomentry.vertices, &geomentry.indices),
+        GlEnum::GetViewport(sender)=> {
             let _ = sender.send( gl.get_viewport() );
         }
-        GLENUM::GetViewportMatrix(sender)=>{
+        GlEnum::GetViewportMatrix(sender)=>{
             let _ = sender.send( gl.get_projection_matrix().into() );
         }
-        GLENUM::IsDephTestEnabled(sender)=>{
+        GlEnum::IsDephTestEnabled(sender)=>{
             let _ = sender.send( gl.is_depth_test_enabled() );
         }
-        GLENUM::Pipeline(p)=> gl.pipeline(p.map(|pp| pp.0)),
-        GLENUM::PopModelMatrx => gl.pop_model_matrix(),
-        GLENUM::PushModelMatrix(mat)=> gl.push_model_matrix(mat.into()),
-        GLENUM::Reset => gl.reset(),
-        GLENUM::Scissor(clip)=> gl.scissor(clip),
-        GLENUM::SetTexture { pipeline, name, texture }=>{
+        GlEnum::Pipeline(p)=> gl.pipeline(p.map(|pp| pp.0)),
+        GlEnum::PopModelMatrx => gl.pop_model_matrix(),
+        GlEnum::PushModelMatrix(mat)=> gl.push_model_matrix(mat.into()),
+        GlEnum::Reset => gl.reset(),
+        GlEnum::Scissor(clip)=> gl.scissor(clip),
+        GlEnum::SetTexture { pipeline, name, texture }=>{
             gl.set_texture(pipeline.0, &name, texture.into());
         }
-        GLENUM::Texture(t)=> gl.texture(t.map(|tex| tex.into()).as_ref()),
-        GLENUM::Viewport(v)=> gl.viewport(v),
+        GlEnum::Texture(t)=> gl.texture(t.map(|tex| tex.into()).as_ref()),
+        GlEnum::Viewport(v)=> gl.viewport(v),
 
     }
 }

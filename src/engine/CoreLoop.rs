@@ -11,6 +11,10 @@ use crossbeam::queue::SegQueue;
 use macroquad::prelude as mq;
 use macroquad::audio as au;
 use macroquad::window::get_internal_gl;
+use crate::engine::CameraManager::CamMemory;
+use crate::engine::CameraManager::Camera;
+use crate::engine::CameraManager::set_camera;
+use crate::engine::CameraManager::set_default_camera;
 use crate::engine::Objects::Cylinder::Cylinder;
 use crate::engine::Objects::ObjectManagement::ObjectStorage::ObjectKey;
 use crate::engine::Objects::Mesh::Mesh;
@@ -23,7 +27,7 @@ use crate::engine::SHADERS::shader_manager as sm;
 use crate::engine::PError::PError;
 use crate::engine::PArc::PArc;
 use crate::engine::Objects::ObjectManagement::ObjectStorage::*;
-use crate::py_abstractions::GL::GLENUM;
+use crate::py_abstractions::GL::GlEnum;
 use crate::py_abstractions::GL::implement_GlEnum;
 use crate::py_abstractions::structs::ThreeDObjects::ColliderOptions::ColliderOptions;
 use crate::py_abstractions::structs::ThreeDObjects::PhysicsHandle::PhysicsEnum;
@@ -38,7 +42,7 @@ use crate::engine::Objects::ObjectManagement::ObjectManagement;
 
 
 pub enum Command {
-    GLENUM(GLENUM),
+    GLENUM(GlEnum),
     DrawRectangleFromPyClass(Rectangle),
     DrawCircleFromPyClass(Circle),
     PhysicsEnum(PhysicsEnum, ObjectKey),
@@ -221,6 +225,7 @@ lazy_static! {
 pub async fn proccess_commands_loop() {
 
     let mut object_storage = ObjectStorage::ObjectStorage::new();
+    let mut cam_memory = CamMemory::new();
 
     loop {
         while let Some(command) = COMMAND_QUEUE.pop() {
@@ -443,7 +448,6 @@ pub async fn proccess_commands_loop() {
                 Command::DrawCubemap {pos,size,texture,color} => {
                     sm::switch_to_desired_shader(sm::ShaderKind::None);
                     mq::draw_cube(pos,size,texture.as_ref(),color);
-                    crate::engine::Cubemap::draw_fullscreen_quad();
         
                 }
         
@@ -503,7 +507,7 @@ pub async fn proccess_commands_loop() {
                     mq::draw_poly(x,y,sides,radius,rotation,color  );
                 }
                 Command::SetDefaultCamera() =>{ 
-                    mq::set_default_camera() 
+                    set_default_camera(&mut cam_memory);
                 }
         
                 Command::DrawTexture { texture,x,y,color}=>
@@ -544,10 +548,10 @@ pub async fn proccess_commands_loop() {
                 Command::SetCamera { camera_2d, camera_3d } => { // merged cam2d and 3d for simplicity.
                     match (camera_2d, camera_3d) {
                         (Some(cam), None) => {
-                            mq::set_camera(&cam);
+                            set_camera(&mut cam_memory, Camera::Camera2D(cam));
                         },
                         (None, Some(cam)) => {
-                            mq::set_camera(&cam);
+                            set_camera(&mut cam_memory, Camera::Camera3D(cam));
                         },
                         _ => panic!("invalid cam pattern"),
         

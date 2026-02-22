@@ -1,0 +1,10 @@
+# run clippy check via cargo clippy -- -D warnings
+
+
+disallowed-methods = [
+    { path = "macroquad::prelude::set_camera", reason = "Use the wrappers inside engine->CameraManager instead." },
+    { path = "macroquad::prelude::camera_font_scale", reason = "Use the wrappers inside engine->CameraManager instead." },
+    { path = "macroquad::prelude::push_camera_state", reason = "Use the wrappers inside engine->CameraManager instead." },
+    { path = "macroquad::prelude::pop_camera_state", reason = "Use the wrappers inside engine->CameraManager instead." },
+    { path = "macroquad::prelude::set_default_camera", reason = "Use the wrappers inside engine->CameraManager instead." }
+]

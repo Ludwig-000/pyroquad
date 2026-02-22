@@ -52,10 +52,7 @@ pub static ENGINE_CURRENTLY_ACTIVE: AtomicBool = AtomicBool::new(false);
 pub fn activate_engine( conf: Option<Config>) -> PyResult<()>{
 
     
-    let conf = match conf {
-        Some(config) => config,
-        None => Config::default(),
-    };
+    let conf = conf.unwrap_or_default();
     let macroConf =  Config::to_window_config(conf.clone());
 
     ENGINE_CURRENTLY_ACTIVE.store(true, Ordering::SeqCst);
@@ -85,7 +82,7 @@ pub fn activate_engine( conf: Option<Config>) -> PyResult<()>{
         
     });
 
-    return Ok(());
+    Ok(())
 }
 
 
@@ -168,7 +165,7 @@ pub fn draw_cylinder_wires( position: Vec3,
     texture: Option<Texture2D>,
     color: Color) {
     
-    COMMAND_QUEUE.push(Command::DrawCylinderWires {position: position.into(), radius_top: radius_top.into(), radius_bottom: radius_bottom.into(), 
+    COMMAND_QUEUE.push(Command::DrawCylinderWires {position: position.into(), radius_top: radius_top, radius_bottom: radius_bottom, 
         height, texture: texture.map(Into::into),color: color.into()});
 }
 
@@ -232,10 +229,7 @@ pub fn draw_plane(center: Vec3, size: Vec2, color: Color, texture: Option<Textur
     let col = mq::Color::new(color.r,color.g,color.b,color.a);
     let cen = mq::vec3( center.x,center.y,center.z);
     let siz = mq::vec2(size.x,size.y);
-    let tex = match texture {
-        Some(t) => Some(  t.into()  ),
-        None => None,
-    };
+    let tex = texture.map(|t| t.into());
 
     let c =Command::DrawPlane { center:cen,size:siz,color: col,texture: tex};
 
@@ -281,7 +275,7 @@ pub fn next_frame(py: Python<'_>, physics_step: Option<f32>) -> PyResult<()>{
     let (sender, receiver) = PChannel::PChannel::sync_channel(1);
     COMMAND_QUEUE.push(Command::NextFrame { physics_step, sender });
 
-    let _ = receiver.recv()?;
+    receiver.recv()?;
     Ok(())
 }
 
@@ -457,8 +451,7 @@ pub fn get_last_key_pressed() -> Option<KeyCode> {
 pub fn get_char_pressed() -> Option<char> {
 
     use crate::engine::FrameInfo as fi;
-    let keyset = *fi::CHAR_PRESSED.lock().unwrap();
-    keyset
+    *fi::CHAR_PRESSED.lock().unwrap()
 }
 
 

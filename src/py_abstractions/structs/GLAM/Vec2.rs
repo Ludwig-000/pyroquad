@@ -229,7 +229,7 @@ impl Vec2 {
     #[inline]
     pub fn min_element(&self) -> f32 {
         let a: gl=(*self).into();
-        a.min_element().into()
+        a.min_element()
     }
 
     /// Returns the horizontal maximum of `self`.
@@ -238,7 +238,7 @@ impl Vec2 {
     #[inline]
     pub fn max_element(&self) -> f32 {
         let a: gl=(*self).into();
-        a.max_element().into()
+        a.max_element()
     }
 
     /// Returns the sum of all elements of `self`.
@@ -480,10 +480,7 @@ impl Vec2 {
     pub fn try_normalize(&self) -> Option<Self> {
         let a: gl = (*self).into();
         let result = a.try_normalize();
-        match result {
-            Some(v) => Some(v.into()),
-            None => None,
-        }
+        result.map(|v| v.into())
     }
 
     /// Returns `self` normalized to length 1.0 if possible, else returns a

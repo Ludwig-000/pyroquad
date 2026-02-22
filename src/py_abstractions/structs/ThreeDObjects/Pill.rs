@@ -46,6 +46,7 @@ crate::implement_basic_setter_methods3D!(Pill);
 crate::implement_check_collision3D!(Pill);
 crate::implement_set_collider3D!(Pill);
 crate::implement_tick3D!(Pill,  r#"Pill()"#);
+crate::implement_manual_drawing_options3D!(Pill,  r#"Pill()"#);
 crate::implement_remove_tick3D!(Pill);
 crate::implement_Drop3D!(Pill);
 
@@ -78,7 +79,7 @@ impl Pill {
         
         let weak_ref_handle: Py<PyWeakref> = {
             let bound_cube = cube_handle.bind(py); 
-            let weak_ref_ref = PyWeakrefReference::new(&bound_cube)?;
+            let weak_ref_ref = PyWeakrefReference::new(bound_cube)?;
             weak_ref_ref.cast_into::<PyWeakref>()?.unbind() 
         };
 

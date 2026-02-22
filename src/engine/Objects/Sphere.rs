@@ -9,7 +9,6 @@ const INDEX_COUNT: usize = SPHERE_STACKS * SPHERE_SLICES * 6;
 
 
 
-
 #[derive(Debug, Clone)]
 pub struct Sphere {
     pub scale: mq::Vec3,

@@ -45,6 +45,7 @@ crate::implement_basic_setter_methods3D!(Sphere);
 crate::implement_check_collision3D!(Sphere);
 crate::implement_set_collider3D!(Sphere);
 crate::implement_tick3D!(Sphere,  r#"Sphere()"#);
+crate::implement_manual_drawing_options3D!(Sphere,  r#"Sphere()"#);
 crate::implement_remove_tick3D!(Sphere);
 crate::implement_Drop3D!(Sphere);
 

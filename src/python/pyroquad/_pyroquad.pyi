@@ -4928,6 +4928,10 @@ class Cube:
         ...   i.pos = Vec3.ZERO()
         ```
         """
+    def set_collider(self, collider_type:ColliderOptions) -> None:
+        r"""
+        overwrites the current collider with the input option.
+        """
     def tick(self, slf:Cube, function:typing.Any) -> None:
         r"""
         Add a function to this object, which will automatically be executed each frame.
@@ -4952,6 +4956,43 @@ class Cube:
         ...    next_frame()
         ```
         """
+    def set_draw_each_frame(self, drawing:builtins.bool) -> None:
+        r"""
+        Decides wether to draw the Cube during all subsequent 'draw_all_objects()'.
+        If set to false, this object will forever be invisible unless drawn manually, which will ignore this flag.
+        
+         
+        Example:
+         
+        ```
+        ...# we flicker the Cube every second frame.
+        >>>myCube = Cube()
+        >>>flag = True
+        >>>while True:
+        >>>     flag = not flag
+        >>>     myCube.set_draw_each_frame(flag)
+        ```
+        """
+    def manually_draw_now(self) -> None:
+        r"""
+        This function will draw the Cube right now.
+        If 'set_draw_each_frame' is set to true,
+        this will still be drawn during 'draw_all_objects()'
+         
+        Example:
+         
+        ```
+        ...# we have turned an enemy invisible,
+        ... #but want to reveal him if he has been spottet for a short duration
+        >>>enemy = Cube()
+        >>>while True:
+        >>>     
+        >>>     if enemy_used_invisibility:
+        >>>         enemy.set_draw_each_frame(False)
+        >>>     if is_spottet:
+        >>>         enemy.manually_draw_now()
+        ```
+        """
     def __eq__(self, other:Cube) -> builtins.bool:
         r"""
         Equality for Cube is based on unique ID.
@@ -4962,12 +5003,8 @@ class Cube:
         """
     def __repr__(self) -> builtins.str: ...
     def __str__(self) -> builtins.str: ...
-    def set_collider(self, collider_type:ColliderOptions) -> None:
-        r"""
-        overwrites the current collider with the input option.
-        """
-    def __new__(cls, position:Vec3=..., rotation:Vec3=..., scale:Vec3=..., color:Color=..., texture:typing.Optional[Texture2D]=None, collider_type:ColliderOptions=...) -> Cube: ...
     def remove_tick(self) -> None: ...
+    def __new__(cls, position:Vec3=..., rotation:Vec3=..., scale:Vec3=..., color:Color=..., texture:typing.Optional[Texture2D]=None, collider_type:ColliderOptions=...) -> Cube: ...
 
 class Cylinder:
     @property
@@ -4976,21 +5013,6 @@ class Cylinder:
         a collection of physics-related methods, that can be applied to the object.
         'physics' will be set to Some() if the object is innitialized as a dynamic object.
         """
-    @property
-    def scale(self) -> Vec3:
-        r"""
-        Accesses the scale of the given object.
-        Note that individual values of an object can NOT be changed via:
-        ```
-        >>>Cylinder.scale.x += 1
-        ```
-        since Cylinder.scale returns a copy of its scale, one has to write:
-        ```
-        >>>Cylinder.scale += Vec3(1, 0, 0)
-        ```
-        """
-    @scale.setter
-    def scale(self, value: Vec3) -> None: ...
     @property
     def pos(self) -> Vec3:
         r"""
@@ -5021,8 +5043,68 @@ class Cylinder:
         """
     @rot.setter
     def rot(self, value: Vec3) -> None: ...
-    def remove_tick(self) -> None: ...
-    def __new__(cls, position:Vec3=..., rotation:Vec3=..., scale:Vec3=..., color:Color=..., texture:typing.Optional[Texture2D]=None, collider_type:ColliderOptions=...) -> Cylinder: ...
+    @property
+    def scale(self) -> Vec3:
+        r"""
+        Accesses the scale of the given object.
+        Note that individual values of an object can NOT be changed via:
+        ```
+        >>>Cylinder.scale.x += 1
+        ```
+        since Cylinder.scale returns a copy of its scale, one has to write:
+        ```
+        >>>Cylinder.scale += Vec3(1, 0, 0)
+        ```
+        """
+    @scale.setter
+    def scale(self, value: Vec3) -> None: ...
+    def __eq__(self, other:Cylinder) -> builtins.bool:
+        r"""
+        Equality for Cylinder is based on unique ID.
+        """
+    def __hash__(self) -> builtins.int:
+        r"""
+        Hash for Cylinder is based on unique ID, not it's fields.
+        """
+    def __repr__(self) -> builtins.str: ...
+    def __str__(self) -> builtins.str: ...
+    def set_draw_each_frame(self, drawing:builtins.bool) -> None:
+        r"""
+        Decides wether to draw the Cylinder during all subsequent 'draw_all_objects()'.
+        If set to false, this object will forever be invisible unless drawn manually, which will ignore this flag.
+        
+         
+        Example:
+         
+        ```
+        ...# we flicker the Cylinder every second frame.
+        >>>myCylinder = Cylinder()
+        >>>flag = True
+        >>>while True:
+        >>>     flag = not flag
+        >>>     myCylinder.set_draw_each_frame(flag)
+        ```
+        """
+    def manually_draw_now(self) -> None:
+        r"""
+        This function will draw the Cylinder right now.
+        If 'set_draw_each_frame' is set to true,
+        this will still be drawn during 'draw_all_objects()'
+         
+        Example:
+         
+        ```
+        ...# we have turned an enemy invisible,
+        ... #but want to reveal him if he has been spottet for a short duration
+        >>>enemy = Cylinder()
+        >>>while True:
+        >>>     
+        >>>     if enemy_used_invisibility:
+        >>>         enemy.set_draw_each_frame(False)
+        >>>     if is_spottet:
+        >>>         enemy.manually_draw_now()
+        ```
+        """
     def tick(self, slf:Cylinder, function:typing.Any) -> None:
         r"""
         Add a function to this object, which will automatically be executed each frame.
@@ -5064,20 +5146,12 @@ class Cylinder:
         ...   i.pos = Vec3.ZERO()
         ```
         """
+    def __new__(cls, position:Vec3=..., rotation:Vec3=..., scale:Vec3=..., color:Color=..., texture:typing.Optional[Texture2D]=None, collider_type:ColliderOptions=...) -> Cylinder: ...
     def set_collider(self, collider_type:ColliderOptions) -> None:
         r"""
         overwrites the current collider with the input option.
         """
-    def __eq__(self, other:Cylinder) -> builtins.bool:
-        r"""
-        Equality for Cylinder is based on unique ID.
-        """
-    def __hash__(self) -> builtins.int:
-        r"""
-        Hash for Cylinder is based on unique ID, not it's fields.
-        """
-    def __repr__(self) -> builtins.str: ...
-    def __str__(self) -> builtins.str: ...
+    def remove_tick(self) -> None: ...
 
 class FileData:
     r"""
@@ -5166,7 +5240,7 @@ class Image:
     def height(self) -> builtins.int: ...
     @height.setter
     def height(self, value: builtins.int) -> None: ...
-    def __new__(cls, bytes:typing.Sequence[builtins.int], width:builtins.int, height:builtins.int) -> Image: ...
+    def __new__(cls, path:builtins.str) -> Image: ...
     @staticmethod
     def empty() -> Image: ...
     @staticmethod
@@ -5191,7 +5265,7 @@ class Image:
         Returns a pixel [Color] from this image.
         """
     @staticmethod
-    def from_file(path:builtins.str) -> Image:
+    def from_bytes(bytes:typing.Sequence[builtins.int], width:builtins.int, height:builtins.int) -> Image:
         r"""
         Creates an image from a given file.
         
@@ -5281,6 +5355,21 @@ class Mesh:
         'physics' will be set to Some() if the object is innitialized as a dynamic object.
         """
     @property
+    def scale(self) -> Vec3:
+        r"""
+        Accesses the scale of the given object.
+        Note that individual values of an object can NOT be changed via:
+        ```
+        >>>Mesh.scale.x += 1
+        ```
+        since Mesh.scale returns a copy of its scale, one has to write:
+        ```
+        >>>Mesh.scale += Vec3(1, 0, 0)
+        ```
+        """
+    @scale.setter
+    def scale(self, value: Vec3) -> None: ...
+    @property
     def pos(self) -> Vec3:
         r"""
         Accesses the position of the given object.
@@ -5310,21 +5399,45 @@ class Mesh:
         """
     @rot.setter
     def rot(self, value: Vec3) -> None: ...
-    @property
-    def scale(self) -> Vec3:
+    @staticmethod
+    def from_file_data(data:FileData, texture:typing.Optional[Texture2D], collider_type:ColliderOptions) -> Mesh: ...
+    def set_draw_each_frame(self, drawing:builtins.bool) -> None:
         r"""
-        Accesses the scale of the given object.
-        Note that individual values of an object can NOT be changed via:
+        Decides wether to draw the Mesh during all subsequent 'draw_all_objects()'.
+        If set to false, this object will forever be invisible unless drawn manually, which will ignore this flag.
+        
+         
+        Example:
+         
         ```
-        >>>Mesh.scale.x += 1
-        ```
-        since Mesh.scale returns a copy of its scale, one has to write:
-        ```
-        >>>Mesh.scale += Vec3(1, 0, 0)
+        ...# we flicker the Mesh every second frame.
+        >>>myMesh = Mesh.from_file_data(...)
+        >>>flag = True
+        >>>while True:
+        >>>     flag = not flag
+        >>>     myMesh.set_draw_each_frame(flag)
         ```
         """
-    @scale.setter
-    def scale(self, value: Vec3) -> None: ...
+    def manually_draw_now(self) -> None:
+        r"""
+        This function will draw the Mesh right now.
+        If 'set_draw_each_frame' is set to true,
+        this will still be drawn during 'draw_all_objects()'
+         
+        Example:
+         
+        ```
+        ...# we have turned an enemy invisible,
+        ... #but want to reveal him if he has been spottet for a short duration
+        >>>enemy = Mesh.from_file_data(...)
+        >>>while True:
+        >>>     
+        >>>     if enemy_used_invisibility:
+        >>>         enemy.set_draw_each_frame(False)
+        >>>     if is_spottet:
+        >>>         enemy.manually_draw_now()
+        ```
+        """
     def __eq__(self, other:Mesh) -> builtins.bool:
         r"""
         Equality for Mesh is based on unique ID.
@@ -5335,29 +5448,7 @@ class Mesh:
         """
     def __repr__(self) -> builtins.str: ...
     def __str__(self) -> builtins.str: ...
-    def set_collider(self, collider_type:ColliderOptions) -> None:
-        r"""
-        overwrites the current collider with the input option.
-        """
-    @staticmethod
-    def from_file_data(data:FileData, texture:typing.Optional[Texture2D], collider_type:ColliderOptions) -> Mesh: ...
-    def check_collision(self) -> builtins.list[typing.Any]:
-        r"""
-        Returns any object, with active collision, that is either
-        intersected or inserted in the current object.
-         
-        Example:
-         
-        ```
-        >>>bigMesh: Mesh = Mesh(pos=Vec3.splat(50))
-        >>>intersected: list[Mesh] = bigMesh.check_collision()
-        ...
-        ...# since the returned objects are references, we can edit them directly
-        ...# without creating duplicates.
-        >>>for i in intersected:
-        ...   i.pos = Vec3.ZERO()
-        ```
-        """
+    def remove_tick(self) -> None: ...
     def tick(self, slf:Mesh, function:typing.Any) -> None:
         r"""
         Add a function to this object, which will automatically be executed each frame.
@@ -5382,7 +5473,27 @@ class Mesh:
         ...    next_frame()
         ```
         """
-    def remove_tick(self) -> None: ...
+    def set_collider(self, collider_type:ColliderOptions) -> None:
+        r"""
+        overwrites the current collider with the input option.
+        """
+    def check_collision(self) -> builtins.list[typing.Any]:
+        r"""
+        Returns any object, with active collision, that is either
+        intersected or inserted in the current object.
+         
+        Example:
+         
+        ```
+        >>>bigMesh: Mesh = Mesh(pos=Vec3.splat(50))
+        >>>intersected: list[Mesh] = bigMesh.check_collision()
+        ...
+        ...# since the returned objects are references, we can edit them directly
+        ...# without creating duplicates.
+        >>>for i in intersected:
+        ...   i.pos = Vec3.ZERO()
+        ```
+        """
 
 class Physics:
     r"""
@@ -5464,10 +5575,6 @@ class Pill:
         """
     @rot.setter
     def rot(self, value: Vec3) -> None: ...
-    def set_collider(self, collider_type:ColliderOptions) -> None:
-        r"""
-        overwrites the current collider with the input option.
-        """
     def tick(self, slf:Pill, function:typing.Any) -> None:
         r"""
         Add a function to this object, which will automatically be executed each frame.
@@ -5509,7 +5616,10 @@ class Pill:
         ...   i.pos = Vec3.ZERO()
         ```
         """
-    def __new__(cls, position:Vec3=..., rotation:Vec3=..., scale:Vec3=..., color:Color=..., texture:typing.Optional[Texture2D]=None, collider_type:ColliderOptions=...) -> Pill: ...
+    def set_collider(self, collider_type:ColliderOptions) -> None:
+        r"""
+        overwrites the current collider with the input option.
+        """
     def __eq__(self, other:Pill) -> builtins.bool:
         r"""
         Equality for Pill is based on unique ID.
@@ -5520,6 +5630,44 @@ class Pill:
         """
     def __repr__(self) -> builtins.str: ...
     def __str__(self) -> builtins.str: ...
+    def set_draw_each_frame(self, drawing:builtins.bool) -> None:
+        r"""
+        Decides wether to draw the Pill during all subsequent 'draw_all_objects()'.
+        If set to false, this object will forever be invisible unless drawn manually, which will ignore this flag.
+        
+         
+        Example:
+         
+        ```
+        ...# we flicker the Pill every second frame.
+        >>>myPill = Pill()
+        >>>flag = True
+        >>>while True:
+        >>>     flag = not flag
+        >>>     myPill.set_draw_each_frame(flag)
+        ```
+        """
+    def manually_draw_now(self) -> None:
+        r"""
+        This function will draw the Pill right now.
+        If 'set_draw_each_frame' is set to true,
+        this will still be drawn during 'draw_all_objects()'
+         
+        Example:
+         
+        ```
+        ...# we have turned an enemy invisible,
+        ... #but want to reveal him if he has been spottet for a short duration
+        >>>enemy = Pill()
+        >>>while True:
+        >>>     
+        >>>     if enemy_used_invisibility:
+        >>>         enemy.set_draw_each_frame(False)
+        >>>     if is_spottet:
+        >>>         enemy.manually_draw_now()
+        ```
+        """
+    def __new__(cls, position:Vec3=..., rotation:Vec3=..., scale:Vec3=..., color:Color=..., texture:typing.Optional[Texture2D]=None, collider_type:ColliderOptions=...) -> Pill: ...
     def remove_tick(self) -> None: ...
 
 class PlaySoundParams:
@@ -5763,7 +5911,44 @@ class Sphere:
         """
     @scale.setter
     def scale(self, value: Vec3) -> None: ...
-    def __new__(cls, position:Vec3=..., rotation:Vec3=..., scale:Vec3=..., color:Color=..., texture:typing.Optional[Texture2D]=None, collider_type:ColliderOptions=...) -> Sphere: ...
+    def remove_tick(self) -> None: ...
+    def set_draw_each_frame(self, drawing:builtins.bool) -> None:
+        r"""
+        Decides wether to draw the Sphere during all subsequent 'draw_all_objects()'.
+        If set to false, this object will forever be invisible unless drawn manually, which will ignore this flag.
+        
+         
+        Example:
+         
+        ```
+        ...# we flicker the Sphere every second frame.
+        >>>mySphere = Sphere()
+        >>>flag = True
+        >>>while True:
+        >>>     flag = not flag
+        >>>     mySphere.set_draw_each_frame(flag)
+        ```
+        """
+    def manually_draw_now(self) -> None:
+        r"""
+        This function will draw the Sphere right now.
+        If 'set_draw_each_frame' is set to true,
+        this will still be drawn during 'draw_all_objects()'
+         
+        Example:
+         
+        ```
+        ...# we have turned an enemy invisible,
+        ... #but want to reveal him if he has been spottet for a short duration
+        >>>enemy = Sphere()
+        >>>while True:
+        >>>     
+        >>>     if enemy_used_invisibility:
+        >>>         enemy.set_draw_each_frame(False)
+        >>>     if is_spottet:
+        >>>         enemy.manually_draw_now()
+        ```
+        """
     def check_collision(self) -> builtins.list[typing.Any]:
         r"""
         Returns any object, with active collision, that is either
@@ -5781,11 +5966,7 @@ class Sphere:
         ...   i.pos = Vec3.ZERO()
         ```
         """
-    def remove_tick(self) -> None: ...
-    def set_collider(self, collider_type:ColliderOptions) -> None:
-        r"""
-        overwrites the current collider with the input option.
-        """
+    def __new__(cls, position:Vec3=..., rotation:Vec3=..., scale:Vec3=..., color:Color=..., texture:typing.Optional[Texture2D]=None, collider_type:ColliderOptions=...) -> Sphere: ...
     def __eq__(self, other:Sphere) -> builtins.bool:
         r"""
         Equality for Sphere is based on unique ID.
@@ -5820,13 +6001,16 @@ class Sphere:
         ...    next_frame()
         ```
         """
+    def set_collider(self, collider_type:ColliderOptions) -> None:
+        r"""
+        overwrites the current collider with the input option.
+        """
 
 class Texture2D:
     r"""
     Texture, data stored in GPU memory
     """
-    @staticmethod
-    def from_image(image:Image) -> Texture2D: ...
+    def __new__(cls, image:Image) -> Texture2D: ...
 
 class Vec2:
     ZERO: Vec2

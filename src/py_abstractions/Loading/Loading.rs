@@ -13,7 +13,7 @@ use crate::engine::CoreLoop::Command;
 #[gen_stub_pyfunction]
 #[pyfunction]
 pub fn load_file(path: &str)-> PyResult<FileData>{
-    match std::fs::read(&path) {
+    match std::fs::read(path) {
         Ok(bytes) => Ok(
             FileData { bytes }
         ),

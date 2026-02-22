@@ -34,14 +34,30 @@ pub struct Image {
 impl Image {
 
     #[new]
-    pub fn new(bytes: Vec<u8>, width: u16, height: u16, ) -> PyResult<Self> {
-        if bytes.len() != (width as usize) * (height as usize) * 4 {
-            return Err(PyErr::new::<PyValueError, _>(
-                "Invalid image data size: expected width * height * 4 bytes",
-            ));
-        }
-        
-        Ok(Self { bytes, width, height })
+    pub fn new(path: String) -> PyResult<Image> {
+        // Load file bytes via your Python-callable function
+        let data = crate::py_abstractions::Loading::Loading::load_file(&path)?;
+
+        // Wrap bytes for image::Reader
+        let cursor = Cursor::new(data.bytes);
+        let reader = ImageReader::new(cursor)
+            .with_guessed_format()
+            .map_err(|e| PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(format!("Failed to guess format: {e}")))?;
+
+        // Decode image
+        let image = reader
+            .decode()
+            .map_err(|e|  PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(format!("Decode error: {e}")))?;
+
+        // Convert to RGBA8 and get raw bytes
+        let rgba = image.to_rgba8();
+        let (width, height) = rgba.dimensions();
+
+        Ok(Image {
+            bytes: rgba.into_raw(),
+            width: width as u16,
+            height: height as u16,
+        })
     }
     
     #[staticmethod]
@@ -58,7 +74,7 @@ impl Image {
     pub fn gen_image_color(width: u16, height: u16, color: Color) -> Image {
         let mut bytes = vec![0; width as usize * height as usize * 4];
         for i in 0..width as usize * height as usize {
-            bytes[i * 4 + 0] = (color.r * 255.) as u8;
+            bytes[i * 4] = (color.r * 255.) as u8;
             bytes[i * 4 + 1] = (color.g * 255.) as u8;
             bytes[i * 4 + 2] = (color.b * 255.) as u8;
             bytes[i * 4 + 3] = (color.a * 255.) as u8;
@@ -148,31 +164,14 @@ impl Image {
     /// 
     /// supported image formats are: ".png", ".jpeg"
     #[staticmethod]
-    pub fn from_file(path: String) -> PyResult<Image> {
-        // Load file bytes via your Python-callable function
-        let data = crate::py_abstractions::Loading::Loading::load_file(&path)
-            .map_err(|e|   { let n: PyErr= e.into(); n})?;
-
-        // Wrap bytes for image::Reader
-        let cursor = Cursor::new(data.bytes);
-        let reader = ImageReader::new(cursor)
-            .with_guessed_format()
-            .map_err(|e| PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(format!("Failed to guess format: {e}")))?;
-
-        // Decode image
-        let image = reader
-            .decode()
-            .map_err(|e|  PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(format!("Decode error: {e}")))?;
-
-        // Convert to RGBA8 and get raw bytes
-        let rgba = image.to_rgba8();
-        let (width, height) = rgba.dimensions();
-
-        Ok(Image {
-            bytes: rgba.into_raw(),
-            width: width as u16,
-            height: height as u16,
-        })
+    pub fn from_bytes(bytes: Vec<u8>, width: u16, height: u16, ) -> PyResult<Self> {
+        if bytes.len() != (width as usize) * (height as usize) * 4 {
+            return Err(PyErr::new::<PyValueError, _>(
+                "Invalid image data size: expected width * height * 4 bytes",
+            ));
+        }
+        
+        Ok(Self { bytes, width, height })
     }
 
     
@@ -202,7 +201,7 @@ pub fn image_from_bytes(bytes: &Vec<u8>)-> PyResult<Image>{
 
 /// Texture, data stored in GPU memory
 #[gen_stub_pyclass]
-#[pyclass(name = "Texture2D")]
+#[pyclass]
 #[derive(Clone, Debug, PartialEq)]
 pub struct Texture2D {
    pub texture: PArc<mq::Texture2D>,
@@ -212,8 +211,8 @@ pub struct Texture2D {
 #[pymethods]
 impl Texture2D {
    
-    #[staticmethod]
-    pub fn from_image(image: Image) -> PyResult<Texture2D> {
+    #[new]
+    pub fn new(image: Image) -> PyResult<Texture2D> {
         
         let inner_im = mq::Image {
             bytes: image.bytes,
