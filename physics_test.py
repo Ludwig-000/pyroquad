@@ -60,4 +60,4 @@ while True:
     draw_all_objects()
     set_default_camera()
     draw_text(f"{get_fps()}",20,20,40,Color.GREEN)
-    next_frame()
+    next_frame(0)

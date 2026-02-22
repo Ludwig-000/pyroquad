@@ -2,6 +2,7 @@ use std::panic;
 
 use std::sync::Arc;
 use std::any::Any;
+use std::time::Instant;
 use macroquad::color::BLACK;
 use lazy_static::*;
 
@@ -516,6 +517,7 @@ pub async fn proccess_commands_loop() {
                 }
         
                 Command::NextFrame{physics_step, sender} => {
+                    let start=  Instant::now();
                     mq::next_frame().await;
                     crate::engine::SHADERS::shader_manager::new_frame_shader_update();
                     crate::engine::FrameInfo::update_frame_info();
