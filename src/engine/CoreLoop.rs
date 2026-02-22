@@ -13,6 +13,7 @@ use macroquad::audio as au;
 use macroquad::window::get_internal_gl;
 use crate::engine::CameraManager::CamMemory;
 use crate::engine::CameraManager::Camera;
+use crate::engine::CameraManager::clone_camera3d;
 use crate::engine::CameraManager::set_camera;
 use crate::engine::CameraManager::set_default_camera;
 use crate::engine::Cubemap::cubemap_internal;
@@ -448,7 +449,11 @@ pub async fn proccess_commands_loop() {
                 }
                 Command::DrawCubemap {texture} => {
                     sm::switch_to_desired_shader(sm::ShaderKind::None);
-                    cubemap_internal(texture);
+                    let cam  =match &cam_memory.current_cam{
+                        Camera::Camera2D(_)=> panic!("should be 3d cam"),
+                        Camera::Camera3D(_cam)=> clone_camera3d(_cam)
+                    };
+                    cubemap_internal(texture, &cam);
         
                 }
         
