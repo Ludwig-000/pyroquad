@@ -101,6 +101,7 @@ pub fn _pyroquad( py: Python<'_>, m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<crate::py_abstractions::RenderTarget::RenderTarget>()?;
     m.add_class::<crate::py_abstractions::RenderTarget::RenderTargetParams>()?;
     m.add_class::<crate::py_abstractions::Textures_and_Images::Texture2D>()?;
+    m.add_class::<crate::py_abstractions::Textures_and_Images::FilterMode>()?;
     m.add_class::<crate::py_abstractions::Textures_and_Images::Image>()?;
     m.add_class::<crate::py_abstractions::Camera::Camera2D>()?;
     m.add_class::<crate::py_abstractions::Camera::Camera3D>()?;
@@ -150,7 +151,6 @@ list of macroquad enums
    mq::Comparison
     mq::DrawMode
     mq::EulerRot
-    mq::FilterMode
     mq::ImageFormat
     mq::MouseButton
     mq::Projection

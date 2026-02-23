@@ -12,7 +12,7 @@ use macroquad::prelude as mq;
 const SKYBOX_VERTEX_SHADER: &str = r#"#version 100
 attribute vec3 position;
 
-varying lowp vec3 v_dir;
+varying highp vec3 v_dir;
 
 // We pass a combined matrix that includes Projection * Rotation(View)
 // We do NOT use the standard Model matrix or full View matrix.
@@ -34,7 +34,7 @@ void main() {
 "#;
 
 const SKYBOX_FRAGMENT_SHADER: &str = r#"#version 100
-precision mediump float;
+precision highp float;
 
 varying vec3 v_dir;
 uniform sampler2D Texture;

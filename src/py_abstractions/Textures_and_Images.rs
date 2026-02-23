@@ -1,3 +1,4 @@
+
 use pyo3::prelude::*;
  
 use macroquad::prelude as mq;
@@ -174,6 +175,34 @@ impl Image {
         Ok(Self { bytes, width, height })
     }
 
+    /// Flip the image horizontally (mirror left-right)
+    pub fn flip_horizontal(&mut self) {
+        let w = self.width as usize;
+        let h = self.height as usize;
+        for y in 0..h {
+            for x in 0..w / 2 {
+                let left = (y * w + x) * 4;
+                let right = (y * w + (w - 1 - x)) * 4;
+                self.bytes.swap(left, right);
+                self.bytes.swap(left + 1, right + 1);
+                self.bytes.swap(left + 2, right + 2);
+                self.bytes.swap(left + 3, right + 3);
+            }
+        }
+    }
+
+    /// Flip the image vertically (mirror top-bottom)
+    pub fn flip_vertical(&mut self) {
+        let w = self.width as usize;
+        let h = self.height as usize;
+        for y in 0..h / 2 {
+            let top_row = y * w * 4;
+            let bottom_row = (h - 1 - y) * w * 4;
+            for x in 0..w * 4 {
+                self.bytes.swap(top_row + x, bottom_row + x);
+            }
+        }
+    }
     
     
 }
@@ -213,7 +242,6 @@ impl Texture2D {
    
     #[new]
     pub fn new(image: Image) -> PyResult<Texture2D> {
-        
         let inner_im = mq::Image {
             bytes: image.bytes,
             width: image.width,
@@ -238,9 +266,24 @@ impl Texture2D {
         
     }
 
+    pub fn set_filter(&mut self, filter_mode: FilterMode){
+
+        let command = match filter_mode{
+            FilterMode::Linear => mq::FilterMode::Linear,
+            FilterMode::Nearest => mq::FilterMode::Nearest,
+        };
+        COMMAND_QUEUE.push(Command::SetTextureFilterMode { tex: (*self.texture).clone(), filter: command });
+    }
+
 }
 
-
+#[gen_stub_pyclass_enum]
+#[pyclass]
+#[derive(Clone, Copy)]
+pub enum FilterMode{
+    Nearest,
+    Linear
+}
 
 use std::ops::Deref;
 

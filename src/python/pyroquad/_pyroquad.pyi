@@ -5271,6 +5271,14 @@ class Image:
         
         supported image formats are: ".png", ".jpeg"
         """
+    def flip_horizontal(self) -> None:
+        r"""
+        Flip the image horizontally (mirror left-right)
+        """
+    def flip_vertical(self) -> None:
+        r"""
+        Flip the image vertically (mirror top-bottom)
+        """
 
 class InternalGL:
     r"""
@@ -6019,6 +6027,7 @@ class Texture2D:
     Texture, data stored in GPU memory
     """
     def __new__(cls, image:Image) -> Texture2D: ...
+    def set_filter(self, filter_mode:FilterMode) -> None: ...
 
 class Vec2:
     ZERO: Vec2
@@ -7068,6 +7077,10 @@ class Vertex:
 class DrawMode(Enum):
     Triangles = ...
     Lines = ...
+
+class FilterMode(Enum):
+    Nearest = ...
+    Linear = ...
 
 class KeyCode(Enum):
     Space = ...

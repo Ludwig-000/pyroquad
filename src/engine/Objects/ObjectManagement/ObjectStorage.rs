@@ -110,14 +110,6 @@ impl ObjectStorage {
         }
         
         self.keymap.remove(key);
-    
-        
-
-        let current_len = self.storage.len();
-        let current_cap = self.storage.capacity();
-    
-        let wasted_capacity = current_cap.saturating_sub(current_len);
-        
         
     }
 

@@ -219,6 +219,10 @@ pub enum Command {
     CameraFontScale{
         world_font_size: f32,
         sender: PSyncSender<(u16, f32, f32)>,
+    },
+    SetTextureFilterMode{
+        tex: mq::Texture2D,
+        filter: mq::FilterMode,
     }
 }
 
@@ -645,6 +649,9 @@ pub async fn proccess_commands_loop() {
                 Command::CameraFontScale { world_font_size, sender }=>{
                     let res  = CameraManager::camera_font_scale(world_font_size);
                     let _ = sender.send(res);
+                }
+                Command::SetTextureFilterMode { tex, filter }=>{
+                    tex.set_filter(filter);
                 }
         
                 
