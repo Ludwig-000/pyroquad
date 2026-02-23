@@ -97,7 +97,8 @@ impl Config{
                     window_width: config.window_width,
                     window_height: config.window_height,
                     fullscreen: config.fullscreen,
-
+                    sample_count: config.sample_count,
+                    window_resizable: config.window_resizable,
                     ..Default::default()
        };
 
