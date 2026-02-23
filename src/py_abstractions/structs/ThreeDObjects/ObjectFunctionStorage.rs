@@ -1,17 +1,13 @@
 use std::sync::Mutex;
 use std::sync::MutexGuard;
-use std::time::Duration;
-use std::time::Instant;
 
 use slotmap::SlotMap;
 /// stores functions to be executed by Python each frame.
 /// 
 /// 
 /// 
-use slotmap::{DefaultKey, DenseSlotMap};
 use pyo3::prelude::*;
 use pyo3::ffi;
-use pyo3::types::*;
 use std::sync::{OnceLock};
 use slotmap::{new_key_type};
 
@@ -151,21 +147,21 @@ impl FunctionStorage {
 
             let lineno: i32 = last_tb.getattr("tb_lineno").and_then(|l| l.extract()).unwrap_or(0);
             
-            if let Ok(frame) = last_tb.getattr("tb_frame") {
-                if let Ok(code) = frame.getattr("f_code") {
-                    if let Ok(filename) = code.getattr("co_filename").and_then(|f| f.extract::<String>()) {
+            if let Ok(frame) = last_tb.getattr("tb_frame")
+                && let Ok(code) = frame.getattr("f_code")
+                    && let Ok(filename) = code.getattr("co_filename").and_then(|f| f.extract::<String>()) {
                         
                         println!("Function: {}", func_name);
                         println!("Location: {} (Line {})", filename, lineno);
 
-                        if let Ok(linecache) = py.import("linecache") {
-                            if let Ok(line) = linecache.call_method1("getline", (filename, lineno)) {
+                        if let Ok(linecache) = py.import("linecache")
+                             && let Ok(line) = linecache.call_method1("getline", (filename, lineno)) {
                                 println!("Code:     > {}", line.to_string().trim());
-                            }
                         }
-                    }
+                        
+                    
                 }
-            }
+            
         }
 
         println!("Error:    {}", err.value(py));

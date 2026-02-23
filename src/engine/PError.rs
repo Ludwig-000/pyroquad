@@ -1,7 +1,6 @@
 use pyo3::prelude::*;
 use symphonia;
 use hound;
-use gltf::Error;
 
 /// Custom error type for this game engine.
 /// It collects all possible errors that can be thrown, like MacroquadErr, Hound, Symphonia, Pyo3
@@ -35,10 +34,7 @@ impl From<PError> for pyo3::PyErr {
 // "extra" is a message added at the end of our error independent of error type.
 fn regular_extract(value: PError, extra: Option<&str>) -> pyo3::PyErr {
 
-    let extra = match extra {
-         None => "",
-         Some(s) => s,
-    };
+    let extra = extra.unwrap_or_default();
 
     match value {
         PError::MacroquadErr(e) => PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(format!("{e} || {extra}")),
@@ -59,7 +55,7 @@ fn recursively_extract_context(err: PError, mut context: String) -> (PError, Str
     match err {
         PError::WithContext(inner, ctx) => {
             if !context.is_empty() {
-                context.push_str(" "); // add separator
+                context.push(' ');
             }
             context.push_str(&ctx);
             recursively_extract_context(*inner, context)

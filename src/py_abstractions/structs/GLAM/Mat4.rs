@@ -1,5 +1,4 @@
 use glam::Mat4 as gl;
-use macroquad::prelude as mq;
 use pyo3::prelude::*;
 use pyo3_stub_gen::derive::*;
 use crate::py_abstractions::structs::GLAM::Vec4::Vec4;

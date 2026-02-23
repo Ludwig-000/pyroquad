@@ -4,8 +4,6 @@ use crate::engine::PError::PError;
 
 use crate::py_abstractions::Loading::FileData::FileData;
 
-use crate::engine::CoreLoop::COMMAND_QUEUE;
-use crate::engine::CoreLoop::Command;
 
 
 /// Loads a file.
@@ -75,7 +73,7 @@ pub fn download_file(url: &str) -> PyResult<FileData> {
 #[gen_stub_pyfunction]
 #[pyfunction]
 pub fn write_to_file(contents: &FileData, path: String) -> PyResult<()> {
-    let res = std::fs::write(path.clone(), contents.bytes.clone()).map_err(|e|{
+    std::fs::write(path.clone(), contents.bytes.clone()).map_err(|e|{
         PError::BasicErr(format!("Failed to write to file {path}: {e}"))
     })?;
     Ok(())

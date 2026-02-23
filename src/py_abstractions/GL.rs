@@ -1,19 +1,19 @@
-use std::cell::RefCell;
 use std::sync::Arc;
+use crate::engine::CoreLoop::COMMAND_QUEUE;
 use crate::engine::PChannel::*;
-///
-/// 
-/// 
-/// A bunch of functions and structs to mimic "get_internal_gl" and it's functionality
-/// 
-/// 
-/// 
+use crate::engine::CoreLoop::Command;
+//
+// 
+// 
+// A bunch of functions and structs to mimic "get_internal_gl" and it's functionality
+// 
+// 
+// 
 
 
 
 use macroquad::prelude as mq;
-use macroquad::window::get_internal_gl;
-use pyo3::{pyclass, pymethods};
+use pyo3::{PyResult, pyclass, pymethods};
 use pyo3_stub_gen::derive::{gen_stub_pyclass, gen_stub_pyclass_enum, gen_stub_pymethods};
 use crate::py_abstractions::structs::GLAM::Mat4::Mat4;
 use crate::py_abstractions::{Color::Color, Textures_and_Images::Texture2D, structs::GLAM::{Vec2::Vec2, Vec3::Vec3}};
@@ -51,9 +51,9 @@ impl Vertex{
 
 
 
-impl Into<mq::Vertex> for Vertex{
-    fn into(self) -> mq::Vertex {
-        mq::Vertex::new2(self.position, self.uv, self.color.into())
+impl From<Vertex> for mq::Vertex{
+    fn from(value: Vertex) -> Self {
+        mq::Vertex::new2(value.position, value.uv, value.color.into())
     }
 }
 
@@ -98,16 +98,18 @@ pub struct InternalGL();
 impl InternalGL{
     #[staticmethod]
     pub fn clear_draw_calls(){
-        
-        todo!()
+        let c = GlEnum::ClearDrawCalls;
+        COMMAND_QUEUE.push( Command::GlEnum(c));
     }
     #[staticmethod]
     pub fn delete_pipeline(pipeline: GlPipeline){
-        todo!()
+        let c  = GlEnum::DeletePipeline(pipeline);
+        COMMAND_QUEUE.push( Command::GlEnum(c));
     }
     #[staticmethod]
     pub fn depth_test(enable: bool){
-        todo!()
+        let c  = GlEnum::DepthTest(enable);
+        COMMAND_QUEUE.push( Command::GlEnum(c));
     }
     // #[staticmethod]
     // pub fn draw(ctx: &mut dyn miniquad::RenderingBackend, projection: glam::Mat4){
@@ -115,27 +117,41 @@ impl InternalGL{
     // }
     #[staticmethod]
     pub fn draw_mode(draw_mode: DrawMode){
-        todo!()
+        let c  = GlEnum::DrawMode(draw_mode);
+        COMMAND_QUEUE.push( Command::GlEnum(c));
     }
     #[staticmethod]
     pub fn geometry(geometry: Geometry){
-        todo!()
+        let c  = GlEnum::Geometry(geometry);
+        COMMAND_QUEUE.push( Command::GlEnum(c));
     }
     // #[staticmethod]
     // pub fn get_active_render_pass()-> Option<RenderPass>{
     //     todo!()
     // }
     #[staticmethod]
-    pub fn get_viewport_matrix()-> Mat4{
-        todo!()
+    pub fn get_viewport_matrix()-> PyResult<Mat4>{
+        let (tx,rx) = PChannel::sync_channel(1);
+        let c  = GlEnum::GetViewportMatrix(tx);
+        COMMAND_QUEUE.push( Command::GlEnum(c));
+
+        Ok(rx.recv()?)
     }
     #[staticmethod]
-    pub fn get_viewport()-> (i32,i32,i32,i32){
-        todo!()
+    pub fn get_viewport()-> PyResult<(i32,i32,i32,i32)>{
+        let (tx,rx) = PChannel::sync_channel(1);
+        let c  = GlEnum::GetViewport(tx);
+        COMMAND_QUEUE.push( Command::GlEnum(c));
+
+        Ok(rx.recv()?)
     }
     #[staticmethod]
-    pub fn is_depth_test_enabled()-> bool{
-        todo!()
+    pub fn is_depth_test_enabled()-> PyResult<bool>{
+        let (tx,rx) = PChannel::sync_channel(1);
+        let c  = GlEnum::IsDephTestEnabled(tx);
+        COMMAND_QUEUE.push( Command::GlEnum(c));
+
+        Ok(rx.recv()?)
     }
     // #[staticmethod]
     // pub fn make_pipeline(
@@ -149,15 +165,18 @@ impl InternalGL{
     // }
     #[staticmethod]
     pub fn pipeline(pipeline: Option<GlPipeline>){
-        todo!()
+        let c  = GlEnum::Pipeline(pipeline);
+        COMMAND_QUEUE.push( Command::GlEnum(c));
     }
     #[staticmethod]
     pub fn pop_model_matrix(){
-        todo!()
+        let c  = GlEnum::PopModelMatrx;
+        COMMAND_QUEUE.push( Command::GlEnum(c));
     }
     #[staticmethod]
     pub fn push_model_matrix(matrix: Mat4){
-        todo!()
+        let c  = GlEnum::PushModelMatrix(matrix);
+        COMMAND_QUEUE.push( Command::GlEnum(c));
     }
     // #[staticmethod]
     // pub fn render_pass(render_pass: Option<RenderPass>){
@@ -166,24 +185,29 @@ impl InternalGL{
     ///Reset internal state to known default
     #[staticmethod]
     pub fn reset(){
-        todo!()
+        let c  = GlEnum::Reset;
+        COMMAND_QUEUE.push( Command::GlEnum(c));
     }
     #[staticmethod]
     pub fn scissor(clip: Option<(i32, i32, i32, i32)>){
-        todo!()
+        let c  = GlEnum::Scissor(clip);
+        COMMAND_QUEUE.push( Command::GlEnum(c));
     }
     #[staticmethod]
     pub fn set_texture(pipeline: GlPipeline, name: &str, texture: Texture2D){
-        todo!()
+        let c  = GlEnum::SetTexture { pipeline, name: name.into(), texture };
+        COMMAND_QUEUE.push( Command::GlEnum(c));
     }
 
     #[staticmethod]
     pub fn texture(texture: Option<Texture2D>){
-        todo!()
+        let c  = GlEnum::Texture(texture);
+        COMMAND_QUEUE.push( Command::GlEnum(c));
     }
     #[staticmethod]
     pub fn viewport(viewport: Option<(i32, i32, i32, i32)>){
-        todo!()
+        let c  = GlEnum::Viewport(viewport);
+        COMMAND_QUEUE.push( Command::GlEnum(c));
     }
 
 }

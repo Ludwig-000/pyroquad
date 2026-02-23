@@ -28,11 +28,11 @@ impl Sound {
     #[staticmethod]
     pub fn load_sound(path: String)-> PyResult<Sound>{
 
-        let (sender, receiver) = PChannel::sync_channel(1);
+        let (tx, rx) = PChannel::sync_channel(1);
 
-        COMMAND_QUEUE.push( Command::LoadSound { path: path, sender } );
+        COMMAND_QUEUE.push( Command::LoadSound { path, sender: tx } );
 
-        let sound  = receiver.recv()?;
+        let sound  = rx.recv()?;
 
         match sound{
             Ok(s) => { Ok( Sound{audio: s}   )  },
@@ -51,7 +51,7 @@ impl Sound {
 
         let (sender, receiver) = PChannel::sync_channel(1);
         
-        COMMAND_QUEUE.push( Command::LoadSoundFromBytes { data: data, sender} );
+        COMMAND_QUEUE.push( Command::LoadSoundFromBytes { data, sender} );
 
         let sound =  receiver.recv()?;
         match sound{
@@ -73,7 +73,7 @@ impl Sound {
 
     pub fn set_sound_volume(&self, volume: f32){ 
         
-        COMMAND_QUEUE.push( Command::SetSoundVolume { sound: au::Sound::from(self) , volume: volume } );
+        COMMAND_QUEUE.push( Command::SetSoundVolume { sound: au::Sound::from(self) , volume} );
     }
 
     pub fn stop_sound(&self){ 

@@ -1,5 +1,4 @@
 use crate::py_abstractions::structs::TwoDObjects::{Circle::Circle, Rectangle::Rectangle};
-use glam::Vec4;
 use macroquad::prelude as mq;
 
 
@@ -22,7 +21,7 @@ pub fn draw_circle(circle: &Circle) {
     vertices.push(mq::Vertex {
         position: mq::vec3(circle.position.x, circle.position.y, 0.0),
         uv: mq::vec2(0.5, 0.5), 
-        color: color, 
+        color, 
         normal: glam::Vec4::ZERO
     });
 
@@ -45,7 +44,7 @@ pub fn draw_circle(circle: &Circle) {
         vertices.push(mq::Vertex {
             position: pos,
             uv,
-            color: color,
+            color,
             normal: glam::Vec4::ZERO
         });
     }
@@ -97,13 +96,13 @@ pub fn draw_rect(rect: &Rectangle) {
 
     let vertices = [
         // Top Left (0)
-        mq::Vertex { position: v_tl, uv: mq::vec2(0.0, 0.0), color: color,normal: glam::Vec4::ZERO},
+        mq::Vertex { position: v_tl, uv: mq::vec2(0.0, 0.0), color,normal: glam::Vec4::ZERO},
         // Top Right (1)
-        mq::Vertex { position: v_tr, uv: mq::vec2(1.0, 0.0), color: color,normal: glam::Vec4::ZERO },
+        mq::Vertex { position: v_tr, uv: mq::vec2(1.0, 0.0), color,normal: glam::Vec4::ZERO },
         // Bottom Right (2)
-        mq::Vertex { position: v_br, uv: mq::vec2(1.0, 1.0), color: color,normal: glam::Vec4::ZERO },
+        mq::Vertex { position: v_br, uv: mq::vec2(1.0, 1.0), color,normal: glam::Vec4::ZERO },
         // Bottom Left (3)
-        mq::Vertex { position: v_bl, uv: mq::vec2(0.0, 1.0), color: color,normal: glam::Vec4::ZERO },
+        mq::Vertex { position: v_bl, uv: mq::vec2(0.0, 1.0), color,normal: glam::Vec4::ZERO },
     ];
 
     // Standard Quad Indices (Counter-Clockwise)

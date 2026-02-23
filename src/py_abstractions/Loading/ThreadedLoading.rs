@@ -108,25 +108,3 @@ where
 }
 
 
-
-
-/// all the structs to make from_dict work
-/// 
-/// 
-#[derive(FromPyObject)]
-struct VarFileUrl {
-    var_name: String,
-    file_path: String,
-    url: String,
-}
-#[derive(FromPyObject)]
-struct VarFile {
-    var_name: String,
-    file_path: String,
-}
-
-#[derive(FromPyObject)]
-struct FileUrl {
-    file_path: String,
-    url: String,
-}

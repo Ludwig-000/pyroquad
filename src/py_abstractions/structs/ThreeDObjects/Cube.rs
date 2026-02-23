@@ -1,14 +1,12 @@
 use pyo3::prelude::*;
 use pyo3_stub_gen::derive::* ;
-use pyo3::types::{PyType, PyWeakref, PyWeakrefReference};
+use pyo3::types::{PyWeakref, PyWeakrefReference};
 use pyo3::exceptions::*;
 
 use crate::py_abstractions::Textures_and_Images::Texture2D;
-use crate::{implement_Drop3D, implement_basic_getter_methods3D, implement_basic_magic_methods3D, implement_basic_setter_methods3D, implement_check_collision3D, implement_remove_tick3D, implement_set_collider3D, implement_tick3D};
 use crate::engine::PChannel::PChannel;
 use crate::py_abstractions::structs::ThreeDObjects::PhysicsHandle::Physics;
 use std::hash::{Hash, Hasher};
-use std::sync::Arc;
 
 use slotmap::Key;
 use crate::py_abstractions::structs::ThreeDObjects::ColliderOptions::InnerColliderOptions;
@@ -71,11 +69,11 @@ impl Cube {
 
         let (sender, receiver) = PChannel::sync_channel(1);
 
-        let cache  =match collider_type.0{
-            InnerColliderOptions::Dynamic { gravity_scale, friction, restitution, density }=>{
+        let cache = match collider_type.0{
+            InnerColliderOptions::Dynamic { .. }=>{
                 None
             },
-            _=> {ObjectDataCache::ThreeDObjCache::new(true, position.into(), rotation.into(), scale.into(), color.into())}
+            _=> {ObjectDataCache::ThreeDObjCache::new(position.into(), rotation.into(), scale.into(), color.into())}
         };
         let placeholder_struct: Cube = Cube { key: ObjectKey::null(),function_key: None,  cache, physics: None};
         let cube_handle: Py<Cube> = Py::new(py, placeholder_struct)?; 
@@ -102,7 +100,7 @@ impl Cube {
         let mut cube_ref = cube_handle.borrow_mut(py);
         cube_ref.key = key;
 
-        if let InnerColliderOptions::Dynamic { gravity_scale, friction, restitution, density } = collider_type.0{
+        if let InnerColliderOptions::Dynamic { .. } = collider_type.0{
             let phys_struct = Physics {
                 identity: weak_ref_handle,
                 handle: key,

@@ -12,7 +12,7 @@ pub struct ThreeDObjCache{
 
 }
 impl ThreeDObjCache{
-    pub fn new(cacheable: bool, location: mq::Vec3, rotation: mq::Vec3, scale: mq::Vec3, color: mq::Color)-> Option<ThreeDObjCache>{
+    pub fn new(location: mq::Vec3, rotation: mq::Vec3, scale: mq::Vec3, color: mq::Color)-> Option<ThreeDObjCache>{
         Some (ThreeDObjCache{
             position: location,
             rotation,

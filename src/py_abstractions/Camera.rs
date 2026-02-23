@@ -3,12 +3,12 @@ use pyo3::prelude::*;
 use macroquad::prelude as mq;
 use crate::engine::CoreLoop::COMMAND_QUEUE;
 use crate::engine::CoreLoop::Command;
+use crate::engine::PChannel::PChannel;
 use pyo3_stub_gen::{derive::gen_stub_pyfunction,derive::*};
 
 use crate::py_abstractions::structs::GLAM::Vec3::Vec3;
 use crate::py_abstractions::structs::GLAM::Vec2::Vec2;
 use crate::py_abstractions::RenderTarget::*;
-use crate::py_abstractions::structs::TwoDObjects::Rectangle::Rectangle;
 
 #[gen_stub_pyclass]
 #[pyclass]
@@ -131,11 +131,29 @@ impl From<Camera2D> for mq::Camera2D {
 #[pyfunction]
 pub fn set_default_camera()  {
     COMMAND_QUEUE.push(Command::SetDefaultCamera());
-
 }
 
 
+#[gen_stub_pyfunction]
+#[pyfunction]
+pub fn push_camera_state()  {
+    COMMAND_QUEUE.push(Command::PushCameraState);
+}
 
+#[gen_stub_pyfunction]
+#[pyfunction]
+pub fn pop_camera_state()  {
+    COMMAND_QUEUE.push(Command::PopCameraState);
+}
+
+/// From given font size in world space gives (font_size, font_scale and font_aspect) params to make rasterized font looks good in currently active camera
+#[gen_stub_pyfunction]
+#[pyfunction]
+pub fn camera_font_scale(world_font_size: f32)-> PyResult<(u16, f32, f32)>{
+    let (sender, reciever) =  PChannel::sync_channel(1);
+    COMMAND_QUEUE.push(Command::CameraFontScale { world_font_size, sender });
+    Ok(reciever.recv()?)
+}
 
 
 

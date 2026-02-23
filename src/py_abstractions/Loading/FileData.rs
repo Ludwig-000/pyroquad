@@ -5,7 +5,6 @@ use crate::py_abstractions::{Loading::Loading::load_file, structs::{ ThreeDObjec
 use crate::py_abstractions::Audio::Sound;
 use crate::py_abstractions::Textures_and_Images::{Image,Texture2D};
 use crate::py_abstractions::Textures_and_Images;
-use crate::py_abstractions::structs::GLAM::Vec3::Vec3;
 
 
 /// A wrapper around raw filedata that has not yet been parsed.

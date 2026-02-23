@@ -1,14 +1,17 @@
 //#![allow(warnings)]
 #![allow(non_snake_case)] // alot of Python Constants are defined via function, so this prevents compiler spam.
-#![allow(unused_variables)] // for now.
-#![allow(dead_code)] // for now.
+//#![allow(unused_variables)] // for now.
+//#![allow(dead_code)]
+
+#![warn(clippy::large_enum_variant)]
+
+#![deny(clippy::disallowed_methods)]
 
 #![allow(clippy::excessive_precision)]
-#![warn(clippy::large_enum_variant)]
 #![allow(clippy::wrong_self_convention)]
 #![allow(clippy::too_many_arguments)]
 #![allow(clippy::needless_range_loop)]
-#![deny(clippy::disallowed_methods)]
+#![allow(clippy::enum_variant_names)]
 
 use pyo3::prelude::*;
 use pyo3_stub_gen::define_stub_info_gatherer;
@@ -68,11 +71,14 @@ pub fn _pyroquad( py: Python<'_>, m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(crate::py_abstractions::py_functions::draw_plane, m)?)?;
     m.add_function(wrap_pyfunction!(crate::py_abstractions::py_functions::draw_cube, m)?)?;
 
-    m.add_function(wrap_pyfunction!(crate::engine::Cubemap::draw_cubemap, m)?)?;
+    m.add_function(wrap_pyfunction!(crate::py_abstractions::py_functions::draw_cubemap, m)?)?;
 
 
 
     m.add_function(wrap_pyfunction!(crate::py_abstractions::Camera::set_default_camera, m)?)?;
+    m.add_function(wrap_pyfunction!(crate::py_abstractions::Camera::push_camera_state, m)?)?;
+    m.add_function(wrap_pyfunction!(crate::py_abstractions::Camera::pop_camera_state, m)?)?;
+    m.add_function(wrap_pyfunction!(crate::py_abstractions::Camera::camera_font_scale, m)?)?;
 
 
     m.add_class::<crate::py_abstractions::Color::Color>()?;

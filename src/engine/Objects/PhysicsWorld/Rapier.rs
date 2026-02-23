@@ -1,21 +1,8 @@
-﻿
-use pyo3_stub_gen::derive;
-use rapier3d::{pipeline, prelude::*};
+﻿use rapier3d::{prelude::*};
 use glam::Vec3;
-use std::sync::Mutex;
-use slotmap::{DefaultKey, Key, KeyData};
-use crate::{engine::Objects::ObjectManagement::ObjectStorage::{self as obj, ObjectStorage}, py_abstractions::structs::ThreeDObjects::ColliderOptions::{ColliderOptions, InnerColliderOptions}};
+use slotmap::{Key, KeyData};
+use crate::{engine::Objects::ObjectManagement::ObjectStorage::{self as obj}, py_abstractions::structs::ThreeDObjects::ColliderOptions::{ColliderOptions, InnerColliderOptions}};
 use crate::engine::Objects::ObjectManagement::ObjectStorage::ObjectKey;
-use crate::engine::Objects::ObjectManagement::ObjectStorage::Object;
-
-
-pub fn physics_thread(){
-    let c = RapierWorld::new();
-    
-}
-
-
-
 
 
 
@@ -94,6 +81,7 @@ impl RapierWorld{
     pub fn step(&mut self, distance: f32) {
         let gravity = vector![0.0, -9.81, 0.0];
 
+        self.integration_parameters.dt = distance;
         self.pipeline.step(
             &gravity,
             &self.integration_parameters,
@@ -112,12 +100,12 @@ impl RapierWorld{
     pub fn insert_object(&mut self, obj: &obj::Object, key: ObjectKey, collider: ColliderOptions) -> Option<ObjectHandle> {
         match collider.0{
             InnerColliderOptions::None => {
-                return None;
+                None
             }
             InnerColliderOptions::Static=> {
-                return Some(self.static_collider_builder(obj, key))
+                Some(self.static_collider_builder(obj, key))
             }
-            InnerColliderOptions::Dynamic { gravity_scale,friction,restitution,density } =>{
+            InnerColliderOptions::Dynamic { .. } =>{
                 Some(self.dynamic_collider_builder(obj,key,collider))
             }
         }

@@ -1,14 +1,9 @@
-use macroquad::prelude::Vertex as mq_vert;
-use pyo3::ffi::PyCallable_Check;
 use pyo3::{pyclass, pymethods};
 use pyo3_stub_gen::derive::{gen_stub_pyclass, gen_stub_pymethods};
 
-use pyo3_stub_gen::inventory::submit;
-use slotmap::DefaultKey;
 use slotmap::Key;
 use std::hash::{Hash, Hasher};
 
-use crate::engine::Objects::ObjectDataCache::ThreeDObjCache;
 use crate::engine::PError::PError;
 use crate::py_abstractions::structs::ThreeDObjects::ColliderOptions::{ColliderOptions, InnerColliderOptions};
 use crate::py_abstractions::structs::ThreeDObjects::PhysicsHandle::Physics;
@@ -21,12 +16,8 @@ use pyo3::prelude::*;
 
 use crate::engine::PChannel::PChannel;
 
-use pyo3::prelude::*;
-use pyo3_stub_gen::derive::* ;
 use pyo3::types::{PyWeakref, PyWeakrefReference};
 use crate::py_abstractions::structs::ThreeDObjects::ObjectFunctionStorage::FunctionKey;
-use pyo3::prelude::*;
-use pyo3_stub_gen::derive::* ;
 
 use pyo3::exceptions::*;
 
@@ -35,9 +26,7 @@ use pyo3::exceptions::*;
 use crate::engine::Objects::ObjectDataCache;
 
 use crate::py_abstractions::structs::ThreeDObjects::ObjectFunctionStorage;
-use crate::py_abstractions::Color::Color;
 use crate::engine::Objects::ObjectManagement::ObjectStorage::ObjectKey;
-use crate::py_abstractions::structs::ThreeDObjects::ObjectMacros::*;
 
 #[gen_stub_pyclass]
 #[pyclass(weakref)]
@@ -84,7 +73,7 @@ impl Mesh{
         
         let weak_ref_handle: Py<PyWeakref> = {
             let bound_mesh = mesh_handle.bind(py); 
-            let weak_ref_ref = PyWeakrefReference::new(&bound_mesh)?;
+            let weak_ref_ref = PyWeakrefReference::new(bound_mesh)?;
             weak_ref_ref.cast_into::<PyWeakref>()?.unbind() 
         };
 
@@ -99,16 +88,12 @@ impl Mesh{
         let mut mesh_ref = mesh_handle.borrow_mut(py);
         mesh_ref.key = key;
 
-
-        match collider_type.0{
-            InnerColliderOptions::Dynamic { gravity_scale, friction, restitution, density }=>{
-                let phys_struct = Physics {
-                    identity: weak_ref_handle,
-                    handle: key,
-                };
-                mesh_ref.physics = Some(Py::new(py, phys_struct)?);
-            },
-            _ => {}
+        if let InnerColliderOptions::Dynamic { .. }= collider_type.0{
+            let phys_struct = Physics {
+                identity: weak_ref_handle,
+                handle: key,
+            };
+            mesh_ref.physics = Some(Py::new(py, phys_struct)?);
         }
 
         drop(mesh_ref);

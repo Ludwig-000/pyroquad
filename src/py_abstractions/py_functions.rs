@@ -6,7 +6,6 @@
 // also, any conversion between my abstracted pyclasses and the structs used in macroquad is being done here.
 // ( example:  Color -> mq::Color )
 
-use crate::py_abstractions::MouseButton::MouseButton;
 use crate::py_abstractions::structs::ThreeDObjects::ObjectFunctionStorage;
 use crate::py_abstractions::Textures_and_Images::*;
 use macroquad::prelude as mq;
@@ -28,9 +27,7 @@ use crate::py_abstractions::KeyCode::*;
 use crate::py_abstractions::Config::Config;
 use std::process;
 use std::sync::atomic::{AtomicBool, Ordering};
-use pyo3::exceptions::PyRuntimeError;
 use std::panic::{self, AssertUnwindSafe};
-use std::thread;
 
 
 
@@ -151,7 +148,7 @@ pub fn draw_cylinder( position: Vec3,
     texture: Option<Texture2D>,
     color: Color ) {
     
-    COMMAND_QUEUE.push(Command::DrawCylinder {position: position.into(), radius_top: radius_top, radius_bottom: radius_bottom, 
+    COMMAND_QUEUE.push(Command::DrawCylinder {position: position.into(), radius_top, radius_bottom, 
         height, texture: texture.map(Into::into),color: color.into()});
 }
 
@@ -165,7 +162,7 @@ pub fn draw_cylinder_wires( position: Vec3,
     texture: Option<Texture2D>,
     color: Color) {
     
-    COMMAND_QUEUE.push(Command::DrawCylinderWires {position: position.into(), radius_top: radius_top, radius_bottom: radius_bottom, 
+    COMMAND_QUEUE.push(Command::DrawCylinderWires {position: position.into(), radius_top, radius_bottom, 
         height, texture: texture.map(Into::into),color: color.into()});
 }
 
@@ -241,13 +238,12 @@ pub fn draw_plane(center: Vec3, size: Vec2, color: Color, texture: Option<Textur
 ///
 #[gen_stub_pyfunction]
 #[pyfunction]
-pub fn draw_cube(position: Vec3, size: Vec3, color: Color) {
-    let col = mq::Color{r: color.r,g: color.g,b :color.b,a: color.a};
+pub fn draw_cube(position: Vec3, size: Vec3, color: Color, texture: Option<Texture2D>) {
     let pos = mq::vec3(position.x,position.y,position.z);
     let siz = mq::vec3(size.x,size.y,size.z);
-    let texture = None; // for now
+    let texture = texture.map( Into::into );
     let c = mq::Color::new(color.r,color.g,color.b,color.a);
-    COMMAND_QUEUE.push(  Command::DrawCube{pos: pos, size: siz, texture, color: c} );
+    COMMAND_QUEUE.push(  Command::DrawCube{pos, size: siz, texture, color: c} );
 }
 
 /// fills the entire screen with a single color.
@@ -455,6 +451,14 @@ pub fn get_char_pressed() -> Option<char> {
 }
 
 
+#[gen_stub_pyfunction]
+#[pyfunction]
+pub fn draw_cubemap(texture: Texture2D) {
+
+    let texture_unpacked = texture.into();
+    COMMAND_QUEUE.push(  Command::DrawCubemap{
+        texture: Some(texture_unpacked)} );
+}
 
 
 //none yet here

@@ -231,6 +231,119 @@ impl Physics{
         let res = rx.recv()?;
         Ok(res) 
     }
+
+
+    
+
+
+
+
+
+
+
+    pub fn get_rotation_locks(&self, py: Python<'_>) -> PyResult<BVec3> {
+        self.is_alive(py)?;
+        let (tx, rx) = PChannel::PChannel::sync_channel(1);
+        COMMAND_QUEUE.push(
+            Command::PhysicsEnum(
+                PhysicsEnum::GetRotationLocks(tx),
+                self.handle
+            )
+        );
+        let res = rx.recv()?;
+        Ok(res)
+    }
+
+    pub fn get_gravity_scale(&self, py: Python<'_>) -> PyResult<f32> {
+        self.is_alive(py)?;
+        let (tx, rx) = PChannel::PChannel::sync_channel(1);
+        COMMAND_QUEUE.push(
+            Command::PhysicsEnum(
+                PhysicsEnum::GetGravityScale(tx),
+                self.handle
+            )
+        );
+        let res = rx.recv()?;
+        Ok(res)
+    }
+
+    pub fn get_mass(&self, py: Python<'_>) -> PyResult<f32> {
+        self.is_alive(py)?;
+        let (tx, rx) = PChannel::PChannel::sync_channel(1);
+        COMMAND_QUEUE.push(
+            Command::PhysicsEnum(
+                PhysicsEnum::GetMass(tx),
+                self.handle
+            )
+        );
+        let res = rx.recv()?;
+        Ok(res)
+    }
+
+    pub fn get_friction(&self, py: Python<'_>) -> PyResult<f32> {
+        self.is_alive(py)?;
+        let (tx, rx) = PChannel::PChannel::sync_channel(1);
+        COMMAND_QUEUE.push(
+            Command::PhysicsEnum(
+                PhysicsEnum::GetFriction(tx),
+                self.handle
+            )
+        );
+        let res = rx.recv()?;
+        Ok(res)
+    }
+
+    pub fn get_restitution(&self, py: Python<'_>) -> PyResult<f32> {
+        self.is_alive(py)?;
+        let (tx, rx) = PChannel::PChannel::sync_channel(1);
+        COMMAND_QUEUE.push(
+            Command::PhysicsEnum(
+                PhysicsEnum::GetRestitution(tx),
+                self.handle
+            )
+        );
+        let res = rx.recv()?;
+        Ok(res)
+    }
+
+    pub fn get_density(&self, py: Python<'_>) -> PyResult<f32> {
+        self.is_alive(py)?;
+        let (tx, rx) = PChannel::PChannel::sync_channel(1);
+        COMMAND_QUEUE.push(
+            Command::PhysicsEnum(
+                PhysicsEnum::GetDensity(tx),
+                self.handle
+            )
+        );
+        let res = rx.recv()?;
+        Ok(res)
+    }
+
+    pub fn get_linear_damping(&self, py: Python<'_>) -> PyResult<f32> {
+        self.is_alive(py)?;
+        let (tx, rx) = PChannel::PChannel::sync_channel(1);
+        COMMAND_QUEUE.push(
+            Command::PhysicsEnum(
+                PhysicsEnum::GetLinearDamping(tx),
+                self.handle
+            )
+        );
+        let res = rx.recv()?;
+        Ok(res)
+    }
+
+    pub fn get_angular_damping(&self, py: Python<'_>) -> PyResult<f32> {
+        self.is_alive(py)?;
+        let (tx, rx) = PChannel::PChannel::sync_channel(1);
+        COMMAND_QUEUE.push(
+            Command::PhysicsEnum(
+                PhysicsEnum::GetAngularDamping(tx),
+                self.handle
+            )
+        );
+        let res = rx.recv()?;
+        Ok(res)
+    }
 }
 
 impl Physics{
@@ -239,7 +352,7 @@ impl Physics{
     /// The engine assumes any key that still exists is also valid.
     /// Since a Physics handle can outlive it's Object of origin while still holding it's key,
     /// we need this check.
-    pub fn is_alive<'py>(&self, py: Python<'py>)-> PyResult<()>{
+    pub fn is_alive<'py>(&self, _py: Python<'py>)-> PyResult<()>{
         let alive=  unsafe {
             let weak_ptr = self.identity.as_ptr();
             let target_ptr = ffi::PyWeakref_GetObject(weak_ptr);

@@ -1,10 +1,10 @@
-/// All internal Camera Fnctions MUST pass through this file.
-/// 
+// All internal Camera Fnctions MUST pass through this file.
+// 
 
 use macroquad::{camera::{Camera2D, Camera3D}, prelude as mq};
 
 
-// because for some reason, macroquad's cameras don't implement clone
+/// because for some reason, macroquad's cameras don't implement clone
 pub fn clone_camera3d(cam: &Camera3D)-> Camera3D{
     mq::Camera3D{
         position: cam.position,
@@ -20,7 +20,7 @@ pub fn clone_camera3d(cam: &Camera3D)-> Camera3D{
     }
 }
 
-// because for some reason, macroquad's cameras don't implement clone
+/// because for some reason, macroquad's cameras don't implement clone
 pub fn clone_camera2d(cam: &Camera2D)-> Camera2D{
     mq::Camera2D{
         rotation: cam.rotation,
@@ -61,6 +61,8 @@ impl CamMemory{
     }
     
 }
+
+
 pub fn camera_font_scale(world_font_size: f32)-> (u16, f32, f32){
     #[allow(clippy::disallowed_methods)]
     mq::camera_font_scale(world_font_size)
@@ -73,6 +75,7 @@ pub fn pop_camera_state(){
     #[allow(clippy::disallowed_methods)]
     mq::pop_camera_state();
 }
+
 pub fn set_default_camera(cam_memory: &mut CamMemory){
     cam_memory.push( &Camera::Camera2D(mq::Camera2D::default()));
     #[allow(clippy::disallowed_methods)]

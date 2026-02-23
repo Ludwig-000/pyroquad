@@ -1,5 +1,4 @@
 use pyo3::prelude::*;
-use crate::py_abstractions::structs::GLAM::Vec3::Vec3;
 use pyo3_stub_gen::derive::* ;
 
 

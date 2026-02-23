@@ -1,7 +1,5 @@
-use crate::engine::Objects::ObjectManagement::{ObjectStorage::*, UnitCube };
-use macroquad::prelude::*;
+use crate::engine::Objects::ObjectManagement::{ObjectStorage::*};
 use macroquad::prelude as mq;
-use crate::engine::Objects::Cube::*;
 
 
 pub fn draw_all_Objects(obj: &ObjectStorage, viewMat: macroquad::prelude::Mat4){

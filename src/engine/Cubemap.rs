@@ -1,38 +1,12 @@
-
-use crate::py_abstractions::Textures_and_Images::*;
 use macroquad::prelude::UniformDesc;
 use macroquad::prelude as mq;
 
-use macroquad::texture::DrawTextureParams;
-use macroquad::texture::draw_texture_ex;
-use pyo3::prelude::*;
- 
-use pyo3_stub_gen::{derive::gen_stub_pyfunction};
 
 
-use crate::engine::CoreLoop::COMMAND_QUEUE;
-use crate::engine::CoreLoop::Command;
 
-#[gen_stub_pyfunction]
-#[pyfunction]
-pub fn draw_cubemap(texture: Texture2D) {
-
-    let col = mq::Color::new(1.,1.,1.,1.);
-    let pos = mq::vec3(0.,0.,0.);
-    let siz = mq::vec3(10000.0, 10000.0,10000.0);
-    let texture_unpacked = texture.into();
-    COMMAND_QUEUE.push(  Command::DrawCubemap{
-        texture: Some(texture_unpacked)} );
-}
-
-pub fn cubemap_internal_old(tex: Option<mq::Texture2D>, current_cam: &mq::Camera3D){
-    
-    let col = mq::Color::new(1.,1.,1.,1.);
-    let pos = mq::vec3(0.,0.,0.);
-    let siz = mq::vec3(10000.0, 10000.0,10000.0);
-    mq::draw_cube(pos, siz, tex.as_ref(), mq::WHITE);
-}
-
+// TODO:
+// move shaders into shader manager.
+// 
 
 
 const SKYBOX_VERTEX_SHADER: &str = r#"#version 100

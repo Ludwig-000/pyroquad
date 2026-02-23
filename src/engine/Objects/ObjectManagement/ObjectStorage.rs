@@ -179,17 +179,17 @@ impl ObjectStorage {
     pub fn does_collide(&mut self, key: ObjectKey)-> bool{
 
         if let Some(object_handle )= self.get_handle(key){
-            return self.physics_world.has_collision(*(&object_handle.collider_handle))
+            return self.physics_world.has_collision(object_handle.collider_handle)
         }
-        return false
+        false
     }
 
     /// returns empty if collision is disabled.
     pub fn collides_with(&mut self, key: ObjectKey)-> Vec<ObjectKey>{
         if let Some(object_handle )= self.get_handle(key){
-            return self.physics_world.get_collided_keys(*(&object_handle.collider_handle))
+            return self.physics_world.get_collided_keys(object_handle.collider_handle)
         }
-        return Vec::new()
+        Vec::new()
     }
 
     pub fn keys_to_py(&mut self, keys: Vec<ObjectKey>)-> Vec<Arc<Py<PyWeakref>>>{
@@ -231,7 +231,7 @@ impl ObjectStorage {
         let obj  = unsafe {self.get_mut(key)};
         obj_recalc(obj);
 
-        /// TODO: change object collision based on scale.
+        // TODO: change object collision based on scale.
         return;
         todo!()
     }

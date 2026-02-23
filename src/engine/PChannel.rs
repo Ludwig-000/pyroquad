@@ -1,9 +1,8 @@
 use std::sync::atomic::Ordering;
-use std::sync::mpsc::{self, Sender};
+use std::sync::mpsc::{self};
 use std::marker::PhantomData;
 use std::sync::mpsc::SendError;
 use std::time::Duration;
-use pyo3::exceptions::PyBaseException;
 
 pub enum PChannelError{
     DeadlockError,
@@ -47,25 +46,24 @@ impl<T> Drop for PSyncSender<T>{
 }
 impl<T> PReceiver<T> {
     pub fn recv(&self) -> Result<T, PChannelError> {
-        let res = loop{
+        loop{
             let res  = self.inner.recv_timeout(Duration::from_millis(100));
 
             match res {
-                Ok(val)=> break val,
+                Ok(val)=> return val,
                 Err(e)=> {
                     if !crate::py_abstractions::py_functions::ENGINE_CURRENTLY_ACTIVE.load(Ordering::Relaxed){ 
-                        break Err(PChannelError::DeadlockError)  
+                        return Err(PChannelError::DeadlockError)  
                     }
                 }
             }
 
-        };
-        
-        res
+        }
     }
 
     
 }
+
 
 
 

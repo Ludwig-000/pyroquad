@@ -1,13 +1,9 @@
 use std::collections::HashSet;
 use std::sync::Mutex;
-use std::sync::atomic::{AtomicI32,AtomicBool,AtomicU32,Ordering,AtomicU64};
+use std::sync::atomic::{AtomicI32,Ordering};
 use macroquad::input::{MouseButton, is_mouse_button_down, is_mouse_button_pressed, is_mouse_button_released};
 use macroquad::prelude as mq;
-use slotmap::Key;
-use std::time::Instant;
-use std::sync::LazyLock;
 use macroquad::prelude::KeyCode;
-use std::sync::OnceLock;
 use lazy_static::lazy_static;
 
 use mq::Vec2;
@@ -55,7 +51,7 @@ pub fn update_frame_info(){
         *MOUSE_POSITION_LOCAL.lock().unwrap() = mq::mouse_position_local();
         *MOUSE_WHEEL.lock().unwrap() = mq::mouse_wheel();
 
-        unsafe {
+        {
             let left = is_mouse_button_down(MouseButton::Left);
             let middle = is_mouse_button_down(MouseButton::Middle);
             let right = is_mouse_button_down(MouseButton::Right);
@@ -74,7 +70,7 @@ pub fn update_frame_info(){
 
             *MOUSE_BUTTON_DOWN.lock().unwrap() = active_buttons;
         }
-        unsafe {
+        {
             let left = is_mouse_button_pressed(MouseButton::Left);
             let middle = is_mouse_button_pressed(MouseButton::Middle);
             let right = is_mouse_button_pressed(MouseButton::Right);
@@ -93,7 +89,7 @@ pub fn update_frame_info(){
 
             *MOUSE_BUTTON_PRESSED.lock().unwrap() = active_buttons;
         }
-        unsafe {
+        {
             let left = is_mouse_button_released(MouseButton::Left);
             let middle = is_mouse_button_released(MouseButton::Middle);
             let right = is_mouse_button_released(MouseButton::Right);

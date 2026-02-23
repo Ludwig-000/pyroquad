@@ -2,7 +2,6 @@ use std::panic;
 
 use std::sync::Arc;
 use std::any::Any;
-use std::time::Instant;
 use macroquad::color::BLACK;
 use lazy_static::*;
 
@@ -11,6 +10,7 @@ use crossbeam::queue::SegQueue;
 use macroquad::prelude as mq;
 use macroquad::audio as au;
 use macroquad::window::get_internal_gl;
+use crate::engine::CameraManager;
 use crate::engine::CameraManager::CamMemory;
 use crate::engine::CameraManager::Camera;
 use crate::engine::CameraManager::clone_camera3d;
@@ -20,11 +20,11 @@ use crate::engine::Cubemap::cubemap_internal;
 use crate::engine::Objects::Cylinder::Cylinder;
 use crate::engine::Objects::ObjectManagement::ObjectStorage::ObjectKey;
 use crate::engine::Objects::Mesh::Mesh;
-use crate::engine::Objects::PhysicsWorld::ApplyPhysics;
 use crate::engine::Objects::Pill::Pill;
 use crate::engine::Objects::Sphere::Sphere;
 use crate::engine::Objects::TwoDObjects::draw_circle;
 use crate::engine::Objects::TwoDObjects::draw_rect;
+use crate::engine::PChannel::PSyncSender;
 use crate::engine::SHADERS::shader_manager as sm;
 use crate::engine::PError::PError;
 use crate::engine::PArc::PArc;
@@ -44,7 +44,7 @@ use crate::engine::Objects::ObjectManagement::ObjectManagement;
 
 
 pub enum Command {
-    GLENUM(GlEnum),
+    GlEnum(GlEnum),
     DrawRectangleFromPyClass(Rectangle),
     DrawCircleFromPyClass(Circle),
     PhysicsEnum(PhysicsEnum, ObjectKey),
@@ -214,6 +214,12 @@ pub enum Command {
 
     ShowMouse(bool),
     
+    PushCameraState,
+    PopCameraState,
+    CameraFontScale{
+        world_font_size: f32,
+        sender: PSyncSender<(u16, f32, f32)>,
+    }
 }
 
 lazy_static! {
@@ -233,7 +239,7 @@ pub async fn proccess_commands_loop() {
         while let Some(command) = COMMAND_QUEUE.pop() {
             
             match command {
-                Command::GLENUM(glenum)=> {
+                Command::GlEnum(glenum)=> {
                     let gl  = unsafe {
                         get_internal_gl().quad_gl
                     };
@@ -454,9 +460,7 @@ pub async fn proccess_commands_loop() {
                         Camera::Camera3D(_cam)=> clone_camera3d(_cam)
                     };
                     cubemap_internal(texture, &cam);
-        
                 }
-        
                 Command::DrawAfflineParallelpiped { offset, e1, e2, e3, texture, color } => {
                     mq::draw_affine_parallelepiped(offset, e1, e2, e3, texture.as_ref(), color);
                 }
@@ -533,8 +537,8 @@ pub async fn proccess_commands_loop() {
 
                     let _ = sender.send(());
                     
-                    if physics_step.is_some(){
-                        object_storage.step_physics(physics_step.unwrap());
+                    if let Some(physics_step)  = physics_step{
+                        object_storage.step_physics(physics_step);
                     }
 
 
@@ -597,7 +601,7 @@ pub async fn proccess_commands_loop() {
                         let sound = au::load_sound_from_bytes(&secured_data).await?;
                         Ok(sound)
                     }.await;
-                    let result = result.map(|op| PArc::new(op)  );
+                    let result = result.map( PArc::new );
                 
                     let _ = sender.send(result);
                 }
@@ -611,7 +615,7 @@ pub async fn proccess_commands_loop() {
                         Ok(sound)
                     }.await;
                 
-                    let result = result.map(|op| PArc::new(op)  );
+                    let result = result.map( PArc::new );
                     let _ = sender.send(result);
                 }
                 
@@ -635,7 +639,13 @@ pub async fn proccess_commands_loop() {
         
                 }
         
-                Command::DropThisItem(item_arc)=>{}
+                Command::DropThisItem(_drop)=>{}
+                Command::PopCameraState => CameraManager::pop_camera_state(),
+                Command::PushCameraState => CameraManager:: push_camera_state(),
+                Command::CameraFontScale { world_font_size, sender }=>{
+                    let res  = CameraManager::camera_font_scale(world_font_size);
+                    let _ = sender.send(res);
+                }
         
                 
             }

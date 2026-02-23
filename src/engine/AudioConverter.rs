@@ -56,7 +56,7 @@ pub fn ensure_wav(data: Vec<u8>) -> Result<Vec<u8>, PError> {
     };
 
     let mut writer = WavWriter::new(&mut wav_cursor, spec)
-        .map_err(|e| PError::from(e))?;
+        .map_err( PError::from )?;
 
     loop {
         let packet = match format.next_packet() {
@@ -81,14 +81,14 @@ pub fn ensure_wav(data: Vec<u8>) -> Result<Vec<u8>, PError> {
             }
             AudioBufferRef::S16(buf) => {
                 for s in buf.chan(0) {
-                    writer.write_sample(*s).map_err(|e| PError::from(e))?;
+                    writer.write_sample(*s).map_err( PError::from )?;
                 }
             }
             _ => return Err(PError::BasicErr("Unsupported audio buffer format".to_string())),
         }
     }
 
-    writer.finalize().map_err(|e| PError::from(e))?;
+    writer.finalize().map_err( PError::from )?;
 
     Ok(wav_cursor.into_inner())
 }

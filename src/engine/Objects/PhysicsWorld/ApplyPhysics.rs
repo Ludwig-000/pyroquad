@@ -1,9 +1,8 @@
-use crate::{engine::Objects::PhysicsWorld::{self, Rapier::{ObjectHandle, RapierWorld}}, 
+use crate::{engine::Objects::PhysicsWorld::{Rapier::{ObjectHandle, RapierWorld}}, 
     py_abstractions::structs::ThreeDObjects::PhysicsHandle::PhysicsEnum};
 
 
 use rapier3d::prelude::*;
-use crate::engine::PChannel; 
 use crate::py_abstractions::structs::GLAM::Vec3::Vec3;
 use crate::py_abstractions::structs::GLAM::BVec3::BVec3;
 

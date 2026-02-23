@@ -7,7 +7,6 @@ use crate::py_abstractions::Textures_and_Images::Texture2D;
 use crate::py_abstractions::structs::ThreeDObjects::PhysicsHandle::Physics;
 use std::hash::{Hash, Hasher};
 
-use slotmap::DefaultKey;
 use slotmap::Key;
 
 use crate::engine::Objects::ObjectDataCache;
@@ -68,10 +67,10 @@ impl Sphere {
         let (sender, receiver) = PChannel::sync_channel(1);
 
         let cache  =match collider_type.0{
-            InnerColliderOptions::Dynamic { gravity_scale, friction, restitution, density }=>{
+            InnerColliderOptions::Dynamic { .. }=>{
                 None
             },
-            _=> {ObjectDataCache::ThreeDObjCache::new(true, position.into(), rotation.into(), scale.into(), color.into())}
+            _=> {ObjectDataCache::ThreeDObjCache::new(position.into(), rotation.into(), scale.into(), color.into())}
         };
         let placeholder_struct = Self { key: ObjectKey::null(),function_key: None,  cache, physics: None};
         let cube_handle: Py<Self> = Py::new(py, placeholder_struct)?; 
@@ -98,7 +97,7 @@ impl Sphere {
         let mut cube_ref = cube_handle.borrow_mut(py);
         cube_ref.key = key;
 
-        if let InnerColliderOptions::Dynamic { gravity_scale, friction, restitution, density } = collider_type.0{
+        if let InnerColliderOptions::Dynamic { .. } = collider_type.0{
             let phys_struct = Physics {
                 identity: weak_ref_handle,
                 handle: key,

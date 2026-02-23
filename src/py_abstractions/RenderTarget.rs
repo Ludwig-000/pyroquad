@@ -46,10 +46,10 @@ impl From<&RenderTarget> for mq::RenderTarget{
 #[gen_stub_pyfunction]
 #[pyfunction]
 pub fn render_target_msaa(width: u32, height: u32) -> PyResult<RenderTarget> {
-    let (sender, receiver) = PChannel::sync_channel(1);
-    COMMAND_QUEUE.push( Command::RenderTargetMsaa{width,height,sender} );
+    let (tx, rx) = PChannel::sync_channel(1);
+    COMMAND_QUEUE.push( Command::RenderTargetMsaa{width,height,sender: tx} );
 
-    let render_target = receiver.recv()?;
+    let render_target = rx.recv()?;
     Ok(RenderTarget { render_target })
 }
 

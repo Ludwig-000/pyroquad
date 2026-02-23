@@ -3,7 +3,6 @@ use crate::py_abstractions::structs::GLAM::BVec3::BVec3;
 use glam::Vec3 as gl;
 use glam::Vec2 as glVec2;
 use pyo3::prelude::*;
-use std::fmt;
 use pyo3_stub_gen::derive::*;
 
 

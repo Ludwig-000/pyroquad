@@ -1,4 +1,4 @@
-# run clippy check via cargo clippy -- -D warnings
+# run clippy check via 'cargo clippy -- -D warnings'
 
 
 disallowed-methods = [

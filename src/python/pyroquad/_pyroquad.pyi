@@ -5522,6 +5522,14 @@ class Physics:
         continuous collision detection.
         """
     def is_ccd_enabled(self) -> builtins.bool: ...
+    def get_rotation_locks(self) -> BVec3: ...
+    def get_gravity_scale(self) -> builtins.float: ...
+    def get_mass(self) -> builtins.float: ...
+    def get_friction(self) -> builtins.float: ...
+    def get_restitution(self) -> builtins.float: ...
+    def get_density(self) -> builtins.float: ...
+    def get_linear_damping(self) -> builtins.float: ...
+    def get_angular_damping(self) -> builtins.float: ...
 
 class Pill:
     @property
@@ -7208,6 +7216,11 @@ def activate_engine(conf:typing.Optional[Config]=None) -> None:
     The engine is built, assuming none of it's library calls are ever executed without the engine being active.
     """
 
+def camera_font_scale(world_font_size:builtins.float) -> tuple[builtins.int, builtins.float, builtins.float]:
+    r"""
+    From given font size in world space gives (font_size, font_scale and font_aspect) params to make rasterized font looks good in currently active camera
+    """
+
 def clear_background(color:Color) -> None:
     r"""
     fills the entire screen with a single color.
@@ -7234,7 +7247,7 @@ def draw_circle(x:builtins.float, y:builtins.float, r:builtins.float, color:Colo
     for a more "round" circle, simply call `draw_poly()` with a greater ammount of sides.
     """
 
-def draw_cube(position:Vec3, size:Vec3, color:Color) -> None:
+def draw_cube(position:Vec3, size:Vec3, color:Color, texture:typing.Optional[Texture2D]) -> None:
     r"""
     draws a basic 3d cube.
     requires a 3d camera to be seen.
@@ -7377,6 +7390,10 @@ def next_frame(physics_step:typing.Optional[builtins.float]=0.0) -> None:
     
     also, this function cleans up dropped memory such as Texture2D
     """
+
+def pop_camera_state() -> None: ...
+
+def push_camera_state() -> None: ...
 
 def render_target(width:builtins.int, height:builtins.int, params:typing.Optional[RenderTargetParams]=None) -> RenderTarget: ...
 

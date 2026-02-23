@@ -27,7 +27,7 @@ impl<T: Send + Sync + 'static> Deref for PArc<T> {
     type Target = T;
 
     fn deref(&self) -> &Self::Target {
-        &*self.item
+        &self.item
     }
 }
 
