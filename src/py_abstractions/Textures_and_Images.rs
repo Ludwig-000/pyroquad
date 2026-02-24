@@ -114,16 +114,11 @@ impl Image {
 
     /// Modifies a pixel's color in this image.
     pub fn set_pixel(&mut self, x: u32, y: u32, color: Color) -> PyResult<()>{
-        // Assert that the x and y coordinates are within the image boundaries.
-        py_assert!(x < self.width as u32);
+        py_assert!(x < self.width as u32 );
         py_assert!(y < self.height as u32);
 
-        // Calculate the starting byte index for the given pixel.
-        // Each pixel takes up 4 bytes (r, g, b, a).
         let index = (y * self.width as u32 + x) as usize * 4;
 
-        // Convert the float color values (assuming a 0.0 to 1.0 range) to u8 (0 to 255).
-        // The cast truncates the fractional part, so we multiply by 255.0 first.
         let r = (color.r * 255.0) as u8;
         let g = (color.g * 255.0) as u8;
         let b = (color.b * 255.0) as u8;
@@ -159,7 +154,7 @@ impl Image {
 
     /// Creates an image from a given file.
     /// 
-    /// supported image formats are: ".png", ".jpeg"
+    /// supported image formats are: ".png", ".jpeg", ".webp"
     #[staticmethod]
     pub fn from_bytes(bytes: Vec<u8>, width: u16, height: u16, ) -> PyResult<Self> {
         if bytes.len() != (width as usize) * (height as usize) * 4 {

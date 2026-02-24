@@ -1,4 +1,4 @@
-use macroquad::prelude::*;
+use macroquad::prelude as mq;
 use macroquad::material::{Material, MaterialParams};
 use macroquad::window::miniquad::{ShaderSource, PipelineParams, Comparison, UniformDesc, UniformType};
 use std::sync::Mutex;
@@ -14,7 +14,7 @@ pub fn shader_load() {
             ..Default::default()
         };
 
-        let material: Material = load_material(
+        let material: Material = mq::load_material(
             ShaderSource::Glsl {
                 vertex: VERTEX_SHADER_SRC,
                 fragment: FRAGMENT_SHADER_SRC,
@@ -32,26 +32,34 @@ pub fn shader_load() {
         let lx = elev.cos() * azim.cos();
         let ly = elev.sin();
         let lz = elev.cos() * azim.sin();
-        let light_dir = vec3(lx, ly, lz);
+        let light_dir = mq::vec3(lx, ly, lz);
         material.set_uniform("LightDir", (light_dir.x, light_dir.y, light_dir.z));
         store_shader(material);
     }
 
     {
-        const GRAGMENT_SHADER_SKYBOX: &str = include_str!("Skybox/FRAG.frag");
-        const VERTEX_SHADER_SKYBOX: &str = include_str!("Skybox/VERTEX.vert");
-        let skybox_material = load_material(
-            ShaderSource::Glsl {
-            vertex: VERTEX_SHADER_SKYBOX,
-            fragment: GRAGMENT_SHADER_SKYBOX,
-        },
-            MaterialParams {
-                // tell MQ to bind a cubemap to "u_skybox"
-                textures: vec!["u_skybox".to_string()],
+        const FRAG_SKYBOX: &str = include_str!("Skybox/FRAG.frag");
+        const VERT_SKYBOX: &str = include_str!("Skybox/VERTEX.vert");
+
+
+        let pipeline_params = mq::PipelineParams {
+            depth_write: false, 
+            depth_test: mq::miniquad::Comparison::LessOrEqual,
+            cull_face: mq::miniquad::CullFace::Nothing, 
+            ..Default::default()
+        };
+        let mat = mq::load_material(
+            mq::ShaderSource::Glsl {
+                vertex: VERT_SKYBOX,
+                fragment: FRAG_SKYBOX,
+            },
+            mq::MaterialParams {
+                pipeline_params,
+                uniforms: vec![UniformDesc::new("SkyViewProj",  mq::UniformType::Mat4)],
                 ..Default::default()
             },
         ).unwrap();
-        store_shader(skybox_material);
+        store_shader(mat);
     }
 }
 

@@ -450,13 +450,25 @@ pub fn get_char_pressed() -> Option<char> {
     *fi::CHAR_PRESSED.lock().unwrap()
 }
 
-
+/**
+ * SKYBOX TEXTURE REQUIREMENTS:
+ * ----------------------------
+ * Type:       Equirectangular Environment Map (Lat-Long)
+ * Format:     LDR / Tonemapped (sRGB)
+ * Projection: 360° Horizontal x 180° Vertical
+ * Aspect:     2:1 (e.g., 2048x1024)
+ * Note: If using an HDR/EXR file (like from Poly Haven), it MUST be 
+ * tonemapped to a standard 8-bit image (JPG/PNG) before use.
+ * Reference Examples: https://polyhaven.com/hdris
+ * 
+ * Also, you might need to mirror the Image used for the Texture vertically.
+ */
 #[gen_stub_pyfunction]
 #[pyfunction]
-pub fn draw_cubemap(texture: Texture2D) {
+pub fn draw_skybox(texture: Texture2D) {
 
     let texture_unpacked = texture.into();
-    COMMAND_QUEUE.push(  Command::DrawCubemap{
+    COMMAND_QUEUE.push(  Command::DrawSkyBox{
         texture: Some(texture_unpacked)} );
 }
 

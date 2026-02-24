@@ -71,7 +71,7 @@ pub fn _pyroquad( py: Python<'_>, m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(crate::py_abstractions::py_functions::draw_plane, m)?)?;
     m.add_function(wrap_pyfunction!(crate::py_abstractions::py_functions::draw_cube, m)?)?;
 
-    m.add_function(wrap_pyfunction!(crate::py_abstractions::py_functions::draw_cubemap, m)?)?;
+    m.add_function(wrap_pyfunction!(crate::py_abstractions::py_functions::draw_skybox, m)?)?;
 
 
 

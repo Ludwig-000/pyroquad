@@ -2,6 +2,8 @@ use macroquad::prelude::*;
 use std::sync::atomic::{AtomicU8, Ordering,AtomicUsize};
 use std::sync::Mutex;
 
+use crate::engine::CameraManager::clone_camera3d;
+
 
 
 #[repr(u8)]
@@ -9,12 +11,13 @@ use std::sync::Mutex;
 pub enum ShaderKind {
     None = 0,
     Basic = 1,
+    SkyBox = 2,
 }
 impl From<u8> for ShaderKind {
     fn from(v: u8) -> Self {
         match v {
-            
             1 => ShaderKind::Basic,
+            2 => ShaderKind::SkyBox,
             _ => ShaderKind::None,
         }
     }
@@ -44,7 +47,7 @@ fn set_current_shader(desired: ShaderKind) {
     CURRENT_SHADER.store(desired.into(), Ordering::Relaxed);
 }
 
-pub fn switch_to_desired_shader(desired: ShaderKind) {
+pub fn switch_to_desired_shader(desired: ShaderKind, current_cam: &Option<macroquad::prelude::Camera3D>) {
     let current = get_current_shader();
     if current == desired {
         return;
@@ -53,7 +56,7 @@ pub fn switch_to_desired_shader(desired: ShaderKind) {
     // Increment switch counter atomically
     SWITCH_COUNT.fetch_add(1, Ordering::Relaxed);
     // Defer actual GPU shader bind to rendering loop
-    load_shader(desired);
+    load_shader(desired, current_cam);
 }
 
 
@@ -92,7 +95,7 @@ fn get_switch_history() -> Vec<usize> {
 
 
 
-fn load_shader(shader: ShaderKind){
+fn load_shader(shader: ShaderKind, current_cam: &Option<macroquad::prelude::Camera3D>){
    match shader {
     ShaderKind::None => {
         gl_use_default_material();
@@ -100,6 +103,27 @@ fn load_shader(shader: ShaderKind){
     ShaderKind::Basic => {
         let material = crate::engine::SHADERS::shaderLoader::get_shader(0).expect("Basic shader not loaded");
         macroquad::material::gl_use_material(&material);
+    }
+    ShaderKind::SkyBox => {
+        
+        let current_cam = clone_camera3d(&current_cam.as_ref().unwrap());
+        use macroquad::prelude as mq;
+        let material = crate::engine::SHADERS::shaderLoader::get_shader(1).expect("Skybox shader not loaded");
+
+        mq::gl_use_material(&material);
+        let aspect = current_cam.aspect.unwrap_or(mq::screen_width() / mq::screen_height());
+        let proj = mq::Mat4::perspective_rh_gl(current_cam.fovy, aspect, current_cam.z_near, current_cam.z_far);
+
+        let view_rot_only = mq::Mat4::look_at_rh(
+            mq::Vec3::ZERO, 
+            current_cam.target - current_cam.position, 
+            current_cam.up
+        );
+
+        let sky_view_proj = proj * view_rot_only;
+
+        material.set_uniform("SkyViewProj", sky_view_proj);
+
     }
    }
     

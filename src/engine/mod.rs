@@ -1,5 +1,4 @@
 pub mod SHADERS;
-pub mod Cubemap;
 
 pub mod EngineSetup;
 pub mod AudioConverter;

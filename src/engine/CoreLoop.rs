@@ -16,7 +16,6 @@ use crate::engine::CameraManager::Camera;
 use crate::engine::CameraManager::clone_camera3d;
 use crate::engine::CameraManager::set_camera;
 use crate::engine::CameraManager::set_default_camera;
-use crate::engine::Cubemap::cubemap_internal;
 use crate::engine::Objects::Cylinder::Cylinder;
 use crate::engine::Objects::ObjectManagement::ObjectStorage::ObjectKey;
 use crate::engine::Objects::Mesh::Mesh;
@@ -184,7 +183,7 @@ pub enum Command {
 
     DrawCube { pos: mq::Vec3, size: mq::Vec3, texture: Option<mq::Texture2D>, color: mq::Color},
 
-    DrawCubemap {texture: Option<mq::Texture2D>},
+    DrawSkyBox {texture: Option<mq::Texture2D>},
 
     DrawPoly{ x: f32, y: f32, sides: u8, radius: f32, rotation: f32, color: mq::Color},
 
@@ -249,10 +248,10 @@ pub async fn proccess_commands_loop() {
                     implement_GlEnum(glenum, gl);
                 }
                 Command::DrawCircleFromPyClass(circle)=> {
-                    sm::switch_to_desired_shader(sm::ShaderKind::None);
+                    sm::switch_to_desired_shader(sm::ShaderKind::None, &None);
                     draw_circle(&circle)},
                 Command::DrawRectangleFromPyClass(rect)=> {
-                    sm::switch_to_desired_shader(sm::ShaderKind::None);
+                    sm::switch_to_desired_shader(sm::ShaderKind::None, &None);
                     draw_rect(&rect)},
                 Command::PhysicsEnum(phys,key )=> {
                     let handle = object_storage.get_handle(key).expect("No physics handle found, yet physics function was called.");
@@ -275,7 +274,7 @@ pub async fn proccess_commands_loop() {
                         let mat = mq::get_internal_gl();
                         matrix= mat.quad_gl.get_projection_matrix()
                     }
-                    sm::switch_to_desired_shader(sm::ShaderKind::Basic);
+                    sm::switch_to_desired_shader(sm::ShaderKind::Basic, &None);
                     ObjectManagement::draw_all_Objects(&object_storage, matrix);
                 }
                 Command::DeleteObject { key }=> {
@@ -434,7 +433,7 @@ pub async fn proccess_commands_loop() {
                         
                 }
                 Command::DrawRect { x, y, w, h, color} => {
-                    sm::switch_to_desired_shader(sm::ShaderKind::None);
+                    sm::switch_to_desired_shader(sm::ShaderKind::None, &None);
                     mq::draw_rectangle(
                         x,
                         y,
@@ -444,25 +443,26 @@ pub async fn proccess_commands_loop() {
                     );
                 }
                 Command::DrawPlane { center, size, color, texture } => {
-                    sm::switch_to_desired_shader(sm::ShaderKind::None);
+                    sm::switch_to_desired_shader(sm::ShaderKind::None, &None);
                     let tex_ref = texture.as_ref();
                     mq::draw_plane(center,size,tex_ref,color);
                 }
                 Command::DrawGrid { slices, spacing, axes_color, other_color } => {
-                    sm::switch_to_desired_shader(sm::ShaderKind::None);
+                    sm::switch_to_desired_shader(sm::ShaderKind::None, &None);
                     mq::draw_grid(slices, spacing, axes_color, other_color);
                 }
                 Command::DrawCube {pos,size,texture,color} => {
-                    sm::switch_to_desired_shader(sm::ShaderKind::Basic);
+                    sm::switch_to_desired_shader(sm::ShaderKind::Basic, &None);
                     mq::draw_cube(pos,size,texture.as_ref(),color)
                 }
-                Command::DrawCubemap {texture} => {
-                    sm::switch_to_desired_shader(sm::ShaderKind::None);
+                Command::DrawSkyBox {texture} => {
                     let cam  =match &cam_memory.current_cam{
                         Camera::Camera2D(_)=> panic!("should be 3d cam"),
                         Camera::Camera3D(_cam)=> clone_camera3d(_cam)
                     };
-                    cubemap_internal(texture, &cam);
+                    sm::switch_to_desired_shader(sm::ShaderKind::SkyBox, &Some(cam));
+                    mq::draw_cube(mq::Vec3::ZERO, mq::vec3(10.0, 10.0, 10.0), texture.as_ref(), mq::WHITE);
+                    //sky_box_internal(texture, &cam);
                 }
                 Command::DrawAfflineParallelpiped { offset, e1, e2, e3, texture, color } => {
                     mq::draw_affine_parallelepiped(offset, e1, e2, e3, texture.as_ref(), color);
@@ -516,7 +516,7 @@ pub async fn proccess_commands_loop() {
                 }
                 Command::DrawPoly { x, y, sides, radius, rotation, color }=>
                 {
-                    sm::switch_to_desired_shader(sm::ShaderKind::None);
+                    sm::switch_to_desired_shader(sm::ShaderKind::None, &None);
                     mq::draw_poly(x,y,sides,radius,rotation,color  );
                 }
                 Command::SetDefaultCamera() =>{ 
@@ -525,7 +525,7 @@ pub async fn proccess_commands_loop() {
         
                 Command::DrawTexture { texture,x,y,color}=>
                 {
-                    sm::switch_to_desired_shader(sm::ShaderKind::None);
+                    sm::switch_to_desired_shader(sm::ShaderKind::None, &None);
                     mq::draw_texture(&texture,x,y,color)
                 }
                 
@@ -549,7 +549,7 @@ pub async fn proccess_commands_loop() {
                 }
             
                 Command::DrawText { text, x, y, font_size, color }=>{
-                sm::switch_to_desired_shader(sm::ShaderKind::None);
+                sm::switch_to_desired_shader(sm::ShaderKind::None, &None);
                 mq::draw_text(text.as_str(), x,y,font_size,color);
                 }
                 
