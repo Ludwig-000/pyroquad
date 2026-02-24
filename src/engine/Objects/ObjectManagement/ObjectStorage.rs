@@ -159,12 +159,8 @@ impl ObjectStorage {
 
 
     pub fn step_physics(&mut self, distance: f32){
-        let start_phys = Instant::now();
         self.physics_world.step(distance);
-        println!("Stepping physics: {} micros", Instant::now().duration_since(start_phys).as_micros());
-        let start_sync  = Instant::now();
         self.sync_transforms();
-        println!("Syncing: {} micros", Instant::now().duration_since(start_sync).as_micros());
     }
 
     /// returns false if collision is disabled.

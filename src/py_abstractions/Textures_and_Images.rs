@@ -7,6 +7,9 @@ use std::sync::Arc;
 use crate::engine::PChannel::PChannel;
 use crate::engine::CoreLoop::COMMAND_QUEUE;
 use crate::engine::CoreLoop::Command;
+use crate::engine::PChannel::PSyncSender;
+use crate::py_abstractions::structs::GLAM::Vec2::Vec2;
+use crate::py_assert;
 use pyo3::exceptions::PyValueError;use pyo3_stub_gen::derive::*;
 use crate::py_abstractions::Color::*;
 use crate::engine::PArc::PArc;
@@ -36,21 +39,17 @@ impl Image {
 
     #[new]
     pub fn new(path: String) -> PyResult<Image> {
-        // Load file bytes via your Python-callable function
         let data = crate::py_abstractions::Loading::Loading::load_file(&path)?;
 
-        // Wrap bytes for image::Reader
         let cursor = Cursor::new(data.bytes);
         let reader = ImageReader::new(cursor)
             .with_guessed_format()
             .map_err(|e| PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(format!("Failed to guess format: {e}")))?;
 
-        // Decode image
         let image = reader
             .decode()
             .map_err(|e|  PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(format!("Decode error: {e}")))?;
 
-        // Convert to RGBA8 and get raw bytes
         let rgba = image.to_rgba8();
         let (width, height) = rgba.dimensions();
 
@@ -88,8 +87,8 @@ impl Image {
     }
 
     /// Updates this image from a slice of [Color]s.
-    pub fn update(&mut self, colors: Vec<Color>) {
-        assert!(self.width as usize * self.height as usize == colors.len());
+    pub fn update(&mut self, colors: Vec<Color>) -> PyResult<()>{
+        py_assert!(self.width as usize * self.height as usize == colors.len());
 
         for i in 0..colors.len() {
             self.bytes[i * 4] = (colors[i].r * 255.) as u8;
@@ -97,31 +96,27 @@ impl Image {
             self.bytes[i * 4 + 2] = (colors[i].b * 255.) as u8;
             self.bytes[i * 4 + 3] = (colors[i].a * 255.) as u8;
         }
+        Ok(())
     }
 
     /// Returns this image's data as a slice of 4-byte arrays.
-    pub fn get_image_data(&self) -> Vec<[u8; 4]> {
-        assert!(self.width as usize * self.height as usize * 4 == self.bytes.len());
+    pub fn get_image_data(&self) ->  Vec<[u8; 4]> {
+        use std::slice;
 
-        // SAFETY: We're converting a slice of u8 to a slice of [u8; 4].
-        // This is safe because we have asserted that the total number of bytes
-        // is a multiple of 4, and the memory layout of u8 is the same as [u8; 4]
-        // for alignment purposes.
-        let image_slice = unsafe {
-            std::slice::from_raw_parts(
+        let r =unsafe {
+            slice::from_raw_parts(
                 self.bytes.as_ptr() as *const [u8; 4],
                 self.width as usize * self.height as usize,
             )
         };
-
-        image_slice.to_vec()
+        r.to_vec()
     }
 
     /// Modifies a pixel's color in this image.
-    pub fn set_pixel(&mut self, x: u32, y: u32, color: Color) {
+    pub fn set_pixel(&mut self, x: u32, y: u32, color: Color) -> PyResult<()>{
         // Assert that the x and y coordinates are within the image boundaries.
-        assert!(x < self.width as u32);
-        assert!(y < self.height as u32);
+        py_assert!(x < self.width as u32);
+        py_assert!(y < self.height as u32);
 
         // Calculate the starting byte index for the given pixel.
         // Each pixel takes up 4 bytes (r, g, b, a).
@@ -139,12 +134,13 @@ impl Image {
         self.bytes[index + 1] = g;
         self.bytes[index + 2] = b;
         self.bytes[index + 3] = a;
+        Ok(())
     }
 
     /// Returns a pixel [Color] from this image.
-    pub fn get_pixel(&self, x: u32, y: u32) -> Color {
-        assert!(x < self.width as u32);
-        assert!(y < self.height as u32);
+    pub fn get_pixel(&self, x: u32, y: u32) -> PyResult<Color> {
+        py_assert!(x < self.width as u32);
+        py_assert!(y < self.height as u32);
 
         let index = (y * self.width as u32+ x) as usize * 4;
         
@@ -153,12 +149,12 @@ impl Image {
         let b = self.bytes[index + 2];
         let a = self.bytes[index + 3];
         
-        Color {
+        Ok(Color {
             r: r as f32 / 255.0,
             g: g as f32 / 255.0,
             b: b as f32 / 255.0,
             a: a as f32 / 255.0,
-        }
+        })
     }
 
     /// Creates an image from a given file.
@@ -176,9 +172,11 @@ impl Image {
     }
 
     /// Flip the image horizontally (mirror left-right)
-    pub fn flip_horizontal(&mut self) {
+    pub fn flip_horizontal(&mut self) -> PyResult<()>{
         let w = self.width as usize;
         let h = self.height as usize;
+        py_assert!((w * h * 4) == self.bytes.len());
+
         for y in 0..h {
             for x in 0..w / 2 {
                 let left = (y * w + x) * 4;
@@ -189,12 +187,15 @@ impl Image {
                 self.bytes.swap(left + 3, right + 3);
             }
         }
+        Ok(())
     }
 
     /// Flip the image vertically (mirror top-bottom)
-    pub fn flip_vertical(&mut self) {
+    pub fn flip_vertical(&mut self) -> PyResult<()>{
         let w = self.width as usize;
         let h = self.height as usize;
+        py_assert!((w * h * 4) == self.bytes.len());
+        
         for y in 0..h / 2 {
             let top_row = y * w * 4;
             let bottom_row = (h - 1 - y) * w * 4;
@@ -202,9 +203,8 @@ impl Image {
                 self.bytes.swap(top_row + x, bottom_row + x);
             }
         }
+        Ok(())
     }
-    
-    
 }
 pub fn image_from_bytes(bytes: &Vec<u8>)-> PyResult<Image>{
     let cursor = Cursor::new(bytes);
@@ -227,6 +227,23 @@ pub fn image_from_bytes(bytes: &Vec<u8>)-> PyResult<Image>{
             height: height as u16,
         })
 }
+
+
+impl From<mq::Image> for Image {
+    fn from(t: mq::Image) -> Self {
+        Image { bytes: t.bytes, width: t.width, height: t.height }
+    }
+}
+
+
+impl From<Image> for mq::Image {
+    fn from(t: Image) -> Self {
+        mq::Image { bytes: t.bytes, width: t.width, height: t.height }
+    }
+}
+
+
+
 
 /// Texture, data stored in GPU memory
 #[gen_stub_pyclass]
@@ -266,13 +283,111 @@ impl Texture2D {
         
     }
 
-    pub fn set_filter(&mut self, filter_mode: FilterMode){
 
-        let command = match filter_mode{
+    #[staticmethod]
+    pub fn empty()-> PyResult<Texture2D>{
+        let (sy,rx) = PChannel::sync_channel(1);
+        let c = EngineTexImgEnum::TextureEmpty(sy);
+        COMMAND_QUEUE.push(Command::TexImEnum(c));
+        let res =rx.recv()?;
+        Ok(res.into())
+    }
+
+    /// Creates a Texture2D from a slice of bytes in an R,G,B,A sequence,
+    /// with the given width and height.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// bytes = [255, 0, 0, 192, 0, 255, 0, 192, 0, 0, 255, 192, 255, 255, 255, 192]
+    /// texture = Texture2D.from_rgba8(2, 2, bytes)
+    /// ```
+    #[staticmethod]
+    pub fn from_rgba8(width: u16, height: u16, bytes: Vec<u8>)-> PyResult<Texture2D>{
+        let (sy,rx) = PChannel::sync_channel(1);
+        let c = EngineTexImgEnum::TextureFromRGBA { width, height, bytes, sender: sy };
+        COMMAND_QUEUE.push(Command::TexImEnum(c));
+        let res =rx.recv()?;
+        Ok(res.into())
+    }
+
+    /// Uploads [Image] data to this texture.
+    pub fn update(&self, image: Image) {
+        let c = EngineTexImgEnum::TextureUpdate {  tex: (*self.texture).clone(), im: image.into() };
+        COMMAND_QUEUE.push(Command::TexImEnum(c));
+    }
+
+    // Updates the texture from an array of bytes.
+    pub fn update_from_bytes(&self, width: u32, height: u32, bytes: Vec<u8>) {
+        let c = EngineTexImgEnum::TextureUpdateFromBytes { width, height, bytes, tex: (*self.texture).clone() };
+        COMMAND_QUEUE.push(Command::TexImEnum(c));
+    }
+
+    /// Uploads [Image] data to part of this texture.
+    pub fn update_part(
+        &self,
+        image: Image,
+        x_offset: i32,
+        y_offset: i32,
+        width: i32,
+        height: i32,
+    ) {
+        let c = EngineTexImgEnum::TextureUpdatePart { 
+            image: image.into(), x_offset, y_offset, width, height, tex: (*self.texture).clone() };
+        COMMAND_QUEUE.push(Command::TexImEnum(c));
+    }
+
+    /// Returns the width of this texture.
+    pub fn width(&self) -> PyResult<f32> {
+        let (sy,rx) = PChannel::sync_channel(1);
+        let c = EngineTexImgEnum::TextureWidth { tex: (*self.texture).clone(), sender: sy };
+        COMMAND_QUEUE.push(Command::TexImEnum(c));
+        let res =rx.recv()?;
+        Ok(res.into())
+    }
+
+    /// Returns the height of this texture.
+    pub fn height(&self) -> PyResult<f32> {
+        let (sy,rx) = PChannel::sync_channel(1);
+        let c = EngineTexImgEnum::TextureHeight{ tex: (*self.texture).clone(), sender: sy };
+        COMMAND_QUEUE.push(Command::TexImEnum(c));
+        let res = rx.recv()?;
+        Ok(res.into())
+    }
+    /// Returns the size of this texture
+    pub fn size(&self) -> PyResult<Vec2> {
+        let (sy,rx) = PChannel::sync_channel(1);
+        let c = EngineTexImgEnum::TextureSize{ tex: (*self.texture).clone(), sender: sy };
+        COMMAND_QUEUE.push(Command::TexImEnum(c));
+        let res = rx.recv()?;
+        Ok(res.into())
+    }
+
+    pub fn set_filter(&mut self, filter_mode: FilterMode){
+        let filter = match filter_mode{
             FilterMode::Linear => mq::FilterMode::Linear,
             FilterMode::Nearest => mq::FilterMode::Nearest,
         };
-        COMMAND_QUEUE.push(Command::SetTextureFilterMode { tex: (*self.texture).clone(), filter: command });
+        let c = EngineTexImgEnum::TextureSetFilter { filter, tex: (*self.texture).clone() };
+        COMMAND_QUEUE.push(Command::TexImEnum(c));
+    }
+
+
+    /// Updates this texture from the screen.
+    pub fn grab_screen(&self) {
+        let c = EngineTexImgEnum::TextureGrabScreen((*self.texture).clone());
+        COMMAND_QUEUE.push(Command::TexImEnum(c));
+    }
+
+    /// Returns an [Image] from the pixel data in this texture.
+    ///
+    /// This operation can be expensive.
+    pub fn get_texture_data(&self) -> PyResult<Image> {
+        let (sy,rx) = PChannel::sync_channel(1);
+        let c = EngineTexImgEnum::TextureGetTexData{ tex: (*self.texture).clone(), sender: sy };
+        COMMAND_QUEUE.push(Command::TexImEnum(c));
+        let res =rx.recv()?;
+        Ok(res.into())
     }
 
 }
@@ -307,5 +422,101 @@ impl From<mq::Texture2D> for Texture2D {
 impl From<Texture2D> for mq::Texture2D {
     fn from(t: Texture2D) -> Self {
         (*t.texture).clone()
+    }
+}
+
+
+
+
+pub enum EngineTexImgEnum{
+    TextureImageToTexture{
+        im: Arc<mq::Image>,
+        sender: PSyncSender<mq::Texture2D>
+    },
+    TextureEmpty(PSyncSender<mq::Texture2D>),
+    TextureFromRGBA{
+        width: u16, height: u16, bytes: Vec<u8>,
+        sender: PSyncSender<mq::Texture2D>
+    },
+    TextureUpdate{
+        tex: mq::Texture2D,
+        im: mq::Image
+    },
+    TextureUpdateFromBytes{
+        width: u32, height: u32, bytes: Vec<u8>,
+        tex: mq::Texture2D,
+    },
+    TextureUpdatePart{
+        image: mq::Image,
+        x_offset: i32,
+        y_offset: i32,
+        width: i32,
+        height: i32,
+        tex: mq::Texture2D
+    },
+    TextureWidth{
+        tex: mq::Texture2D,
+        sender: PSyncSender<f32>,
+    },
+    TextureHeight{
+        tex: mq::Texture2D,
+        sender: PSyncSender<f32>,
+    },
+    TextureSize{
+        tex: mq::Texture2D,
+        sender: PSyncSender<mq::Vec2>,
+    },
+    TextureSetFilter{
+        filter: mq::FilterMode,
+        tex: mq::Texture2D,
+    },
+    TextureGrabScreen(mq::Texture2D),
+    TextureGetTexData{
+        tex: mq::Texture2D,
+        sender: PSyncSender<mq::Image>
+    }
+
+}
+impl EngineTexImgEnum{
+    pub fn execute(self){
+        match self{ 
+            Self::TextureEmpty(sender)=> {
+                let _ = sender.send(mq::Texture2D::empty());
+            },
+            Self::TextureImageToTexture { im, sender }=>{
+                let _  = sender.send( mq::Texture2D::from_image(&im) );
+            }
+            Self::TextureFromRGBA { width, height, bytes, sender }=>{
+                let _ = sender.send( mq::Texture2D::from_rgba8(width, height, &bytes));
+            }
+            Self::TextureUpdate { tex, im }=>{
+                tex.update(&im);
+            }
+            Self::TextureUpdateFromBytes { width, height, bytes, tex }=>{
+                tex.update_from_bytes(width, height, &bytes);
+            }
+            Self::TextureUpdatePart { image, x_offset, y_offset, width, height, tex }=>{
+                tex.update_part(&image, x_offset, y_offset, width, height);
+            }
+            
+            Self::TextureWidth { tex, sender } => {
+                let _ = sender.send(tex.width());
+            }
+            Self::TextureHeight { tex, sender } => {
+                let _ = sender.send(tex.height());
+            }
+            Self::TextureSize { tex, sender } => {
+                let _ = sender.send(tex.size());
+            }
+            Self::TextureSetFilter { filter, tex } => {
+                tex.set_filter(filter);
+            }
+            Self::TextureGrabScreen(tex) => {
+                tex.grab_screen();
+            }
+            Self::TextureGetTexData { tex, sender } => {
+                let _ = sender.send(tex.get_texture_data());
+            }
+        }
     }
 }

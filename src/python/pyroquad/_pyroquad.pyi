@@ -6027,7 +6027,53 @@ class Texture2D:
     Texture, data stored in GPU memory
     """
     def __new__(cls, image:Image) -> Texture2D: ...
+    @staticmethod
+    def empty() -> Texture2D: ...
+    @staticmethod
+    def from_rgba8(width:builtins.int, height:builtins.int, bytes:typing.Sequence[builtins.int]) -> Texture2D:
+        r"""
+        Creates a Texture2D from a slice of bytes in an R,G,B,A sequence,
+        with the given width and height.
+        
+        # Example
+        
+        ```
+        bytes = [255, 0, 0, 192, 0, 255, 0, 192, 0, 0, 255, 192, 255, 255, 255, 192]
+        texture = Texture2D.from_rgba8(2, 2, bytes)
+        ```
+        """
+    def update(self, image:Image) -> None:
+        r"""
+        Uploads [Image] data to this texture.
+        """
+    def update_from_bytes(self, width:builtins.int, height:builtins.int, bytes:typing.Sequence[builtins.int]) -> None: ...
+    def update_part(self, image:Image, x_offset:builtins.int, y_offset:builtins.int, width:builtins.int, height:builtins.int) -> None:
+        r"""
+        Uploads [Image] data to part of this texture.
+        """
+    def width(self) -> builtins.float:
+        r"""
+        Returns the width of this texture.
+        """
+    def height(self) -> builtins.float:
+        r"""
+        Returns the height of this texture.
+        """
+    def size(self) -> Vec2:
+        r"""
+        Returns the size of this texture
+        """
     def set_filter(self, filter_mode:FilterMode) -> None: ...
+    def grab_screen(self) -> None:
+        r"""
+        Updates this texture from the screen.
+        """
+    def get_texture_data(self) -> Image:
+        r"""
+        Returns an [Image] from the pixel data in this texture.
+        
+        This operation can be expensive.
+        """
 
 class Vec2:
     ZERO: Vec2

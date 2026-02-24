@@ -10,3 +10,4 @@ pub mod CoreLoop;
 pub mod FrameInfo;
 pub mod PChannel;
 pub mod CameraManager;
+pub mod PAssert;

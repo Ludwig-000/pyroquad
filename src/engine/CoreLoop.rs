@@ -31,6 +31,7 @@ use crate::engine::PArc::PArc;
 use crate::engine::Objects::ObjectManagement::ObjectStorage::*;
 use crate::py_abstractions::GL::GlEnum;
 use crate::py_abstractions::GL::implement_GlEnum;
+use crate::py_abstractions::Textures_and_Images::EngineTexImgEnum;
 use crate::py_abstractions::structs::ThreeDObjects::ColliderOptions::ColliderOptions;
 use crate::py_abstractions::structs::ThreeDObjects::PhysicsHandle::PhysicsEnum;
 use crate::py_abstractions::structs::TwoDObjects::Circle::Circle;
@@ -44,6 +45,7 @@ use crate::engine::Objects::ObjectManagement::ObjectManagement;
 
 
 pub enum Command {
+    TexImEnum(EngineTexImgEnum),
     GlEnum(GlEnum),
     DrawRectangleFromPyClass(Rectangle),
     DrawCircleFromPyClass(Circle),
@@ -220,10 +222,6 @@ pub enum Command {
         world_font_size: f32,
         sender: PSyncSender<(u16, f32, f32)>,
     },
-    SetTextureFilterMode{
-        tex: mq::Texture2D,
-        filter: mq::FilterMode,
-    }
 }
 
 lazy_static! {
@@ -243,6 +241,7 @@ pub async fn proccess_commands_loop() {
         while let Some(command) = COMMAND_QUEUE.pop() {
             
             match command {
+                Command::TexImEnum(en)=> en.execute(),
                 Command::GlEnum(glenum)=> {
                     let gl  = unsafe {
                         get_internal_gl().quad_gl
@@ -649,9 +648,6 @@ pub async fn proccess_commands_loop() {
                 Command::CameraFontScale { world_font_size, sender }=>{
                     let res  = CameraManager::camera_font_scale(world_font_size);
                     let _ = sender.send(res);
-                }
-                Command::SetTextureFilterMode { tex, filter }=>{
-                    tex.set_filter(filter);
                 }
         
                 
