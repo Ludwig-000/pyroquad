@@ -35,4 +35,4 @@ How to build:
 
 4) The .whl file can be found at `./target/wheels/`
 
-5) The .whl file can be added to pip via `pip install C:\path\to\your\file.whl --force-reinstall`
+5) The .whl file can be added to pip via `pip install \path\to\your\file.whl --force-reinstall`

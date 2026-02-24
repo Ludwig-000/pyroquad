@@ -451,6 +451,12 @@ pub fn get_char_pressed() -> Option<char> {
 }
 
 /**
+ * !Requires an active 3D camera.
+ * 
+ * 'draw_skybox' is being drawn with depth-test disabled.
+ * This means, just like 'clear_background()', it is intended to be the first draw-call right after a 3D camera has been set.
+ * 
+ * 
  * SKYBOX TEXTURE REQUIREMENTS:
  * ----------------------------
  * Type:       Equirectangular Environment Map (Lat-Long)
@@ -461,15 +467,16 @@ pub fn get_char_pressed() -> Option<char> {
  * tonemapped to a standard 8-bit image (JPG/PNG) before use.
  * Reference Examples: https://polyhaven.com/hdris
  * 
- * Also, you might need to mirror the Image used for the Texture vertically.
+ * Also, you might need to mirror the Image vertically before converting it to a Texture2D.
  */
 #[gen_stub_pyfunction]
 #[pyfunction]
-pub fn draw_skybox(texture: Texture2D) {
+#[pyo3(signature = (texture, tint = Color::WHITE()))] 
+pub fn draw_skybox(texture: Texture2D, tint: Color) {
 
     let texture_unpacked = texture.into();
     COMMAND_QUEUE.push(  Command::DrawSkyBox{
-        texture: Some(texture_unpacked)} );
+        texture: Some(texture_unpacked), tint: tint.into()} );
 }
 
 

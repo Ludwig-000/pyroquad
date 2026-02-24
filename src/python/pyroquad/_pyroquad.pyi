@@ -7351,9 +7351,15 @@ def draw_rectangle(x:builtins.float, y:builtins.float, w:builtins.float, h:built
     viewing the rectangle required a 2D Camera ( default )
     """
 
-def draw_skybox(texture:Texture2D) -> None:
+def draw_skybox(texture:Texture2D, tint:Color=...) -> None:
     r"""
-    * SKYBOX TEXTURE REQUIREMENTS:
+    * !Requires an active 3D camera.
+     * 
+     * 'draw_skybox' is being drawn with depth-test disabled.
+     * This means, just like 'clear_background()', it is intended to be the first draw-call right after a 3D camera has been set.
+     * 
+     * 
+     * SKYBOX TEXTURE REQUIREMENTS:
      * ----------------------------
      * Type:       Equirectangular Environment Map (Lat-Long)
      * Format:     LDR / Tonemapped (sRGB)
@@ -7363,7 +7369,7 @@ def draw_skybox(texture:Texture2D) -> None:
      * tonemapped to a standard 8-bit image (JPG/PNG) before use.
      * Reference Examples: https://polyhaven.com/hdris
      * 
-     * Also, you might need to mirror the Image used for the Texture vertically.
+     * Also, you might need to mirror the Image vertically before converting it to a Texture2D.
     """
 
 def draw_text(text:builtins.str, x:builtins.float, y:builtins.float, font_size:builtins.float, color:Color) -> None:

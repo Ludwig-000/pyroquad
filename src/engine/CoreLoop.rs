@@ -7,6 +7,7 @@ use lazy_static::*;
 
 use crossbeam::queue::SegQueue;
 
+use macroquad::models::DrawSphereParams;
 use macroquad::prelude as mq;
 use macroquad::audio as au;
 use macroquad::window::get_internal_gl;
@@ -183,7 +184,7 @@ pub enum Command {
 
     DrawCube { pos: mq::Vec3, size: mq::Vec3, texture: Option<mq::Texture2D>, color: mq::Color},
 
-    DrawSkyBox {texture: Option<mq::Texture2D>},
+    DrawSkyBox {texture: Option<mq::Texture2D>, tint: mq::Color},
 
     DrawPoly{ x: f32, y: f32, sides: u8, radius: f32, rotation: f32, color: mq::Color},
 
@@ -455,13 +456,14 @@ pub async fn proccess_commands_loop() {
                     sm::switch_to_desired_shader(sm::ShaderKind::Basic, &None);
                     mq::draw_cube(pos,size,texture.as_ref(),color)
                 }
-                Command::DrawSkyBox {texture} => {
+                Command::DrawSkyBox {texture, tint} => {
                     let cam  =match &cam_memory.current_cam{
                         Camera::Camera2D(_)=> panic!("should be 3d cam"),
                         Camera::Camera3D(_cam)=> clone_camera3d(_cam)
                     };
                     sm::switch_to_desired_shader(sm::ShaderKind::SkyBox, &Some(cam));
-                    mq::draw_cube(mq::Vec3::ZERO, mq::vec3(10.0, 10.0, 10.0), texture.as_ref(), mq::WHITE);
+                    //mq::draw_cube(mq::Vec3::ZERO, mq::vec3(10.0, 10.0, 10.0), texture.as_ref(), mq::WHITE);
+                    mq::draw_sphere_ex(mq::Vec3::ZERO, 10.0, texture.as_ref(), tint,DrawSphereParams { rings: 100, slices: 100, draw_mode: mq::DrawMode::Triangles });
                     //sky_box_internal(texture, &cam);
                 }
                 Command::DrawAfflineParallelpiped { offset, e1, e2, e3, texture, color } => {
