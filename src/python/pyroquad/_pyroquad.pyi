@@ -362,7 +362,15 @@ class Circle:
         """
     def __new__(cls, position:Vec2, rotation:builtins.float, radius:builtins.float, color:Color) -> Circle: ...
     def draw(self) -> None: ...
-    def collides_with(self, rhs:Rectangle | Circle) -> builtins.bool: ...
+    def collides_with(self, rhs:Rectangle | Circle) -> builtins.bool:
+        r"""
+        Check collision between two 2D Objects.
+        A Circle's collider assumes a perfect Circle.
+        """
+    def collides_with_list(self, rhs:typing.Sequence[Rectangle | Circle]) -> builtins.list[Rectangle | Circle]:
+        r"""
+        takes a list of 2D shapes, and returns every element that Collides with self.
+        """
 
 class ColliderOptions:
     r"""
@@ -4975,7 +4983,7 @@ class Cube:
         ```
         """
     def __new__(cls, position:Vec3=..., rotation:Vec3=..., scale:Vec3=..., color:Color=..., texture:typing.Optional[Texture2D]=None, collider_type:ColliderOptions=...) -> Cube: ...
-    def __eq__(self, other:Cube) -> builtins.bool:
+    def __eq__(self, other:typing.Any) -> builtins.bool:
         r"""
         Equality for Cube is based on unique ID.
         """
@@ -5097,7 +5105,7 @@ class Cylinder:
         ```
         """
     def __new__(cls, position:Vec3=..., rotation:Vec3=..., scale:Vec3=..., color:Color=..., texture:typing.Optional[Texture2D]=None, collider_type:ColliderOptions=...) -> Cylinder: ...
-    def __eq__(self, other:Cylinder) -> builtins.bool:
+    def __eq__(self, other:typing.Any) -> builtins.bool:
         r"""
         Equality for Cylinder is based on unique ID.
         """
@@ -5408,7 +5416,7 @@ class Mesh:
         """
     @scale.setter
     def scale(self, value: Vec3) -> None: ...
-    def __eq__(self, other:Mesh) -> builtins.bool:
+    def __eq__(self, other:typing.Any) -> builtins.bool:
         r"""
         Equality for Mesh is based on unique ID.
         """
@@ -5609,7 +5617,7 @@ class Pill:
         ...   i.pos = Vec3.ZERO()
         ```
         """
-    def __eq__(self, other:Pill) -> builtins.bool:
+    def __eq__(self, other:typing.Any) -> builtins.bool:
         r"""
         Equality for Pill is based on unique ID.
         """
@@ -5722,7 +5730,24 @@ class Rectangle:
     def __eq__(self, other:builtins.object) -> builtins.bool: ...
     def __new__(cls, position:Vec2, rotation:builtins.float, scale:Vec2, color:Color) -> Rectangle: ...
     def draw(self) -> None: ...
-    def collides_with(self, rhs:Rectangle | Circle) -> builtins.bool: ...
+    def collides_with(self, rhs:Rectangle | Circle) -> builtins.bool:
+        r"""
+        Check collision between two 2D Objects.
+        A Circle's collider assumes a perfect Circle.
+        """
+    def clamp(self, rhs:Rectangle | Circle) -> None:
+        r"""
+        moves the rectangle inside another
+        clamp(Rect) -> Rect
+        """
+    def clip(self, rhs:Rectangle | Circle) -> None:
+        r"""
+        crops a rectangle inside another
+        """
+    def collides_with_list(self, rhs:typing.Sequence[Rectangle | Circle]) -> builtins.list[Rectangle | Circle]:
+        r"""
+        takes a list of 2D shapes, and returns every element that Collides with self.
+        """
     def tick(self, slf:Rectangle, function:typing.Any) -> None:
         r"""
         Add a function to this object, which will automatically be executed each frame.
@@ -5929,7 +5954,7 @@ class Sphere:
         """
     @rot.setter
     def rot(self, value: Vec3) -> None: ...
-    def __eq__(self, other:Sphere) -> builtins.bool:
+    def __eq__(self, other:typing.Any) -> builtins.bool:
         r"""
         Equality for Sphere is based on unique ID.
         """

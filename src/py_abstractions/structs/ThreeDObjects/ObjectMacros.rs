@@ -12,8 +12,13 @@ macro_rules! implement_basic_magic_methods3D {
             impl $name {
 
                 #[doc = "Equality for " $name " is based on unique ID."]
-                fn __eq__(&self, other: &Self) -> bool {
-                    self.key == other.key
+                fn __eq__(&self, other: &pyo3::Bound<'_, pyo3::PyAny>) -> bool {
+                    if let Ok(other_val) = other.downcast::<$name>() {
+                        let other_borrow = other_val.borrow();
+                        self.key == other_borrow.key
+                    } else {
+                        false
+                    }
                 }
             
                 #[doc = "Hash for " $name " is based on unique ID, not it's fields."]

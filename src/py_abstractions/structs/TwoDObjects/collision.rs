@@ -9,10 +9,10 @@ use pyo3::prelude::*;
 
 
 
-#[derive(FromPyObject)]
-pub enum Shape<'a> {
-    Rect(Bound<'a, Rectangle>),
-    Circ(Bound<'a, Circle>),
+#[derive(FromPyObject, IntoPyObject)]
+pub enum Shape<'py> {
+    Rect(Bound<'py, Rectangle>),
+    Circ(Bound<'py, Circle>),
 }
 
 

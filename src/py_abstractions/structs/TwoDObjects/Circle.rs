@@ -52,6 +52,9 @@ impl Circle{
         COMMAND_QUEUE.push(  Command::DrawCircleFromPyClass(self.clone()));
     }
 
+    
+    /// Check collision between two 2D Objects.
+    /// A Circle's collider assumes a perfect Circle.
     pub fn collides_with(&self, rhs: Shape<'_>)-> bool{
         match rhs{
             Shape::Circ(c)=> {
@@ -64,4 +67,26 @@ impl Circle{
             }
         }
     }
+
+    /// takes a list of 2D shapes, and returns every element that Collides with self.
+    pub fn collides_with_list<'py>(&self, rhs: Vec<Shape<'py>>)-> Vec<Shape<'py>>{
+
+        rhs.into_iter().filter_map(|element|{
+            let is_hit = match &element {
+                Shape::Rect(rect_bound) => {
+                    let other = rect_bound.borrow();
+                    collides_with_rec_circ(&other, self)
+                }
+                Shape::Circ(circ_bound) => {
+                    let other = circ_bound.borrow();
+                    collides_with_circl_circ(self, &other)
+                }
+            };
+            if is_hit {
+                Some(element)
+            } else {None}
+        }).collect()
+    }
+
+
 }
