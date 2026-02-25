@@ -9,6 +9,7 @@ use pyo3_stub_gen::derive::*;
 #[gen_stub_pyclass]
 #[cfg_attr(feature = "abi_314", pyclass(eq,str,frozen, immutable_type))]
 #[cfg_attr(not(feature = "abi_314"), pyclass(eq,str,frozen))]
+#[repr(C)]
 #[derive(Clone, Copy, PartialEq,Debug)]
 pub struct Vec4 {
     #[pyo3(get)]

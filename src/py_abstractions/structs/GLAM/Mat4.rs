@@ -8,8 +8,8 @@ use crate::py_abstractions::structs::GLAM::Vec4::Vec4;
 #[gen_stub_pyclass]
 #[cfg_attr(feature = "abi_314", pyclass(eq,str,frozen, immutable_type))]
 #[cfg_attr(not(feature = "abi_314"), pyclass(eq,str,frozen))]
-#[derive(Clone,Copy,PartialEq,Debug)]
 #[repr(C)]
+#[derive(Clone,Copy,PartialEq,Debug)]
 pub struct Mat4 {
     #[pyo3(get)]
     pub x_axis: Vec4,

@@ -13,6 +13,7 @@ use pyo3_stub_gen::derive::*;
 #[gen_stub_pyclass]
 #[cfg_attr(feature = "abi_314", pyclass(eq,str,frozen, immutable_type))]
 #[cfg_attr(not(feature = "abi_314"), pyclass(eq,str,frozen))]
+#[repr(C)]
 #[derive(Clone, Copy, PartialEq,Debug)]
 pub struct Vec3 {
     #[pyo3(get)]
@@ -1075,9 +1076,9 @@ use pyo3_stub_gen::{PyStubType, TypeInfo};
 
 impl PyStubType for Vec3OrF32 {
     fn type_input() -> TypeInfo {
-        TypeInfo::builtin("Union['Vec3', float]")
+        TypeInfo::unqualified("Vec3 | float")
     }
     fn type_output() -> TypeInfo {
-        TypeInfo::builtin("Union['Vec3', float]")
+        TypeInfo::unqualified("Vec3 | float")
     }
 }

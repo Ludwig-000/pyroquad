@@ -8,7 +8,8 @@ use pyo3_stub_gen::derive::*;
 #[gen_stub_pyclass]
 #[cfg_attr(feature = "abi_314", pyclass(eq,str,hash,frozen, immutable_type))]
 #[cfg_attr(not(feature = "abi_314"), pyclass(eq,str,hash,frozen))]
-#[derive(Clone, Copy, PartialEq,Debug,Eq, Hash)]
+#[repr(C)]
+#[derive(Clone, Copy, PartialEq, Eq, Debug, Hash)]
 pub struct BVec3 {
     #[pyo3(get)]
     pub x: bool,

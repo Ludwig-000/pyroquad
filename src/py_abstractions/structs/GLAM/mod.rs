@@ -4,3 +4,4 @@ pub mod BVec3;
 pub mod BVec2;
 pub mod Mat4;
 pub mod Vec4;
+pub mod checks;

@@ -12,6 +12,10 @@ use crate::py_abstractions::structs::GLAM::Vec2::Vec2;
 use crate::py_abstractions::structs::ThreeDObjects::ObjectFunctionStorage;
 use crate::py_abstractions::Color::Color;
 use crate::py_abstractions::structs::ThreeDObjects::ObjectFunctionStorage::FunctionKey;
+use crate::py_abstractions::structs::TwoDObjects::Circle::Circle;
+use crate::py_abstractions::structs::TwoDObjects::collision::Shape;
+use crate::py_abstractions::structs::TwoDObjects::collision::collides_with_rec_circ;
+use crate::py_abstractions::structs::TwoDObjects::collision::collides_with_rec_rec;
 
 
 #[gen_stub_pyclass]
@@ -50,4 +54,18 @@ impl Rectangle{
         COMMAND_QUEUE.push(  Command::DrawRectangleFromPyClass(self.clone()));
     }
 
+    pub fn collides_with(&self, rhs: Shape<'_>)-> bool{
+        match rhs{
+            Shape::Circ(c)=> {
+                let circle = c.borrow();
+                collides_with_rec_circ(self, &circle)
+            },
+            Shape::Rect(r)=>{
+                let other_rect = r.borrow(); 
+                collides_with_rec_rec(self, &other_rect)
+            }
+        }
+    }
+
 }
+

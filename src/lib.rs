@@ -95,9 +95,6 @@ pub fn _pyroquad( py: Python<'_>, m: &Bound<'_, PyModule>) -> PyResult<()> {
     
     m.add_class::<crate::py_abstractions::GL::InternalGL>()?;
 
-
-    //m.add_class::<crate::py_abstractions::structs::GL::Internal_GL>()?;
-
     m.add_class::<crate::py_abstractions::RenderTarget::RenderTarget>()?;
     m.add_class::<crate::py_abstractions::RenderTarget::RenderTargetParams>()?;
     m.add_class::<crate::py_abstractions::Textures_and_Images::Texture2D>()?;
