@@ -450,6 +450,26 @@ pub fn get_char_pressed() -> Option<char> {
     *fi::CHAR_PRESSED.lock().unwrap()
 }
 
+/// TODO: appears to not update when resizing the window?
+/// need to investigate
+#[gen_stub_pyfunction]
+#[pyfunction]
+pub fn screen_width() -> f32 {
+
+    use crate::engine::FrameInfo as fi;
+    *fi::SCREEN_WIDTH.lock().unwrap()
+}
+
+/// TODO: appears to not update when resizing the window?
+/// need to investigate
+#[gen_stub_pyfunction]
+#[pyfunction]
+pub fn screen_height() -> f32 {
+
+    use crate::engine::FrameInfo as fi;
+    *fi::SCREEN_HEIGHT.lock().unwrap()
+}
+
 /**
  * !Requires an active 3D camera.
  * 

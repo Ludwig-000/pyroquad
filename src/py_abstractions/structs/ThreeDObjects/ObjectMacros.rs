@@ -289,6 +289,7 @@ Example:
 ```
 "
 ]
+                #[pyo3(signature = (function))]
                 pub fn tick(slf: Bound<'_, Self>, function: Bound<'_,PyAny>)-> PyResult<()>{
 
                     if !function.is_callable(){
@@ -450,8 +451,6 @@ Example:
 
     };
 }
-
-
 
 
 

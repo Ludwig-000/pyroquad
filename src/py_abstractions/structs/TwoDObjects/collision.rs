@@ -30,7 +30,6 @@ impl PyStubType for Shape<'_> {
 
 
 
-#[inline(always)]
 pub fn collides_with_rec_rec(lhs: &Rectangle, rhs: &Rectangle) -> bool {
     let axes = [
         (lhs.rotation.cos(), lhs.rotation.sin()),
@@ -58,7 +57,7 @@ pub fn collides_with_rec_rec(lhs: &Rectangle, rhs: &Rectangle) -> bool {
     true
 }
 
-#[inline(always)]
+
 pub fn collides_with_rec_circ(lhs: &Rectangle, rhs: &Circle) -> bool {
     let diff_x = rhs.position.x - lhs.position.x;
     let diff_y = rhs.position.y - lhs.position.y;
@@ -84,8 +83,7 @@ pub fn collides_with_rec_circ(lhs: &Rectangle, rhs: &Circle) -> bool {
 }
 
 
-#[inline(always)]
-pub fn collides_with_circl_circ(lhs: &Circle, rhs: &Circle)-> bool{
+pub fn collides_with_circl_circ(lhs: &Circle, rhs: &Circle) -> bool{
     
     let dist_sq=  lhs.position.distance_squared(rhs.position);
     let combined_radius = lhs.radius + rhs.radius;

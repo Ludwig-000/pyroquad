@@ -22,6 +22,8 @@ pub static MOUSE_DELTA_POSITION: Mutex<Vec2> = Mutex::new( Vec2::new(0.,0.) );
 pub static MOUSE_POSITION_LOCAL: Mutex<Vec2> = Mutex::new( Vec2::new(0.,0.) );
 pub static MOUSE_WHEEL: Mutex<(f32,f32)> = Mutex::new((0.,0.));
 
+pub static SCREEN_HEIGHT: Mutex<f32> = Mutex::new(0.0);
+pub static SCREEN_WIDTH: Mutex<f32> = Mutex::new(0.0);
 lazy_static! {
     pub static ref KEYS_PRESSED: Mutex<HashSet<KeyCode>> = Mutex::new(HashSet::new());
     pub static ref KEYS_DOWN: Mutex<HashSet<KeyCode>> = Mutex::new(HashSet::new());
@@ -51,6 +53,8 @@ pub fn update_frame_info(){
         *MOUSE_POSITION_LOCAL.lock().unwrap() = mq::mouse_position_local();
         *MOUSE_WHEEL.lock().unwrap() = mq::mouse_wheel();
 
+        *SCREEN_HEIGHT.lock().unwrap() = mq::screen_height();
+        *SCREEN_WIDTH.lock().unwrap() = mq::screen_width();
         {
             let left = is_mouse_button_down(MouseButton::Left);
             let middle = is_mouse_button_down(MouseButton::Middle);

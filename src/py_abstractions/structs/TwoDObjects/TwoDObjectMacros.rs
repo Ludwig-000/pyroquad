@@ -1,3 +1,7 @@
+
+
+
+
 #[macro_export]
 macro_rules! implement_Drop2D {
     ($name:ident) => {
@@ -52,6 +56,7 @@ Example:
 ```
 "
 ]
+                #[pyo3(signature = (function))]
                 pub fn tick(slf: Bound<'_, Self>, function: Bound<'_,PyAny>)-> PyResult<()>{
 
                     if !function.is_callable(){
@@ -77,3 +82,30 @@ Example:
     };
 }
 
+
+
+
+
+
+#[macro_export]
+macro_rules! implement_magic_methods2D {
+    ($name:ident) => {
+        paste::paste! {
+
+            #[gen_stub_pymethods]
+            #[pymethods]
+            impl $name {
+
+                fn __copy__(&self) -> Self {
+                    self.clone()
+                }
+
+                fn __deepcopy__(&self, _memo: &Bound<'_, PyDict>) -> Self {
+                    self.clone()
+                }
+
+            }
+        }
+
+    };
+}

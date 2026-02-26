@@ -64,6 +64,8 @@ pub fn _pyroquad( py: Python<'_>, m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(crate::py_abstractions::Mouse::show_mouse, m)?)?;
 
     m.add_function(wrap_pyfunction!(crate::py_abstractions::py_functions::get_screen_data, m)?)?;
+    m.add_function(wrap_pyfunction!(crate::py_abstractions::py_functions::screen_height, m)?)?;
+    m.add_function(wrap_pyfunction!(crate::py_abstractions::py_functions::screen_width, m)?)?;
 
     m.add_function(wrap_pyfunction!(crate::py_abstractions::py_functions::get_last_key_pressed, m)?)?;
     m.add_function(wrap_pyfunction!(crate::py_abstractions::py_functions::draw_grid, m)?)?;

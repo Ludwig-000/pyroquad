@@ -17,7 +17,7 @@ use crate::py_abstractions::structs::TwoDObjects::Rectangle::Rectangle;
 use crate::py_abstractions::structs::TwoDObjects::collision::Shape;
 use crate::py_abstractions::structs::TwoDObjects::collision::collides_with_circl_circ;
 use crate::py_abstractions::structs::TwoDObjects::collision::collides_with_rec_circ;
-
+use pyo3::types::PyDict;
 
 #[gen_stub_pyclass]
 #[pyclass(eq)]
@@ -41,6 +41,7 @@ pub struct Circle{
 crate::implement_Drop2D!(Circle);
 crate::implement_tick2D!(Circle,  r#"Circle()"#);
 
+crate::implement_magic_methods2D!(Circle);
 #[gen_stub_pymethods]
 #[pymethods]
 impl Circle{

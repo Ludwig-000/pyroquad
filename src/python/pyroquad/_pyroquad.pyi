@@ -336,7 +336,18 @@ class Circle:
     @texture.setter
     def texture(self, value: typing.Optional[Texture2D]) -> None: ...
     def __eq__(self, other:builtins.object) -> builtins.bool: ...
-    def tick(self, slf:Circle, function:typing.Any) -> None:
+    def __new__(cls, position:Vec2, rotation:builtins.float, radius:builtins.float, color:Color) -> Circle: ...
+    def draw(self) -> None: ...
+    def collides_with(self, rhs:Rectangle | Circle) -> builtins.bool:
+        r"""
+        Check collision between two 2D Objects.
+        A Circle's collider assumes a perfect Circle.
+        """
+    def collides_with_list(self, rhs:typing.Sequence[Rectangle | Circle]) -> builtins.list[Rectangle | Circle]:
+        r"""
+        takes a list of 2D shapes, and returns every element that Collides with self.
+        """
+    def tick(self, function:typing.Any) -> None:
         r"""
         Add a function to this object, which will automatically be executed each frame.
         The function must take the object it is attatched to as an argument.
@@ -360,17 +371,8 @@ class Circle:
         ...    next_frame()
         ```
         """
-    def __new__(cls, position:Vec2, rotation:builtins.float, radius:builtins.float, color:Color) -> Circle: ...
-    def draw(self) -> None: ...
-    def collides_with(self, rhs:Rectangle | Circle) -> builtins.bool:
-        r"""
-        Check collision between two 2D Objects.
-        A Circle's collider assumes a perfect Circle.
-        """
-    def collides_with_list(self, rhs:typing.Sequence[Rectangle | Circle]) -> builtins.list[Rectangle | Circle]:
-        r"""
-        takes a list of 2D shapes, and returns every element that Collides with self.
-        """
+    def __copy__(self) -> Circle: ...
+    def __deepcopy__(self, _memo:dict) -> Circle: ...
 
 class ColliderOptions:
     r"""
@@ -4958,7 +4960,7 @@ class Cube:
         ```
         """
     def remove_tick(self) -> None: ...
-    def tick(self, slf:Cube, function:typing.Any) -> None:
+    def tick(self, function:typing.Any) -> None:
         r"""
         Add a function to this object, which will automatically be executed each frame.
         The function must take the object it is attatched to as an argument.
@@ -5132,7 +5134,7 @@ class Cylinder:
         ...   i.pos = Vec3.ZERO()
         ```
         """
-    def tick(self, slf:Cylinder, function:typing.Any) -> None:
+    def tick(self, function:typing.Any) -> None:
         r"""
         Add a function to this object, which will automatically be executed each frame.
         The function must take the object it is attatched to as an argument.
@@ -5426,7 +5428,7 @@ class Mesh:
         """
     def __repr__(self) -> builtins.str: ...
     def __str__(self) -> builtins.str: ...
-    def tick(self, slf:Mesh, function:typing.Any) -> None:
+    def tick(self, function:typing.Any) -> None:
         r"""
         Add a function to this object, which will automatically be executed each frame.
         The function must take the object it is attatched to as an argument.
@@ -5670,7 +5672,7 @@ class Pill:
         ```
         """
     def remove_tick(self) -> None: ...
-    def tick(self, slf:Pill, function:typing.Any) -> None:
+    def tick(self, function:typing.Any) -> None:
         r"""
         Add a function to this object, which will automatically be executed each frame.
         The function must take the object it is attatched to as an argument.
@@ -5728,6 +5730,8 @@ class Rectangle:
     @texture.setter
     def texture(self, value: typing.Optional[Texture2D]) -> None: ...
     def __eq__(self, other:builtins.object) -> builtins.bool: ...
+    def __copy__(self) -> Rectangle: ...
+    def __deepcopy__(self, _memo:dict) -> Rectangle: ...
     def __new__(cls, position:Vec2, rotation:builtins.float, scale:Vec2, color:Color) -> Rectangle: ...
     def draw(self) -> None: ...
     def collides_with(self, rhs:Rectangle | Circle) -> builtins.bool:
@@ -5748,7 +5752,7 @@ class Rectangle:
         r"""
         takes a list of 2D shapes, and returns every element that Collides with self.
         """
-    def tick(self, slf:Rectangle, function:typing.Any) -> None:
+    def tick(self, function:typing.Any) -> None:
         r"""
         Add a function to this object, which will automatically be executed each frame.
         The function must take the object it is attatched to as an argument.
@@ -6023,7 +6027,7 @@ class Sphere:
         r"""
         overwrites the current collider with the input option.
         """
-    def tick(self, slf:Sphere, function:typing.Any) -> None:
+    def tick(self, function:typing.Any) -> None:
         r"""
         Add a function to this object, which will automatically be executed each frame.
         The function must take the object it is attatched to as an argument.
@@ -7505,6 +7509,18 @@ def render_target(width:builtins.int, height:builtins.int, params:typing.Optiona
 def render_target_msaa(width:builtins.int, height:builtins.int) -> RenderTarget:
     r"""
     A shortcut to create a render target with no depth buffer and `sample_count: 4`
+    """
+
+def screen_height() -> builtins.float:
+    r"""
+    Return the last pressed char.
+    Each "get_char_pressed" call will consume a character from the input queue.
+    """
+
+def screen_width() -> builtins.float:
+    r"""
+    Return the last pressed char.
+    Each "get_char_pressed" call will consume a character from the input queue.
     """
 
 def set_cursor_grab(option:builtins.bool) -> None: ...

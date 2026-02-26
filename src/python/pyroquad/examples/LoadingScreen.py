@@ -1,0 +1,42 @@
+
+from typing import Callable, TypeVar, Iterable
+from pyroquad import *
+
+T = TypeVar("T")
+R = TypeVar("R")
+
+from collections.abc import Sized
+
+def loading_screen(
+    func: Callable[[T], R],
+    args_list: Iterable[T],
+    message: str = "Loading: "
+) -> list[R]:
+    """
+    Example:
+    ```
+    >>> image_paths= [first.png, second.png, third.png, fourth.png, fith.png]
+    >>> images = loading_screen( Image, image_paths )
+    ```
+    """
+    results: list[R] = []
+
+    next_frame(None)
+
+    ds = screen_width() / 2200
+
+    if isinstance(args_list, Sized):
+        total = len(args_list)
+        for i, arg in enumerate(args_list, 1):
+            percent = int((i / total) * 100)
+            draw_text(message, 900*ds, 500*ds, 70*ds, Color.WHITE)
+            draw_text(f"{percent}%", 900*ds, 600*ds, 70*ds, Color.WHITE)
+            next_frame(None)
+            results.append(func(arg))
+    else:
+        for i, arg in enumerate(args_list, 1):
+            draw_text(f"{i}%", 900*ds, 600*ds, 70*ds, Color.WHITE)
+            next_frame(None)
+            results.append(func(arg))
+
+    return results
