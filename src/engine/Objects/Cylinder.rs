@@ -10,13 +10,14 @@ pub struct Cylinder{
     pub color: mq::Color,
 
     pub mesh: CylinderMesh,
+    pub draw_each_frame: bool,
 
 }
 impl Cylinder{
     pub fn new(size: mq::Vec3, position: mq::Vec3, rotation: mq::Vec3, color: mq::Color, texture: Option<Texture2D>)-> Cylinder{
         let mesh: CylinderMesh = CylinderMesh::new(size, position, rotation, texture, color,10);
 
-        Cylinder { scale: size,position,rotation,color,  mesh  }
+        Cylinder { scale: size,position,rotation,color,  mesh, draw_each_frame: true }
     }
 
     pub fn draw(&self, gl: &mut macroquad::prelude::QuadGl ){

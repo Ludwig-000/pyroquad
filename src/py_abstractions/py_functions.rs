@@ -11,7 +11,7 @@ use crate::py_abstractions::Textures_and_Images::*;
 use macroquad::prelude as mq;
 
 use pyo3::prelude::*;
- 
+
 use pyo3_stub_gen::{derive::gen_stub_pyfunction};
 
 use crate::engine::PChannel;
@@ -52,6 +52,9 @@ pub fn activate_engine( conf: Option<Config>) -> PyResult<()>{
     let conf = conf.unwrap_or_default();
     let macroConf =  Config::to_window_config(conf.clone());
 
+    #[allow(clippy::disallowed_methods)]
+    let (tx, rx) = std::sync::mpsc::sync_channel(1);
+
     ENGINE_CURRENTLY_ACTIVE.store(true, Ordering::SeqCst);
     std::thread::spawn(move || {
         let panic_catcher = panic::catch_unwind(AssertUnwindSafe(|| {
@@ -59,8 +62,12 @@ pub fn activate_engine( conf: Option<Config>) -> PyResult<()>{
             macroquad::Window::from_config(macroConf, async move  {
                 
                 crate::engine::EngineSetup::setup_engine();
+                crate::engine::FrameInfo::update_frame_info();
+                // we make sure frame info is updated, so that statics are initialized.
+                let _ = tx.send(());
+                
                 crate::engine::CoreLoop::proccess_commands_loop().await;
-    
+                
             });
     
             ENGINE_CURRENTLY_ACTIVE.store(false, Ordering::SeqCst);
@@ -74,12 +81,17 @@ pub fn activate_engine( conf: Option<Config>) -> PyResult<()>{
 
         // check if the engine paniced. if yes, run cleanup.
         if let Err(cause) = panic_catcher {
-            
+            todo!()
         }
         
     });
 
-    Ok(())
+    
+
+    match rx.recv() {
+        Ok(_) => Ok(()),
+        Err(_) => Err(pyo3::exceptions::PyRuntimeError::new_err("Engine failed to initialize")),
+    }
 }
 
 
@@ -100,8 +112,7 @@ pub fn draw_all_objects() {
 #[gen_stub_pyfunction]
 #[pyfunction]
 pub fn draw_rectangle(x: f32, y: f32, w: f32, h: f32, color: Color) {
-    let c = mq::Color::new(color.r,color.g,color.b,color.a);
-    COMMAND_QUEUE.push(Command::DrawRect { x, y, w, h,color:c});
+    COMMAND_QUEUE.push(Command::DrawRect { x, y, w, h,color: color.into()});
 }
 
 #[gen_stub_pyfunction]

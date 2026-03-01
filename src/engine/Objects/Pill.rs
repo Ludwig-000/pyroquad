@@ -10,6 +10,7 @@ pub struct Pill{
     pub color: mq::Color,
 
     pub mesh: PillMesh,
+    pub draw_each_frame: bool,
 
 }
 
@@ -17,7 +18,7 @@ impl Pill{
     pub fn new(size: mq::Vec3, position: mq::Vec3, rotation: mq::Vec3, color: mq::Color, texture: Option<Texture2D>)-> Pill{
         let mesh: PillMesh = PillMesh::new(size, position, rotation, texture, color, 20);
 
-        Pill { scale: size,position,rotation,color,  mesh  }
+        Pill { scale: size,position,rotation,color,  mesh,draw_each_frame: true}
     }
     pub fn draw(&self, gl: &mut macroquad::prelude::QuadGl ){
         gl.texture(self.mesh.texture.as_ref());

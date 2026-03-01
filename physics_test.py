@@ -62,8 +62,8 @@ while True:
         break
     cam.update()
     draw_grid(100,10,Color.YELLOW,Color.CYAN)
-    draw_cube(Vec3.ZERO,Vec3.ONE,Color.PURE_BLUE)
+    draw_cube(Vec3.ZERO,Vec3.ONE,Color.PURE_BLUE, None)
     draw_all_objects()
     set_default_camera()
     draw_text(f"{get_fps()}",20,20,40,Color.GREEN)
-    next_frame(0)
+    next_frame(get_delta_time())

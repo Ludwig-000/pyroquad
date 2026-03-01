@@ -2,6 +2,34 @@
 
 
 
+
+#[derive(FromPyObject, IntoPyObject)]
+pub enum Objct<'py> {
+    Cub(Bound<'py, Cube>),
+    Cyl(Bound<'py, Cylinder>),
+    Mesh(Bound<'py, Mesh>),
+    Pill(Bound<'py, Pill>),
+    Sph(Bound<'py, Sphere>),
+}
+
+
+use pyo3_stub_gen::{PyStubType, TypeInfo};
+use rapier3d::parry::simba::scalar::SupersetOf;
+use pyo3::prelude::*;
+use crate::py_abstractions::structs::ThreeDObjects::{Cube::Cube, Cylinder::Cylinder, Mesh::Mesh, Pill::Pill, Sphere::Sphere};
+
+impl PyStubType for Objct<'_> {
+    fn type_input() -> TypeInfo {
+        TypeInfo::unqualified("Cube | Cylinder | Mesh | Pill | Sphere")
+    }
+    fn type_output() -> TypeInfo {
+        TypeInfo::unqualified("Cube | Cylinder | Mesh | Pill | Sphere")
+    }
+}
+
+
+
+
 #[macro_export]
 macro_rules! implement_basic_magic_methods3D {
     ($name:ident) => {
@@ -201,7 +229,7 @@ macro_rules! implement_basic_setter_methods3D {
 macro_rules! implement_check_collision3D {
     ($name:ident) => {
         paste::paste! {
-
+            use crate::py_abstractions::structs::ThreeDObjects::ObjectMacros::Objct;
             #[gen_stub_pymethods]
             #[pymethods]
             impl $name {
@@ -223,9 +251,9 @@ Example:
 ...   i.pos = Vec3.ZERO()
 ```
 "
-]
-                pub fn check_collision<'py>(&self, py: Python<'py> )-> PyResult<Vec<Bound<'py, PyAny>>>{
-
+]               
+                
+                pub fn check_collision<'py>(&self, py: Python<'py> )-> PyResult<Vec<Objct<'py>>>{
                     let (sender, receiver) = PChannel::sync_channel(1);
                     let command = Command::GetColissionObjects { key: self.key, sender };
                     COMMAND_QUEUE.push(command);
@@ -238,13 +266,7 @@ Example:
             
                         let weak_bound: Bound<'py, PyWeakref> = weak_py.bind(py).clone();
             
-                        let upgraded: Bound<'py, PyAny> = weak_bound.call0().ok()?;
-            
-                        if upgraded.is_none() {
-                            None
-                        } else {
-                            Some(upgraded)
-                        }
+                        weak_bound.call0().ok()?.extract::<Objct<'py>>().ok()
                     }).collect())
                 }
             }
@@ -298,6 +320,7 @@ Example:
 
                     let mut storage = ObjectFunctionStorage::get_fun_storage();
                     let mut self_ = slf.borrow_mut();
+                    
                     if let Some(key) = self_.function_key{
                         storage.remove(key);
                     }
@@ -327,14 +350,15 @@ macro_rules! implement_remove_tick3D {
             #[pymethods]
             impl $name {
 
+
+                /// Removes any assigned tick-function from this object.
+                /// If the object does not have a tick function, this will do nothing.
                 pub fn remove_tick(&mut self)-> PyResult<()>{
 
                     let mut storage = ObjectFunctionStorage::get_fun_storage();
                     let key = match self.function_key{
                         None => { 
-                            return Err(
-                                PyRuntimeError::new_err("No function found, that can be removed.")
-                            );
+                            return Ok(());
                         },
                         Some(key)=> { key },
                     };
@@ -362,7 +386,9 @@ macro_rules! implement_set_collider3D {
                 
                 /// overwrites the current collider with the input option.
                 pub fn set_collider(&self, collider_type: ColliderOptions){
-                    todo!()
+                    COMMAND_QUEUE.push(
+                        Command::SetCollisionForObject{key: self.key, collider: collider_type}
+                    );
                 }
             }
         }
@@ -419,7 +445,12 @@ Example:
 "
 ]
                 pub fn set_draw_each_frame(&self, drawing: bool){
-                    todo!()
+                    COMMAND_QUEUE.push(
+                        Command::SetDrawEachFrame{
+                            key: self.key,
+                            set: drawing,
+                        }
+                    );
                 }
 
 #[doc = 
@@ -444,7 +475,9 @@ Example:
 "
 ]
                 pub fn manually_draw_now(&self){
-                    todo!()
+                    COMMAND_QUEUE.push(
+                        Command::DrawObjectNow( self.key )
+                    );
                 }
             }
         }

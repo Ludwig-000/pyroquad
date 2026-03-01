@@ -67,14 +67,56 @@ impl RapierWorld{
         rb.set_rotation(rotation, true);
         
     }
-    pub fn scale_object(&mut self, handle: &ColliderHandle, obj_type:  &obj::Object, scale: &Vec3){
-        match obj_type{
+    pub fn scale_object(&mut self, handle: &ColliderHandle, obj_type: &obj::Object, scale: &Vec3) {
+        let collider = self.coll.get_mut(*handle).expect("Missing collider despite holding handle.");
+
+        let new_shape = match obj_type {
             obj::Object::Cube(_) => {
-                let c = self.coll.get_mut(*handle).expect("Missing collider despite holding handle.");
-                let shape = SharedShape::cuboid(scale.x/2.0, scale.y/2.0, scale.z/2.0);
-                c.set_shape(shape);
+                SharedShape::cuboid(scale.x / 2.0, scale.y / 2.0, scale.z / 2.0)
+            },
+            obj::Object::Sphere(_) => {
+                // Uses X scale as radius
+                SharedShape::ball(scale.x / 2.0)
+            },
+            obj::Object::Cylinder(_) => {
+                // Cylinder takes half-height (y) and radius (x)
+                SharedShape::cylinder(scale.y / 2.0, scale.x / 2.0)
+            },
+            obj::Object::Pill(_) => {
+                // Capsule takes half-height of the segment (y) and radius (x)
+                SharedShape::capsule_y(scale.y / 2.0, scale.x / 2.0)
+            },
+            obj::Object::Mesh(mesh_wrapper) => {
+                // We must reconstruct the Trimesh with the new scale values applied 
+                // to the original vertex positions.
+                let vertices: Vec<rapier3d::na::Point3<f32>> = mesh_wrapper.mesh.vertices
+                    .iter()
+                    .map(|v| {
+                        rapier3d::na::Point3::new(
+                            v.position.x * scale.x,
+                            v.position.y * scale.y,
+                            v.position.z * scale.z,
+                        )
+                    })
+                    .collect();
+
+                let indices: Vec<[u32; 3]> = mesh_wrapper.mesh.indices
+                    .chunks_exact(3)
+                    .map(|chunk| [chunk[0] as u32, chunk[1] as u32, chunk[2] as u32])
+                    .collect();
+
+                SharedShape::trimesh(vertices, indices).expect("Failed to build Mesh.")
             }
-            _ => todo!() // not important for the moment
+        };
+
+        collider.set_shape(new_shape);
+        
+        // Optional: If the object is sleeping, you might want to wake it up so physics 
+        // reacts to the size change immediately.
+        if let Some(parent_handle) = collider.parent() {
+            if let Some(rb) = self.rigidBS.get_mut(parent_handle) {
+                rb.wake_up(true);
+            }
         }
     }
 
@@ -155,7 +197,30 @@ impl RapierWorld{
                     .density(density_val)
                     .build()
             },
-            _ => todo!("Other object types not implemented for dynamic colliders"),
+            obj::Object::Sphere(_) => {
+                // ball() takes the radius
+                ColliderBuilder::ball(t.scale.x / 2.0)
+                    .friction(friction_val)
+                    .restitution(restitution_val)
+                    .density(density_val)
+                    .build()
+            },
+            obj::Object::Cylinder(_) => {
+                // cylinder() takes half-height and radius
+                ColliderBuilder::cylinder(t.scale.y / 2.0, t.scale.x / 2.0)
+                    .friction(friction_val)
+                    .restitution(restitution_val)
+                    .density(density_val)
+                    .build()
+            },
+            obj::Object::Pill(_) => {
+                // capsule_y() takes half-height of the inner cylindrical segment and the radius
+                ColliderBuilder::capsule_y(t.scale.y / 2.0, t.scale.x / 2.0)
+                    .friction(friction_val)
+                    .restitution(restitution_val)
+                    .density(density_val)
+                    .build()
+            },
         };
 
         // 3. Build the RigidBody
@@ -183,6 +248,9 @@ impl RapierWorld{
 
         ObjectHandle { rigid_body_handle, collider_handle }
     }
+
+
+
     fn static_collider_builder(&mut self, obj: &obj::Object, key: ObjectKey)-> ObjectHandle{
 
         let t: Transforms<'_>  = extract_object_transforms(obj);
@@ -234,7 +302,48 @@ impl RapierWorld{
                     )
                     .build()
             },
-            _ => todo!()
+            obj::Object::Sphere(_) => {
+                ColliderBuilder::ball(t.scale.x / 2.0)
+                    .sensor(true)
+                    .restitution(0.7)
+                    .density(1.0)
+                    .active_collision_types(
+                        ActiveCollisionTypes::DYNAMIC_DYNAMIC
+                        | ActiveCollisionTypes::DYNAMIC_KINEMATIC
+                        | ActiveCollisionTypes::DYNAMIC_FIXED
+                        | ActiveCollisionTypes::KINEMATIC_KINEMATIC 
+                        | ActiveCollisionTypes::KINEMATIC_FIXED
+                    )
+                    .build()
+            },
+            obj::Object::Cylinder(_) => {
+                ColliderBuilder::cylinder(t.scale.y / 2.0, t.scale.x / 2.0)
+                    .sensor(true)
+                    .restitution(0.7)
+                    .density(1.0)
+                    .active_collision_types(
+                        ActiveCollisionTypes::DYNAMIC_DYNAMIC
+                        | ActiveCollisionTypes::DYNAMIC_KINEMATIC
+                        | ActiveCollisionTypes::DYNAMIC_FIXED
+                        | ActiveCollisionTypes::KINEMATIC_KINEMATIC 
+                        | ActiveCollisionTypes::KINEMATIC_FIXED
+                    )
+                    .build()
+            },
+            obj::Object::Pill(_) => {
+                ColliderBuilder::capsule_y(t.scale.y / 2.0, t.scale.x / 2.0)
+                    .sensor(true)
+                    .restitution(0.7)
+                    .density(1.0)
+                    .active_collision_types(
+                        ActiveCollisionTypes::DYNAMIC_DYNAMIC
+                        | ActiveCollisionTypes::DYNAMIC_KINEMATIC
+                        | ActiveCollisionTypes::DYNAMIC_FIXED
+                        | ActiveCollisionTypes::KINEMATIC_KINEMATIC 
+                        | ActiveCollisionTypes::KINEMATIC_FIXED
+                    )
+                    .build()
+            },
         };
 
         // CHANGE HERE: Added .user_data()
@@ -338,8 +447,8 @@ pub fn extract_object_transforms(obj: &obj::Object)-> Transforms<'_>{
     match obj{
         obj::Object::Cube(cube) => Transforms { pos: &cube.position, rot: &cube.rotation, scale: &cube.scale },
         obj::Object::Mesh(mesh) => Transforms { pos: &mesh.position, rot: &mesh.rotation, scale: &mesh.scale},
-        obj::Object::Sphere(sphere)=> Transforms { pos: &sphere.position, rot: &sphere.rotation, scale: &sphere.rotation },
-        obj::Object::Pill(o)=> Transforms { pos: &o.position, rot: &o.rotation, scale: &o.rotation },
-        obj::Object::Cylinder(o)=> Transforms { pos: &o.position, rot: &o.rotation, scale: &o.rotation }
+        obj::Object::Sphere(sphere)=> Transforms { pos: &sphere.position, rot: &sphere.rotation, scale: &sphere.scale },
+        obj::Object::Pill(o)=> Transforms { pos: &o.position, rot: &o.rotation, scale: &o.scale },
+        obj::Object::Cylinder(o)=> Transforms { pos: &o.position, rot: &o.rotation, scale: &o.scale }
     }
 }

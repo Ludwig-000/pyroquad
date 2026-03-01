@@ -10,15 +10,25 @@ pub fn draw_all_Objects(obj: &ObjectStorage, viewMat: macroquad::prelude::Mat4){
         gl.draw_mode(mq::DrawMode::Triangles);
 
 
-        let _: () = obj.iter().map(|item|{
-            match item{
-                Object::Cube(cube)=> cube.draw(gl),
-                Object::Mesh(mesh)=> mesh.draw(gl),
-                Object::Sphere(sphere)=> sphere.draw(gl),
-                Object::Pill(pill)=> pill.draw(gl),
-                Object::Cylinder(cyl)=> cyl.draw(gl),
+        obj.iter().for_each(|item|{
+            match item {
+                Object::Cube(cube) => {
+                    if cube.draw_each_frame { cube.draw(gl); }
+                },
+                Object::Mesh(mesh) => {
+                    if mesh.draw_each_frame { mesh.draw(gl); }
+                },
+                Object::Sphere(sphere) => {
+                    if sphere.draw_each_frame { sphere.draw(gl); }
+                },
+                Object::Pill(pill) => {
+                    if pill.draw_each_frame { pill.draw(gl); }
+                },
+                Object::Cylinder(cyl) => {
+                    if cyl.draw_each_frame { cyl.draw(gl); }
+                },
             }
-        }).collect();
+        });
 
     }
 

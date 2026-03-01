@@ -16,7 +16,6 @@ macro_rules! implement_Drop2D {
                 }
             }
         }
-
     };
 }
 
@@ -35,7 +34,8 @@ macro_rules! implement_tick2D {
 "
 Add a function to this object, which will automatically be executed each frame.
 The function must take the object it is attatched to as an argument.
- 
+If a tick function is already assigned, this call will overwrite the existing function.
+
 Example:
  
 ```
@@ -76,8 +76,26 @@ Example:
 
                     Ok(())
                 }
+
+
+                /// Removes any assigned tick-function from this object.
+                /// If the object does not have a tick function, this will do nothing.
+                pub fn remove_tick(&mut self)-> PyResult<()>{
+
+                    let mut storage = ObjectFunctionStorage::get_fun_storage();
+                    let key = match self.function_key{
+                        None => { 
+                            return Ok(());
+                        },
+                        Some(key)=> { key },
+                    };
+                    storage.remove(key);
+                    self.function_key  = None;
+                    Ok(())
+                }
             }
         }
+    
 
     };
 }

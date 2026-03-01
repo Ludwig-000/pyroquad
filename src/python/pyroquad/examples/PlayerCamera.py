@@ -55,13 +55,12 @@ class PlayerCamera:
         right = forward.cross(world_up).normalize()
         
         FACTOR  = 100
-        # Move up/down
+        
         if KeyCode.W in keys:
             self.cam.position += forward * self.movespeed * delta_time * FACTOR
         if KeyCode.S in keys:
             self.cam.position -= forward * self.movespeed* delta_time*  FACTOR
 
-        # Move left/right
         if KeyCode.A in keys:
             self.cam.position -= right * self.movespeed* delta_time* FACTOR
         if KeyCode.D in keys:
@@ -79,4 +78,3 @@ class PlayerCamera:
         # Update camera target
         self.cam.target = self.cam.position + forward
         Camera3D.set_camera(self.cam)
-

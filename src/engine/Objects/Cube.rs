@@ -10,18 +10,18 @@ pub struct Cube{
     pub color: mq::Color,
 
     pub mesh: CubeMesh,
+    pub draw_each_frame: bool,
 
 }
 impl Cube {
     pub fn new(size: mq::Vec3, position: mq::Vec3, rotation: mq::Vec3, color: mq::Color, texture: Option<Texture2D>)-> Cube{
         let mesh: CubeMesh = CubeMesh::new(size, position, rotation, texture, color);
 
-        Cube { scale: size,position,rotation,color,  mesh  }
+        Cube { scale: size,position,rotation,color,  mesh, draw_each_frame: true }
     }
     pub fn draw(&self, gl: &mut macroquad::prelude::QuadGl ){
             gl.texture(self.mesh.texture.as_ref());
             gl.geometry(&self.mesh.vertices, &self.mesh.indices);
-        
     }
 }
 

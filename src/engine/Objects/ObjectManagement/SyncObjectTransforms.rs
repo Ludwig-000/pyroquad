@@ -4,7 +4,7 @@ use macroquad::prelude as mq;
 
 /// idk make this unsafe threaded at some point.
 /// this function takes a considerable ammount of time to run, when working with many objects.
-pub fn sync_transforms(storage : &mut ObjectStorage) {
+pub fn sync_transforms_inner(storage : &mut ObjectStorage) {
     use crate::engine::Objects::PhysicsWorld::Rapier::*;
     let objects_ptr = storage as *mut ObjectStorage;
 

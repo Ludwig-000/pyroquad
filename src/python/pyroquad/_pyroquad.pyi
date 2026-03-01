@@ -351,7 +351,8 @@ class Circle:
         r"""
         Add a function to this object, which will automatically be executed each frame.
         The function must take the object it is attatched to as an argument.
-         
+        If a tick function is already assigned, this call will overwrite the existing function.
+        
         Example:
          
         ```
@@ -370,6 +371,11 @@ class Circle:
         ...    #'next_frame' runs the update function for every object.
         ...    next_frame()
         ```
+        """
+    def remove_tick(self) -> None:
+        r"""
+        Removes any assigned tick-function from this object.
+        If the object does not have a tick function, this will do nothing.
         """
     def __copy__(self) -> Circle: ...
     def __deepcopy__(self, _memo:dict) -> Circle: ...
@@ -4959,7 +4965,11 @@ class Cube:
         >>>         enemy.manually_draw_now()
         ```
         """
-    def remove_tick(self) -> None: ...
+    def remove_tick(self) -> None:
+        r"""
+        Removes any assigned tick-function from this object.
+        If the object does not have a tick function, this will do nothing.
+        """
     def tick(self, function:typing.Any) -> None:
         r"""
         Add a function to this object, which will automatically be executed each frame.
@@ -4999,7 +5009,7 @@ class Cube:
         r"""
         overwrites the current collider with the input option.
         """
-    def check_collision(self) -> builtins.list[typing.Any]:
+    def check_collision(self) -> builtins.list[Cube | Cylinder | Mesh | Pill | Sphere]:
         r"""
         Returns any object, with active collision, that is either
         intersected or inserted in the current object.
@@ -5117,7 +5127,7 @@ class Cylinder:
         """
     def __repr__(self) -> builtins.str: ...
     def __str__(self) -> builtins.str: ...
-    def check_collision(self) -> builtins.list[typing.Any]:
+    def check_collision(self) -> builtins.list[Cube | Cylinder | Mesh | Pill | Sphere]:
         r"""
         Returns any object, with active collision, that is either
         intersected or inserted in the current object.
@@ -5162,7 +5172,11 @@ class Cylinder:
         r"""
         overwrites the current collider with the input option.
         """
-    def remove_tick(self) -> None: ...
+    def remove_tick(self) -> None:
+        r"""
+        Removes any assigned tick-function from this object.
+        If the object does not have a tick function, this will do nothing.
+        """
 
 class FileData:
     r"""
@@ -5456,10 +5470,14 @@ class Mesh:
         r"""
         overwrites the current collider with the input option.
         """
-    def remove_tick(self) -> None: ...
+    def remove_tick(self) -> None:
+        r"""
+        Removes any assigned tick-function from this object.
+        If the object does not have a tick function, this will do nothing.
+        """
     @staticmethod
     def from_file_data(data:FileData, texture:typing.Optional[Texture2D], collider_type:ColliderOptions) -> Mesh: ...
-    def check_collision(self) -> builtins.list[typing.Any]:
+    def check_collision(self) -> builtins.list[Cube | Cylinder | Mesh | Pill | Sphere]:
         r"""
         Returns any object, with active collision, that is either
         intersected or inserted in the current object.
@@ -5602,7 +5620,7 @@ class Pill:
         """
     @scale.setter
     def scale(self, value: Vec3) -> None: ...
-    def check_collision(self) -> builtins.list[typing.Any]:
+    def check_collision(self) -> builtins.list[Cube | Cylinder | Mesh | Pill | Sphere]:
         r"""
         Returns any object, with active collision, that is either
         intersected or inserted in the current object.
@@ -5671,7 +5689,11 @@ class Pill:
         >>>         enemy.manually_draw_now()
         ```
         """
-    def remove_tick(self) -> None: ...
+    def remove_tick(self) -> None:
+        r"""
+        Removes any assigned tick-function from this object.
+        If the object does not have a tick function, this will do nothing.
+        """
     def tick(self, function:typing.Any) -> None:
         r"""
         Add a function to this object, which will automatically be executed each frame.
@@ -5756,7 +5778,8 @@ class Rectangle:
         r"""
         Add a function to this object, which will automatically be executed each frame.
         The function must take the object it is attatched to as an argument.
-         
+        If a tick function is already assigned, this call will overwrite the existing function.
+        
         Example:
          
         ```
@@ -5775,6 +5798,11 @@ class Rectangle:
         ...    #'next_frame' runs the update function for every object.
         ...    next_frame()
         ```
+        """
+    def remove_tick(self) -> None:
+        r"""
+        Removes any assigned tick-function from this object.
+        If the object does not have a tick function, this will do nothing.
         """
 
 class RenderTarget:
@@ -6006,7 +6034,7 @@ class Sphere:
         >>>         enemy.manually_draw_now()
         ```
         """
-    def check_collision(self) -> builtins.list[typing.Any]:
+    def check_collision(self) -> builtins.list[Cube | Cylinder | Mesh | Pill | Sphere]:
         r"""
         Returns any object, with active collision, that is either
         intersected or inserted in the current object.
@@ -6051,7 +6079,11 @@ class Sphere:
         ...    next_frame()
         ```
         """
-    def remove_tick(self) -> None: ...
+    def remove_tick(self) -> None:
+        r"""
+        Removes any assigned tick-function from this object.
+        If the object does not have a tick function, this will do nothing.
+        """
 
 class Texture2D:
     r"""
@@ -7513,14 +7545,14 @@ def render_target_msaa(width:builtins.int, height:builtins.int) -> RenderTarget:
 
 def screen_height() -> builtins.float:
     r"""
-    Return the last pressed char.
-    Each "get_char_pressed" call will consume a character from the input queue.
+    TODO: appears to not update when resizing the window?
+    need to investigate
     """
 
 def screen_width() -> builtins.float:
     r"""
-    Return the last pressed char.
-    Each "get_char_pressed" call will consume a character from the input queue.
+    TODO: appears to not update when resizing the window?
+    need to investigate
     """
 
 def set_cursor_grab(option:builtins.bool) -> None: ...

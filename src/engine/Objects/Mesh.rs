@@ -2,7 +2,6 @@ use macroquad::{prelude as mq};
 use glam::{Vec3A, Mat3A, Quat, EulerRot};
 use gltf::mesh::util::ReadIndices;
 
-
 pub struct Mesh{
     
     pub scale: mq::Vec3,
@@ -11,7 +10,26 @@ pub struct Mesh{
     pub color: mq::Color,
 
     pub mesh: mq::Mesh,
+    pub draw_each_frame: bool,
 
+}
+
+///i do NOT KNOW why the FUCK mq::Mesh does not have CLONE BUT I AM DOING IT MYSELF 
+impl Clone for Mesh{
+    fn clone(&self) -> Self {
+        Mesh { 
+            scale: self.scale,
+            position: self.position, 
+            rotation: self.rotation, 
+            color: self.color, 
+            mesh: mq::Mesh { 
+                vertices: self.mesh.vertices.clone(), 
+                indices: self.mesh.indices.clone(), 
+                texture: self.mesh.texture.clone()
+            },
+            draw_each_frame: self.draw_each_frame
+        }
+    }
 }
 impl Mesh{
     pub fn draw(&self, gl: &mut macroquad::prelude::QuadGl ){
@@ -125,6 +143,7 @@ impl Mesh{
                 indices,
                 texture,
             },
+            draw_each_frame: true,
         })
     }
 

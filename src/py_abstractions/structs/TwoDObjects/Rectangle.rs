@@ -41,8 +41,8 @@ pub struct Rectangle{
 crate::implement_Drop2D!(Rectangle);
 crate::implement_tick2D!(Rectangle,  r#"Rectangle()"#);
 
-
 crate::implement_magic_methods2D!(Rectangle);
+
 #[gen_stub_pymethods]
 #[pymethods]
 impl Rectangle{

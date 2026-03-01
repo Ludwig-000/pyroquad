@@ -31,15 +31,29 @@ impl PyStubType for Shape<'_> {
 
 
 pub fn collides_with_rec_rec(lhs: &Rectangle, rhs: &Rectangle) -> bool {
+
+
+    let diff_x = rhs.position.x - lhs.position.x;
+    let diff_y = rhs.position.y - lhs.position.y;
+
+    // worst-case quick abort
+    {   
+        let lhs_radius = (lhs.scale.x * lhs.scale.x + lhs.scale.y * lhs.scale.y).sqrt() / 2.0;
+        let rhs_radius = (rhs.scale.x * rhs.scale.x + rhs.scale.y * rhs.scale.y).sqrt() / 2.0;
+
+        let dist_sq = diff_x * diff_x + diff_y * diff_y;
+        let sum_radii = lhs_radius + rhs_radius;
+
+        if dist_sq > sum_radii * sum_radii {
+            return false;
+        }
+    }
     let axes = [
         (lhs.rotation.cos(), lhs.rotation.sin()),
         (-lhs.rotation.sin(), lhs.rotation.cos()),
         (rhs.rotation.cos(), rhs.rotation.sin()),
         (-rhs.rotation.sin(), rhs.rotation.cos()),
     ];
-
-    let diff_x = rhs.position.x - lhs.position.x;
-    let diff_y = rhs.position.y - lhs.position.y;
 
     for (ax, ay) in axes.iter() {
         let dist = (diff_x * ax + diff_y * ay).abs();
@@ -61,6 +75,18 @@ pub fn collides_with_rec_rec(lhs: &Rectangle, rhs: &Rectangle) -> bool {
 pub fn collides_with_rec_circ(lhs: &Rectangle, rhs: &Circle) -> bool {
     let diff_x = rhs.position.x - lhs.position.x;
     let diff_y = rhs.position.y - lhs.position.y;
+
+    // worst-case quick abort
+    {   
+        let lhs_radius = (lhs.scale.x * lhs.scale.x + lhs.scale.y * lhs.scale.y).sqrt() / 2.0;
+
+        let dist_sq = diff_x * diff_x + diff_y * diff_y;
+        let sum_radii = lhs_radius + rhs.radius;
+
+        if dist_sq > sum_radii * sum_radii {
+            return false;
+        }
+    }
 
     let cos_r = lhs.rotation.cos();
     let sin_r = lhs.rotation.sin();

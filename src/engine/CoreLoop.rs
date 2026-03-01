@@ -56,7 +56,11 @@ pub enum Command {
         key: ObjectKey, sender: PChannel::PSyncSender<Vec<Arc<Py<PyWeakref>>>>,
     },
     DrawAll3DObjects(),
-
+    DrawObjectNow(ObjectKey),
+    SetDrawEachFrame{
+        key: ObjectKey,
+        set: bool,
+    },
     DeleteObject{
         key: ObjectKey, 
     },
@@ -233,7 +237,7 @@ lazy_static! {
 /// processes commands that rely on the macroquad engine
 /// commands that do not rely on it's core (openGL) components ( or just the internal Core-Thread ) are found in pyabstractions.
 pub async fn proccess_commands_loop() {
-
+    
     let mut object_storage = ObjectStorage::ObjectStorage::new();
     let mut cam_memory = CamMemory::new();
 
@@ -277,6 +281,31 @@ pub async fn proccess_commands_loop() {
                     }
                     sm::switch_to_desired_shader(sm::ShaderKind::Basic, &None);
                     ObjectManagement::draw_all_Objects(&object_storage, matrix);
+                }
+                Command::DrawObjectNow(obj_key)=> {
+                    let gl = unsafe {
+                        mq::get_internal_gl().quad_gl
+                    };
+                    sm::switch_to_desired_shader(sm::ShaderKind::Basic, &None);
+                    gl.draw_mode(mq::DrawMode::Triangles);
+                    let obj=  object_storage.get(obj_key);
+                    match obj {
+                        Object::Cube(c)=> c.draw(gl),
+                        Object::Cylinder(c)=> c.draw(gl),
+                        Object::Mesh(m)=> m.draw(gl),
+                        Object::Pill(p)=> p.draw(gl),
+                        Object::Sphere(s)=> s.draw(gl),
+                    }
+                }
+                Command::SetDrawEachFrame { key, set }=>{
+                    let obj = unsafe {object_storage.get_mut(key)};
+                    match obj{
+                        Object::Cube(c)=> c.draw_each_frame = set,
+                        Object::Cylinder(c)=> c.draw_each_frame = set,
+                        Object::Mesh(c)=> c.draw_each_frame = set,
+                        Object::Pill(c)=>c.draw_each_frame = set,
+                        Object::Sphere(c)=> c.draw_each_frame = set,
+                    }
                 }
                 Command::DeleteObject { key }=> {
                     object_storage.remove_object(key);

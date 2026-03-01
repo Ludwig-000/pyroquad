@@ -1,4 +1,4 @@
-use crate::{engine::Objects::{Cube::Cube, Cylinder::Cylinder, Mesh::Mesh, ObjectManagement::SyncObjectTransforms::sync_transforms, PhysicsWorld::ApplyPhysics::apply_physics_enum, Pill::Pill, Sphere::Sphere}, py_abstractions::structs::ThreeDObjects::{ColliderOptions::ColliderOptions, PhysicsHandle::PhysicsEnum}};
+use crate::{engine::Objects::{Cube::Cube, Cylinder::Cylinder, Mesh::Mesh, ObjectManagement::SyncObjectTransforms::sync_transforms_inner, PhysicsWorld::ApplyPhysics::apply_physics_enum, Pill::Pill, Sphere::Sphere}, py_abstractions::structs::ThreeDObjects::{ColliderOptions::ColliderOptions, PhysicsHandle::PhysicsEnum}};
 use pyo3::prelude::*;
 use pyo3::types::PyWeakref;
 use slotmap::*;
@@ -8,6 +8,7 @@ use crate::engine::Objects::PhysicsWorld::Rapier::{ObjectHandle, RapierWorld};
 use crate::engine::PChannel::PSyncSender;
 use macroquad::prelude as mq;
 
+#[derive(Clone)]
 pub enum Object {
     Cube(Cube),
     Sphere(Sphere),
@@ -64,6 +65,7 @@ impl ObjectStorage {
         sender: PSyncSender<ObjectKey>,
         weak_ref_handle: Py<PyWeakref>,
         object_factory: F){
+
 
         let idx = self.storage.len();
         let key = self.keymap.insert((idx, Arc::new(weak_ref_handle)));
@@ -214,23 +216,40 @@ impl ObjectStorage {
         
     }
     /// the user-provided function is responsible for changing ALL internal obj values.
-    pub fn change_obj_scale<T: FnOnce(&mut Object)>(&mut self, scale: &mq::Vec3, key: ObjectKey,obj_recalc: T){
-        
-        let obj  = unsafe {self.get_mut(key)};
-        obj_recalc(obj);
+    pub fn change_obj_scale<T: FnOnce(&mut Object)>(&mut self, scale: &mq::Vec3, key: ObjectKey, obj_recalc: T) {
+        {
+            let obj = unsafe { self.get_mut(key) };
+            obj_recalc(obj);
+        }
 
-        // TODO: change object collision based on scale.
-        return;
-        todo!()
+        let (obj_clone, handle_copy) = {
+            let obj: Object = self.get(key).clone();
+            let handle = *self.get_handle(key);
+            (obj, handle)
+        };
+
+        if let Some(handle) = handle_copy {
+            self.physics_world.scale_object(&handle.collider_handle, &obj_clone, scale);
+        }
     }
 
-    pub fn set_collision_for_object(&mut self, key: ObjectKey, collider: ColliderOptions){
-        todo!()
+    pub fn set_collision_for_object(&mut self, key: ObjectKey, collider: ColliderOptions) {
+        let vec_idx = self.keymap.get(key).expect("key not known to the map.").0;
+
+        if let Some(old_handle) = self.glue_data[vec_idx].obj_handle.take() {
+            self.physics_world.remove_object(old_handle);
+        }
+
+        let obj = &self.storage[vec_idx];
+
+        let new_handle = self.physics_world.insert_object(obj, key, collider);
+        
+        self.glue_data[vec_idx].obj_handle = new_handle;
     }
 
 
     pub fn sync_transforms(&mut self) {
-        sync_transforms(self);
+        sync_transforms_inner(self);
     }
 
 

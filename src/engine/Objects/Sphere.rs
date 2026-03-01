@@ -17,12 +17,13 @@ pub struct Sphere {
     pub color: mq::Color,
 
     pub mesh: SphereMesh,
+    pub draw_each_frame: bool,
 }
 
 impl Sphere {
     pub fn new(size: mq::Vec3, position: mq::Vec3, rotation: mq::Vec3, color: mq::Color, texture: Option<mq::Texture2D>) -> Sphere {
         let mesh: SphereMesh = SphereMesh::new(size, position, rotation, texture, color);
-        Sphere { scale: size, position, rotation, color, mesh }
+        Sphere { scale: size, position, rotation, color, mesh , draw_each_frame: true}
     }
 
     pub fn draw(&self, gl: &mut macroquad::prelude::QuadGl) {

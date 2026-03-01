@@ -51,10 +51,11 @@ crate::implement_tick3D!(Cube,  r#"Cube()"#);
 crate::implement_remove_tick3D!(Cube);
 crate::implement_Drop3D!(Cube);
 crate::implement_manual_drawing_options3D!(Cube,  r#"Cube()"#);
+
 #[gen_stub_pymethods]
 #[pymethods]
 impl Cube {
-
+    
     #[pyo3(signature = (position= Vec3::ZERO(), rotation = Vec3::ZERO(),scale= Vec3::ONE(), color = Color::WHITE(), texture=None,collider_type = ColliderOptions::NONE()))]
     #[new]
     pub fn new(

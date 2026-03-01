@@ -15,27 +15,33 @@ def loading_screen(
     """
     Example:
     ```
-    >>> image_paths= [first.png, second.png, third.png, fourth.png, fith.png]
+    >>> image_paths= ["first.png", "second.png", "third.png", "fourth.png", "fith.png"]
     >>> images = loading_screen( Image, image_paths )
     ```
     """
     results: list[R] = []
-
-    next_frame(None)
-
+    
     ds = screen_width() / 2200
+
+    draw_text(message, 902*ds, 502*ds, 70*ds, Color.ORANGE)
+    draw_text(message, 900*ds, 500*ds, 70*ds, Color.WHITE)
+    next_frame(None)
 
     if isinstance(args_list, Sized):
         total = len(args_list)
         for i, arg in enumerate(args_list, 1):
             percent = int((i / total) * 100)
+
+            draw_text(message, 902*ds, 502*ds, 70*ds, Color.ORANGE)
             draw_text(message, 900*ds, 500*ds, 70*ds, Color.WHITE)
             draw_text(f"{percent}%", 900*ds, 600*ds, 70*ds, Color.WHITE)
             next_frame(None)
             results.append(func(arg))
     else:
         for i, arg in enumerate(args_list, 1):
-            draw_text(f"{i}%", 900*ds, 600*ds, 70*ds, Color.WHITE)
+            draw_text(message, 902*ds, 502*ds, 70*ds, Color.ORANGE)
+            draw_text(message, 900*ds, 500*ds, 70*ds, Color.WHITE)
+            draw_text(f"{i}", 900*ds, 600*ds, 70*ds, Color.WHITE)
             next_frame(None)
             results.append(func(arg))
 
