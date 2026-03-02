@@ -69,7 +69,6 @@ jobs:
           xvfb-run --auto-servernum pytest -n auto --dist loadfile tests/
 
       - name: Run Pytest (Windows/macOS - Skip Failures)
-        if: runner.os != 'Linux'
         shell: bash
         continue-on-error: true
         run: |
