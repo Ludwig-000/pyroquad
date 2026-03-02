@@ -33,8 +33,8 @@ jobs:
       - name: Build and Link (Debug)
         uses: PyO3/maturin-action@v1
         with:
-          command: develop # Directly installs into python env for testing
-          args: --features abi_310 --no-default-features
+          command: develop
+          args: --release --out dist --features abi_310 --no-default-features --interpreter python3.10
 
       - name: Run Smoke Test
         run: |
