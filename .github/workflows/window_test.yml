@@ -43,4 +43,4 @@ jobs:
       - name: Run Smoke Test
         run: |
           # We run your test script here
-          python test/basic_test.py
+          python tests/basic_test.py
