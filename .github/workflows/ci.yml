@@ -1,0 +1,108 @@
+name: Pyroquad Release Build
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Release Version (e.g., v0.0.1)'
+        required: true
+        default: 'v0.0.1'
+
+jobs:
+  build:
+    name: Build py${{ matrix.py_ver }} on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            py_ver: "3.9"
+            feat: "abi_39"
+          - os: ubuntu-latest
+            py_ver: "3.10"
+            feat: "abi_310"
+          - os: ubuntu-latest
+            py_ver: "3.14"
+            feat: "abi_314"
+          - os: windows-latest
+            py_ver: "3.9"
+            feat: "abi_39"
+          - os: windows-latest
+            py_ver: "3.10"
+            feat: "abi_310"
+          - os: windows-latest
+            py_ver: "3.14"
+            feat: "abi_314"
+          - os: macos-latest
+            py_ver: "3.9"
+            feat: "abi_39"
+          - os: macos-latest
+            py_ver: "3.10"
+            feat: "abi_310"
+          - os: macos-latest
+            py_ver: "3.14"
+            feat: "abi_314"
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Rust Cache
+        uses: Swatinem/rust-cache@v2
+        with:
+          key: ${{ matrix.os }}-${{ matrix.feat }}
+
+      - name: Set up Python ${{ matrix.py_ver }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.py_ver }}
+
+      - name: Generate Type Stubs
+        run: cargo run --bin stub_gen
+
+      - name: Build Wheel
+        uses: PyO3/maturin-action@v1
+        with:
+          command: build
+          args: --release --out dist --features ${{ matrix.feat }} --no-default-features --interpreter python${{ matrix.py_ver }}
+
+      - name: Install and Run Pytest (Isolated)
+        shell: bash
+        run: |
+          pip install pytest pytest-xdist
+          # Find the wheel in dist/ and install it
+          pip install ./dist/*.whl
+          # -n auto: uses all CPU cores
+          # --dist loadfile: fresh process per test file for static isolation
+          pytest -n auto --dist loadfile tests/
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: pyroquad-${{ matrix.os }}-py${{ matrix.py_ver }}
+          path: dist/*.whl
+
+  publish:
+    name: Create GitHub Release
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # Crucial for creating a release
+    steps:
+      - name: Download all wheels
+        uses: actions/download-artifact@v4
+        with:
+          path: release_dist
+          pattern: pyroquad-*
+          merge-multiple: true
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.event.inputs.version }}
+          files: release_dist/*.whl
+          body: "Pre-alpha release of Pyroquad Engine. Optimized builds for Python 3.9, 3.10, and 3.14."
+          generate_release_notes: true

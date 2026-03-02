@@ -79,11 +79,7 @@ pub fn activate_engine( conf: Option<Config>) -> PyResult<()>{
             
         }));
 
-        // check if the engine paniced. if yes, run cleanup.
-        if let Err(cause) = panic_catcher {
-            todo!()
-        }
-        
+
     });
 
     

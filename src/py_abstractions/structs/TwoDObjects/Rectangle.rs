@@ -70,16 +70,6 @@ impl Rectangle{
         }
     }
 
-    /// moves the rectangle inside another
-    /// clamp(Rect) -> Rect
-    pub fn clamp(&mut self, rhs:  Shape<'_>){
-        todo!()
-    }
-
-    /// crops a rectangle inside another
-    pub fn clip(&mut self, rhs:  Shape<'_>){
-        todo!()
-    }
 
     /// takes a list of 2D shapes, and returns every element that Collides with self.
     pub fn collides_with_list<'py>(&self, rhs: Vec<Shape<'py>>)-> Vec<Shape<'py>>{
