@@ -47,45 +47,39 @@ jobs:
       - name: Run Smoke Test
         shell: bash
         env:
-          RUST_BACKTRACE: 1
-          GALLIUM_DRIVER: llvmpipe
-          LIBGL_ALWAYS_SOFTWARE: 1
+            RUST_BACKTRACE: 1
+            GALLIUM_DRIVER: llvmpipe
+            LIBGL_ALWAYS_SOFTWARE: 1
         run: |
-          echo "Starting OpenGL environment setup..."
-          
-          # 1. Dynamically find the Mesa DLL
-          # This handles cases where the action nests it in x64/ or other subfolders
-          MESA_DLL_PATH=$(find "${{ github.workspace }}/mesa_driver" -name "opengl32.dll" | head -n 1)
-          
-          if [ -z "$MESA_DLL_PATH" ]; then
-            echo "::error::Could not find opengl32.dll in the mesa_driver folder!"
-            # Fallback search of the whole workspace just in case
-            MESA_DLL_PATH=$(find "${{ github.workspace }}" -name "opengl32.dll" | head -n 1)
-          fi
-
-          if [ -z "$MESA_DLL_PATH" ]; then
-            echo "::error::Mesa DLL not found anywhere. Check install-mesa step."
-            exit 1
-          fi
-          
-          echo "Found Mesa DLL at: $MESA_DLL_PATH"
-
-          # 2. Identify the Python directory
-          PYTHON_BIN_DIR=$(dirname $(which python))
-          echo "Injecting into Python directory: $PYTHON_BIN_DIR"
-          
-          # 3. Force-inject the DLL next to the executable
-          # This is the 'Silver Bullet' for Windows OpenGL CI
-          cp "$MESA_DLL_PATH" "$PYTHON_BIN_DIR/"
-          
-          # 4. Verify the file is in place
-          if [ -f "$PYTHON_BIN_DIR/opengl32.dll" ]; then
-            echo "✅ Injection successful. Python will now use Mesa Software Rendering."
-          else
-            echo "::error::Failed to copy DLL to Python directory."
-            exit 1
-          fi
-          
-          # 5. Run the test
-          echo "Launching test/basic_test.py..."
-          python tests/basic_test.py
+            echo "Current working directory: $(pwd)"
+            echo "Listing files for debug:"
+            ls -R . | grep "opengl32.dll" || echo "DLL not found in recursive ls"
+  
+            # 1. Dynamically find the Mesa DLL using relative paths to avoid backslash issues
+            # Search starting from current directory (.)
+            MESA_DLL_PATH=$(find . -name "opengl32.dll" | head -n 1)
+            
+            if [ -z "$MESA_DLL_PATH" ]; then
+              echo "::error::Could not find opengl32.dll anywhere in the workspace!"
+              exit 1
+            fi
+            
+            echo "Found Mesa DLL at: $MESA_DLL_PATH"
+  
+            # 2. Identify the Python directory
+            PYTHON_BIN_DIR=$(dirname $(which python))
+            echo "Injecting into Python directory: $PYTHON_BIN_DIR"
+            
+            # 3. Force-inject the DLL
+            cp "$MESA_DLL_PATH" "$PYTHON_BIN_DIR/"
+            
+            # 4. Final verification
+            if [ -f "$PYTHON_BIN_DIR/opengl32.dll" ]; then
+              echo "✅ Injection successful."
+            else
+              echo "::error::Failed to copy DLL."
+              exit 1
+            fi
+            
+            # 5. Run the test
+            python tests/basic_test.py
