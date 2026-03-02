@@ -20,12 +20,12 @@ jobs:
         with:
           python-version: "3.10"
 
+      # Install Mesa to deterministic absolute location
       - name: Install Mesa (Modern OpenGL Driver)
         uses: f3d-app/install-mesa-windows-action@v1
         with:
           version: 24.0.5
-          # Install inside workspace so Git Bash can access it via /d/...
-          path: ${{ github.workspace }}\mesa_driver
+          path: C:\mesa
 
       - name: Aggressive Rust Cache
         uses: Swatinem/rust-cache@v2
@@ -53,14 +53,19 @@ jobs:
 
           echo "PWD: $(pwd)"
 
-          # In GitHub Windows runner with bash, pwd is already /d/a/...
-          MESA_DIR="$(pwd)/mesa_driver"
+          # Convert Windows path C:\mesa to MSYS path
+          MESA_ROOT="/c/mesa"
 
-          echo "Expecting Mesa in: $MESA_DIR"
-          ls -R "$MESA_DIR" || true
+          if [ ! -d "$MESA_ROOT" ]; then
+            echo "::error::Mesa root directory not found at $MESA_ROOT"
+            ls /c || true
+            exit 1
+          fi
 
-          # Locate opengl32.dll inside Mesa directory
-          MESA_DLL_PATH=$(find "$MESA_DIR" -name opengl32.dll | head -n 1)
+          echo "Listing Mesa directory:"
+          ls -R "$MESA_ROOT" || true
+
+          MESA_DLL_PATH=$(find "$MESA_ROOT" -name opengl32.dll | head -n 1)
 
           if [ -z "$MESA_DLL_PATH" ]; then
             echo "::error::Mesa opengl32.dll not found"
@@ -72,7 +77,6 @@ jobs:
           # Prepend directory containing opengl32.dll to PATH
           export PATH="$(dirname "$MESA_DLL_PATH"):$PATH"
 
-          # Verify python resolution
           which python
 
           python tests/basic_test.py
