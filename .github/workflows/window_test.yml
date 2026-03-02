@@ -7,7 +7,7 @@ jobs:
   gl-test:
     name: OpenGL Window & Shader Check
     runs-on: windows-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
 
     steps:
       - uses: actions/checkout@v4
@@ -24,16 +24,20 @@ jobs:
         uses: f3d-app/install-mesa-windows-action@v1
         with:
           version: 24.0.5
-          # Installing into a subfolder to keep things tidy
+          # We define a specific path to make it easier for 'find'
           path: ${{ github.workspace }}\mesa_driver
 
-      - name: Rust Cache
+      - name: Aggressive Rust Cache
         uses: Swatinem/rust-cache@v2
+        with:
+          # Using a shared key so manual tests can use the cache from release builds
+          key: ${{ runner.os }}-shared-gl-test-abi_310
 
       - name: Build Wheel
         uses: PyO3/maturin-action@v1
         with:
           command: build
+          # Keep --release but consider removing it if you want even faster builds
           args: --release --out dist --features abi_310 --no-default-features --interpreter python3.10
 
       - name: Install Wheel
@@ -43,17 +47,45 @@ jobs:
       - name: Run Smoke Test
         shell: bash
         env:
-          # Force software rendering and show full Rust errors if it crashes
           RUST_BACKTRACE: 1
           GALLIUM_DRIVER: llvmpipe
           LIBGL_ALWAYS_SOFTWARE: 1
         run: |
-          # 1. Identify the Python directory
+          echo "Starting OpenGL environment setup..."
+          
+          # 1. Dynamically find the Mesa DLL
+          # This handles cases where the action nests it in x64/ or other subfolders
+          MESA_DLL_PATH=$(find "${{ github.workspace }}/mesa_driver" -name "opengl32.dll" | head -n 1)
+          
+          if [ -z "$MESA_DLL_PATH" ]; then
+            echo "::error::Could not find opengl32.dll in the mesa_driver folder!"
+            # Fallback search of the whole workspace just in case
+            MESA_DLL_PATH=$(find "${{ github.workspace }}" -name "opengl32.dll" | head -n 1)
+          fi
+
+          if [ -z "$MESA_DLL_PATH" ]; then
+            echo "::error::Mesa DLL not found anywhere. Check install-mesa step."
+            exit 1
+          fi
+          
+          echo "Found Mesa DLL at: $MESA_DLL_PATH"
+
+          # 2. Identify the Python directory
           PYTHON_BIN_DIR=$(dirname $(which python))
+          echo "Injecting into Python directory: $PYTHON_BIN_DIR"
           
-          # 2. Force-inject Mesa DLL into the Python folder 
-          # (This overrides the system's broken opengl32.dll)
-          cp "${{ github.workspace }}/mesa_driver/opengl32.dll" "$PYTHON_BIN_DIR/"
+          # 3. Force-inject the DLL next to the executable
+          # This is the 'Silver Bullet' for Windows OpenGL CI
+          cp "$MESA_DLL_PATH" "$PYTHON_BIN_DIR/"
           
-          # 3. Run the test
+          # 4. Verify the file is in place
+          if [ -f "$PYTHON_BIN_DIR/opengl32.dll" ]; then
+            echo "✅ Injection successful. Python will now use Mesa Software Rendering."
+          else
+            echo "::error::Failed to copy DLL to Python directory."
+            exit 1
+          fi
+          
+          # 5. Run the test
+          echo "Launching test/basic_test.py..."
           python tests/basic_test.py
