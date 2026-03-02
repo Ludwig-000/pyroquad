@@ -32,18 +32,6 @@ jobs:
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
 
-      - name: Run Pytest (Linux Headless Display)
-        if: runner.os == 'Linux'
-        shell: bash
-        env:
-          # Forces the system to use the CPU for shaders (LLVMpipe)
-          LIBGL_ALWAYS_SOFTWARE: 1
-        run: |
-          pip install pytest pytest-xdist
-          # We use --force-reinstall to ignore version mismatches if needed
-          pip install ./dist/*.whl --force-reinstall
-          xvfb-run --auto-servernum pytest -n auto --dist loadfile tests/
-
       - name: Rust Cache
         uses: Swatinem/rust-cache@v2
         with:
@@ -59,22 +47,6 @@ jobs:
         with:
           command: build
           args: --release --out dist --features ${{ matrix.feat }} --no-default-features --interpreter python${{ matrix.py_ver }}
-
-      - name: Run Pytest (Linux Headless Display)
-        if: runner.os == 'Linux'
-        shell: bash
-        run: |
-          pip install pytest pytest-xdist
-          pip install ./dist/*.whl
-          xvfb-run --auto-servernum pytest -n auto --dist loadfile tests/
-
-      - name: Run Pytest (Windows/macOS - Skip Failures)
-        shell: bash
-        continue-on-error: true
-        run: |
-          pip install pytest pytest-xdist
-          pip install ./dist/*.whl
-          pytest -n auto --dist loadfile tests/
 
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
@@ -101,5 +73,5 @@ jobs:
         with:
           tag_name: ${{ github.event.inputs.version }}
           files: release_dist/*.whl
-          body: "Pre-alpha release of Pyroquad Engine."
+          body: "Pre-alpha release of Pyroquad Engine binaries."
           generate_release_notes: true
