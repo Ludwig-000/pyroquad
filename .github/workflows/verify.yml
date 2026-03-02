@@ -27,8 +27,16 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y libasound2-dev libx11-dev libxi-dev libgl1-mesa-dev libxcursor-dev libxinerama-dev libxrandr-dev
 
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+
       - name: Rust Cache
         uses: Swatinem/rust-cache@v2
 
-      - name: Full Compile and Link
-        run: cargo build --release --all-targets
+      - name: Maturin Build Check
+        uses: PyO3/maturin-action@v1
+        with:
+          command: build
+          args: --features abi_310 --no-default-features --interpreter python3.10
