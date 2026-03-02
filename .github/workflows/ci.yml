@@ -32,11 +32,17 @@ jobs:
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
 
-      - name: Install Linux System Dependencies
+      - name: Run Pytest (Linux Headless Display)
         if: runner.os == 'Linux'
+        shell: bash
+        env:
+          # Forces the system to use the CPU for shaders (LLVMpipe)
+          LIBGL_ALWAYS_SOFTWARE: 1
         run: |
-          sudo apt-get update
-          sudo apt-get install -y libasound2-dev libx11-dev libxi-dev libgl1-mesa-dev libxcursor-dev libxinerama-dev libxrandr-dev xvfb
+          pip install pytest pytest-xdist
+          # We use --force-reinstall to ignore version mismatches if needed
+          pip install ./dist/*.whl --force-reinstall
+          xvfb-run --auto-servernum pytest -n auto --dist loadfile tests/
 
       - name: Rust Cache
         uses: Swatinem/rust-cache@v2

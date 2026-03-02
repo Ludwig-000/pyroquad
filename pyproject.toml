@@ -3,7 +3,7 @@ name = "pyroquad"
 version = "0.1.0"
 description = "The Pyroquad game engine."
 readme = "README.md"
-requires-python = ">=3.10"
+requires-python = ">=3.9"
 keywords = ["Game Engine", "Rust", "Low Level","Macroquad", "2D Render", "3D Render"]
 
 [tool.maturin]
