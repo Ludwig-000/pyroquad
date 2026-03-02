@@ -1,9 +1,10 @@
 #version 100
-precision highp float;
 
 #ifdef GL_OES_standard_derivatives
 #extension GL_OES_standard_derivatives : enable
 #endif
+
+precision highp float;
 
 varying lowp vec4 v_color;
 varying highp vec3 v_world_pos;
