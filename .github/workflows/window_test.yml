@@ -20,12 +20,10 @@ jobs:
         with:
           python-version: "3.10"
 
-      # Install Mesa to deterministic absolute location
       - name: Install Mesa (Modern OpenGL Driver)
         uses: f3d-app/install-mesa-windows-action@v1
         with:
           version: 24.0.5
-          path: C:\mesa
 
       - name: Aggressive Rust Cache
         uses: Swatinem/rust-cache@v2
@@ -43,40 +41,28 @@ jobs:
           pip install --no-index --find-links=dist pyroquad
 
       - name: Run Smoke Test
-        shell: bash
+        shell: pwsh
         env:
           RUST_BACKTRACE: 1
           GALLIUM_DRIVER: llvmpipe
           LIBGL_ALWAYS_SOFTWARE: 1
         run: |
-          set -e
+          $ErrorActionPreference = "Stop"
 
-          echo "PWD: $(pwd)"
+          Write-Host "PATH after Mesa install:"
+          Write-Host $env:PATH
 
-          # Convert Windows path C:\mesa to MSYS path
-          MESA_ROOT="/c/mesa"
+          # Ensure Mesa directory is first in PATH
+          $mesaDir = ($env:PATH -split ';' | Where-Object { $_ -match "mesa" })[0]
 
-          if [ ! -d "$MESA_ROOT" ]; then
-            echo "::error::Mesa root directory not found at $MESA_ROOT"
-            ls /c || true
-            exit 1
-          fi
+          if (-not $mesaDir) {
+              Write-Error "Mesa directory not found in PATH"
+          }
 
-          echo "Listing Mesa directory:"
-          ls -R "$MESA_ROOT" || true
+          Write-Host "Using Mesa directory: $mesaDir"
 
-          MESA_DLL_PATH=$(find "$MESA_ROOT" -name opengl32.dll | head -n 1)
+          $env:PATH = "$mesaDir;$env:PATH"
 
-          if [ -z "$MESA_DLL_PATH" ]; then
-            echo "::error::Mesa opengl32.dll not found"
-            exit 1
-          fi
-
-          echo "Using Mesa DLL at: $MESA_DLL_PATH"
-
-          # Prepend directory containing opengl32.dll to PATH
-          export PATH="$(dirname "$MESA_DLL_PATH"):$PATH"
-
-          which python
+          where.exe opengl32.dll
 
           python tests/basic_test.py
