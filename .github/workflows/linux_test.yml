@@ -1,0 +1,55 @@
+name: Manual Linux GL Test
+
+on:
+  workflow_dispatch: 
+
+jobs:
+  linux-gl-test:
+    name: OpenGL Virtual Display Check
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+
+      - name: Install System Dependencies
+        run: |
+          sudo apt-get update
+          # Standard miniquad deps + xvfb (virtual monitor) + pulseaudio (fake audio)
+          sudo apt-get install -y libasound2-dev libx11-dev libxi-dev libgl1-mesa-dev libxcursor-dev libxinerama-dev libxrandr-dev xvfb pulseaudio
+
+      - name: Rust Cache
+        uses: Swatinem/rust-cache@v2
+        with:
+          key: ${{ runner.os }}-shared-gl-test-abi_310
+
+      - name: Build Wheel
+        uses: PyO3/maturin-action@v1
+        with:
+          command: build
+          # Removed --release for faster test iterations
+          args: --out dist --features abi_310 --no-default-features --interpreter python3.10
+
+      - name: Install Wheel
+        run: |
+          pip install --no-index --find-links=dist pyroquad
+
+      - name: Run Smoke Test (Headless)
+        env:
+          RUST_BACKTRACE: 1
+        run: |
+          # 1. Start a dummy audio daemon so quad-snd doesn't panic
+          pulseaudio -D --exit-idle-time=-1
+          
+          # 2. Run the test wrapped in the X Virtual FrameBuffer
+          # -a auto-finds a free display port
+          # -s sets up a fake 1024x768 screen with 24-bit color
+          xvfb-run -a -s "-screen 0 1024x768x24" python tests/basic_test.py

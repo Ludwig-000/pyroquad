@@ -51,7 +51,7 @@ for i in range(10):
 
     next_frame()
 
-t = Texture2D(Image("docs/3d_screenshot.png"))
+t = Texture2D(Image.empty())
 rec =  Rectangle(Vec2.ZERO,0, Vec2(screen_width(),screen_height()),Color.WHITE)
 rec.texture = t
 get_keys_down()
