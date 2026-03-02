@@ -32,6 +32,13 @@ jobs:
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
 
+      - name: Install Linux Dependencies
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          # These are required for macroquad/miniquad to link successfully
+          sudo apt-get install -y libasound2-dev libx11-dev libxi-dev libgl1-mesa-dev libxcursor-dev libxinerama-dev libxrandr-dev
+
       - name: Rust Cache
         uses: Swatinem/rust-cache@v2
         with:
@@ -73,5 +80,5 @@ jobs:
         with:
           tag_name: ${{ github.event.inputs.version }}
           files: release_dist/*.whl
-          body: "Pre-alpha release of Pyroquad Engine binaries."
+          body: "Pre-alpha release of Pyroquad Engine."
           generate_release_notes: true
