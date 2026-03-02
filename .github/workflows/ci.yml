@@ -60,9 +60,6 @@ jobs:
         with:
           python-version: ${{ matrix.py_ver }}
 
-      - name: Generate Type Stubs
-        run: cargo run --bin stub_gen
-
       - name: Build Wheel
         uses: PyO3/maturin-action@v1
         with:
