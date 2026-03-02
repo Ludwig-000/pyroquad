@@ -24,6 +24,7 @@ jobs:
         uses: f3d-app/install-mesa-windows-action@v1
         with:
           version: 24.0.5
+          # Install inside workspace so Git Bash can access it via /d/...
           path: ${{ github.workspace }}\mesa_driver
 
       - name: Aggressive Rust Cache
@@ -50,14 +51,15 @@ jobs:
         run: |
           set -e
 
-          echo "Workspace: $GITHUB_WORKSPACE"
+          echo "PWD: $(pwd)"
 
-          MESA_DIR="$GITHUB_WORKSPACE/mesa_driver"
+          # In GitHub Windows runner with bash, pwd is already /d/a/...
+          MESA_DIR="$(pwd)/mesa_driver"
 
-          echo "Listing Mesa directory:"
+          echo "Expecting Mesa in: $MESA_DIR"
           ls -R "$MESA_DIR" || true
 
-          # Locate opengl32.dll deterministically inside Mesa install dir
+          # Locate opengl32.dll inside Mesa directory
           MESA_DLL_PATH=$(find "$MESA_DIR" -name opengl32.dll | head -n 1)
 
           if [ -z "$MESA_DLL_PATH" ]; then
@@ -67,10 +69,10 @@ jobs:
 
           echo "Using Mesa DLL at: $MESA_DLL_PATH"
 
-          # Prepend Mesa directory (containing the DLL) to PATH
+          # Prepend directory containing opengl32.dll to PATH
           export PATH="$(dirname "$MESA_DLL_PATH"):$PATH"
 
-          echo "PATH updated. Verifying resolution:"
+          # Verify python resolution
           which python
 
           python tests/basic_test.py
