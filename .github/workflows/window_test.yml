@@ -24,6 +24,7 @@ jobs:
         uses: f3d-app/install-mesa-windows-action@v1
         with:
           version: 24.0.5
+          path: ${{ github.workspace }}\mesa_driver
 
       - name: Aggressive Rust Cache
         uses: Swatinem/rust-cache@v2
@@ -49,19 +50,24 @@ jobs:
         run: |
           $ErrorActionPreference = "Stop"
 
-          Write-Host "PATH after Mesa install:"
-          Write-Host $env:PATH
+          $mesaRoot = Join-Path $env:GITHUB_WORKSPACE "mesa_driver"
 
-          # Ensure Mesa directory is first in PATH
-          $mesaDir = ($env:PATH -split ';' | Where-Object { $_ -match "mesa" })[0]
-
-          if (-not $mesaDir) {
-              Write-Error "Mesa directory not found in PATH"
+          if (!(Test-Path $mesaRoot)) {
+              Write-Error "Mesa directory not found at $mesaRoot"
           }
 
-          Write-Host "Using Mesa directory: $mesaDir"
+          Write-Host "Mesa installed at: $mesaRoot"
 
-          $env:PATH = "$mesaDir;$env:PATH"
+          $dll = Get-ChildItem -Path $mesaRoot -Recurse -Filter opengl32.dll | Select-Object -First 1
+
+          if (!$dll) {
+              Write-Error "opengl32.dll not found inside Mesa directory"
+          }
+
+          Write-Host "Using DLL at: $($dll.FullName)"
+
+          # Prepend directory to PATH so Windows loader picks it first
+          $env:PATH = "$($dll.Directory.FullName);$env:PATH"
 
           where.exe opengl32.dll
 
