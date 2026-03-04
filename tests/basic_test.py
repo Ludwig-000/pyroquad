@@ -62,3 +62,17 @@ for i in range(10):
     set_default_camera()
     rec.draw()
     next_frame()
+
+
+
+
+
+
+file = download_file("https://raw.githubusercontent.com/Ludwig-000/pyroquad/main/tests/sound_example.mp3")
+f =  file.to_Sound()
+
+f.play_sound_once()
+
+
+for i in range(500):
+    next_frame()
