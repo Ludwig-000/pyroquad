@@ -45,6 +45,14 @@ use crate::engine::Objects::ObjectManagement::ObjectManagement;
 
 
 pub enum Command {
+    RequestNewScreenSize{
+        width: f32,
+        height: f32
+    },
+    IsQuitRequested(PSyncSender<bool>),
+    PreventQuit,
+    SetFullscreen(bool),
+
     TexImEnum(EngineTexImgEnum),
     GlEnum(GlEnum),
     DrawRectangleFromPyClass(Rectangle),
@@ -175,12 +183,23 @@ pub enum Command {
                 border_color: mq::Color,
                 fill_color: mq::Color,},
     DrawLine3D{start: mq::Vec3, end: mq::Vec3, color: mq::Color},
+    DrawLine{x1: f32,y1: f32,x2: f32,y2: f32,thickness: f32,color: mq::Color},
 
 
     DrawAfflineParallelpiped{offset: mq::Vec3, e1: mq::Vec3,e2: mq::Vec3,e3: mq::Vec3,texture: Option<mq::Texture2D>,color: mq::Color},
+    DrawAfflineParallogram{offset: mq::Vec3,
+        e1: mq::Vec3,
+        e2: mq::Vec3,
+        texture: Option<mq::Texture2D>,
+        color: mq::Color},
     SetDefaultCamera(),
 
     DrawRect { x: f32, y: f32, w: f32, h: f32, color: mq::Color },
+    DrawRectLines { x: f32, y: f32, w: f32, h: f32,thickness: f32, color: mq::Color },
+
+    DrawTriangle { v1: mq::Vec2, v2: mq::Vec2, v3: mq::Vec2, color: mq::Color },
+    DrawTriangleLines {v1: mq::Vec2,v2: mq::Vec2,v3: mq::Vec2, thickness: f32, color: mq::Color },
+
 
     DrawPlane { center: mq::Vec3, size: mq::Vec2, color: mq::Color, texture: Option<mq::Texture2D> },
 
@@ -191,8 +210,15 @@ pub enum Command {
     DrawSkyBox {texture: Option<mq::Texture2D>, tint: mq::Color},
 
     DrawPoly{ x: f32, y: f32, sides: u8, radius: f32, rotation: f32, color: mq::Color},
+    DrawPolyLines{ x: f32,y: f32,sides: u8,radius: f32,rotation: f32,thickness: f32,color: mq::Color},
 
     DrawText{text: String, x: f32, y: f32, font_size: f32, color: mq::Color},
+    DrawMultilineText{text: String,
+        x: f32,
+        y: f32,
+        font_size: f32,
+        line_distance_factor: Option<f32>,
+        color: mq::Color},
 
     DrawTexture{ texture: mq::Texture2D, x: f32, y: f32, color: mq::Color   },
     
@@ -219,7 +245,8 @@ pub enum Command {
     SetCursorGrab ( bool ),
 
     ShowMouse(bool),
-    
+    ClearInputQueue,
+    IsSimulatingMouseWithTouch(PSyncSender<bool>),
     PushCameraState,
     PopCameraState,
     CameraFontScale{
@@ -245,6 +272,26 @@ pub async fn proccess_commands_loop() {
         while let Some(command) = COMMAND_QUEUE.pop() {
             
             match command {
+                Command::RequestNewScreenSize { width, height }
+                    => mq::request_new_screen_size(width, height),
+                Command::PreventQuit => mq::prevent_quit(),
+                Command::SetFullscreen(fullscreen) => mq::set_fullscreen(fullscreen),
+                Command::IsQuitRequested(sender)=>{
+                    let is_quit_requested = mq::is_quit_requested();
+                    let _ = sender.send(is_quit_requested);
+                }
+                Command::DrawPolyLines { x, y, sides, radius, rotation, thickness, color }
+                    => mq::draw_poly_lines(x, y, sides, radius, rotation, thickness, color),
+                Command::DrawAfflineParallogram { offset, e1, e2, texture, color }
+                    => mq::draw_affine_parallelogram(offset, e1, e2, texture.as_ref(), color),
+                Command::DrawMultilineText { text, x, y, font_size, line_distance_factor, color }
+                    => mq::draw_multiline_text(&text, x, y, font_size, line_distance_factor, color),
+                Command::ClearInputQueue => mq::clear_input_queue(),
+                Command::IsSimulatingMouseWithTouch(sender)=>{
+                    let _ = sender.send(mq::is_simulating_mouse_with_touch());
+                }
+                Command::DrawLine { x1, y1, x2, y2, thickness, color }
+                    => mq::draw_line(x1, y1, x2, y2, thickness, color),
                 Command::TexImEnum(en)=> en.execute(),
                 Command::GlEnum(glenum)=> {
                     let gl  = unsafe {
@@ -462,6 +509,8 @@ pub async fn proccess_commands_loop() {
                         });
                         
                 }
+                Command::DrawRectLines { x, y, w, h, thickness, color }
+                    => mq::draw_rectangle_lines(x, y, w, h, thickness, color),
                 Command::DrawRect { x, y, w, h, color} => {
                     sm::switch_to_desired_shader(sm::ShaderKind::None, &None);
                     mq::draw_rectangle(
@@ -472,6 +521,10 @@ pub async fn proccess_commands_loop() {
                         color,
                     );
                 }
+                Command::DrawTriangle { v1, v2, v3, color }
+                    => mq::draw_triangle(v1, v2, v3, color),
+                Command::DrawTriangleLines { v1, v2, v3, thickness, color }
+                    => mq::draw_triangle_lines(v1, v2, v3, thickness, color),
                 Command::DrawPlane { center, size, color, texture } => {
                     sm::switch_to_desired_shader(sm::ShaderKind::None, &None);
                     let tex_ref = texture.as_ref();

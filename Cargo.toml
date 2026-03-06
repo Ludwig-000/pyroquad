@@ -15,7 +15,7 @@ doc = false
 
 
 [profile.release]
-overflow-checks = true #disable for release. The engine should NEVER panic.
+overflow-checks = false
 panic = "unwind"
 
 

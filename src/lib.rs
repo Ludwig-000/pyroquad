@@ -29,9 +29,15 @@ pub fn _pyroquad( py: Python<'_>, m: &Bound<'_, PyModule>) -> PyResult<()> {
     
     m.add_function(wrap_pyfunction!(crate::py_abstractions::py_functions::draw_all_objects, m)?)?;
     m.add_function(wrap_pyfunction!(crate::py_abstractions::py_functions::draw_rectangle, m)?)?;
+    m.add_function(wrap_pyfunction!(crate::py_abstractions::py_functions::draw_rectangle_lines, m)?)?;
+    m.add_function(wrap_pyfunction!(crate::py_abstractions::py_functions::draw_triangle, m)?)?;
+    m.add_function(wrap_pyfunction!(crate::py_abstractions::py_functions::draw_triangle_lines, m)?)?;
     m.add_function(wrap_pyfunction!(crate::py_abstractions::py_functions::draw_poly, m)?)?;
+    m.add_function(wrap_pyfunction!(crate::py_abstractions::py_functions::draw_poly_lines, m)?)?;
     m.add_function(wrap_pyfunction!(crate::py_abstractions::py_functions::draw_circle, m)?)?;
+    m.add_function(wrap_pyfunction!(crate::py_abstractions::py_functions::draw_circle_lines, m)?)?;
     m.add_function(wrap_pyfunction!(crate::py_abstractions::py_functions::draw_affine_parallelepiped, m)?)?;
+    m.add_function(wrap_pyfunction!(crate::py_abstractions::py_functions::draw_affine_parallelogram, m)?)?;
     m.add_function(wrap_pyfunction!(crate::py_abstractions::py_functions::draw_arc, m)?)?;
     m.add_function(wrap_pyfunction!(crate::py_abstractions::py_functions::draw_cube_wires, m)?)?;
     m.add_function(wrap_pyfunction!(crate::py_abstractions::py_functions::draw_cylinder, m)?)?;
@@ -39,12 +45,14 @@ pub fn _pyroquad( py: Python<'_>, m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(crate::py_abstractions::py_functions::draw_ellipse, m)?)?;
     m.add_function(wrap_pyfunction!(crate::py_abstractions::py_functions::draw_ellipse_lines, m)?)?;
     m.add_function(wrap_pyfunction!(crate::py_abstractions::py_functions::draw_hexagon, m)?)?;
+    m.add_function(wrap_pyfunction!(crate::py_abstractions::py_functions::draw_line, m)?)?;
     m.add_function(wrap_pyfunction!(crate::py_abstractions::py_functions::draw_line_3d, m)?)?;
 
     m.add_function(wrap_pyfunction!(crate::py_abstractions::py_functions::step_physics, m)?)?;
 
     m.add_function(wrap_pyfunction!(crate::py_abstractions::py_functions::next_frame, m)?)?;
     m.add_function(wrap_pyfunction!(crate::py_abstractions::py_functions::clear_background, m)?)?;
+    m.add_function(wrap_pyfunction!(crate::py_abstractions::py_functions::draw_multiline_text, m)?)?;
     m.add_function(wrap_pyfunction!(crate::py_abstractions::py_functions::draw_text, m)?)?;
     m.add_function(wrap_pyfunction!(crate::py_abstractions::py_functions::get_fps, m)?)?;
     m.add_function(wrap_pyfunction!(crate::py_abstractions::py_functions::get_delta_time, m)?)?;
@@ -62,10 +70,13 @@ pub fn _pyroquad( py: Python<'_>, m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(crate::py_abstractions::Mouse::get_mouse_position, m)?)?;
     m.add_function(wrap_pyfunction!(crate::py_abstractions::Mouse::set_cursor_grab, m)?)?;
     m.add_function(wrap_pyfunction!(crate::py_abstractions::Mouse::show_mouse, m)?)?;
+    m.add_function(wrap_pyfunction!(crate::py_abstractions::Mouse::clear_input_queue, m)?)?;
+    m.add_function(wrap_pyfunction!(crate::py_abstractions::Mouse::is_simulating_mouse_with_touch, m)?)?;
 
     m.add_function(wrap_pyfunction!(crate::py_abstractions::py_functions::get_screen_data, m)?)?;
     m.add_function(wrap_pyfunction!(crate::py_abstractions::py_functions::screen_height, m)?)?;
     m.add_function(wrap_pyfunction!(crate::py_abstractions::py_functions::screen_width, m)?)?;
+    m.add_function(wrap_pyfunction!(crate::py_abstractions::py_functions::request_new_screen_size, m)?)?;
 
     m.add_function(wrap_pyfunction!(crate::py_abstractions::py_functions::get_last_key_pressed, m)?)?;
     m.add_function(wrap_pyfunction!(crate::py_abstractions::py_functions::draw_grid, m)?)?;
@@ -75,7 +86,7 @@ pub fn _pyroquad( py: Python<'_>, m: &Bound<'_, PyModule>) -> PyResult<()> {
 
     m.add_function(wrap_pyfunction!(crate::py_abstractions::py_functions::draw_skybox, m)?)?;
 
-
+    m.add_function(wrap_pyfunction!(crate::py_abstractions::py_functions::set_fullscreen, m)?)?;
 
     m.add_function(wrap_pyfunction!(crate::py_abstractions::Camera::set_default_camera, m)?)?;
     m.add_function(wrap_pyfunction!(crate::py_abstractions::Camera::push_camera_state, m)?)?;
@@ -93,7 +104,8 @@ pub fn _pyroquad( py: Python<'_>, m: &Bound<'_, PyModule>) -> PyResult<()> {
 
     m.add_class::<crate::py_abstractions::GL::Vertex>()?;
 
-
+    m.add_function(wrap_pyfunction!(crate::py_abstractions::py_functions::is_quit_requested, m)?)?;
+    m.add_function(wrap_pyfunction!(crate::py_abstractions::py_functions::prevent_quit, m)?)?;
     
     m.add_class::<crate::py_abstractions::GL::InternalGL>()?;
 
@@ -148,7 +160,6 @@ define_stub_info_gatherer!(stub_info);
 list of macroquad enums
 
    mq::Comparison
-    mq::DrawMode
     mq::EulerRot
     mq::ImageFormat
     mq::MouseButton
@@ -173,104 +184,25 @@ list of macroquad::prelude functions
 
 
     mq::build_textures_atlas
-    mq::camera_font_scale
     mq::cartesian_to_polar
-    mq::clamp
-    mq::clear_background
-    mq::clear_input_queue
-
-    mq::draw_affine_parallelepiped
-    mq::draw_affine_parallelogram
-    mq::draw_arc
-    mq::draw_circle
-    mq::draw_circle_lines
-    mq::draw_cube
-    mq::draw_cube_wires
-    mq::draw_cylinder
-    mq::draw_cylinder_ex
-    mq::draw_cylinder_wires
-    mq::draw_ellipse
-    mq::draw_ellipse_lines
-    mq::draw_fps
-    mq::draw_grid
-    mq::draw_grid_ex
-    mq::draw_hexagon
-    mq::draw_line
-    mq::draw_line_3d
-    mq::draw_mesh
-    mq::draw_multiline_text
-    mq::draw_plane
-    mq::draw_poly
-    mq::draw_poly_lines
-    mq::draw_rectangle
-    mq::draw_rectangle_ex
-    mq::draw_rectangle_lines
-    mq::draw_rectangle_lines_ex
-    mq::draw_sphere
-    mq::draw_sphere_ex
-    mq::draw_sphere_wires
-
-    mq::draw_text
-    mq::draw_text_ex
-
-    mq::draw_texture
-    mq::draw_texture_ex
-    mq::draw_triangle
-    mq::draw_triangle_lines
-    mq::get_char_pressed
     mq::get_dropped_files
-    mq::get_fps
-    mq::get_frame_time
     mq::get_internal_gl
-    mq::get_keys_down
-    mq::get_keys_pressed
-    mq::get_keys_released
-    mq::get_last_key_pressed
-    mq::get_screen_data
     mq::get_text_center
-    mq::get_time
     mq::gl_use_default_material
     mq::gl_use_material
-    mq::is_key_down
-    mq::is_key_pressed
-    mq::is_key_released
-    mq::is_mouse_button_down
-    mq::is_mouse_button_pressed
-    mq::is_mouse_button_released
-    mq::is_quit_requested
-    mq::is_simulating_mouse_with_touch
-    mq::load_file
-    mq::load_image
     mq::load_material
-    mq::load_string
-    mq::load_texture
     mq::load_ttf_font_from_bytes
     mq::measure_text
-    mq::mouse_delta_position
-    mq::mouse_position
-    mq::mouse_position_local
-    mq::mouse_wheel
-    mq::next_frame
+
     mq::polar_to_cartesian
-    mq::pop_camera_state
-    mq::prevent_quit
-    mq::push_camera_state
     mq::quat
     mq::render_target
     mq::render_target_ex
     mq::render_target_msaa
-    mq::request_new_screen_size
+    
     mq::screen_dpi_scale
-    mq::screen_height
-    mq::screen_width
-    mq::set_camera
-    mq::set_cursor_grab
-    mq::set_default_camera
     mq::set_default_filter_mode
-    mq::set_fullscreen
-    mq::set_panic_handler
     mq::set_pc_assets_folder
-    mq::show_mouse
     mq::simulate_mouse_with_touch
     mq::touches
     mq::touches_local

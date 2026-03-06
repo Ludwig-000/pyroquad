@@ -3,6 +3,7 @@ use pyo3_stub_gen::derive::gen_stub_pyfunction;
 
 use crate::engine::CoreLoop::COMMAND_QUEUE;
 use crate::engine::CoreLoop::Command;
+use crate::engine::PChannel::PChannel;
 use crate::py_abstractions::structs::GLAM::Vec2::Vec2;
 use std::collections::HashSet;
 use crate::py_abstractions::MouseButton::MouseButton;
@@ -91,4 +92,18 @@ pub fn get_mouse_delta_position() -> Vec2 {
     mouse.into()
 }
 
+/// Clears input queue
+#[gen_stub_pyfunction]
+#[pyfunction]
+pub fn clear_input_queue() {
+    COMMAND_QUEUE.push(  Command::ClearInputQueue );
+}
 
+/// Clears input queue
+#[gen_stub_pyfunction]
+#[pyfunction]
+pub fn is_simulating_mouse_with_touch()-> PyResult<bool> {
+    let (sender, receiver) = PChannel::sync_channel(1);
+    COMMAND_QUEUE.push(  Command::IsSimulatingMouseWithTouch(sender));
+    Ok(receiver.recv()?)
+}

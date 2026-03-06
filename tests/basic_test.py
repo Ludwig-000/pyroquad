@@ -67,12 +67,66 @@ for i in range(10):
 
 
 
-
-file = download_file("https://raw.githubusercontent.com/Ludwig-000/pyroquad/main/tests/sound_example.mp3")
+file=  examples.loading_screen(download_file,["https://raw.githubusercontent.com/Ludwig-000/pyroquad/main/tests/sound_example.mp3"])[0]
 f =  file.to_Sound()
 
 f.play_sound_once()
 
 
-for i in range(500):
+
+threeDCAM = examples.PlayerCamera(Vec3.splat(2))
+threeDCAM.yaw = -140
+threeDCAM.pitch = -30
+
+c = Cube(Vec3.ZERO,Vec3.splat(50),Vec3.ONE,Color.GREEN, None,ColliderOptions.NONE)
+
+cyl = Cylinder(Vec3(2,0,0),Vec3.splat(20),Vec3.ONE,Color.YELLOW, None,ColliderOptions.DYNAMIC(0))
+
+
+for i in range(100):
+    clear_background(Color.AZURE)
+    if i == 30:
+        c.set_collider(ColliderOptions.DYNAMIC(gravity_scale=1))
+    try:
+        c.rot += get_delta_time()
+    except:
+        ...
+    threeDCAM.update()
+    draw_all_objects()
+    
+    next_frame(get_delta_time())
+
+file = examples.loading_screen(download_file, ["https://raw.githubusercontent.com/Ludwig-000/pyroquad/main/tests/example_image.jpg"])[0]
+texture=  file.to_2DTexture()
+
+if cyl.physics:
+    cyl.physics.apply_impulse(Vec3(1,1,1))
+else:
+    assert False, "physics should be Some"
+for i in range(30):
+    threeDCAM.update()
+    draw_skybox(texture,Color.WHITE)
+    draw_all_objects()
+    next_frame(get_delta_time())
+
+
+assert not Color.WHITE == Color.WHEAT
+
+
+
+set_default_camera()
+
+
+recs: list[Rectangle] = []
+for w in range(100):
+    for h in range(100):
+        recs.append(Rectangle(Vec2(w*5,h*5),0,Vec2.splat(4),Color.AMETHYST))
+
+
+for i in range(30):
+    colls= recs[0].collides_with_list(recs)
+    assert colls.__len__() == 1
+    for rec in recs:
+        rec.draw()
     next_frame()
+

@@ -113,11 +113,36 @@ pub fn draw_rectangle(x: f32, y: f32, w: f32, h: f32, color: Color) {
 
 #[gen_stub_pyfunction]
 #[pyfunction]
+pub fn draw_rectangle_lines(x: f32, y: f32, w: f32, h: f32,thickness: f32,  color: Color) {
+    COMMAND_QUEUE.push(Command::DrawRectLines { x, y, w, h,thickness,color: color.into()});
+}
+
+
+#[gen_stub_pyfunction]
+#[pyfunction]
+pub fn draw_triangle(v1: Vec2, v2: Vec2, v3: Vec2, color: Color) {
+    COMMAND_QUEUE.push(Command::DrawTriangle { v1: v1.into(), v2: v2.into(), v3: v3.into(), color: color.into() });
+}
+
+#[gen_stub_pyfunction]
+#[pyfunction]
+pub fn draw_triangle_lines(v1: Vec2, v2: Vec2, v3: Vec2, thickness: f32, color: Color) {
+    COMMAND_QUEUE.push(Command::DrawTriangleLines { v1: v1.into(), v2: v2.into(), v3: v3.into(), thickness, color: color.into() });
+}
+
+#[gen_stub_pyfunction]
+#[pyfunction]
 pub fn draw_affine_parallelepiped(offset: Vec3, e1: Vec3,e2: Vec3,e3: Vec3,texture: Option<Texture2D>,color: Color) {
     
     COMMAND_QUEUE.push(Command::DrawAfflineParallelpiped { offset: offset.into(), e1: e1.into(), e2: e2.into(), e3: e3.into(), texture: texture.map(Into::into), color: color.into() });
 }
 
+#[gen_stub_pyfunction]
+#[pyfunction]
+pub fn draw_affine_parallelogram(offset: Vec3, e1: Vec3,e2: Vec3,e3: Vec3,texture: Option<Texture2D>,color: Color) {
+    
+    COMMAND_QUEUE.push(Command::DrawAfflineParallelpiped { offset: offset.into(), e1: e1.into(), e2: e2.into(), e3: e3.into(), texture: texture.map(Into::into), color: color.into() });
+}
 #[gen_stub_pyfunction]
 #[pyfunction]
 pub fn step_physics(distance: f32) {
@@ -208,7 +233,11 @@ pub fn draw_hexagon( x: f32,
 pub fn draw_line_3d( start: Vec3, end: Vec3, color: Color){
     COMMAND_QUEUE.push(Command::DrawLine3D { start: start.into(), end: end.into(), color: color.into()});
 }
-
+#[gen_stub_pyfunction]
+#[pyfunction]
+pub fn draw_line( start: Vec3, end: Vec3, color: Color){
+    COMMAND_QUEUE.push(Command::DrawLine3D { start: start.into(), end: end.into(), color: color.into()});
+}
 
 
 /// draws a basic grid in 3d space.
@@ -217,9 +246,7 @@ pub fn draw_line_3d( start: Vec3, end: Vec3, color: Color){
 #[gen_stub_pyfunction]
 #[pyfunction]
 pub fn draw_grid(slices: u32, spacing: f32, axes_color: Color, other_color: Color) {
-    let c1 = mq::Color::new(axes_color.r,axes_color.g,axes_color.b,axes_color.a);
-    let c2 = mq::Color::new(other_color.r,other_color.g,other_color.b,other_color.a);
-    let c =Command::DrawGrid { slices, spacing, axes_color: c1, other_color: c2 };
+    let c =Command::DrawGrid { slices, spacing, axes_color: axes_color.into(), other_color: other_color.into() };
 
     COMMAND_QUEUE.push(c );
 }
@@ -230,12 +257,11 @@ pub fn draw_grid(slices: u32, spacing: f32, axes_color: Color, other_color: Colo
 #[gen_stub_pyfunction]
 #[pyfunction]
 pub fn draw_plane(center: Vec3, size: Vec2, color: Color, texture: Option<Texture2D>)  {
-    let col = mq::Color::new(color.r,color.g,color.b,color.a);
     let cen = mq::vec3( center.x,center.y,center.z);
     let siz = mq::vec2(size.x,size.y);
     let tex = texture.map(|t| t.into());
 
-    let c =Command::DrawPlane { center:cen,size:siz,color: col,texture: tex};
+    let c =Command::DrawPlane { center:cen,size:siz,color: color.into(),texture: tex};
 
     COMMAND_QUEUE.push(c );
 }
@@ -246,11 +272,8 @@ pub fn draw_plane(center: Vec3, size: Vec2, color: Color, texture: Option<Textur
 #[gen_stub_pyfunction]
 #[pyfunction]
 pub fn draw_cube(position: Vec3, size: Vec3, color: Color, texture: Option<Texture2D>) {
-    let pos = mq::vec3(position.x,position.y,position.z);
-    let siz = mq::vec3(size.x,size.y,size.z);
     let texture = texture.map( Into::into );
-    let c = mq::Color::new(color.r,color.g,color.b,color.a);
-    COMMAND_QUEUE.push(  Command::DrawCube{pos, size: siz, texture, color: c} );
+    COMMAND_QUEUE.push(  Command::DrawCube{pos: position.into(), size: size.into(), texture, color: color.into()} );
 }
 
 /// fills the entire screen with a single color.
@@ -259,8 +282,7 @@ pub fn draw_cube(position: Vec3, size: Vec3, color: Color, texture: Option<Textu
 #[gen_stub_pyfunction]
 #[pyfunction]
 pub fn clear_background(color: Color) {
-    let col = mq::Color{r: color.r,g: color.g,b: color.b,a: color.a};
-    COMMAND_QUEUE.push(Command::ClearBackground { color: col});
+    COMMAND_QUEUE.push(Command::ClearBackground { color: color.into()});
 }
 
 /// processes all drawing commands that have accumulated.
@@ -288,8 +310,12 @@ pub fn next_frame(py: Python<'_>, physics_step: Option<f32>) -> PyResult<()>{
 #[gen_stub_pyfunction]
 #[pyfunction]
 pub fn draw_text(text: String, x: f32, y: f32, font_size: f32, color: Color) {
-    let c = mq::Color::new(color.r,color.g,color.b,color.a);
-    COMMAND_QUEUE.push(Command::DrawText {text, x, y, font_size, color:c});
+    COMMAND_QUEUE.push(Command::DrawText {text, x, y, font_size, color: color.into()});
+}
+#[gen_stub_pyfunction]
+#[pyfunction]
+pub fn draw_multiline_text(text: String, x: f32, y: f32, font_size: f32, line_distance_factor: Option<f32>, color: Color) {
+    COMMAND_QUEUE.push(Command::DrawMultilineText { text, x, y, font_size, line_distance_factor, color: color.into() });
 }
 
 /// draws very basic circle in 2d space.
@@ -301,8 +327,13 @@ pub fn draw_text(text: String, x: f32, y: f32, font_size: f32, color: Color) {
 #[gen_stub_pyfunction]
 #[pyfunction]
 pub fn draw_circle(x: f32, y: f32, r: f32, color: Color) {
-    let c = mq::Color::new(color.r,color.g,color.b,color.a);
-    COMMAND_QUEUE.push(Command::DrawPoly{ x, y, sides:20, radius:r, rotation:0.0, color:c});
+    COMMAND_QUEUE.push(Command::DrawPoly{ x, y, sides:20, radius:r, rotation:0.0, color: color.into()});
+}
+
+#[gen_stub_pyfunction]
+#[pyfunction]
+pub fn draw_circle_lines(x: f32, y: f32, r: f32, thickness: f32, color: Color) {
+    COMMAND_QUEUE.push(Command::DrawPolyLines{ x, y, sides:20, radius:r, rotation:0.0,thickness, color: color.into()});
 }
 
 /// draws n-sided polygon in 2d space. 
@@ -312,8 +343,12 @@ pub fn draw_circle(x: f32, y: f32, r: f32, color: Color) {
 #[gen_stub_pyfunction]
 #[pyfunction]
 pub fn draw_poly(x: f32, y: f32, sides: u8, radius: f32, rotation: f32, color: Color) {
-    let c = mq::Color::new(color.r,color.g,color.b,color.a);
-    COMMAND_QUEUE.push(Command::DrawPoly{ x, y, sides, radius, rotation, color: c});
+    COMMAND_QUEUE.push(Command::DrawPoly{ x, y, sides, radius, rotation, color: color.into()});
+}
+#[gen_stub_pyfunction]
+#[pyfunction]
+pub fn draw_poly_lines(x: f32, y: f32, sides: u8, radius: f32, rotation: f32,thickness: f32, color: Color) {
+    COMMAND_QUEUE.push(Command::DrawPolyLines { x, y, sides, radius, rotation, thickness, color: color.into() });
 }
 
 /// draws a texture in 2d space.
@@ -324,9 +359,8 @@ pub fn draw_poly(x: f32, y: f32, sides: u8, radius: f32, rotation: f32, color: C
 #[gen_stub_pyfunction]
 #[pyfunction]
 pub fn draw_texture(texture: Texture2D,x: f32, y: f32, color: Color ) {
-    let c = mq::Color::new(color.r,color.g,color.b,color.a);
     let innerTexture: mq::Texture2D  = texture.into();
-    COMMAND_QUEUE.push( Command::DrawTexture{ texture: innerTexture, x, y, color: c   }  );
+    COMMAND_QUEUE.push( Command::DrawTexture{ texture: innerTexture, x, y, color: color.into()   }  );
    
 }
 
@@ -435,6 +469,24 @@ pub fn get_keys_down() -> HashSet<KeyCode> {
 }
 
 
+#[gen_stub_pyfunction]
+#[pyfunction]
+pub fn is_quit_requested() -> PyResult<bool> {
+    let (sender, receiver) = PChannel::PChannel::sync_channel(1);
+    COMMAND_QUEUE.push( Command::IsQuitRequested(sender));
+    Ok(receiver.recv()?)
+}
+#[gen_stub_pyfunction]
+#[pyfunction]
+pub fn prevent_quit() {
+    COMMAND_QUEUE.push( Command::PreventQuit);
+}
+#[gen_stub_pyfunction]
+#[pyfunction]
+pub fn set_fullscreen(fullscreen: bool) {
+    COMMAND_QUEUE.push( Command::SetFullscreen(fullscreen));
+}
+
 
 
 /// Return the last pressed key.
@@ -465,6 +517,16 @@ pub fn screen_width() -> f32 {
 
     use crate::engine::FrameInfo as fi;
     *fi::SCREEN_WIDTH.lock().unwrap()
+}
+
+/// Request the window size to be the given value. 
+/// This takes DPI into account.
+/// Note that the OS might decide to give a different size. 
+/// Additionally, the size won't be updated until the next next_frame()
+#[gen_stub_pyfunction]
+#[pyfunction]
+pub fn request_new_screen_size(width: f32, height: f32) {
+    COMMAND_QUEUE.push( Command::RequestNewScreenSize { width, height });
 }
 
 /// TODO: appears to not update when resizing the window?
@@ -500,7 +562,6 @@ pub fn screen_height() -> f32 {
 #[pyfunction]
 #[pyo3(signature = (texture, tint = Color::WHITE()))] 
 pub fn draw_skybox(texture: Texture2D, tint: Color) {
-
     let texture_unpacked = texture.into();
     COMMAND_QUEUE.push(  Command::DrawSkyBox{
         texture: Some(texture_unpacked), tint: tint.into()} );

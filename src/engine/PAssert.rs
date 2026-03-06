@@ -9,12 +9,18 @@ use pyo3::PyErr;
 macro_rules! py_assert {
     ($cond:expr) => {
         if !($cond) {
-            return Err( PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(concat!("Assertion failed: ", stringify!($cond))));
+            return Err($crate::engine::PAssert::py_assert_fail(concat!("Assertion failed: ", stringify!($cond)).to_string()));
         }
     };
     ($cond:expr, $($arg:tt)+) => {
         if !($cond) {
-            return Err(PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(format!($($arg)+)));
+            return Err($crate::engine::PAssert::py_assert_fail(format!($($arg)+)));
         }
     };
+}
+
+#[inline(never)]
+#[cold]
+pub fn py_assert_fail(msg: String) -> pyo3::PyErr {
+    pyo3::PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(msg)
 }

@@ -5,7 +5,7 @@ import math
 
 class PlayerCamera:
 
-    movespeed = 0.2
+    movespeed: float = 0.2
     cam: Camera3D
     yaw: float = 0.0
     pitch: float = -20.0
@@ -14,7 +14,7 @@ class PlayerCamera:
     pitch_speed: float= 2.0
     middleMousePos: Vec2
 
-    def __init__(self, position: Vec3):
+    def __init__(self, position: Vec3 = Vec3.ZERO):
         r"""run once at the start of the program after engine initialization."""
         show_mouse(False)
         set_cursor_grab(True)

@@ -32,14 +32,11 @@ impl Sound {
 
         COMMAND_QUEUE.push( Command::LoadSound { path, sender: tx } );
 
-        let sound  = rx.recv()?;
+        let sound  = rx.recv()??;
+        return Ok(Sound{
+            audio: sound
+        });
 
-        match sound{
-            Ok(s) => { Ok( Sound{audio: s}   )  },
-            Err(e) => {
-                Err(e.into())
-            }
-        }
 
     }
 
