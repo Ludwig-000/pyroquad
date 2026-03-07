@@ -425,7 +425,7 @@ pub async fn proccess_commands_loop() {
                         Object::Cube(c)=> c.draw_each_frame = set,
                         Object::Cylinder(c)=> c.draw_each_frame = set,
                         Object::Mesh(c)=> c.draw_each_frame = set,
-                        Object::Pill(c)=>c.draw_each_frame = set,
+                        Object::Pill(c)=> c.draw_each_frame = set,
                         Object::Sphere(c)=> c.draw_each_frame = set,
                     }
                 }

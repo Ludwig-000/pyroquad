@@ -1,3 +1,4 @@
+use macroquad::prelude;
 use pyo3::prelude::*;
 use pyo3_stub_gen::{derive::*};
 
@@ -99,4 +100,14 @@ impl Shader{
         todo!()
     }
     
+}
+
+
+/// Not yet implmented, but will be used to set uniform variables for shaders.
+#[gen_stub_pyclass_enum]
+#[pyclass]
+#[derive(Debug)]
+pub enum ShaderSource {
+    Glsl { vertex: String, fragment: String },
+    Msl { program: String },
 }

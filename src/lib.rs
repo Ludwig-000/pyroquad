@@ -135,6 +135,7 @@ pub fn _pyroquad( m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<crate::py_abstractions::Textures_and_Images::Image>()?;
     m.add_class::<crate::py_abstractions::Camera::Camera2D>()?;
     m.add_class::<crate::py_abstractions::Camera::Camera3D>()?;
+    m.add_class::<crate::py_abstractions::Camera::Projection>()?;
     m.add_function(wrap_pyfunction!(crate::py_abstractions::RenderTarget::render_target_msaa, m)?)?;
     m.add_function(wrap_pyfunction!(crate::py_abstractions::RenderTarget::render_target, m)?)?;
 
@@ -163,9 +164,14 @@ pub fn _pyroquad( m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<crate::py_abstractions::structs::ThreeDObjects::ColliderOptions::ColliderOptions>()?;
 
     m.add_class::<crate::py_abstractions::Shader::Shader>()?;
+    m.add_class::<crate::py_abstractions::Shader::ShaderSource>()?;
     m.add_class::<crate::py_abstractions::KeyCode::KeyCode>()?;
 
     m.add_class::<crate::py_abstractions::MouseButton::MouseButton>()?;
+
+    m.add_class::<crate::py_abstractions::UniformType::UniformType>()?;
+    m.add_class::<crate::py_abstractions::UniformType::EulerRot>()?;
+    m.add_class::<crate::py_abstractions::UniformType::Comparison>()?;
 
 
 
@@ -174,33 +180,9 @@ pub fn _pyroquad( m: &Bound<'_, PyModule>) -> PyResult<()> {
 
 define_stub_info_gatherer!(stub_info);
 
-/*
-
-list of macroquad enums
-
-   mq::Comparison
-    mq::EulerRot
-    mq::ImageFormat
-    mq::MouseButton
-    mq::Projection
-    mq::ShaderError
-    mq::ShaderSource
-    mq::TouchPhase
-    mq::UniformType
-
-
-
-
-*/
-
-
-
-
 
 /*
 list of macroquad::prelude functions
-
-
 
     mq::build_textures_atlas
     mq::cartesian_to_polar
@@ -209,7 +191,6 @@ list of macroquad::prelude functions
     mq::gl_use_material
     mq::load_material
     mq::measure_text
-    
 
 
 

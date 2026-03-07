@@ -13,3 +13,4 @@ pub mod KeyCode;
 pub mod Shader;
 pub mod RenderTarget;
 pub mod Text;
+pub mod UniformType;
