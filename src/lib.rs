@@ -1,7 +1,4 @@
-//#![allow(warnings)]
 #![allow(non_snake_case)] // alot of Python Constants are defined via function, so this prevents compiler spam.
-//#![allow(unused_variables)] // for now.
-//#![allow(dead_code)]
 
 #![warn(clippy::large_enum_variant)]
 
@@ -22,14 +19,10 @@ mod py_abstractions;
 
 /// TODO:
 /// make FileData an ARC
-/// 
-/// AAAND
-/// 
-/// check if Font needs to be a PARC
 #[pymodule]
 #[pyo3(gil_used = false)]
 pub fn _pyroquad( m: &Bound<'_, PyModule>) -> PyResult<()> {
-
+    
     m.add_function(wrap_pyfunction!(crate::py_abstractions::py_functions::activate_engine, m)?)?;
     
     m.add_function(wrap_pyfunction!(crate::py_abstractions::py_functions::draw_all_objects, m)?)?;
@@ -149,7 +142,9 @@ pub fn _pyroquad( m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<crate::py_abstractions::structs::GLAM::BVec2::BVec2>()?;
     m.add_class::<crate::py_abstractions::structs::GLAM::BVec3::BVec3>()?;
     m.add_class::<crate::py_abstractions::structs::GLAM::Vec3::Vec3>()?;
+    m.add_class::<crate::py_abstractions::structs::GLAM::Vec4::Vec4>()?;
     m.add_class::<crate::py_abstractions::structs::GLAM::Vec2::Vec2>()?;
+    m.add_class::<crate::py_abstractions::structs::GLAM::Mat4::Mat4>()?;
 
 
     m.add_class::<crate::py_abstractions::structs::ThreeDObjects::Cube::Cube>()?;
@@ -172,8 +167,6 @@ pub fn _pyroquad( m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<crate::py_abstractions::UniformType::UniformType>()?;
     m.add_class::<crate::py_abstractions::UniformType::EulerRot>()?;
     m.add_class::<crate::py_abstractions::UniformType::Comparison>()?;
-
-
 
     Ok(())
 }

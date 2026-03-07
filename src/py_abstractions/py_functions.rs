@@ -85,11 +85,10 @@ pub fn activate_engine( conf: Option<Config>) -> PyResult<()>{
     });
 
     
-
-    match rx.recv() {
-        Ok(_) => Ok(()),
-        Err(_) => Err(pyo3::exceptions::PyRuntimeError::new_err("Engine failed to initialize")),
-    }
+    Ok(rx.recv().map_err(|_| {
+        ENGINE_CURRENTLY_ACTIVE.store(false, Ordering::SeqCst);
+        pyo3::exceptions::PyRuntimeError::new_err("Engine failed to initialize")
+    })?)
 }
 
 
