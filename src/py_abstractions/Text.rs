@@ -6,14 +6,14 @@ use macroquad::prelude as mq;
 
 use pyo3_stub_gen::derive::* ;
 
-use crate::{engine::PChannel::PChannel, py_abstractions::{Loading::FileData::FileData, Textures_and_Images::FilterMode}};
+use crate::{engine::{PArc::PArc, PChannel::PChannel}, py_abstractions::{Loading::FileData::FileData, Textures_and_Images::FilterMode}};
 use crate::engine::CoreLoop::COMMAND_QUEUE;
 use crate::engine::CoreLoop::Command;
 #[gen_stub_pyclass]
 #[pyclass]
 #[derive(Clone)]
 pub struct Font {
-    font: mq::Font,
+    font: PArc<mq::Font>,
 }
 
 
@@ -69,12 +69,12 @@ impl Font {
 
 impl From<mq::Font> for Font{
     fn from(value: mq::Font) -> Self {
-        Font { font: value }
+        Font { font: PArc::new(value) }
     }
 }
 impl From<Font> for mq::Font{
     fn from(value: Font) -> Self {
-        value.font
+        (*value.font).clone()
     }
 }
 

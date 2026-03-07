@@ -6,20 +6,18 @@ use crate::engine::CoreLoop::Command;
 use std::fmt::{Debug, Formatter};
 
 /// Pythonic Arc.
-/// this Wrapper ensures the object gets dropped in the same Thread it was created in.
+/// this Wrapper ensures the object gets dropped on the macroquad thread.
 /// (kinda)
 /// This is mostly useful for anything that implements 'Texture2D', since it has an
 /// unsafe destructor that panics if run on the python thread.
 pub struct PArc<T: Send + Sync + 'static>{
     item: Arc<T>,
-    origin: thread::ThreadId,
 }
 
 impl<T: Send + Sync + 'static> PArc<T>{
     pub fn new(item: T)-> Self{
-        let id: thread::ThreadId = thread::current().id();
         let item  =Arc::new(item);
-        PArc {  item, origin: id, }
+        PArc {  item }
     }
 }
 
@@ -42,10 +40,6 @@ impl<T: Send + Sync + 'static> Drop for PArc<T> {
 
         let count = Arc::strong_count(&self.item);
         if  count > 1  {return}
-        
-
-        let id = thread::current().id();
-        if id == self.origin {return}
 
         
         let cloned_arc  =self.item.clone();
@@ -57,8 +51,7 @@ impl<T: Send + Sync + 'static> Drop for PArc<T> {
 impl<T: Send + Sync + 'static> Clone for PArc<T> {
     fn clone(&self) -> Self {
         PArc {
-            item: self.item.clone(),
-            origin: self.origin,
+            item: self.item.clone()
         }
     }
 }
