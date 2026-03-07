@@ -33,9 +33,9 @@ impl Sound {
         COMMAND_QUEUE.push( Command::LoadSound { path, sender: tx } );
 
         let sound  = rx.recv()??;
-        return Ok(Sound{
+        Ok(Sound{
             audio: sound
-        });
+        })
 
 
     }

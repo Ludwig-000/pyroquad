@@ -28,7 +28,7 @@ mod py_abstractions;
 /// check if Font needs to be a PARC
 #[pymodule]
 #[pyo3(gil_used = false)]
-pub fn _pyroquad( py: Python<'_>, m: &Bound<'_, PyModule>) -> PyResult<()> {
+pub fn _pyroquad( m: &Bound<'_, PyModule>) -> PyResult<()> {
 
     m.add_function(wrap_pyfunction!(crate::py_abstractions::py_functions::activate_engine, m)?)?;
     
@@ -79,6 +79,12 @@ pub fn _pyroquad( py: Python<'_>, m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(crate::py_abstractions::Mouse::show_mouse, m)?)?;
     m.add_function(wrap_pyfunction!(crate::py_abstractions::Mouse::clear_input_queue, m)?)?;
     m.add_function(wrap_pyfunction!(crate::py_abstractions::Mouse::is_simulating_mouse_with_touch, m)?)?;
+    m.add_function(wrap_pyfunction!(crate::py_abstractions::Mouse::simulate_mouse_with_touch, m)?)?;
+    m.add_function(wrap_pyfunction!(crate::py_abstractions::Mouse::touches, m)?)?;
+    m.add_function(wrap_pyfunction!(crate::py_abstractions::Mouse::touches_local, m)?)?;
+    
+    m.add_class::<crate::py_abstractions::Mouse::Touch>()?;
+    m.add_class::<crate::py_abstractions::Mouse::TouchPhase>()?;
 
     m.add_function(wrap_pyfunction!(crate::py_abstractions::py_functions::get_screen_data, m)?)?;
     m.add_function(wrap_pyfunction!(crate::py_abstractions::py_functions::screen_height, m)?)?;
@@ -92,7 +98,9 @@ pub fn _pyroquad( py: Python<'_>, m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(crate::py_abstractions::py_functions::draw_plane, m)?)?;
     m.add_function(wrap_pyfunction!(crate::py_abstractions::py_functions::draw_cube, m)?)?;
 
-
+    m.add_function(wrap_pyfunction!(crate::py_abstractions::py_functions::polar_to_cartesian, m)?)?;
+    m.add_function(wrap_pyfunction!(crate::py_abstractions::py_functions::set_pc_assets_folder, m)?)?;
+    
     m.add_function(wrap_pyfunction!(crate::py_abstractions::py_functions::draw_skybox, m)?)?;
 
     m.add_function(wrap_pyfunction!(crate::py_abstractions::py_functions::set_fullscreen, m)?)?;
@@ -201,15 +209,8 @@ list of macroquad::prelude functions
     mq::gl_use_material
     mq::load_material
     mq::measure_text
-
-    mq::polar_to_cartesian
-    mq::quat
     
 
-    mq::set_pc_assets_folder
-    mq::simulate_mouse_with_touch
-    mq::touches
-    mq::touches_local
 
 
 */

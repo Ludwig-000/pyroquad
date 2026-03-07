@@ -22,31 +22,3 @@ impl ThreeDObjCache{
     }
 
 }
-
-
-#[derive(Clone,Copy,PartialEq)]
-pub struct TwoDObjCache{
-    // an object's data can only be cached, if it cannot be influenced by anything else.
-    // F.E.: gravity.
-
-    pub location: mq::Vec2,
-    pub rotation: mq::Vec2,
-    pub scale: mq::Vec2,
-    pub color: mq::Color,
-}
-impl TwoDObjCache {
-    pub fn new(
-        location: mq::Vec2, 
-        rotation: mq::Vec2, 
-        scale: mq::Vec2, 
-        color: mq::Color)-> Option<TwoDObjCache>{
-
-        Some(TwoDObjCache{
-            location,
-            rotation,
-            scale,
-            color,
-        })
-    }
-
-}

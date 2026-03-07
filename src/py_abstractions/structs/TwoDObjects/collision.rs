@@ -114,5 +114,5 @@ pub fn collides_with_circl_circ(lhs: &Circle, rhs: &Circle) -> bool{
     let dist_sq=  lhs.position.distance_squared(rhs.position);
     let combined_radius = lhs.radius + rhs.radius;
 
-    if dist_sq > (combined_radius * combined_radius){false} else {true}
+    dist_sq <= (combined_radius * combined_radius)
 }

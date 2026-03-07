@@ -269,8 +269,17 @@ Example:
                         weak_bound.call0().ok()?.extract::<Objct<'py>>().ok()
                     }).collect())
                 }
+
+                /// Checks if the object collides with any other 3D object.
+                pub fn does_collide(&self)-> PyResult<bool>{
+                    let (sender, receiver) = PChannel::sync_channel(1);
+                    let command = Command::DoesObjectCollide { key: self.key, sender };
+                    COMMAND_QUEUE.push(command);
+                    Ok(receiver.recv()?)
+                }
             }
         }
+    
 
     };
 }

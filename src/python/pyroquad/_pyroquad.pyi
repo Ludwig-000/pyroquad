@@ -4973,6 +4973,10 @@ class Cube:
         ...   i.pos = Vec3.ZERO()
         ```
         """
+    def does_collide(self) -> builtins.bool:
+        r"""
+        Checks if the object collides with any other 3D object.
+        """
     def set_draw_each_frame(self, drawing:builtins.bool) -> None:
         r"""
         Decides wether to draw the Cube during all subsequent 'draw_all_objects()'.
@@ -5176,6 +5180,10 @@ class Cylinder:
         >>>for i in intersected:
         ...   i.pos = Vec3.ZERO()
         ```
+        """
+    def does_collide(self) -> builtins.bool:
+        r"""
+        Checks if the object collides with any other 3D object.
         """
 
 class FileData:
@@ -5488,6 +5496,10 @@ class Mesh:
         ...   i.pos = Vec3.ZERO()
         ```
         """
+    def does_collide(self) -> builtins.bool:
+        r"""
+        Checks if the object collides with any other 3D object.
+        """
     def set_draw_each_frame(self, drawing:builtins.bool) -> None:
         r"""
         Decides wether to draw the Mesh during all subsequent 'draw_all_objects()'.
@@ -5721,6 +5733,10 @@ class Pill:
         >>>for i in intersected:
         ...   i.pos = Vec3.ZERO()
         ```
+        """
+    def does_collide(self) -> builtins.bool:
+        r"""
+        Checks if the object collides with any other 3D object.
         """
     def __new__(cls, position:Vec3=..., rotation:Vec3=..., scale:Vec3=..., color:Color=..., texture:typing.Optional[Texture2D]=None, collider_type:ColliderOptions=...) -> Pill: ...
     def remove_tick(self) -> None:
@@ -6070,6 +6086,10 @@ class Sphere:
         ...   i.pos = Vec3.ZERO()
         ```
         """
+    def does_collide(self) -> builtins.bool:
+        r"""
+        Checks if the object collides with any other 3D object.
+        """
     def tick(self, function:typing.Any) -> None:
         r"""
         Add a function to this object, which will automatically be executed each frame.
@@ -6192,6 +6212,21 @@ class Texture2D:
         
         This operation can be expensive.
         """
+
+class Touch:
+    @property
+    def id(self) -> builtins.int: ...
+    @id.setter
+    def id(self, value: builtins.int) -> None: ...
+    @property
+    def phase(self) -> TouchPhase: ...
+    @phase.setter
+    def phase(self, value: TouchPhase) -> None: ...
+    @property
+    def position(self) -> Vec2: ...
+    @position.setter
+    def position(self, value: Vec2) -> None: ...
+    def __new__(cls, id:builtins.int, phase:TouchPhase, position:Vec2) -> Touch: ...
 
 class Vec2:
     ZERO: Vec2
@@ -7380,6 +7415,13 @@ class Projection(Enum):
     Perspective = ...
     Orthographics = ...
 
+class TouchPhase(Enum):
+    Started = ...
+    Stationary = ...
+    Moved = ...
+    Ended = ...
+    Cancelled = ...
+
 def activate_engine(conf:typing.Optional[Config]=None) -> None:
     r"""
     [!] This should generally be the first function call.
@@ -7457,7 +7499,7 @@ def draw_grid(slices:builtins.int, spacing:builtins.float, axes_color:Color, oth
 
 def draw_hexagon(x:builtins.float, y:builtins.float, size:builtins.float, border:builtins.float, vertical:builtins.bool, border_color:Color, fill_color:Color) -> None: ...
 
-def draw_line(start:Vec3, end:Vec3, color:Color) -> None: ...
+def draw_line(x1:builtins.float, y1:builtins.float, x2:builtins.float, y2:builtins.float, thickness:builtins.float, color:Color) -> None: ...
 
 def draw_line_3d(start:Vec3, end:Vec3, color:Color) -> None: ...
 
@@ -7601,7 +7643,8 @@ def is_quit_requested() -> builtins.bool: ...
 
 def is_simulating_mouse_with_touch() -> builtins.bool:
     r"""
-    Clears input queue
+    This is set to true by default, meaning touches will raise mouse events in addition to raising touch events.
+    If set to false, touches won't affect mouse events.
     """
 
 def load_file(path:builtins.str) -> FileData:
@@ -7615,6 +7658,11 @@ def next_frame(physics_step:typing.Optional[builtins.float]=0.0) -> None:
     blocks until the frame has been drawn.
     
     also, this function cleans up dropped memory such as Texture2D
+    """
+
+def polar_to_cartesian(rho:builtins.float, theta:builtins.float) -> Vec2:
+    r"""
+    Converts 2d polar coordinates to 2d cartesian coordinates.
     """
 
 def pop_camera_state() -> None: ...
@@ -7661,9 +7709,52 @@ def set_default_camera() -> None:
 
 def set_fullscreen(fullscreen:builtins.bool) -> None: ...
 
+def set_pc_assets_folder(path:builtins.str) -> None:
+    r"""
+    There are super common project layout like this:
+    ```skip
+       .
+       ├── assets
+       ├── └── nice_texture.png
+       ├── src
+       ├── └── main.rs
+       └── Cargo.toml
+    ```
+    when such a project being run on desktop assets should be referenced as
+    "assets/nice_texture.png".
+    While on web or android it usually is just "nice_texture.png".
+    The reason: on PC assets are being referenced relative to current active directory/executable path. In most IDEs its the root of the project.
+    While on, say, android it is:
+    ```skip
+    [package.metadata.android]
+    assets = "assets"
+    ```
+    And therefore on android assets are referenced from the root of "assets" folder.
+    
+    In the future there going to be some sort of meta-data file for PC as well.
+    But right now to resolve this situation and keep pathes consistent across platforms
+    `set_pc_assets_folder("assets");`call before first `load_file`/`load_texture` will allow using same pathes on PC and Android.
+    """
+
 def show_mouse(option:builtins.bool) -> None: ...
 
+def simulate_mouse_with_touch(option:builtins.bool) -> None:
+    r"""
+    This is set to true by default, meaning touches will raise mouse events in addition to raising touch events.
+    If set to false, touches won't affect mouse events.
+    """
+
 def step_physics(distance:builtins.float) -> None: ...
+
+def touches() -> builtins.list[Touch]:
+    r"""
+    Return touches with positions in pixels.
+    """
+
+def touches_local() -> builtins.list[Touch]:
+    r"""
+    Return touches with positions in range [-1; 1].
+    """
 
 def write_to_file(contents:FileData, path:builtins.str) -> None:
     r"""

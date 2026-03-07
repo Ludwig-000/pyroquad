@@ -113,11 +113,10 @@ impl RapierWorld{
         
         // Optional: If the object is sleeping, you might want to wake it up so physics 
         // reacts to the size change immediately.
-        if let Some(parent_handle) = collider.parent() {
-            if let Some(rb) = self.rigidBS.get_mut(parent_handle) {
-                rb.wake_up(true);
+        if let Some(parent_handle) = collider.parent()
+            && let Some(rb) = self.rigidBS.get_mut(parent_handle) {
+                 rb.wake_up(true);
             }
-        }
     }
 
     pub fn step(&mut self, distance: f32) {
@@ -384,7 +383,7 @@ impl RapierWorld{
         );
     }
 
-    pub fn has_collision(&mut self, collider_handle: ColliderHandle) -> bool {
+    pub fn has_collision(&self, collider_handle: ColliderHandle) -> bool {
         
         let has_contacts = self.narrowP
             .contact_pairs_with(collider_handle)

@@ -7,6 +7,7 @@ use lazy_static::*;
 
 use crossbeam::queue::SegQueue;
 
+use macroquad::input::Touch;
 use macroquad::models::DrawSphereParams;
 use macroquad::prelude as mq;
 use macroquad::audio as au;
@@ -45,6 +46,9 @@ use crate::engine::Objects::ObjectManagement::ObjectManagement;
 
 
 pub enum Command {
+    Touches(PSyncSender<Vec<Touch>>),
+    TouchesLocal(PSyncSender<Vec<Touch>>),
+    SimulateMouseWithTouch(bool),
     LoadTTFFOnt{
         path: String,
         sender: PSyncSender<Result<mq::Font, PError>>
@@ -80,6 +84,10 @@ pub enum Command {
     },
     DrawAll3DObjects(),
     DrawObjectNow(ObjectKey),
+    DoesObjectCollide{
+        key: ObjectKey,
+        sender: PSyncSender<bool>,
+    },
     SetDrawEachFrame{
         key: ObjectKey,
         set: bool,
@@ -260,11 +268,6 @@ pub enum Command {
 
     NextFrame{physics_step: Option<f32>, sender: PChannel::PSyncSender<()>},
 
-    ImgToTexture {
-        image: Arc<mq::Image>,
-        sender: PChannel::PSyncSender<PArc<mq::Texture2D>>,
-    },
-
     LoadImage {
         path: String,
         sender: PChannel::PSyncSender<Result<mq::Image, PError>>,
@@ -305,6 +308,17 @@ pub async fn proccess_commands_loop() {
         while let Some(command) = COMMAND_QUEUE.pop() {
             
             match command {
+                Command::Touches(sender)=>{
+                    let touches = mq::touches();
+                    let _ = sender.send(touches);
+                }
+                Command::TouchesLocal(sender)=>{
+                    let touches = mq::touches_local();
+                    let _ = sender.send(touches);
+                }
+                Command::SimulateMouseWithTouch(option)=>{
+                    mq::simulate_mouse_with_touch(option);
+                }
                 Command::LoadTTFFOnt { path, sender }=>{
                     let font  = mq::load_ttf_font(&path).await;
                     let _ = sender.send( font.map_err(Into::into ) );
@@ -362,6 +376,13 @@ pub async fn proccess_commands_loop() {
                 Command::PhysicsEnum(phys,key )=> {
                     let handle = object_storage.get_handle(key).expect("No physics handle found, yet physics function was called.");
                     object_storage.apply_physics_enum(phys, &handle);
+                }
+                Command::DoesObjectCollide { key, sender }=>{
+                    let mut res = false;
+                    if let Some(handle) = object_storage.get_handle(key){
+                        res = object_storage.physics_world.has_collision(handle.collider_handle);
+                    }
+                    let _ = sender.send(res);
                 }
                 Command::SetCollisionForObject{key, collider}=> {
                     object_storage.set_collision_for_object(key, collider);
@@ -714,13 +735,8 @@ pub async fn proccess_commands_loop() {
                     }
                 Command::GetTextCenter { text, font, font_size, font_scale, rotation, sender }=>{
                     let _ = sender.send(
-                        mq::get_text_center(&text, font.map(Into::into).as_ref(), font_size, font_scale, rotation)
+                        mq::get_text_center(&text, font.as_ref(), font_size, font_scale, rotation)
                     );
-                }
-                
-                Command::ImgToTexture { image, sender }=>{
-                    let tex: PArc<mq::Texture2D> = PArc::new(  mq::Texture2D::from_image(&image));
-                    let _ = sender.send(tex);
                 }
                 Command::SetCamera { camera_2d, camera_3d } => { // merged cam2d and 3d for simplicity.
                     match (camera_2d, camera_3d) {

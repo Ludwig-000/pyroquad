@@ -264,16 +264,14 @@ impl Texture2D {
         
         let (sender, receiver) = PChannel::sync_channel(1);
         
-        let command = Command::ImgToTexture {
-            image: imagePointer.clone(),
-            sender,
-        };
+        let command = 
+            Command::TexImEnum(EngineTexImgEnum::TextureImageToTexture { im: imagePointer.clone(), sender});
 
         COMMAND_QUEUE.push(command);
 
         let mq_texture = receiver.recv()?;
         let ourTexture=  Texture2D{
-            texture: mq_texture,
+            texture: PArc::new(mq_texture),
         };
         Ok(ourTexture)
         
@@ -338,8 +336,7 @@ impl Texture2D {
         let (sy,rx) = PChannel::sync_channel(1);
         let c = EngineTexImgEnum::TextureWidth { tex: (*self.texture).clone(), sender: sy };
         COMMAND_QUEUE.push(Command::TexImEnum(c));
-        let res =rx.recv()?;
-        Ok(res.into())
+        Ok(rx.recv()?)
     }
 
     /// Returns the height of this texture.
@@ -347,16 +344,14 @@ impl Texture2D {
         let (sy,rx) = PChannel::sync_channel(1);
         let c = EngineTexImgEnum::TextureHeight{ tex: (*self.texture).clone(), sender: sy };
         COMMAND_QUEUE.push(Command::TexImEnum(c));
-        let res = rx.recv()?;
-        Ok(res.into())
+        Ok(rx.recv()?)
     }
     /// Returns the size of this texture
     pub fn size(&self) -> PyResult<Vec2> {
         let (sy,rx) = PChannel::sync_channel(1);
         let c = EngineTexImgEnum::TextureSize{ tex: (*self.texture).clone(), sender: sy };
         COMMAND_QUEUE.push(Command::TexImEnum(c));
-        let res = rx.recv()?;
-        Ok(res.into())
+        Ok(rx.recv()?.into())
     }
 
     pub fn set_filter(&mut self, filter_mode: FilterMode){

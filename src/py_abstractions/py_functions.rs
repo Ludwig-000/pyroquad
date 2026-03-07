@@ -143,8 +143,10 @@ pub fn draw_affine_parallelepiped(offset: Vec3, e1: Vec3,e2: Vec3,e3: Vec3,textu
 #[pyfunction]
 pub fn draw_affine_parallelogram(offset: Vec3, e1: Vec3,e2: Vec3,e3: Vec3,texture: Option<Texture2D>,color: Color) {
     
-    COMMAND_QUEUE.push(Command::DrawAfflineParallelpiped { offset: offset.into(), e1: e1.into(), e2: e2.into(), e3: e3.into(), texture: texture.map(Into::into), color: color.into() });
+    COMMAND_QUEUE.push(Command::DrawAfflineParallogram { offset: offset.into(), e1: e1.into(), 
+        e2: e2.into(), texture: texture.map(Into::into), color: color.into() });
 }
+
 #[gen_stub_pyfunction]
 #[pyfunction]
 pub fn step_physics(distance: f32) {
@@ -165,6 +167,8 @@ pub fn draw_arc( x: f32,
     
     COMMAND_QUEUE.push(Command::DrawArc { x, y, sides, radius, rotation, thickness, arc, color: color.into() });
 }
+
+
 
 #[gen_stub_pyfunction]
 #[pyfunction]
@@ -237,8 +241,8 @@ pub fn draw_line_3d( start: Vec3, end: Vec3, color: Color){
 }
 #[gen_stub_pyfunction]
 #[pyfunction]
-pub fn draw_line( start: Vec3, end: Vec3, color: Color){
-    COMMAND_QUEUE.push(Command::DrawLine3D { start: start.into(), end: end.into(), color: color.into()});
+pub fn draw_line(x1: f32, y1: f32, x2: f32, y2: f32, thickness: f32, color: Color){
+    COMMAND_QUEUE.push(Command::DrawLine { x1, y1, x2, y2, thickness, color: color.into() });
 }
 
 
@@ -249,8 +253,7 @@ pub fn draw_line( start: Vec3, end: Vec3, color: Color){
 #[pyfunction]
 pub fn draw_grid(slices: u32, spacing: f32, axes_color: Color, other_color: Color) {
     let c =Command::DrawGrid { slices, spacing, axes_color: axes_color.into(), other_color: other_color.into() };
-
-    COMMAND_QUEUE.push(c );
+    COMMAND_QUEUE.push(c);
 }
 
 /// draws a flat plane in 3d space.
@@ -602,89 +605,39 @@ pub fn draw_skybox(texture: Texture2D, tint: Color) {
 }
 
 
-//none yet here
-
-/*
-list of macroquad::prelude functions
-
-
-
-    mq::build_textures_atlas
-    mq::camera_font_scale
-    mq::cartesian_to_polar
-    mq::clear_input_queue
-
-    mq::draw_line_3d
-    mq::draw_mesh
-    mq::draw_multiline_text
-    mq::draw_plane
-    mq::draw_poly_lines
-    mq::draw_rectangle
-    mq::draw_rectangle_ex
-    mq::draw_rectangle_lines
-    mq::draw_rectangle_lines_ex
-    mq::draw_sphere
-    mq::draw_sphere_ex
-    mq::draw_sphere_wires
-
-    mq::draw_text
-    mq::draw_text_ex
-
-    mq::draw_texture
-    mq::draw_texture_ex
-    mq::draw_triangle
-    mq::draw_triangle_lines
-    mq::get_char_pressed
-    mq::get_dropped_files
-    mq::get_fps
-    mq::get_frame_time
-    mq::get_internal_gl
-    mq::get_keys_down
-    mq::get_keys_pressed
-    mq::get_keys_released
-    mq::get_last_key_pressed
-    mq::get_screen_data
-    mq::get_text_center
-    mq::get_time
-    mq::gl_use_default_material
-    mq::gl_use_material
-    mq::is_key_down
-    mq::is_key_pressed
-    mq::is_key_released
-    mq::is_mouse_button_down
-    mq::is_mouse_button_pressed
-    mq::is_mouse_button_released
-    mq::is_quit_requested
-    mq::is_simulating_mouse_with_touch
-    mq::load_material
-    mq::load_string
-    mq::load_ttf_font_from_bytes
-    mq::measure_text
-    mq::mouse_delta_position
-    mq::mouse_position
-    mq::mouse_position_local
-    mq::mouse_wheel
-    mq::polar_to_cartesian
-    mq::pop_camera_state
-    mq::prevent_quit
-    mq::push_camera_state
-    mq::quat
-    mq::render_target
-    mq::render_target_ex
-    mq::render_target_msaa
-    mq::request_new_screen_size
-    mq::screen_dpi_scale
-    mq::screen_height
-    mq::screen_width
-    mq::set_cursor_grab
-    mq::set_default_filter_mode
-    mq::set_fullscreen
-    mq::set_panic_handler
-    mq::set_pc_assets_folder
-    mq::show_mouse
-    mq::simulate_mouse_with_touch
-    mq::touches
-    mq::touches_local
+/// Converts 2d polar coordinates to 2d cartesian coordinates.
+#[gen_stub_pyfunction]
+#[pyfunction]
+pub fn polar_to_cartesian(rho: f32, theta: f32) -> Vec2{
+    mq::polar_to_cartesian(rho, theta).into()
+}
 
 
-*/
+/// There are super common project layout like this:
+/// ```skip
+///    .
+///    ├── assets
+///    ├── └── nice_texture.png
+///    ├── src
+///    ├── └── main.rs
+///    └── Cargo.toml
+/// ```
+/// when such a project being run on desktop assets should be referenced as
+/// "assets/nice_texture.png".
+/// While on web or android it usually is just "nice_texture.png".
+/// The reason: on PC assets are being referenced relative to current active directory/executable path. In most IDEs its the root of the project.
+/// While on, say, android it is:
+/// ```skip
+/// [package.metadata.android]
+/// assets = "assets"
+/// ```
+/// And therefore on android assets are referenced from the root of "assets" folder.
+///
+/// In the future there going to be some sort of meta-data file for PC as well.
+/// But right now to resolve this situation and keep pathes consistent across platforms
+/// `set_pc_assets_folder("assets");`call before first `load_file`/`load_texture` will allow using same pathes on PC and Android.
+#[gen_stub_pyfunction]
+#[pyfunction]
+pub fn set_pc_assets_folder(path: String){
+    mq::set_pc_assets_folder(&path);
+}

@@ -83,14 +83,6 @@ fn handle_Symphonia_error(e: symphonia::core::errors::Error, extra: &str ) -> py
 }
 
 
-fn unstring(s: Option<String>)-> String{
-    match s {
-       None => "".to_string(),
-       Some(ss) => ss,
-    }
-}
-
-
 impl From<macroquad::Error> for PError {
     fn from(value: macroquad::Error) -> PError {
         PError::MacroquadErr(value)

@@ -106,7 +106,7 @@ fn load_shader(shader: ShaderKind, current_cam: &Option<macroquad::prelude::Came
     }
     ShaderKind::SkyBox => {
         
-        let current_cam = clone_camera3d(&current_cam.as_ref().unwrap());
+        let current_cam = clone_camera3d(current_cam.as_ref().unwrap());
         use macroquad::prelude as mq;
         let material = crate::engine::SHADERS::shaderLoader::get_shader(1).expect("Skybox shader not loaded");
 
