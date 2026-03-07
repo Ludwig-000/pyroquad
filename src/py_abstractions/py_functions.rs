@@ -6,6 +6,8 @@
 // also, any conversion between my abstracted pyclasses and the structs used in macroquad is being done here.
 // ( example:  Color -> mq::Color )
 
+use crate::py_abstractions::Text::Font;
+use crate::py_abstractions::Text::TextDimensions;
 use crate::py_abstractions::structs::ThreeDObjects::ObjectFunctionStorage;
 use crate::py_abstractions::Textures_and_Images::*;
 use macroquad::prelude as mq;
@@ -309,9 +311,22 @@ pub fn next_frame(py: Python<'_>, physics_step: Option<f32>) -> PyResult<()>{
 ///
 #[gen_stub_pyfunction]
 #[pyfunction]
-pub fn draw_text(text: String, x: f32, y: f32, font_size: f32, color: Color) {
-    COMMAND_QUEUE.push(Command::DrawText {text, x, y, font_size, color: color.into()});
+pub fn draw_text(text: String, x: f32, y: f32, font_size: f32, color: Color) -> PyResult<TextDimensions>{
+    let (sender, receiver) = PChannel::PChannel::sync_channel(1);
+    COMMAND_QUEUE.push(Command::DrawText {text, x, y, font_size, color: color.into(), sender});
+    Ok(receiver.recv()?.into())
 }
+
+#[gen_stub_pyfunction]
+#[pyfunction]
+pub fn get_text_center(text: String, font: Option<Font>, font_size: u16, font_scale: f32, rotation: f32) -> PyResult<Vec2>{
+    let (sender, receiver) = PChannel::PChannel::sync_channel(1);
+    COMMAND_QUEUE.push(Command::GetTextCenter { text, font: font.map(Into::into), font_size, font_scale, rotation, sender });
+
+    Ok(receiver.recv()?.into())
+}
+
+
 #[gen_stub_pyfunction]
 #[pyfunction]
 pub fn draw_multiline_text(text: String, x: f32, y: f32, font_size: f32, line_distance_factor: Option<f32>, color: Color) {

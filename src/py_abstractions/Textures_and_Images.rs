@@ -2,6 +2,7 @@
 use pyo3::prelude::*;
  
 use macroquad::prelude as mq;
+use rayon::iter::Filter;
 use std::sync::Arc;
 
 use crate::engine::PChannel::PChannel;
@@ -394,7 +395,22 @@ pub enum FilterMode{
     Nearest,
     Linear
 }
-
+impl From<mq::FilterMode> for FilterMode{
+    fn from(value: mq::FilterMode) -> Self {
+        match value {
+            mq::FilterMode::Linear => FilterMode::Linear,
+            mq::FilterMode::Nearest => FilterMode::Nearest,
+        }
+    }
+}
+impl From<FilterMode> for mq::FilterMode{
+    fn from(value: FilterMode) -> Self {
+        match value{
+            FilterMode::Linear => mq::FilterMode::Linear,
+            FilterMode::Nearest => mq::FilterMode::Nearest,
+        }
+    }
+}
 use std::ops::Deref;
 
 impl Deref for Texture2D {

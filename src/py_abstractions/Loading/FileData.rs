@@ -1,7 +1,7 @@
 
 use pyo3::prelude::*;
 use pyo3_stub_gen::derive::* ;
-use crate::py_abstractions::{Loading::Loading::load_file, structs::{ ThreeDObjects::{ColliderOptions::ColliderOptions, Mesh::Mesh}}};
+use crate::py_abstractions::{Loading::Loading::load_file, Text::Font, structs::ThreeDObjects::{ColliderOptions::ColliderOptions, Mesh::Mesh}};
 use crate::py_abstractions::Audio::Sound;
 use crate::py_abstractions::Textures_and_Images::{Image,Texture2D};
 use crate::py_abstractions::Textures_and_Images;
@@ -72,6 +72,10 @@ impl FileData{
     #[pyo3(signature = (texture=None,collider_type = ColliderOptions::NONE()))]
     pub fn to_mesh_data(&self, py: Python<'_>, texture: Option<Texture2D>,collider_type: ColliderOptions)-> PyResult<Py<Mesh>>{
         Mesh::from_file_data(py, self.clone(),texture,collider_type)
+    }
+
+    pub fn to_font(&self)-> PyResult<Font>{
+        Font::load_ttf_font_from_bytes(self.clone())
     }
     
 }

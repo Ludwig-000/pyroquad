@@ -45,6 +45,21 @@ use crate::engine::Objects::ObjectManagement::ObjectManagement;
 
 
 pub enum Command {
+    LoadTTFFOnt{
+        path: String,
+        sender: PSyncSender<Result<mq::Font, PError>>
+    },
+    PopulateFontCache{
+        font: mq::Font, characters: Vec<char>, size: u16
+    },
+    SetFontFilter{
+        font: mq::Font,
+        filter: mq::FilterMode
+    },
+    LoadTTFFontFromBytes{
+        bytes: Vec<u8>,
+        sender: PSyncSender<Result<mq::Font, PError>>
+    },
     RequestNewScreenSize{
         width: f32,
         height: f32
@@ -212,13 +227,21 @@ pub enum Command {
     DrawPoly{ x: f32, y: f32, sides: u8, radius: f32, rotation: f32, color: mq::Color},
     DrawPolyLines{ x: f32,y: f32,sides: u8,radius: f32,rotation: f32,thickness: f32,color: mq::Color},
 
-    DrawText{text: String, x: f32, y: f32, font_size: f32, color: mq::Color},
+    DrawText{text: String, x: f32, y: f32, font_size: f32, color: mq::Color, sender: PSyncSender<mq::TextDimensions>},
+    GetTextCenter{text: String,
+        font: Option<mq::Font>,
+        font_size: u16,
+        font_scale: f32,
+        rotation: f32,
+        sender: PSyncSender<mq::Vec2>
+    },
     DrawMultilineText{text: String,
         x: f32,
         y: f32,
         font_size: f32,
         line_distance_factor: Option<f32>,
-        color: mq::Color},
+        color: mq::Color
+    },
 
     DrawTexture{ texture: mq::Texture2D, x: f32, y: f32, color: mq::Color   },
     
@@ -272,6 +295,19 @@ pub async fn proccess_commands_loop() {
         while let Some(command) = COMMAND_QUEUE.pop() {
             
             match command {
+                Command::LoadTTFFOnt { path, sender }=>{
+                    let font  = mq::load_ttf_font(&path).await;
+                    let _ = sender.send( font.map_err(Into::into ) );
+                }
+                Command::LoadTTFFontFromBytes { bytes, sender }=>{
+                    let _ = sender.send( mq::load_ttf_font_from_bytes(&bytes).map_err(Into::into ));
+                }
+                Command::SetFontFilter { font, filter }=> {
+                    let mut font = font;
+                    font.set_filter(filter);
+                }
+                Command::PopulateFontCache { font, characters, size }
+                    => font.populate_font_cache(&characters, size),
                 Command::RequestNewScreenSize { width, height }
                     => mq::request_new_screen_size(width, height),
                 Command::PreventQuit => mq::prevent_quit(),
@@ -281,17 +317,25 @@ pub async fn proccess_commands_loop() {
                     let _ = sender.send(is_quit_requested);
                 }
                 Command::DrawPolyLines { x, y, sides, radius, rotation, thickness, color }
-                    => mq::draw_poly_lines(x, y, sides, radius, rotation, thickness, color),
+                    => {
+                        sm::switch_to_desired_shader(sm::ShaderKind::None, &None);
+                        mq::draw_poly_lines(x, y, sides, radius, rotation, thickness, color)
+                    }
                 Command::DrawAfflineParallogram { offset, e1, e2, texture, color }
-                    => mq::draw_affine_parallelogram(offset, e1, e2, texture.as_ref(), color),
-                Command::DrawMultilineText { text, x, y, font_size, line_distance_factor, color }
-                    => mq::draw_multiline_text(&text, x, y, font_size, line_distance_factor, color),
+                    => {
+                        sm::switch_to_desired_shader(sm::ShaderKind::None, &None);
+                        mq::draw_affine_parallelogram(offset, e1, e2, texture.as_ref(), color)}
+                Command::DrawMultilineText { text, x, y, font_size, line_distance_factor, color } => {
+                        sm::switch_to_desired_shader(sm::ShaderKind::None, &None);
+                        mq::draw_multiline_text(&text, x, y, font_size, line_distance_factor, color)}
                 Command::ClearInputQueue => mq::clear_input_queue(),
                 Command::IsSimulatingMouseWithTouch(sender)=>{
                     let _ = sender.send(mq::is_simulating_mouse_with_touch());
                 }
                 Command::DrawLine { x1, y1, x2, y2, thickness, color }
-                    => mq::draw_line(x1, y1, x2, y2, thickness, color),
+                    => {
+                        sm::switch_to_desired_shader(sm::ShaderKind::None, &None);
+                        mq::draw_line(x1, y1, x2, y2, thickness, color)}
                 Command::TexImEnum(en)=> en.execute(),
                 Command::GlEnum(glenum)=> {
                     let gl  = unsafe {
@@ -632,9 +676,15 @@ pub async fn proccess_commands_loop() {
                     mq::clear_background(BLACK); // 3d rendering is bugged if we don't clear.
                 }
             
-                Command::DrawText { text, x, y, font_size, color }=>{
-                sm::switch_to_desired_shader(sm::ShaderKind::None, &None);
-                mq::draw_text(text.as_str(), x,y,font_size,color);
+                Command::DrawText { text, x, y, font_size, color , sender}=>{
+                    sm::switch_to_desired_shader(sm::ShaderKind::None, &None);
+                    let res =mq::draw_text(text.as_str(), x,y,font_size,color);
+                    let _ = sender.send(res);
+                }
+                Command::GetTextCenter { text, font, font_size, font_scale, rotation, sender }=>{
+                    let _ = sender.send(
+                        mq::get_text_center(&text, font.map(Into::into).as_ref(), font_size, font_scale, rotation)
+                    );
                 }
                 
                 Command::ImgToTexture { image, sender }=>{

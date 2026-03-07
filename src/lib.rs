@@ -54,6 +54,8 @@ pub fn _pyroquad( py: Python<'_>, m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(crate::py_abstractions::py_functions::clear_background, m)?)?;
     m.add_function(wrap_pyfunction!(crate::py_abstractions::py_functions::draw_multiline_text, m)?)?;
     m.add_function(wrap_pyfunction!(crate::py_abstractions::py_functions::draw_text, m)?)?;
+    m.add_function(wrap_pyfunction!(crate::py_abstractions::py_functions::get_text_center, m)?)?;
+
     m.add_function(wrap_pyfunction!(crate::py_abstractions::py_functions::get_fps, m)?)?;
     m.add_function(wrap_pyfunction!(crate::py_abstractions::py_functions::get_delta_time, m)?)?;
     m.add_function(wrap_pyfunction!(crate::py_abstractions::py_functions::get_keys_pressed, m)?)?;
@@ -93,6 +95,8 @@ pub fn _pyroquad( py: Python<'_>, m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(crate::py_abstractions::Camera::pop_camera_state, m)?)?;
     m.add_function(wrap_pyfunction!(crate::py_abstractions::Camera::camera_font_scale, m)?)?;
 
+    m.add_class::<crate::py_abstractions::Text::Font>()?;
+    m.add_class::<crate::py_abstractions::Text::TextDimensions>()?;
 
     m.add_class::<crate::py_abstractions::Color::Color>()?;
 
@@ -196,9 +200,6 @@ list of macroquad::prelude functions
 
     mq::polar_to_cartesian
     mq::quat
-    mq::render_target
-    mq::render_target_ex
-    mq::render_target_msaa
     
     mq::screen_dpi_scale
     mq::set_default_filter_mode
