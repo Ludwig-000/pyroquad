@@ -20,7 +20,12 @@ mod engine;
 mod py_abstractions;
 
 
-
+/// TODO:
+/// make FileData an ARC
+/// 
+/// AAAND
+/// 
+/// check if Font needs to be a PARC
 #[pymodule]
 #[pyo3(gil_used = false)]
 pub fn _pyroquad( py: Python<'_>, m: &Bound<'_, PyModule>) -> PyResult<()> {
@@ -79,12 +84,14 @@ pub fn _pyroquad( py: Python<'_>, m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(crate::py_abstractions::py_functions::screen_height, m)?)?;
     m.add_function(wrap_pyfunction!(crate::py_abstractions::py_functions::screen_width, m)?)?;
     m.add_function(wrap_pyfunction!(crate::py_abstractions::py_functions::request_new_screen_size, m)?)?;
+    m.add_function(wrap_pyfunction!(crate::py_abstractions::py_functions::screen_dpi_scale, m)?)?;
 
     m.add_function(wrap_pyfunction!(crate::py_abstractions::py_functions::get_last_key_pressed, m)?)?;
     m.add_function(wrap_pyfunction!(crate::py_abstractions::py_functions::draw_grid, m)?)?;
     m.add_function(wrap_pyfunction!(crate::py_abstractions::py_functions::draw_texture, m)?)?;
     m.add_function(wrap_pyfunction!(crate::py_abstractions::py_functions::draw_plane, m)?)?;
     m.add_function(wrap_pyfunction!(crate::py_abstractions::py_functions::draw_cube, m)?)?;
+
 
     m.add_function(wrap_pyfunction!(crate::py_abstractions::py_functions::draw_skybox, m)?)?;
 
@@ -190,19 +197,15 @@ list of macroquad::prelude functions
     mq::build_textures_atlas
     mq::cartesian_to_polar
     mq::get_dropped_files
-    mq::get_internal_gl
-    mq::get_text_center
     mq::gl_use_default_material
     mq::gl_use_material
     mq::load_material
-    mq::load_ttf_font_from_bytes
     mq::measure_text
 
     mq::polar_to_cartesian
     mq::quat
     
-    mq::screen_dpi_scale
-    mq::set_default_filter_mode
+
     mq::set_pc_assets_folder
     mq::simulate_mouse_with_touch
     mq::touches

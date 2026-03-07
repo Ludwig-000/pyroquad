@@ -227,7 +227,17 @@ pub enum Command {
     DrawPoly{ x: f32, y: f32, sides: u8, radius: f32, rotation: f32, color: mq::Color},
     DrawPolyLines{ x: f32,y: f32,sides: u8,radius: f32,rotation: f32,thickness: f32,color: mq::Color},
 
-    DrawText{text: String, x: f32, y: f32, font_size: f32, color: mq::Color, sender: PSyncSender<mq::TextDimensions>},
+    DrawText{
+        text: String, 
+        x: f32, 
+        y: f32, 
+        color: mq::Color, 
+        font: Option<mq::Font>,
+        font_size: u16, 
+        font_scale: f32,
+        font_scale_aspect: f32,
+        rotation: f32,
+        sender: PSyncSender<mq::TextDimensions>},
     GetTextCenter{text: String,
         font: Option<mq::Font>,
         font_size: u16,
@@ -246,7 +256,7 @@ pub enum Command {
     DrawTexture{ texture: mq::Texture2D, x: f32, y: f32, color: mq::Color   },
     
     ClearBackground { color: mq::Color },
-
+    ScreenDpiScale(PSyncSender<f32>),
 
     NextFrame{physics_step: Option<f32>, sender: PChannel::PSyncSender<()>},
 
@@ -660,6 +670,9 @@ pub async fn proccess_commands_loop() {
                 Command::ClearBackground {color } => {
                     macroquad::prelude::clear_background(color);
                 }
+                Command::ScreenDpiScale(sender)=> {
+                    let _ = sender.send(  mq::screen_dpi_scale() );
+                }
         
                 Command::NextFrame{physics_step, sender} => {
                     mq::next_frame().await;
@@ -676,11 +689,29 @@ pub async fn proccess_commands_loop() {
                     mq::clear_background(BLACK); // 3d rendering is bugged if we don't clear.
                 }
             
-                Command::DrawText { text, x, y, font_size, color , sender}=>{
-                    sm::switch_to_desired_shader(sm::ShaderKind::None, &None);
-                    let res =mq::draw_text(text.as_str(), x,y,font_size,color);
-                    let _ = sender.send(res);
-                }
+                Command::DrawText { 
+                    text, 
+                    x, 
+                    y, 
+                    font_size, 
+                    color, 
+                    font, 
+                    font_scale, 
+                    font_scale_aspect, 
+                    rotation, 
+                    sender } =>{
+                        let font_options = mq::TextParams{
+                            font: font.as_ref(),
+                            font_size,
+                            font_scale,
+                            font_scale_aspect,
+                            rotation,
+                            color,
+                        };
+
+                        let res = mq::draw_text_ex(&text, x, y, font_options);
+                        let _ = sender.send(res);
+                    }
                 Command::GetTextCenter { text, font, font_size, font_scale, rotation, sender }=>{
                     let _ = sender.send(
                         mq::get_text_center(&text, font.map(Into::into).as_ref(), font_size, font_scale, rotation)

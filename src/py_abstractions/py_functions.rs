@@ -287,6 +287,15 @@ pub fn clear_background(color: Color) {
     COMMAND_QUEUE.push(Command::ClearBackground { color: color.into()});
 }
 
+
+#[gen_stub_pyfunction]
+#[pyfunction]
+pub fn screen_dpi_scale() -> PyResult<f32>{
+    let (sender, receiver) = PChannel::PChannel::sync_channel(1);
+    COMMAND_QUEUE.push(Command::ScreenDpiScale(sender));
+    Ok(receiver.recv()?)
+}
+
 /// processes all drawing commands that have accumulated.
 /// blocks until the frame has been drawn.
 ///
@@ -311,9 +320,19 @@ pub fn next_frame(py: Python<'_>, physics_step: Option<f32>) -> PyResult<()>{
 ///
 #[gen_stub_pyfunction]
 #[pyfunction]
-pub fn draw_text(text: String, x: f32, y: f32, font_size: f32, color: Color) -> PyResult<TextDimensions>{
+
+#[pyo3(signature = (text, x, y, color = Color::WHITE(), font = None, 
+    font_size  = 20, font_scale = 1.0, font_scale_aspect =  1.0, rotation = 0.0))] 
+pub fn draw_text(text: String, x: f32, y: f32, color: Color, font: Option<Font>, 
+    font_size: u16, font_scale: f32, font_scale_aspect: f32, rotation: f32) -> PyResult<TextDimensions>{
+
     let (sender, receiver) = PChannel::PChannel::sync_channel(1);
-    COMMAND_QUEUE.push(Command::DrawText {text, x, y, font_size, color: color.into(), sender});
+    COMMAND_QUEUE.push(Command::DrawText { 
+        text, 
+        x, 
+        y, 
+        color: color.into(), 
+        font: font.map(Into::into), font_size, font_scale, font_scale_aspect, rotation, sender });
     Ok(receiver.recv()?.into())
 }
 

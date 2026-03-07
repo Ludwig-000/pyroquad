@@ -96,8 +96,9 @@ for i in range(100):
     
     next_frame(get_delta_time())
 
-file = examples.loading_screen(download_file, ["https://raw.githubusercontent.com/Ludwig-000/pyroquad/main/tests/example_image.jpg"])[0]
-texture=  file.to_2DTexture()
+file = examples.loading_screen(download_file, ["https://raw.githubusercontent.com/Ludwig-000/pyroquad/main/tests/example_image.jpg",
+                                               "https://raw.githubusercontent.com/Ludwig-000/pyroquad/main/tests/example_font.ttf"])
+texture=  file[0].to_2DTexture()
 
 if cyl.physics:
     cyl.physics.apply_impulse(Vec3(1,1,1))
@@ -128,5 +129,7 @@ for i in range(30):
     assert colls.__len__() == 1
     for rec in recs:
         rec.draw()
+
+    draw_text("Testing..", 300,300,Color.WHITE,font_scale=100, font=file[1].to_font())
     next_frame()
 

@@ -7507,7 +7507,7 @@ def draw_skybox(texture:Texture2D, tint:Color=...) -> None:
      * Also, you might need to mirror the Image vertically before converting it to a Texture2D.
     """
 
-def draw_text(text:builtins.str, x:builtins.float, y:builtins.float, font_size:builtins.float, color:Color) -> TextDimensions:
+def draw_text(text:builtins.str, x:builtins.float, y:builtins.float, color:Color=..., font:typing.Optional[Font]=None, font_size:builtins.int=20, font_scale:builtins.float=1.0, font_scale_aspect:builtins.float=1.0, rotation:builtins.float=0.0) -> TextDimensions:
     r"""
     draws a text in 2d space.
     requires a 2d camera to be seen.
@@ -7637,6 +7637,8 @@ def request_new_screen_size(width:builtins.float, height:builtins.float) -> None
     Note that the OS might decide to give a different size. 
     Additionally, the size won't be updated until the next next_frame()
     """
+
+def screen_dpi_scale() -> builtins.float: ...
 
 def screen_height() -> builtins.float:
     r"""
