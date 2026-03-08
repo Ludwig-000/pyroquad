@@ -17,8 +17,6 @@ mod engine;
 mod py_abstractions;
 
 
-/// TODO:
-/// make FileData an ARC
 #[pymodule]
 #[pyo3(gil_used = false)]
 pub fn _pyroquad( m: &Bound<'_, PyModule>) -> PyResult<()> {
@@ -92,6 +90,7 @@ pub fn _pyroquad( m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(crate::py_abstractions::py_functions::draw_cube, m)?)?;
 
     m.add_function(wrap_pyfunction!(crate::py_abstractions::py_functions::polar_to_cartesian, m)?)?;
+    m.add_function(wrap_pyfunction!(crate::py_abstractions::py_functions::cartesian_to_polar, m)?)?;
     m.add_function(wrap_pyfunction!(crate::py_abstractions::py_functions::set_pc_assets_folder, m)?)?;
     
     m.add_function(wrap_pyfunction!(crate::py_abstractions::py_functions::draw_skybox, m)?)?;
@@ -178,7 +177,6 @@ define_stub_info_gatherer!(stub_info);
 list of macroquad::prelude functions
 
     mq::build_textures_atlas
-    mq::cartesian_to_polar
     mq::get_dropped_files
     mq::gl_use_default_material
     mq::gl_use_material

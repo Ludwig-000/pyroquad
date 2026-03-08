@@ -29,7 +29,6 @@ lazy_static! {
     pub static ref KEYS_DOWN: Mutex<HashSet<KeyCode>> = Mutex::new(HashSet::new());
     pub static ref KEYS_RELEASED: Mutex<HashSet<KeyCode>> = Mutex::new(HashSet::new());
 
-
     pub static ref MOUSE_BUTTON_PRESSED: Mutex<HashSet<MouseButton>> = Mutex::new(HashSet::new());
     pub static ref MOUSE_BUTTON_DOWN: Mutex<HashSet<MouseButton>> = Mutex::new(HashSet::new());
     pub static ref MOUSE_BUTTON_RELEASED: Mutex<HashSet<MouseButton>> = Mutex::new(HashSet::new());

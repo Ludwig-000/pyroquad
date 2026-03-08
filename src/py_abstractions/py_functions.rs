@@ -611,6 +611,13 @@ pub fn polar_to_cartesian(rho: f32, theta: f32) -> Vec2{
     mq::polar_to_cartesian(rho, theta).into()
 }
 
+/// Converts 2d polar coordinates to 2d cartesian coordinates.
+#[gen_stub_pyfunction]
+#[pyfunction]
+pub fn cartesian_to_polar(cartesian: Vec2) -> Vec2{
+    mq::cartesian_to_polar(cartesian.into()).into()
+}
+
 
 /// There are super common project layout like this:
 /// ```skip

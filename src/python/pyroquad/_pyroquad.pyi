@@ -404,4331 +404,4331 @@ class ColliderOptions:
 class Color:
     CLOUDY_BLUE: Color
     r"""
-    CLOUDY_BLUE
+    CLOUDY_BLUE | #ACC2D9 | rgb(0.675, 0.761, 0.851)
     """
     DARK_PASTEL_GREEN: Color
     r"""
-    DARK_PASTEL_GREEN
+    DARK_PASTEL_GREEN | #56AE57 | rgb(0.337, 0.682, 0.341)
     """
     DUST: Color
     r"""
-    DUST
+    DUST | #B2996E | rgb(0.698, 0.600, 0.431)
     """
     ELECTRIC_LIME: Color
     r"""
-    ELECTRIC_LIME
+    ELECTRIC_LIME | #A8FF04 | rgb(0.659, 1.000, 0.016)
     """
     FRESH_GREEN: Color
     r"""
-    FRESH_GREEN
+    FRESH_GREEN | #69D84F | rgb(0.412, 0.847, 0.310)
     """
     LIGHT_EGGPLANT: Color
     r"""
-    LIGHT_EGGPLANT
+    LIGHT_EGGPLANT | #894585 | rgb(0.537, 0.271, 0.522)
     """
     NASTY_GREEN: Color
     r"""
-    NASTY_GREEN
+    NASTY_GREEN | #70B23F | rgb(0.439, 0.698, 0.247)
     """
     REALLY_LIGHT_BLUE: Color
     r"""
-    REALLY_LIGHT_BLUE
+    REALLY_LIGHT_BLUE | #D4FFFF | rgb(0.831, 1.000, 1.000)
     """
     TEA: Color
     r"""
-    TEA
+    TEA | #65AB7C | rgb(0.396, 0.671, 0.486)
     """
     WARM_PURPLE: Color
     r"""
-    WARM_PURPLE
+    WARM_PURPLE | #952E8F | rgb(0.584, 0.180, 0.561)
     """
     YELLOWISH_TAN: Color
     r"""
-    YELLOWISH_TAN
+    YELLOWISH_TAN | #FCFC81 | rgb(0.988, 0.988, 0.506)
     """
     CEMENT: Color
     r"""
-    CEMENT
+    CEMENT | #A5A391 | rgb(0.647, 0.639, 0.569)
     """
     DARK_GRASS_GREEN: Color
     r"""
-    DARK_GRASS_GREEN
+    DARK_GRASS_GREEN | #388004 | rgb(0.220, 0.502, 0.016)
     """
     DUSTY_TEAL: Color
     r"""
-    DUSTY_TEAL
+    DUSTY_TEAL | #4C9085 | rgb(0.298, 0.565, 0.522)
     """
     GREY_TEAL: Color
     r"""
-    GREY_TEAL
+    GREY_TEAL | #5E9B8A | rgb(0.369, 0.608, 0.541)
     """
     MACARONI_AND_CHEESE: Color
     r"""
-    MACARONI_AND_CHEESE
+    MACARONI_AND_CHEESE | #EFB435 | rgb(0.937, 0.706, 0.208)
     """
     PINKISH_TAN: Color
     r"""
-    PINKISH_TAN
+    PINKISH_TAN | #D99B82 | rgb(0.851, 0.608, 0.510)
     """
     SPRUCE: Color
     r"""
-    SPRUCE
+    SPRUCE | #0A5F38 | rgb(0.039, 0.373, 0.220)
     """
     STRONG_BLUE: Color
     r"""
-    STRONG_BLUE
+    STRONG_BLUE | #0C06F7 | rgb(0.047, 0.024, 0.969)
     """
     TOXIC_GREEN: Color
     r"""
-    TOXIC_GREEN
+    TOXIC_GREEN | #61DE2A | rgb(0.380, 0.871, 0.165)
     """
     WINDOWS_BLUE: Color
     r"""
-    WINDOWS_BLUE
+    WINDOWS_BLUE | #3778BF | rgb(0.216, 0.471, 0.749)
     """
     BLUE_BLUE: Color
     r"""
-    BLUE_BLUE
+    BLUE_BLUE | #2242C7 | rgb(0.133, 0.259, 0.780)
     """
     BLUE_WITH_A_HINT_OF_PURPLE: Color
     r"""
-    BLUE_WITH_A_HINT_OF_PURPLE
+    BLUE_WITH_A_HINT_OF_PURPLE | #533CC6 | rgb(0.325, 0.235, 0.776)
     """
     BOOGER: Color
     r"""
-    BOOGER
+    BOOGER | #9BB53C | rgb(0.608, 0.710, 0.235)
     """
     BRIGHT_SEA_GREEN: Color
     r"""
-    BRIGHT_SEA_GREEN
+    BRIGHT_SEA_GREEN | #05FFA6 | rgb(0.020, 1.000, 0.651)
     """
     DARK_GREEN_BLUE: Color
     r"""
-    DARK_GREEN_BLUE
+    DARK_GREEN_BLUE | #1F6357 | rgb(0.122, 0.388, 0.341)
     """
     DEEP_TURQUOISE: Color
     r"""
-    DEEP_TURQUOISE
+    DEEP_TURQUOISE | #017374 | rgb(0.004, 0.451, 0.455)
     """
     GREEN_TEAL: Color
     r"""
-    GREEN_TEAL
+    GREEN_TEAL | #0CB577 | rgb(0.047, 0.710, 0.467)
     """
     STRONG_PINK: Color
     r"""
-    STRONG_PINK
+    STRONG_PINK | #FF0789 | rgb(1.000, 0.027, 0.537)
     """
     BLAND: Color
     r"""
-    BLAND
+    BLAND | #AFA88B | rgb(0.686, 0.659, 0.545)
     """
     DEEP_AQUA: Color
     r"""
-    DEEP_AQUA
+    DEEP_AQUA | #08787F | rgb(0.031, 0.471, 0.498)
     """
     LAVENDER_PINK: Color
     r"""
-    LAVENDER_PINK
+    LAVENDER_PINK | #DD85D7 | rgb(0.867, 0.522, 0.843)
     """
     LIGHT_MOSS_GREEN: Color
     r"""
-    LIGHT_MOSS_GREEN
+    LIGHT_MOSS_GREEN | #A6C875 | rgb(0.651, 0.784, 0.459)
     """
     LIGHT_SEAFOAM_GREEN: Color
     r"""
-    LIGHT_SEAFOAM_GREEN
+    LIGHT_SEAFOAM_GREEN | #A7FFB5 | rgb(0.655, 1.000, 0.710)
     """
     OLIVE_YELLOW: Color
     r"""
-    OLIVE_YELLOW
+    OLIVE_YELLOW | #C2B709 | rgb(0.761, 0.718, 0.035)
     """
     PIG_PINK: Color
     r"""
-    PIG_PINK
+    PIG_PINK | #E78EA5 | rgb(0.906, 0.557, 0.647)
     """
     DEEP_LILAC: Color
     r"""
-    DEEP_LILAC
+    DEEP_LILAC | #966EBD | rgb(0.588, 0.431, 0.741)
     """
     DESERT: Color
     r"""
-    DESERT
+    DESERT | #CCAD60 | rgb(0.800, 0.678, 0.376)
     """
     DUSTY_LAVENDER: Color
     r"""
-    DUSTY_LAVENDER
+    DUSTY_LAVENDER | #AC86A8 | rgb(0.675, 0.525, 0.659)
     """
     PURPLEY_GREY: Color
     r"""
-    PURPLEY_GREY
+    PURPLEY_GREY | #947E94 | rgb(0.580, 0.494, 0.580)
     """
     PURPLY: Color
     r"""
-    PURPLY
+    PURPLY | #983FB2 | rgb(0.596, 0.247, 0.698)
     """
     CANDY_PINK: Color
     r"""
-    CANDY_PINK
+    CANDY_PINK | #FF63E9 | rgb(1.000, 0.388, 0.914)
     """
     LIGHT_PASTEL_GREEN: Color
     r"""
-    LIGHT_PASTEL_GREEN
+    LIGHT_PASTEL_GREEN | #B2FBA5 | rgb(0.698, 0.984, 0.647)
     """
     BORING_GREEN: Color
     r"""
-    BORING_GREEN
+    BORING_GREEN | #63B365 | rgb(0.388, 0.702, 0.396)
     """
     KIWI_GREEN: Color
     r"""
-    KIWI_GREEN
+    KIWI_GREEN | #8EE53F | rgb(0.557, 0.898, 0.247)
     """
     LIGHT_GREY_GREEN: Color
     r"""
-    LIGHT_GREY_GREEN
+    LIGHT_GREY_GREEN | #B7E1A1 | rgb(0.718, 0.882, 0.631)
     """
     ORANGE_PINK: Color
     r"""
-    ORANGE_PINK
+    ORANGE_PINK | #FF6F52 | rgb(1.000, 0.435, 0.322)
     """
     TEA_GREEN: Color
     r"""
-    TEA_GREEN
+    TEA_GREEN | #BDF8A3 | rgb(0.741, 0.973, 0.639)
     """
     VERY_LIGHT_BROWN: Color
     r"""
-    VERY_LIGHT_BROWN
+    VERY_LIGHT_BROWN | #D3B683 | rgb(0.827, 0.714, 0.514)
     """
     EGG_SHELL: Color
     r"""
-    EGG_SHELL
+    EGG_SHELL | #FFFCC4 | rgb(1.000, 0.988, 0.769)
     """
     EGGPLANT_PURPLE: Color
     r"""
-    EGGPLANT_PURPLE
+    EGGPLANT_PURPLE | #430541 | rgb(0.263, 0.020, 0.255)
     """
     POWDER_PINK: Color
     r"""
-    POWDER_PINK
+    POWDER_PINK | #FFB2D0 | rgb(1.000, 0.698, 0.816)
     """
     REDDISH_GREY: Color
     r"""
-    REDDISH_GREY
+    REDDISH_GREY | #997570 | rgb(0.600, 0.459, 0.439)
     """
     BABY_SHIT_BROWN: Color
     r"""
-    BABY_SHIT_BROWN
+    BABY_SHIT_BROWN | #AD900D | rgb(0.678, 0.565, 0.051)
     """
     LILIAC: Color
     r"""
-    LILIAC
+    LILIAC | #C48EFD | rgb(0.769, 0.557, 0.992)
     """
     STORMY_BLUE: Color
     r"""
-    STORMY_BLUE
+    STORMY_BLUE | #507B9C | rgb(0.314, 0.482, 0.612)
     """
     UGLY_BROWN: Color
     r"""
-    UGLY_BROWN
+    UGLY_BROWN | #7D7103 | rgb(0.490, 0.443, 0.012)
     """
     CUSTARD: Color
     r"""
-    CUSTARD
+    CUSTARD | #FFFD78 | rgb(1.000, 0.992, 0.471)
     """
     DARKISH_PINK: Color
     r"""
-    DARKISH_PINK
+    DARKISH_PINK | #DA467D | rgb(0.855, 0.275, 0.490)
     """
     DEEP_BROWN: Color
     r"""
-    DEEP_BROWN
+    DEEP_BROWN | #410200 | rgb(0.255, 0.008, 0.000)
     """
     GREENISH_BEIGE: Color
     r"""
-    GREENISH_BEIGE
+    GREENISH_BEIGE | #C9D179 | rgb(0.788, 0.820, 0.475)
     """
     MANILLA: Color
     r"""
-    MANILLA
+    MANILLA | #FFFA86 | rgb(1.000, 0.980, 0.525)
     """
     OFF_BLUE: Color
     r"""
-    OFF_BLUE
+    OFF_BLUE | #5684AE | rgb(0.337, 0.518, 0.682)
     """
     BATTLESHIP_GREY: Color
     r"""
-    BATTLESHIP_GREY
+    BATTLESHIP_GREY | #6B7C85 | rgb(0.420, 0.486, 0.522)
     """
     BROWNY_GREEN: Color
     r"""
-    BROWNY_GREEN
+    BROWNY_GREEN | #6F6C0A | rgb(0.435, 0.424, 0.039)
     """
     BRUISE: Color
     r"""
-    BRUISE
+    BRUISE | #7E4071 | rgb(0.494, 0.251, 0.443)
     """
     KELLEY_GREEN: Color
     r"""
-    KELLEY_GREEN
+    KELLEY_GREEN | #009337 | rgb(0.000, 0.576, 0.216)
     """
     SICKLY_YELLOW: Color
     r"""
-    SICKLY_YELLOW
+    SICKLY_YELLOW | #D0E429 | rgb(0.816, 0.894, 0.161)
     """
     SUNNY_YELLOW: Color
     r"""
-    SUNNY_YELLOW
+    SUNNY_YELLOW | #FFF917 | rgb(1.000, 0.976, 0.090)
     """
     AZUL: Color
     r"""
-    AZUL
+    AZUL | #1D5DEC | rgb(0.114, 0.365, 0.925)
     """
     DARKGREEN: Color
     r"""
-    DARKGREEN
+    DARKGREEN | #054907 | rgb(0.020, 0.286, 0.027)
     """
     GREEN_YELLOW: Color
     r"""
-    GREEN_YELLOW
+    GREEN_YELLOW | #B5CE08 | rgb(0.710, 0.808, 0.031)
     """
     LICHEN: Color
     r"""
-    LICHEN
+    LICHEN | #8FB67B | rgb(0.561, 0.714, 0.482)
     """
     LIGHT_LIGHT_GREEN: Color
     r"""
-    LIGHT_LIGHT_GREEN
+    LIGHT_LIGHT_GREEN | #C8FFB0 | rgb(0.784, 1.000, 0.690)
     """
     PALE_GOLD: Color
     r"""
-    PALE_GOLD
+    PALE_GOLD | #FDDE6C | rgb(0.992, 0.871, 0.424)
     """
     SUN_YELLOW: Color
     r"""
-    SUN_YELLOW
+    SUN_YELLOW | #FFDF22 | rgb(1.000, 0.875, 0.133)
     """
     TAN_GREEN: Color
     r"""
-    TAN_GREEN
+    TAN_GREEN | #A9BE70 | rgb(0.663, 0.745, 0.439)
     """
     BURPLE: Color
     r"""
-    BURPLE
+    BURPLE | #6832E3 | rgb(0.408, 0.196, 0.890)
     """
     BUTTERSCOTCH: Color
     r"""
-    BUTTERSCOTCH
+    BUTTERSCOTCH | #FDB147 | rgb(0.992, 0.694, 0.278)
     """
     TOUPE: Color
     r"""
-    TOUPE
+    TOUPE | #C7AC7D | rgb(0.780, 0.675, 0.490)
     """
     DARK_CREAM: Color
     r"""
-    DARK_CREAM
+    DARK_CREAM | #FFF39A | rgb(1.000, 0.953, 0.604)
     """
     INDIAN_RED: Color
     r"""
-    INDIAN_RED
+    INDIAN_RED | #850E04 | rgb(0.522, 0.055, 0.016)
     """
     LIGHT_LAVENDAR: Color
     r"""
-    LIGHT_LAVENDAR
+    LIGHT_LAVENDAR | #EFC0FE | rgb(0.937, 0.753, 0.996)
     """
     POISON_GREEN: Color
     r"""
-    POISON_GREEN
+    POISON_GREEN | #40FD14 | rgb(0.251, 0.992, 0.078)
     """
     BABY_PUKE_GREEN: Color
     r"""
-    BABY_PUKE_GREEN
+    BABY_PUKE_GREEN | #B6C406 | rgb(0.714, 0.769, 0.024)
     """
     BRIGHT_YELLOW_GREEN: Color
     r"""
-    BRIGHT_YELLOW_GREEN
+    BRIGHT_YELLOW_GREEN | #9DFF00 | rgb(0.616, 1.000, 0.000)
     """
     CHARCOAL_GREY: Color
     r"""
-    CHARCOAL_GREY
+    CHARCOAL_GREY | #3C4142 | rgb(0.235, 0.255, 0.259)
     """
     SQUASH: Color
     r"""
-    SQUASH
+    SQUASH | #F2AB15 | rgb(0.949, 0.671, 0.082)
     """
     CINNAMON: Color
     r"""
-    CINNAMON
+    CINNAMON | #AC4F06 | rgb(0.675, 0.310, 0.024)
     """
     LIGHT_PEA_GREEN: Color
     r"""
-    LIGHT_PEA_GREEN
+    LIGHT_PEA_GREEN | #C4FE82 | rgb(0.769, 0.996, 0.510)
     """
     RADIOACTIVE_GREEN: Color
     r"""
-    RADIOACTIVE_GREEN
+    RADIOACTIVE_GREEN | #2CFA1F | rgb(0.173, 0.980, 0.122)
     """
     RAW_SIENNA: Color
     r"""
-    RAW_SIENNA
+    RAW_SIENNA | #9A6200 | rgb(0.604, 0.384, 0.000)
     """
     BABY_PURPLE: Color
     r"""
-    BABY_PURPLE
+    BABY_PURPLE | #CA9BF7 | rgb(0.792, 0.608, 0.969)
     """
     COCOA: Color
     r"""
-    COCOA
+    COCOA | #875F42 | rgb(0.529, 0.373, 0.259)
     """
     LIGHT_ROYAL_BLUE: Color
     r"""
-    LIGHT_ROYAL_BLUE
+    LIGHT_ROYAL_BLUE | #3A2EFE | rgb(0.227, 0.180, 0.996)
     """
     ORANGEISH: Color
     r"""
-    ORANGEISH
+    ORANGEISH | #FD8D49 | rgb(0.992, 0.553, 0.286)
     """
     RUST_BROWN: Color
     r"""
-    RUST_BROWN
+    RUST_BROWN | #8B3103 | rgb(0.545, 0.192, 0.012)
     """
     SAND_BROWN: Color
     r"""
-    SAND_BROWN
+    SAND_BROWN | #CBA560 | rgb(0.796, 0.647, 0.376)
     """
     SWAMP: Color
     r"""
-    SWAMP
+    SWAMP | #698339 | rgb(0.412, 0.514, 0.224)
     """
     TEALISH_GREEN: Color
     r"""
-    TEALISH_GREEN
+    TEALISH_GREEN | #0CDC73 | rgb(0.047, 0.863, 0.451)
     """
     BURNT_SIENA: Color
     r"""
-    BURNT_SIENA
+    BURNT_SIENA | #B75203 | rgb(0.718, 0.322, 0.012)
     """
     CAMO: Color
     r"""
-    CAMO
+    CAMO | #7F8F4E | rgb(0.498, 0.561, 0.306)
     """
     DUSK_BLUE: Color
     r"""
-    DUSK_BLUE
+    DUSK_BLUE | #26538D | rgb(0.149, 0.325, 0.553)
     """
     FERN: Color
     r"""
-    FERN
+    FERN | #63A950 | rgb(0.388, 0.663, 0.314)
     """
     OLD_ROSE: Color
     r"""
-    OLD_ROSE
+    OLD_ROSE | #C87F89 | rgb(0.784, 0.498, 0.537)
     """
     PALE_LIGHT_GREEN: Color
     r"""
-    PALE_LIGHT_GREEN
+    PALE_LIGHT_GREEN | #B1FC99 | rgb(0.694, 0.988, 0.600)
     """
     PEACHY_PINK: Color
     r"""
-    PEACHY_PINK
+    PEACHY_PINK | #FF9A8A | rgb(1.000, 0.604, 0.541)
     """
     ROSY_PINK: Color
     r"""
-    ROSY_PINK
+    ROSY_PINK | #F6688E | rgb(0.965, 0.408, 0.557)
     """
     LIGHT_BLUISH_GREEN: Color
     r"""
-    LIGHT_BLUISH_GREEN
+    LIGHT_BLUISH_GREEN | #76FDA8 | rgb(0.463, 0.992, 0.659)
     """
     LIGHT_BRIGHT_GREEN: Color
     r"""
-    LIGHT_BRIGHT_GREEN
+    LIGHT_BRIGHT_GREEN | #53FE5C | rgb(0.325, 0.996, 0.361)
     """
     LIGHT_NEON_GREEN: Color
     r"""
-    LIGHT_NEON_GREEN
+    LIGHT_NEON_GREEN | #4EFD54 | rgb(0.306, 0.992, 0.329)
     """
     LIGHT_SEAFOAM: Color
     r"""
-    LIGHT_SEAFOAM
+    LIGHT_SEAFOAM | #A0FEBF | rgb(0.627, 0.996, 0.749)
     """
     TIFFANY_BLUE: Color
     r"""
-    TIFFANY_BLUE
+    TIFFANY_BLUE | #7BF2DA | rgb(0.482, 0.949, 0.855)
     """
     WASHED_OUT_GREEN: Color
     r"""
-    WASHED_OUT_GREEN
+    WASHED_OUT_GREEN | #BCF5A6 | rgb(0.737, 0.961, 0.651)
     """
     BROWNY_ORANGE: Color
     r"""
-    BROWNY_ORANGE
+    BROWNY_ORANGE | #CA6B02 | rgb(0.792, 0.420, 0.008)
     """
     NICE_BLUE: Color
     r"""
-    NICE_BLUE
+    NICE_BLUE | #107AB0 | rgb(0.063, 0.478, 0.690)
     """
     SAPPHIRE: Color
     r"""
-    SAPPHIRE
+    SAPPHIRE | #2138AB | rgb(0.129, 0.220, 0.671)
     """
     GREYISH_TEAL: Color
     r"""
-    GREYISH_TEAL
+    GREYISH_TEAL | #719F91 | rgb(0.443, 0.624, 0.569)
     """
     ORANGEY_YELLOW: Color
     r"""
-    ORANGEY_YELLOW
+    ORANGEY_YELLOW | #FDB915 | rgb(0.992, 0.725, 0.082)
     """
     PARCHMENT: Color
     r"""
-    PARCHMENT
+    PARCHMENT | #FEFCAF | rgb(0.996, 0.988, 0.686)
     """
     STRAW: Color
     r"""
-    STRAW
+    STRAW | #FCF679 | rgb(0.988, 0.965, 0.475)
     """
     VERY_DARK_BROWN: Color
     r"""
-    VERY_DARK_BROWN
+    VERY_DARK_BROWN | #1D0200 | rgb(0.114, 0.008, 0.000)
     """
     TERRACOTA: Color
     r"""
-    TERRACOTA
+    TERRACOTA | #CB6843 | rgb(0.796, 0.408, 0.263)
     """
     UGLY_BLUE: Color
     r"""
-    UGLY_BLUE
+    UGLY_BLUE | #31668A | rgb(0.192, 0.400, 0.541)
     """
     CLEAR_BLUE: Color
     r"""
-    CLEAR_BLUE
+    CLEAR_BLUE | #247AFD | rgb(0.141, 0.478, 0.992)
     """
     CREME: Color
     r"""
-    CREME
+    CREME | #FFFFB6 | rgb(1.000, 1.000, 0.714)
     """
     FOAM_GREEN: Color
     r"""
-    FOAM_GREEN
+    FOAM_GREEN | #90FDA9 | rgb(0.565, 0.992, 0.663)
     """
     GREY_GREEN: Color
     r"""
-    GREY_GREEN
+    GREY_GREEN | #86A17D | rgb(0.525, 0.631, 0.490)
     """
     LIGHT_GOLD: Color
     r"""
-    LIGHT_GOLD
+    LIGHT_GOLD | #FDDC5C | rgb(0.992, 0.863, 0.361)
     """
     SEAFOAM_BLUE: Color
     r"""
-    SEAFOAM_BLUE
+    SEAFOAM_BLUE | #78D1B6 | rgb(0.471, 0.820, 0.714)
     """
     TOPAZ: Color
     r"""
-    TOPAZ
+    TOPAZ | #13BBAF | rgb(0.075, 0.733, 0.686)
     """
     VIOLET_PINK: Color
     r"""
-    VIOLET_PINK
+    VIOLET_PINK | #FB5FFC | rgb(0.984, 0.373, 0.988)
     """
     WINTERGREEN: Color
     r"""
-    WINTERGREEN
+    WINTERGREEN | #20F986 | rgb(0.125, 0.976, 0.525)
     """
     YELLOW_TAN: Color
     r"""
-    YELLOW_TAN
+    YELLOW_TAN | #FFE36E | rgb(1.000, 0.890, 0.431)
     """
     DARK_FUCHSIA: Color
     r"""
-    DARK_FUCHSIA
+    DARK_FUCHSIA | #9D0759 | rgb(0.616, 0.027, 0.349)
     """
     INDIGO_BLUE: Color
     r"""
-    INDIGO_BLUE
+    INDIGO_BLUE | #3A18B1 | rgb(0.227, 0.094, 0.694)
     """
     LIGHT_YELLOWISH_GREEN: Color
     r"""
-    LIGHT_YELLOWISH_GREEN
+    LIGHT_YELLOWISH_GREEN | #C2FF89 | rgb(0.761, 1.000, 0.537)
     """
     PALE_MAGENTA: Color
     r"""
-    PALE_MAGENTA
+    PALE_MAGENTA | #D767AD | rgb(0.843, 0.404, 0.678)
     """
     RICH_PURPLE: Color
     r"""
-    RICH_PURPLE
+    RICH_PURPLE | #720058 | rgb(0.447, 0.000, 0.345)
     """
     SUNFLOWER_YELLOW: Color
     r"""
-    SUNFLOWER_YELLOW
+    SUNFLOWER_YELLOW | #FFDA03 | rgb(1.000, 0.855, 0.012)
     """
     GREEN_BLUE: Color
     r"""
-    GREEN_BLUE
+    GREEN_BLUE | #01C08D | rgb(0.004, 0.753, 0.553)
     """
     LEATHER: Color
     r"""
-    LEATHER
+    LEATHER | #AC7434 | rgb(0.675, 0.455, 0.204)
     """
     RACING_GREEN: Color
     r"""
-    RACING_GREEN
+    RACING_GREEN | #014600 | rgb(0.004, 0.275, 0.000)
     """
     VIVID_PURPLE: Color
     r"""
-    VIVID_PURPLE
+    VIVID_PURPLE | #9900FA | rgb(0.600, 0.000, 0.980)
     """
     DARK_ROYAL_BLUE: Color
     r"""
-    DARK_ROYAL_BLUE
+    DARK_ROYAL_BLUE | #02066F | rgb(0.008, 0.024, 0.435)
     """
     HAZEL: Color
     r"""
-    HAZEL
+    HAZEL | #8E7618 | rgb(0.557, 0.463, 0.094)
     """
     MUTED_PINK: Color
     r"""
-    MUTED_PINK
+    MUTED_PINK | #D1768F | rgb(0.820, 0.463, 0.561)
     """
     BOOGER_GREEN: Color
     r"""
-    BOOGER_GREEN
+    BOOGER_GREEN | #96B403 | rgb(0.588, 0.706, 0.012)
     """
     CANARY: Color
     r"""
-    CANARY
+    CANARY | #FDFF63 | rgb(0.992, 1.000, 0.388)
     """
     COOL_GREY: Color
     r"""
-    COOL_GREY
+    COOL_GREY | #95A3A6 | rgb(0.584, 0.639, 0.651)
     """
     DARK_TAUPE: Color
     r"""
-    DARK_TAUPE
+    DARK_TAUPE | #7F684E | rgb(0.498, 0.408, 0.306)
     """
     DARKISH_PURPLE: Color
     r"""
-    DARKISH_PURPLE
+    DARKISH_PURPLE | #751973 | rgb(0.459, 0.098, 0.451)
     """
     TRUE_GREEN: Color
     r"""
-    TRUE_GREEN
+    TRUE_GREEN | #089404 | rgb(0.031, 0.580, 0.016)
     """
     CORAL_PINK: Color
     r"""
-    CORAL_PINK
+    CORAL_PINK | #FF6163 | rgb(1.000, 0.380, 0.388)
     """
     DARK_SAGE: Color
     r"""
-    DARK_SAGE
+    DARK_SAGE | #598556 | rgb(0.349, 0.522, 0.337)
     """
     DARK_SLATE_BLUE: Color
     r"""
-    DARK_SLATE_BLUE
+    DARK_SLATE_BLUE | #214761 | rgb(0.129, 0.278, 0.380)
     """
     FLAT_BLUE: Color
     r"""
-    FLAT_BLUE
+    FLAT_BLUE | #3C73A8 | rgb(0.235, 0.451, 0.659)
     """
     MUSHROOM: Color
     r"""
-    MUSHROOM
+    MUSHROOM | #BA9E88 | rgb(0.729, 0.620, 0.533)
     """
     RICH_BLUE: Color
     r"""
-    RICH_BLUE
+    RICH_BLUE | #021BF9 | rgb(0.008, 0.106, 0.976)
     """
     DIRTY_PURPLE: Color
     r"""
-    DIRTY_PURPLE
+    DIRTY_PURPLE | #734A65 | rgb(0.451, 0.290, 0.396)
     """
     GREENBLUE: Color
     r"""
-    GREENBLUE
+    GREENBLUE | #23C48B | rgb(0.137, 0.769, 0.545)
     """
     ICKY_GREEN: Color
     r"""
-    ICKY_GREEN
+    ICKY_GREEN | #8FAE22 | rgb(0.561, 0.682, 0.133)
     """
     LIGHT_KHAKI: Color
     r"""
-    LIGHT_KHAKI
+    LIGHT_KHAKI | #E6F2A2 | rgb(0.902, 0.949, 0.635)
     """
     WARM_BLUE: Color
     r"""
-    WARM_BLUE
+    WARM_BLUE | #4B57DB | rgb(0.294, 0.341, 0.859)
     """
     DARK_HOT_PINK: Color
     r"""
-    DARK_HOT_PINK
+    DARK_HOT_PINK | #D90166 | rgb(0.851, 0.004, 0.400)
     """
     DEEP_SEA_BLUE: Color
     r"""
-    DEEP_SEA_BLUE
+    DEEP_SEA_BLUE | #015482 | rgb(0.004, 0.329, 0.510)
     """
     CARMINE: Color
     r"""
-    CARMINE
+    CARMINE | #9D0216 | rgb(0.616, 0.008, 0.086)
     """
     DARK_YELLOW_GREEN: Color
     r"""
-    DARK_YELLOW_GREEN
+    DARK_YELLOW_GREEN | #728F02 | rgb(0.447, 0.561, 0.008)
     """
     PALE_PEACH: Color
     r"""
-    PALE_PEACH
+    PALE_PEACH | #FFE5AD | rgb(1.000, 0.898, 0.678)
     """
     PLUM_PURPLE: Color
     r"""
-    PLUM_PURPLE
+    PLUM_PURPLE | #4E0550 | rgb(0.306, 0.020, 0.314)
     """
     GOLDEN_ROD: Color
     r"""
-    GOLDEN_ROD
+    GOLDEN_ROD | #F9BC08 | rgb(0.976, 0.737, 0.031)
     """
     NEON_RED: Color
     r"""
-    NEON_RED
+    NEON_RED | #FF073A | rgb(1.000, 0.027, 0.227)
     """
     OLD_PINK: Color
     r"""
-    OLD_PINK
+    OLD_PINK | #C77986 | rgb(0.780, 0.475, 0.525)
     """
     VERY_PALE_BLUE: Color
     r"""
-    VERY_PALE_BLUE
+    VERY_PALE_BLUE | #D6FFFE | rgb(0.839, 1.000, 0.996)
     """
     BLOOD_ORANGE: Color
     r"""
-    BLOOD_ORANGE
+    BLOOD_ORANGE | #FE4B03 | rgb(0.996, 0.294, 0.012)
     """
     GRAPEFRUIT: Color
     r"""
-    GRAPEFRUIT
+    GRAPEFRUIT | #FD5956 | rgb(0.992, 0.349, 0.337)
     """
     SAND_YELLOW: Color
     r"""
-    SAND_YELLOW
+    SAND_YELLOW | #FCE166 | rgb(0.988, 0.882, 0.400)
     """
     CLAY_BROWN: Color
     r"""
-    CLAY_BROWN
+    CLAY_BROWN | #B2713D | rgb(0.698, 0.443, 0.239)
     """
     DARK_BLUE_GREY: Color
     r"""
-    DARK_BLUE_GREY
+    DARK_BLUE_GREY | #1F3B4D | rgb(0.122, 0.231, 0.302)
     """
     FLAT_GREEN: Color
     r"""
-    FLAT_GREEN
+    FLAT_GREEN | #699D4C | rgb(0.412, 0.616, 0.298)
     """
     LIGHT_GREEN_BLUE: Color
     r"""
-    LIGHT_GREEN_BLUE
+    LIGHT_GREEN_BLUE | #56FCA2 | rgb(0.337, 0.988, 0.635)
     """
     WARM_PINK: Color
     r"""
-    WARM_PINK
+    WARM_PINK | #FB5581 | rgb(0.984, 0.333, 0.506)
     """
     DODGER_BLUE: Color
     r"""
-    DODGER_BLUE
+    DODGER_BLUE | #3E82FC | rgb(0.243, 0.510, 0.988)
     """
     GROSS_GREEN: Color
     r"""
-    GROSS_GREEN
+    GROSS_GREEN | #A0BF16 | rgb(0.627, 0.749, 0.086)
     """
     ICE: Color
     r"""
-    ICE
+    ICE | #D6FFFA | rgb(0.839, 1.000, 0.980)
     """
     METALLIC_BLUE: Color
     r"""
-    METALLIC_BLUE
+    METALLIC_BLUE | #4F738E | rgb(0.310, 0.451, 0.557)
     """
     PALE_SALMON: Color
     r"""
-    PALE_SALMON
+    PALE_SALMON | #FFB19A | rgb(1.000, 0.694, 0.604)
     """
     SAP_GREEN: Color
     r"""
-    SAP_GREEN
+    SAP_GREEN | #5C8B15 | rgb(0.361, 0.545, 0.082)
     """
     ALGAE: Color
     r"""
-    ALGAE
+    ALGAE | #54AC68 | rgb(0.329, 0.675, 0.408)
     """
     BLUEY_GREY: Color
     r"""
-    BLUEY_GREY
+    BLUEY_GREY | #89A0B0 | rgb(0.537, 0.627, 0.690)
     """
     GREENY_GREY: Color
     r"""
-    GREENY_GREY
+    GREENY_GREY | #7EA07A | rgb(0.494, 0.627, 0.478)
     """
     HIGHLIGHTER_GREEN: Color
     r"""
-    HIGHLIGHTER_GREEN
+    HIGHLIGHTER_GREEN | #1BFC06 | rgb(0.106, 0.988, 0.024)
     """
     LIGHT_LIGHT_BLUE: Color
     r"""
-    LIGHT_LIGHT_BLUE
+    LIGHT_LIGHT_BLUE | #CAFFFB | rgb(0.792, 1.000, 0.984)
     """
     LIGHT_MINT: Color
     r"""
-    LIGHT_MINT
+    LIGHT_MINT | #B6FFBB | rgb(0.714, 1.000, 0.733)
     """
     RAW_UMBER: Color
     r"""
-    RAW_UMBER
+    RAW_UMBER | #A75E09 | rgb(0.655, 0.369, 0.035)
     """
     VIVID_BLUE: Color
     r"""
-    VIVID_BLUE
+    VIVID_BLUE | #152EFF | rgb(0.082, 0.180, 1.000)
     """
     DEEP_LAVENDER: Color
     r"""
-    DEEP_LAVENDER
+    DEEP_LAVENDER | #8D5EB7 | rgb(0.553, 0.369, 0.718)
     """
     DULL_TEAL: Color
     r"""
-    DULL_TEAL
+    DULL_TEAL | #5F9E8F | rgb(0.373, 0.620, 0.561)
     """
     LIGHT_GREENISH_BLUE: Color
     r"""
-    LIGHT_GREENISH_BLUE
+    LIGHT_GREENISH_BLUE | #63F7B4 | rgb(0.388, 0.969, 0.706)
     """
     MUD_GREEN: Color
     r"""
-    MUD_GREEN
+    MUD_GREEN | #606602 | rgb(0.376, 0.400, 0.008)
     """
     PINKY: Color
     r"""
-    PINKY
+    PINKY | #FC86AA | rgb(0.988, 0.525, 0.667)
     """
     RED_WINE: Color
     r"""
-    RED_WINE
+    RED_WINE | #8C0034 | rgb(0.549, 0.000, 0.204)
     """
     SHIT_GREEN: Color
     r"""
-    SHIT_GREEN
+    SHIT_GREEN | #758000 | rgb(0.459, 0.502, 0.000)
     """
     TAN_BROWN: Color
     r"""
-    TAN_BROWN
+    TAN_BROWN | #AB7E4C | rgb(0.671, 0.494, 0.298)
     """
     DARKBLUE: Color
     r"""
-    DARKBLUE
+    DARKBLUE | #030764 | rgb(0.012, 0.027, 0.392)
     """
     ROSA: Color
     r"""
-    ROSA
+    ROSA | #FE86A4 | rgb(0.996, 0.525, 0.643)
     """
     LIPSTICK: Color
     r"""
-    LIPSTICK
+    LIPSTICK | #D5174E | rgb(0.835, 0.090, 0.306)
     """
     PALE_MAUVE: Color
     r"""
-    PALE_MAUVE
+    PALE_MAUVE | #FED0FC | rgb(0.996, 0.816, 0.988)
     """
     CLARET: Color
     r"""
-    CLARET
+    CLARET | #680018 | rgb(0.408, 0.000, 0.094)
     """
     DANDELION: Color
     r"""
-    DANDELION
+    DANDELION | #FEDF08 | rgb(0.996, 0.875, 0.031)
     """
     ORANGERED: Color
     r"""
-    ORANGERED
+    ORANGERED | #FE420F | rgb(0.996, 0.259, 0.059)
     """
     POOP_GREEN: Color
     r"""
-    POOP_GREEN
+    POOP_GREEN | #6F7C00 | rgb(0.435, 0.486, 0.000)
     """
     RUBY: Color
     r"""
-    RUBY
+    RUBY | #CA0147 | rgb(0.792, 0.004, 0.278)
     """
     DARK: Color
     r"""
-    DARK
+    DARK | #1B2431 | rgb(0.106, 0.141, 0.192)
     """
     GREENISH_TURQUOISE: Color
     r"""
-    GREENISH_TURQUOISE
+    GREENISH_TURQUOISE | #00FBB0 | rgb(0.000, 0.984, 0.690)
     """
     PASTEL_RED: Color
     r"""
-    PASTEL_RED
+    PASTEL_RED | #DB5856 | rgb(0.859, 0.345, 0.337)
     """
     PISS_YELLOW: Color
     r"""
-    PISS_YELLOW
+    PISS_YELLOW | #DDD618 | rgb(0.867, 0.839, 0.094)
     """
     BRIGHT_CYAN: Color
     r"""
-    BRIGHT_CYAN
+    BRIGHT_CYAN | #41FDFE | rgb(0.255, 0.992, 0.996)
     """
     DARK_CORAL: Color
     r"""
-    DARK_CORAL
+    DARK_CORAL | #CF524E | rgb(0.812, 0.322, 0.306)
     """
     ALGAE_GREEN: Color
     r"""
-    ALGAE_GREEN
+    ALGAE_GREEN | #21C36F | rgb(0.129, 0.765, 0.435)
     """
     DARKISH_RED: Color
     r"""
-    DARKISH_RED
+    DARKISH_RED | #A90308 | rgb(0.663, 0.012, 0.031)
     """
     REDDY_BROWN: Color
     r"""
-    REDDY_BROWN
+    REDDY_BROWN | #6E1005 | rgb(0.431, 0.063, 0.020)
     """
     BLUSH_PINK: Color
     r"""
-    BLUSH_PINK
+    BLUSH_PINK | #FE828C | rgb(0.996, 0.510, 0.549)
     """
     CAMOUFLAGE_GREEN: Color
     r"""
-    CAMOUFLAGE_GREEN
+    CAMOUFLAGE_GREEN | #4B6113 | rgb(0.294, 0.380, 0.075)
     """
     LAWN_GREEN: Color
     r"""
-    LAWN_GREEN
+    LAWN_GREEN | #4DA409 | rgb(0.302, 0.643, 0.035)
     """
     PUTTY: Color
     r"""
-    PUTTY
+    PUTTY | #BEAE8A | rgb(0.745, 0.682, 0.541)
     """
     VIBRANT_BLUE: Color
     r"""
-    VIBRANT_BLUE
+    VIBRANT_BLUE | #0339F8 | rgb(0.012, 0.224, 0.973)
     """
     DARK_SAND: Color
     r"""
-    DARK_SAND
+    DARK_SAND | #A88F59 | rgb(0.659, 0.561, 0.349)
     """
     PURPLE_BLUE: Color
     r"""
-    PURPLE_BLUE
+    PURPLE_BLUE | #5D21D0 | rgb(0.365, 0.129, 0.816)
     """
     SAFFRON: Color
     r"""
-    SAFFRON
+    SAFFRON | #FEB209 | rgb(0.996, 0.698, 0.035)
     """
     TWILIGHT: Color
     r"""
-    TWILIGHT
+    TWILIGHT | #4E518B | rgb(0.306, 0.318, 0.545)
     """
     WARM_BROWN: Color
     r"""
-    WARM_BROWN
+    WARM_BROWN | #964E02 | rgb(0.588, 0.306, 0.008)
     """
     BLUEGREY: Color
     r"""
-    BLUEGREY
+    BLUEGREY | #85A3B2 | rgb(0.522, 0.639, 0.698)
     """
     BUBBLE_GUM_PINK: Color
     r"""
-    BUBBLE_GUM_PINK
+    BUBBLE_GUM_PINK | #FF69AF | rgb(1.000, 0.412, 0.686)
     """
     DUCK_EGG_BLUE: Color
     r"""
-    DUCK_EGG_BLUE
+    DUCK_EGG_BLUE | #C3FBF4 | rgb(0.765, 0.984, 0.957)
     """
     GREENISH_CYAN: Color
     r"""
-    GREENISH_CYAN
+    GREENISH_CYAN | #2AFEB7 | rgb(0.165, 0.996, 0.718)
     """
     PETROL: Color
     r"""
-    PETROL
+    PETROL | #005F6A | rgb(0.000, 0.373, 0.416)
     """
     ROYAL: Color
     r"""
-    ROYAL
+    ROYAL | #0C1793 | rgb(0.047, 0.090, 0.576)
     """
     BUTTER: Color
     r"""
-    BUTTER
+    BUTTER | #FFFF81 | rgb(1.000, 1.000, 0.506)
     """
     DUSTY_ORANGE: Color
     r"""
-    DUSTY_ORANGE
+    DUSTY_ORANGE | #F0833A | rgb(0.941, 0.514, 0.227)
     """
     OFF_YELLOW: Color
     r"""
-    OFF_YELLOW
+    OFF_YELLOW | #F1F33F | rgb(0.945, 0.953, 0.247)
     """
     PALE_OLIVE_GREEN: Color
     r"""
-    PALE_OLIVE_GREEN
+    PALE_OLIVE_GREEN | #B1D27B | rgb(0.694, 0.824, 0.482)
     """
     ORANGISH: Color
     r"""
-    ORANGISH
+    ORANGISH | #FC824A | rgb(0.988, 0.510, 0.290)
     """
     LEAF: Color
     r"""
-    LEAF
+    LEAF | #71AA34 | rgb(0.443, 0.667, 0.204)
     """
     LIGHT_BLUE_GREY: Color
     r"""
-    LIGHT_BLUE_GREY
+    LIGHT_BLUE_GREY | #B7C9E2 | rgb(0.718, 0.788, 0.886)
     """
     DRIED_BLOOD: Color
     r"""
-    DRIED_BLOOD
+    DRIED_BLOOD | #4B0101 | rgb(0.294, 0.004, 0.004)
     """
     LIGHTISH_PURPLE: Color
     r"""
-    LIGHTISH_PURPLE
+    LIGHTISH_PURPLE | #A552E6 | rgb(0.647, 0.322, 0.902)
     """
     RUSTY_RED: Color
     r"""
-    RUSTY_RED
+    RUSTY_RED | #AF2F0D | rgb(0.686, 0.184, 0.051)
     """
     LAVENDER_BLUE: Color
     r"""
-    LAVENDER_BLUE
+    LAVENDER_BLUE | #8B88F8 | rgb(0.545, 0.533, 0.973)
     """
     LIGHT_GRASS_GREEN: Color
     r"""
-    LIGHT_GRASS_GREEN
+    LIGHT_GRASS_GREEN | #9AF764 | rgb(0.604, 0.969, 0.392)
     """
     LIGHT_MINT_GREEN: Color
     r"""
-    LIGHT_MINT_GREEN
+    LIGHT_MINT_GREEN | #A6FBB2 | rgb(0.651, 0.984, 0.698)
     """
     SUNFLOWER: Color
     r"""
-    SUNFLOWER
+    SUNFLOWER | #FFC512 | rgb(1.000, 0.773, 0.071)
     """
     VELVET: Color
     r"""
-    VELVET
+    VELVET | #750851 | rgb(0.459, 0.031, 0.318)
     """
     BRICK_ORANGE: Color
     r"""
-    BRICK_ORANGE
+    BRICK_ORANGE | #C14A09 | rgb(0.757, 0.290, 0.035)
     """
     LIGHTISH_RED: Color
     r"""
-    LIGHTISH_RED
+    LIGHTISH_RED | #FE2F4A | rgb(0.996, 0.184, 0.290)
     """
     PURE_BLUE: Color
     r"""
-    PURE_BLUE
+    PURE_BLUE | #0203E2 | rgb(0.008, 0.012, 0.886)
     """
     TWILIGHT_BLUE: Color
     r"""
-    TWILIGHT_BLUE
+    TWILIGHT_BLUE | #0A437A | rgb(0.039, 0.263, 0.478)
     """
     VIOLET_RED: Color
     r"""
-    VIOLET_RED
+    VIOLET_RED | #A50055 | rgb(0.647, 0.000, 0.333)
     """
     YELLOWY_BROWN: Color
     r"""
-    YELLOWY_BROWN
+    YELLOWY_BROWN | #AE8B0C | rgb(0.682, 0.545, 0.047)
     """
     CARNATION: Color
     r"""
-    CARNATION
+    CARNATION | #FD798F | rgb(0.992, 0.475, 0.561)
     """
     MUDDY_YELLOW: Color
     r"""
-    MUDDY_YELLOW
+    MUDDY_YELLOW | #BFAC05 | rgb(0.749, 0.675, 0.020)
     """
     DARK_SEAFOAM_GREEN: Color
     r"""
-    DARK_SEAFOAM_GREEN
+    DARK_SEAFOAM_GREEN | #3EAF76 | rgb(0.243, 0.686, 0.463)
     """
     DEEP_ROSE: Color
     r"""
-    DEEP_ROSE
+    DEEP_ROSE | #C74767 | rgb(0.780, 0.278, 0.404)
     """
     DUSTY_RED: Color
     r"""
-    DUSTY_RED
+    DUSTY_RED | #B9484E | rgb(0.725, 0.282, 0.306)
     """
     GREY_BLUE: Color
     r"""
-    GREY_BLUE
+    GREY_BLUE | #647D8E | rgb(0.392, 0.490, 0.557)
     """
     LEMON_LIME: Color
     r"""
-    LEMON_LIME
+    LEMON_LIME | #BFFE28 | rgb(0.749, 0.996, 0.157)
     """
     PURPLE_PINK: Color
     r"""
-    PURPLE_PINK
+    PURPLE_PINK | #D725DE | rgb(0.843, 0.145, 0.871)
     """
     BROWN_YELLOW: Color
     r"""
-    BROWN_YELLOW
+    BROWN_YELLOW | #B29705 | rgb(0.698, 0.592, 0.020)
     """
     PURPLE_BROWN: Color
     r"""
-    PURPLE_BROWN
+    PURPLE_BROWN | #673A3F | rgb(0.404, 0.227, 0.247)
     """
     WISTERIA: Color
     r"""
-    WISTERIA
+    WISTERIA | #A87DC2 | rgb(0.659, 0.490, 0.761)
     """
     BANANA_YELLOW: Color
     r"""
-    BANANA_YELLOW
+    BANANA_YELLOW | #FAFE4B | rgb(0.980, 0.996, 0.294)
     """
     LIPSTICK_RED: Color
     r"""
-    LIPSTICK_RED
+    LIPSTICK_RED | #C0022F | rgb(0.753, 0.008, 0.184)
     """
     WATER_BLUE: Color
     r"""
-    WATER_BLUE
+    WATER_BLUE | #0E87CC | rgb(0.055, 0.529, 0.800)
     """
     BROWN_GREY: Color
     r"""
-    BROWN_GREY
+    BROWN_GREY | #8D8468 | rgb(0.553, 0.518, 0.408)
     """
     VIBRANT_PURPLE: Color
     r"""
-    VIBRANT_PURPLE
+    VIBRANT_PURPLE | #AD03DE | rgb(0.678, 0.012, 0.871)
     """
     BABY_GREEN: Color
     r"""
-    BABY_GREEN
+    BABY_GREEN | #8CFF9E | rgb(0.549, 1.000, 0.620)
     """
     BARF_GREEN: Color
     r"""
-    BARF_GREEN
+    BARF_GREEN | #94AC02 | rgb(0.580, 0.675, 0.008)
     """
     EGGSHELL_BLUE: Color
     r"""
-    EGGSHELL_BLUE
+    EGGSHELL_BLUE | #C4FFF7 | rgb(0.769, 1.000, 0.969)
     """
     SANDY_YELLOW: Color
     r"""
-    SANDY_YELLOW
+    SANDY_YELLOW | #FDEE73 | rgb(0.992, 0.933, 0.451)
     """
     COOL_GREEN: Color
     r"""
-    COOL_GREEN
+    COOL_GREEN | #33B864 | rgb(0.200, 0.722, 0.392)
     """
     PALE: Color
     r"""
-    PALE
+    PALE | #FFF9D0 | rgb(1.000, 0.976, 0.816)
     """
     BLUE_GREY: Color
     r"""
-    BLUE_GREY
+    BLUE_GREY | #758DA3 | rgb(0.459, 0.553, 0.639)
     """
     HOT_MAGENTA: Color
     r"""
-    HOT_MAGENTA
+    HOT_MAGENTA | #F504C9 | rgb(0.961, 0.016, 0.788)
     """
     GREYBLUE: Color
     r"""
-    GREYBLUE
+    GREYBLUE | #77A1B5 | rgb(0.467, 0.631, 0.710)
     """
     PURPLEY: Color
     r"""
-    PURPLEY
+    PURPLEY | #8756E4 | rgb(0.529, 0.337, 0.894)
     """
     BABY_SHIT_GREEN: Color
     r"""
-    BABY_SHIT_GREEN
+    BABY_SHIT_GREEN | #889717 | rgb(0.533, 0.592, 0.090)
     """
     BROWNISH_PINK: Color
     r"""
-    BROWNISH_PINK
+    BROWNISH_PINK | #C27E79 | rgb(0.761, 0.494, 0.475)
     """
     DARK_AQUAMARINE: Color
     r"""
-    DARK_AQUAMARINE
+    DARK_AQUAMARINE | #017371 | rgb(0.004, 0.451, 0.443)
     """
     DIARRHEA: Color
     r"""
-    DIARRHEA
+    DIARRHEA | #9F8303 | rgb(0.624, 0.514, 0.012)
     """
     LIGHT_MUSTARD: Color
     r"""
-    LIGHT_MUSTARD
+    LIGHT_MUSTARD | #F7D560 | rgb(0.969, 0.835, 0.376)
     """
     PALE_SKY_BLUE: Color
     r"""
-    PALE_SKY_BLUE
+    PALE_SKY_BLUE | #BDF6FE | rgb(0.741, 0.965, 0.996)
     """
     TURTLE_GREEN: Color
     r"""
-    TURTLE_GREEN
+    TURTLE_GREEN | #75B84F | rgb(0.459, 0.722, 0.310)
     """
     BRIGHT_OLIVE: Color
     r"""
-    BRIGHT_OLIVE
+    BRIGHT_OLIVE | #9CBB04 | rgb(0.612, 0.733, 0.016)
     """
     DARK_GREY_BLUE: Color
     r"""
-    DARK_GREY_BLUE
+    DARK_GREY_BLUE | #29465B | rgb(0.161, 0.275, 0.357)
     """
     GREENY_BROWN: Color
     r"""
-    GREENY_BROWN
+    GREENY_BROWN | #696006 | rgb(0.412, 0.376, 0.024)
     """
     LEMON_GREEN: Color
     r"""
-    LEMON_GREEN
+    LEMON_GREEN | #ADF802 | rgb(0.678, 0.973, 0.008)
     """
     LIGHT_PERIWINKLE: Color
     r"""
-    LIGHT_PERIWINKLE
+    LIGHT_PERIWINKLE | #C1C6FC | rgb(0.757, 0.776, 0.988)
     """
     SEAWEED_GREEN: Color
     r"""
-    SEAWEED_GREEN
+    SEAWEED_GREEN | #35AD6B | rgb(0.208, 0.678, 0.420)
     """
     SUNSHINE_YELLOW: Color
     r"""
-    SUNSHINE_YELLOW
+    SUNSHINE_YELLOW | #FFFD37 | rgb(1.000, 0.992, 0.216)
     """
     UGLY_PURPLE: Color
     r"""
-    UGLY_PURPLE
+    UGLY_PURPLE | #A442A0 | rgb(0.643, 0.259, 0.627)
     """
     MEDIUM_PINK: Color
     r"""
-    MEDIUM_PINK
+    MEDIUM_PINK | #F36196 | rgb(0.953, 0.380, 0.588)
     """
     PUKE_BROWN: Color
     r"""
-    PUKE_BROWN
+    PUKE_BROWN | #947706 | rgb(0.580, 0.467, 0.024)
     """
     VERY_LIGHT_PINK: Color
     r"""
-    VERY_LIGHT_PINK
+    VERY_LIGHT_PINK | #FFF4F2 | rgb(1.000, 0.957, 0.949)
     """
     VIRIDIAN: Color
     r"""
-    VIRIDIAN
+    VIRIDIAN | #1E9167 | rgb(0.118, 0.569, 0.404)
     """
     BILE: Color
     r"""
-    BILE
+    BILE | #B5C306 | rgb(0.710, 0.765, 0.024)
     """
     FADED_YELLOW: Color
     r"""
-    FADED_YELLOW
+    FADED_YELLOW | #FEFF7F | rgb(0.996, 1.000, 0.498)
     """
     VERY_PALE_GREEN: Color
     r"""
-    VERY_PALE_GREEN
+    VERY_PALE_GREEN | #CFFDBC | rgb(0.812, 0.992, 0.737)
     """
     VIBRANT_GREEN: Color
     r"""
-    VIBRANT_GREEN
+    VIBRANT_GREEN | #0ADD08 | rgb(0.039, 0.867, 0.031)
     """
     BRIGHT_LIME: Color
     r"""
-    BRIGHT_LIME
+    BRIGHT_LIME | #87FD05 | rgb(0.529, 0.992, 0.020)
     """
     SPEARMINT: Color
     r"""
-    SPEARMINT
+    SPEARMINT | #1EF876 | rgb(0.118, 0.973, 0.463)
     """
     LIGHT_AQUAMARINE: Color
     r"""
-    LIGHT_AQUAMARINE
+    LIGHT_AQUAMARINE | #7BFDC7 | rgb(0.482, 0.992, 0.780)
     """
     LIGHT_SAGE: Color
     r"""
-    LIGHT_SAGE
+    LIGHT_SAGE | #BCECAC | rgb(0.737, 0.925, 0.675)
     """
     YELLOWGREEN: Color
     r"""
-    YELLOWGREEN
+    YELLOWGREEN | #BBF90F | rgb(0.733, 0.976, 0.059)
     """
     BABY_POO: Color
     r"""
-    BABY_POO
+    BABY_POO | #AB9004 | rgb(0.671, 0.565, 0.016)
     """
     DARK_SEAFOAM: Color
     r"""
-    DARK_SEAFOAM
+    DARK_SEAFOAM | #1FB57A | rgb(0.122, 0.710, 0.478)
     """
     DEEP_TEAL: Color
     r"""
-    DEEP_TEAL
+    DEEP_TEAL | #00555A | rgb(0.000, 0.333, 0.353)
     """
     HEATHER: Color
     r"""
-    HEATHER
+    HEATHER | #A484AC | rgb(0.643, 0.518, 0.675)
     """
     RUST_ORANGE: Color
     r"""
-    RUST_ORANGE
+    RUST_ORANGE | #C45508 | rgb(0.769, 0.333, 0.031)
     """
     DIRTY_BLUE: Color
     r"""
-    DIRTY_BLUE
+    DIRTY_BLUE | #3F829D | rgb(0.247, 0.510, 0.616)
     """
     FERN_GREEN: Color
     r"""
-    FERN_GREEN
+    FERN_GREEN | #548D44 | rgb(0.329, 0.553, 0.267)
     """
     BRIGHT_LILAC: Color
     r"""
-    BRIGHT_LILAC
+    BRIGHT_LILAC | #C95EFB | rgb(0.788, 0.369, 0.984)
     """
     WEIRD_GREEN: Color
     r"""
-    WEIRD_GREEN
+    WEIRD_GREEN | #3AE57F | rgb(0.227, 0.898, 0.498)
     """
     PEACOCK_BLUE: Color
     r"""
-    PEACOCK_BLUE
+    PEACOCK_BLUE | #016795 | rgb(0.004, 0.404, 0.584)
     """
     AVOCADO_GREEN: Color
     r"""
-    AVOCADO_GREEN
+    AVOCADO_GREEN | #87A922 | rgb(0.529, 0.663, 0.133)
     """
     FADED_ORANGE: Color
     r"""
-    FADED_ORANGE
+    FADED_ORANGE | #F0944D | rgb(0.941, 0.580, 0.302)
     """
     GRAPE_PURPLE: Color
     r"""
-    GRAPE_PURPLE
+    GRAPE_PURPLE | #5D1451 | rgb(0.365, 0.078, 0.318)
     """
     HOT_GREEN: Color
     r"""
-    HOT_GREEN
+    HOT_GREEN | #25FF29 | rgb(0.145, 1.000, 0.161)
     """
     LIME_YELLOW: Color
     r"""
-    LIME_YELLOW
+    LIME_YELLOW | #D0FE1D | rgb(0.816, 0.996, 0.114)
     """
     MANGO: Color
     r"""
-    MANGO
+    MANGO | #FFA62B | rgb(1.000, 0.651, 0.169)
     """
     SHAMROCK: Color
     r"""
-    SHAMROCK
+    SHAMROCK | #01B44C | rgb(0.004, 0.706, 0.298)
     """
     BUBBLEGUM: Color
     r"""
-    BUBBLEGUM
+    BUBBLEGUM | #FF6CB5 | rgb(1.000, 0.424, 0.710)
     """
     PURPLISH_BROWN: Color
     r"""
-    PURPLISH_BROWN
+    PURPLISH_BROWN | #6B4247 | rgb(0.420, 0.259, 0.278)
     """
     VOMIT_YELLOW: Color
     r"""
-    VOMIT_YELLOW
+    VOMIT_YELLOW | #C7C10C | rgb(0.780, 0.757, 0.047)
     """
     PALE_CYAN: Color
     r"""
-    PALE_CYAN
+    PALE_CYAN | #B7FFFA | rgb(0.718, 1.000, 0.980)
     """
     KEY_LIME: Color
     r"""
-    KEY_LIME
+    KEY_LIME | #AEFF6E | rgb(0.682, 1.000, 0.431)
     """
     TOMATO_RED: Color
     r"""
-    TOMATO_RED
+    TOMATO_RED | #EC2D01 | rgb(0.925, 0.176, 0.004)
     """
     LIGHTGREEN: Color
     r"""
-    LIGHTGREEN
+    LIGHTGREEN | #76FF7B | rgb(0.463, 1.000, 0.482)
     """
     MERLOT: Color
     r"""
-    MERLOT
+    MERLOT | #730039 | rgb(0.451, 0.000, 0.224)
     """
     NIGHT_BLUE: Color
     r"""
-    NIGHT_BLUE
+    NIGHT_BLUE | #040348 | rgb(0.016, 0.012, 0.282)
     """
     PURPLEISH_PINK: Color
     r"""
-    PURPLEISH_PINK
+    PURPLEISH_PINK | #DF4EC8 | rgb(0.875, 0.306, 0.784)
     """
     APPLE: Color
     r"""
-    APPLE
+    APPLE | #6ECB3C | rgb(0.431, 0.796, 0.235)
     """
     BABY_POOP_GREEN: Color
     r"""
-    BABY_POOP_GREEN
+    BABY_POOP_GREEN | #8F9805 | rgb(0.561, 0.596, 0.020)
     """
     GREEN_APPLE: Color
     r"""
-    GREEN_APPLE
+    GREEN_APPLE | #5EDC1F | rgb(0.369, 0.863, 0.122)
     """
     HELIOTROPE: Color
     r"""
-    HELIOTROPE
+    HELIOTROPE | #D94FF5 | rgb(0.851, 0.310, 0.961)
     """
     YELLOW_GREEN: Color
     r"""
-    YELLOW_GREEN
+    YELLOW_GREEN | #C8FD3D | rgb(0.784, 0.992, 0.239)
     """
     ALMOST_BLACK: Color
     r"""
-    ALMOST_BLACK
+    ALMOST_BLACK | #070D0D | rgb(0.027, 0.051, 0.051)
     """
     COOL_BLUE: Color
     r"""
-    COOL_BLUE
+    COOL_BLUE | #4984B8 | rgb(0.286, 0.518, 0.722)
     """
     LEAFY_GREEN: Color
     r"""
-    LEAFY_GREEN
+    LEAFY_GREEN | #51B73B | rgb(0.318, 0.718, 0.231)
     """
     MUSTARD_BROWN: Color
     r"""
-    MUSTARD_BROWN
+    MUSTARD_BROWN | #AC7E04 | rgb(0.675, 0.494, 0.016)
     """
     DUSK: Color
     r"""
-    DUSK
+    DUSK | #4E5481 | rgb(0.306, 0.329, 0.506)
     """
     DULL_BROWN: Color
     r"""
-    DULL_BROWN
+    DULL_BROWN | #876E4B | rgb(0.529, 0.431, 0.294)
     """
     FROG_GREEN: Color
     r"""
-    FROG_GREEN
+    FROG_GREEN | #58BC08 | rgb(0.345, 0.737, 0.031)
     """
     VIVID_GREEN: Color
     r"""
-    VIVID_GREEN
+    VIVID_GREEN | #2FEF10 | rgb(0.184, 0.937, 0.063)
     """
     BRIGHT_LIGHT_GREEN: Color
     r"""
-    BRIGHT_LIGHT_GREEN
+    BRIGHT_LIGHT_GREEN | #2DFE54 | rgb(0.176, 0.996, 0.329)
     """
     FLURO_GREEN: Color
     r"""
-    FLURO_GREEN
+    FLURO_GREEN | #0AFF02 | rgb(0.039, 1.000, 0.008)
     """
     KIWI: Color
     r"""
-    KIWI
+    KIWI | #9CEF43 | rgb(0.612, 0.937, 0.263)
     """
     SEAWEED: Color
     r"""
-    SEAWEED
+    SEAWEED | #18D17B | rgb(0.094, 0.820, 0.482)
     """
     NAVY_GREEN: Color
     r"""
-    NAVY_GREEN
+    NAVY_GREEN | #35530A | rgb(0.208, 0.325, 0.039)
     """
     ULTRAMARINE_BLUE: Color
     r"""
-    ULTRAMARINE_BLUE
+    ULTRAMARINE_BLUE | #1805DB | rgb(0.094, 0.020, 0.859)
     """
     IRIS: Color
     r"""
-    IRIS
+    IRIS | #6258C4 | rgb(0.384, 0.345, 0.769)
     """
     PASTEL_ORANGE: Color
     r"""
-    PASTEL_ORANGE
+    PASTEL_ORANGE | #FF964F | rgb(1.000, 0.588, 0.310)
     """
     YELLOWISH_ORANGE: Color
     r"""
-    YELLOWISH_ORANGE
+    YELLOWISH_ORANGE | #FFAB0F | rgb(1.000, 0.671, 0.059)
     """
     PERRYWINKLE: Color
     r"""
-    PERRYWINKLE
+    PERRYWINKLE | #8F8CE7 | rgb(0.561, 0.549, 0.906)
     """
     TEALISH: Color
     r"""
-    TEALISH
+    TEALISH | #24BCA8 | rgb(0.141, 0.737, 0.659)
     """
     DARK_PLUM: Color
     r"""
-    DARK_PLUM
+    DARK_PLUM | #3F012C | rgb(0.247, 0.004, 0.173)
     """
     PEAR: Color
     r"""
-    PEAR
+    PEAR | #CBF85F | rgb(0.796, 0.973, 0.373)
     """
     PINKISH_ORANGE: Color
     r"""
-    PINKISH_ORANGE
+    PINKISH_ORANGE | #FF724C | rgb(1.000, 0.447, 0.298)
     """
     MIDNIGHT_PURPLE: Color
     r"""
-    MIDNIGHT_PURPLE
+    MIDNIGHT_PURPLE | #280137 | rgb(0.157, 0.004, 0.216)
     """
     LIGHT_URPLE: Color
     r"""
-    LIGHT_URPLE
+    LIGHT_URPLE | #B36FF6 | rgb(0.702, 0.435, 0.965)
     """
     DARK_MINT: Color
     r"""
-    DARK_MINT
+    DARK_MINT | #48C072 | rgb(0.282, 0.753, 0.447)
     """
     GREENISH_TAN: Color
     r"""
-    GREENISH_TAN
+    GREENISH_TAN | #BCCB7A | rgb(0.737, 0.796, 0.478)
     """
     LIGHT_BURGUNDY: Color
     r"""
-    LIGHT_BURGUNDY
+    LIGHT_BURGUNDY | #A8415B | rgb(0.659, 0.255, 0.357)
     """
     TURQUOISE_BLUE: Color
     r"""
-    TURQUOISE_BLUE
+    TURQUOISE_BLUE | #06B1C4 | rgb(0.024, 0.694, 0.769)
     """
     UGLY_PINK: Color
     r"""
-    UGLY_PINK
+    UGLY_PINK | #CD7584 | rgb(0.804, 0.459, 0.518)
     """
     SANDY: Color
     r"""
-    SANDY
+    SANDY | #F1DA7A | rgb(0.945, 0.855, 0.478)
     """
     ELECTRIC_PINK: Color
     r"""
-    ELECTRIC_PINK
+    ELECTRIC_PINK | #FF0490 | rgb(1.000, 0.016, 0.565)
     """
     MUTED_PURPLE: Color
     r"""
-    MUTED_PURPLE
+    MUTED_PURPLE | #805B87 | rgb(0.502, 0.357, 0.529)
     """
     MID_GREEN: Color
     r"""
-    MID_GREEN
+    MID_GREEN | #50A747 | rgb(0.314, 0.655, 0.278)
     """
     GREYISH: Color
     r"""
-    GREYISH
+    GREYISH | #A8A495 | rgb(0.659, 0.643, 0.584)
     """
     NEON_YELLOW: Color
     r"""
-    NEON_YELLOW
+    NEON_YELLOW | #CFFF04 | rgb(0.812, 1.000, 0.016)
     """
     BANANA: Color
     r"""
-    BANANA
+    BANANA | #FFFF7E | rgb(1.000, 1.000, 0.494)
     """
     CARNATION_PINK: Color
     r"""
-    CARNATION_PINK
+    CARNATION_PINK | #FF7FA7 | rgb(1.000, 0.498, 0.655)
     """
     TOMATO: Color
     r"""
-    TOMATO
+    TOMATO | #EF4026 | rgb(0.937, 0.251, 0.149)
     """
     SEA: Color
     r"""
-    SEA
+    SEA | #3C9992 | rgb(0.235, 0.600, 0.573)
     """
     MUDDY_BROWN: Color
     r"""
-    MUDDY_BROWN
+    MUDDY_BROWN | #886806 | rgb(0.533, 0.408, 0.024)
     """
     TURQUOISE_GREEN: Color
     r"""
-    TURQUOISE_GREEN
+    TURQUOISE_GREEN | #04F489 | rgb(0.016, 0.957, 0.537)
     """
     BUFF: Color
     r"""
-    BUFF
+    BUFF | #FEF69E | rgb(0.996, 0.965, 0.620)
     """
     FAWN: Color
     r"""
-    FAWN
+    FAWN | #CFAF7B | rgb(0.812, 0.686, 0.482)
     """
     MUTED_BLUE: Color
     r"""
-    MUTED_BLUE
+    MUTED_BLUE | #3B719F | rgb(0.231, 0.443, 0.624)
     """
     PALE_ROSE: Color
     r"""
-    PALE_ROSE
+    PALE_ROSE | #FDC1C5 | rgb(0.992, 0.757, 0.773)
     """
     DARK_MINT_GREEN: Color
     r"""
-    DARK_MINT_GREEN
+    DARK_MINT_GREEN | #20C073 | rgb(0.125, 0.753, 0.451)
     """
     AMETHYST: Color
     r"""
-    AMETHYST
+    AMETHYST | #9B5FC0 | rgb(0.608, 0.373, 0.753)
     """
     BLUE_GREEN: Color
     r"""
-    BLUE_GREEN
+    BLUE_GREEN | #0F9B8E | rgb(0.059, 0.608, 0.557)
     """
     CHESTNUT: Color
     r"""
-    CHESTNUT
+    CHESTNUT | #742802 | rgb(0.455, 0.157, 0.008)
     """
     SICK_GREEN: Color
     r"""
-    SICK_GREEN
+    SICK_GREEN | #9DB92C | rgb(0.616, 0.725, 0.173)
     """
     PEA: Color
     r"""
-    PEA
+    PEA | #A4BF20 | rgb(0.643, 0.749, 0.125)
     """
     RUSTY_ORANGE: Color
     r"""
-    RUSTY_ORANGE
+    RUSTY_ORANGE | #CD5909 | rgb(0.804, 0.349, 0.035)
     """
     STONE: Color
     r"""
-    STONE
+    STONE | #ADA587 | rgb(0.678, 0.647, 0.529)
     """
     ROSE_RED: Color
     r"""
-    ROSE_RED
+    ROSE_RED | #BE013C | rgb(0.745, 0.004, 0.235)
     """
     PALE_AQUA: Color
     r"""
-    PALE_AQUA
+    PALE_AQUA | #B8FFEB | rgb(0.722, 1.000, 0.922)
     """
     DEEP_ORANGE: Color
     r"""
-    DEEP_ORANGE
+    DEEP_ORANGE | #DC4D01 | rgb(0.863, 0.302, 0.004)
     """
     EARTH: Color
     r"""
-    EARTH
+    EARTH | #A2653E | rgb(0.635, 0.396, 0.243)
     """
     MOSSY_GREEN: Color
     r"""
-    MOSSY_GREEN
+    MOSSY_GREEN | #638B27 | rgb(0.388, 0.545, 0.153)
     """
     GRASSY_GREEN: Color
     r"""
-    GRASSY_GREEN
+    GRASSY_GREEN | #419C03 | rgb(0.255, 0.612, 0.012)
     """
     PALE_LIME_GREEN: Color
     r"""
-    PALE_LIME_GREEN
+    PALE_LIME_GREEN | #B1FF65 | rgb(0.694, 1.000, 0.396)
     """
     LIGHT_GREY_BLUE: Color
     r"""
-    LIGHT_GREY_BLUE
+    LIGHT_GREY_BLUE | #9DBCD4 | rgb(0.616, 0.737, 0.831)
     """
     PALE_GREY: Color
     r"""
-    PALE_GREY
+    PALE_GREY | #FDFDFE | rgb(0.992, 0.992, 0.996)
     """
     ASPARAGUS: Color
     r"""
-    ASPARAGUS
+    ASPARAGUS | #77AB56 | rgb(0.467, 0.671, 0.337)
     """
     BLUEBERRY: Color
     r"""
-    BLUEBERRY
+    BLUEBERRY | #464196 | rgb(0.275, 0.255, 0.588)
     """
     PURPLE_RED: Color
     r"""
-    PURPLE_RED
+    PURPLE_RED | #990147 | rgb(0.600, 0.004, 0.278)
     """
     PALE_LIME: Color
     r"""
-    PALE_LIME
+    PALE_LIME | #BEFD73 | rgb(0.745, 0.992, 0.451)
     """
     GREENISH_TEAL: Color
     r"""
-    GREENISH_TEAL
+    GREENISH_TEAL | #32BF84 | rgb(0.196, 0.749, 0.518)
     """
     CARAMEL: Color
     r"""
-    CARAMEL
+    CARAMEL | #AF6F09 | rgb(0.686, 0.435, 0.035)
     """
     DEEP_MAGENTA: Color
     r"""
-    DEEP_MAGENTA
+    DEEP_MAGENTA | #A0025C | rgb(0.627, 0.008, 0.361)
     """
     LIGHT_PEACH: Color
     r"""
-    LIGHT_PEACH
+    LIGHT_PEACH | #FFD8B1 | rgb(1.000, 0.847, 0.694)
     """
     MILK_CHOCOLATE: Color
     r"""
-    MILK_CHOCOLATE
+    MILK_CHOCOLATE | #7F4E1E | rgb(0.498, 0.306, 0.118)
     """
     OCHER: Color
     r"""
-    OCHER
+    OCHER | #BF9B0C | rgb(0.749, 0.608, 0.047)
     """
     OFF_GREEN: Color
     r"""
-    OFF_GREEN
+    OFF_GREEN | #6BA353 | rgb(0.420, 0.639, 0.325)
     """
     PURPLY_PINK: Color
     r"""
-    PURPLY_PINK
+    PURPLY_PINK | #F075E6 | rgb(0.941, 0.459, 0.902)
     """
     LIGHTBLUE: Color
     r"""
-    LIGHTBLUE
+    LIGHTBLUE | #7BC8F6 | rgb(0.482, 0.784, 0.965)
     """
     DUSKY_BLUE: Color
     r"""
-    DUSKY_BLUE
+    DUSKY_BLUE | #475F94 | rgb(0.278, 0.373, 0.580)
     """
     GOLDEN: Color
     r"""
-    GOLDEN
+    GOLDEN | #F5BF03 | rgb(0.961, 0.749, 0.012)
     """
     LIGHT_BEIGE: Color
     r"""
-    LIGHT_BEIGE
+    LIGHT_BEIGE | #FFFEB6 | rgb(1.000, 0.996, 0.714)
     """
     BUTTER_YELLOW: Color
     r"""
-    BUTTER_YELLOW
+    BUTTER_YELLOW | #FFFD74 | rgb(1.000, 0.992, 0.455)
     """
     DUSKY_PURPLE: Color
     r"""
-    DUSKY_PURPLE
+    DUSKY_PURPLE | #895B7B | rgb(0.537, 0.357, 0.482)
     """
     FRENCH_BLUE: Color
     r"""
-    FRENCH_BLUE
+    FRENCH_BLUE | #436BAD | rgb(0.263, 0.420, 0.678)
     """
     UGLY_YELLOW: Color
     r"""
-    UGLY_YELLOW
+    UGLY_YELLOW | #D0C101 | rgb(0.816, 0.757, 0.004)
     """
     GREENY_YELLOW: Color
     r"""
-    GREENY_YELLOW
+    GREENY_YELLOW | #C6F808 | rgb(0.776, 0.973, 0.031)
     """
     ORANGISH_RED: Color
     r"""
-    ORANGISH_RED
+    ORANGISH_RED | #F43605 | rgb(0.957, 0.212, 0.020)
     """
     SHAMROCK_GREEN: Color
     r"""
-    SHAMROCK_GREEN
+    SHAMROCK_GREEN | #02C14D | rgb(0.008, 0.757, 0.302)
     """
     ORANGISH_BROWN: Color
     r"""
-    ORANGISH_BROWN
+    ORANGISH_BROWN | #B25F03 | rgb(0.698, 0.373, 0.012)
     """
     TREE_GREEN: Color
     r"""
-    TREE_GREEN
+    TREE_GREEN | #2A7E19 | rgb(0.165, 0.494, 0.098)
     """
     DEEP_VIOLET: Color
     r"""
-    DEEP_VIOLET
+    DEEP_VIOLET | #490648 | rgb(0.286, 0.024, 0.282)
     """
     GUNMETAL: Color
     r"""
-    GUNMETAL
+    GUNMETAL | #536267 | rgb(0.325, 0.384, 0.404)
     """
     BLUE_PURPLE: Color
     r"""
-    BLUE_PURPLE
+    BLUE_PURPLE | #5A06EF | rgb(0.353, 0.024, 0.937)
     """
     CHERRY: Color
     r"""
-    CHERRY
+    CHERRY | #CF0234 | rgb(0.812, 0.008, 0.204)
     """
     SANDY_BROWN: Color
     r"""
-    SANDY_BROWN
+    SANDY_BROWN | #C4A661 | rgb(0.769, 0.651, 0.380)
     """
     WARM_GREY: Color
     r"""
-    WARM_GREY
+    WARM_GREY | #978A84 | rgb(0.592, 0.541, 0.518)
     """
     DARK_INDIGO: Color
     r"""
-    DARK_INDIGO
+    DARK_INDIGO | #1F0954 | rgb(0.122, 0.035, 0.329)
     """
     MIDNIGHT: Color
     r"""
-    MIDNIGHT
+    MIDNIGHT | #03012D | rgb(0.012, 0.004, 0.176)
     """
     BLUEY_GREEN: Color
     r"""
-    BLUEY_GREEN
+    BLUEY_GREEN | #2BB179 | rgb(0.169, 0.694, 0.475)
     """
     GREY_PINK: Color
     r"""
-    GREY_PINK
+    GREY_PINK | #C3909B | rgb(0.765, 0.565, 0.608)
     """
     SOFT_PURPLE: Color
     r"""
-    SOFT_PURPLE
+    SOFT_PURPLE | #A66FB5 | rgb(0.651, 0.435, 0.710)
     """
     BLOOD: Color
     r"""
-    BLOOD
+    BLOOD | #770001 | rgb(0.467, 0.000, 0.004)
     """
     BROWN_RED: Color
     r"""
-    BROWN_RED
+    BROWN_RED | #922B05 | rgb(0.573, 0.169, 0.020)
     """
     MEDIUM_GREY: Color
     r"""
-    MEDIUM_GREY
+    MEDIUM_GREY | #7D7F7C | rgb(0.490, 0.498, 0.486)
     """
     BERRY: Color
     r"""
-    BERRY
+    BERRY | #990F4B | rgb(0.600, 0.059, 0.294)
     """
     POO: Color
     r"""
-    POO
+    POO | #8F7303 | rgb(0.561, 0.451, 0.012)
     """
     PURPLEY_PINK: Color
     r"""
-    PURPLEY_PINK
+    PURPLEY_PINK | #C83CB9 | rgb(0.784, 0.235, 0.725)
     """
     LIGHT_SALMON: Color
     r"""
-    LIGHT_SALMON
+    LIGHT_SALMON | #FEA993 | rgb(0.996, 0.663, 0.576)
     """
     SNOT: Color
     r"""
-    SNOT
+    SNOT | #ACBB0D | rgb(0.675, 0.733, 0.051)
     """
     EASTER_PURPLE: Color
     r"""
-    EASTER_PURPLE
+    EASTER_PURPLE | #C071FE | rgb(0.753, 0.443, 0.996)
     """
     LIGHT_YELLOW_GREEN: Color
     r"""
-    LIGHT_YELLOW_GREEN
+    LIGHT_YELLOW_GREEN | #CCFD7F | rgb(0.800, 0.992, 0.498)
     """
     DARK_NAVY_BLUE: Color
     r"""
-    DARK_NAVY_BLUE
+    DARK_NAVY_BLUE | #00022E | rgb(0.000, 0.008, 0.180)
     """
     DRAB: Color
     r"""
-    DRAB
+    DRAB | #828344 | rgb(0.510, 0.514, 0.267)
     """
     LIGHT_ROSE: Color
     r"""
-    LIGHT_ROSE
+    LIGHT_ROSE | #FFC5CB | rgb(1.000, 0.773, 0.796)
     """
     ROUGE: Color
     r"""
-    ROUGE
+    ROUGE | #AB1239 | rgb(0.671, 0.071, 0.224)
     """
     PURPLISH_RED: Color
     r"""
-    PURPLISH_RED
+    PURPLISH_RED | #B0054B | rgb(0.690, 0.020, 0.294)
     """
     SLIME_GREEN: Color
     r"""
-    SLIME_GREEN
+    SLIME_GREEN | #99CC04 | rgb(0.600, 0.800, 0.016)
     """
     BABY_POOP: Color
     r"""
-    BABY_POOP
+    BABY_POOP | #937C00 | rgb(0.576, 0.486, 0.000)
     """
     IRISH_GREEN: Color
     r"""
-    IRISH_GREEN
+    IRISH_GREEN | #019529 | rgb(0.004, 0.584, 0.161)
     """
     PINK_PURPLE: Color
     r"""
-    PINK_PURPLE
+    PINK_PURPLE | #EF1DE7 | rgb(0.937, 0.114, 0.906)
     """
     DARK_NAVY: Color
     r"""
-    DARK_NAVY
+    DARK_NAVY | #000435 | rgb(0.000, 0.016, 0.208)
     """
     GREENY_BLUE: Color
     r"""
-    GREENY_BLUE
+    GREENY_BLUE | #42B395 | rgb(0.259, 0.702, 0.584)
     """
     LIGHT_PLUM: Color
     r"""
-    LIGHT_PLUM
+    LIGHT_PLUM | #9D5783 | rgb(0.616, 0.341, 0.514)
     """
     PINKISH_GREY: Color
     r"""
-    PINKISH_GREY
+    PINKISH_GREY | #C8ACA9 | rgb(0.784, 0.675, 0.663)
     """
     DIRTY_ORANGE: Color
     r"""
-    DIRTY_ORANGE
+    DIRTY_ORANGE | #C87606 | rgb(0.784, 0.463, 0.024)
     """
     RUST_RED: Color
     r"""
-    RUST_RED
+    RUST_RED | #AA2704 | rgb(0.667, 0.153, 0.016)
     """
     PALE_LILAC: Color
     r"""
-    PALE_LILAC
+    PALE_LILAC | #E4CBFF | rgb(0.894, 0.796, 1.000)
     """
     ORANGEY_RED: Color
     r"""
-    ORANGEY_RED
+    ORANGEY_RED | #FA4224 | rgb(0.980, 0.259, 0.141)
     """
     PRIMARY_BLUE: Color
     r"""
-    PRIMARY_BLUE
+    PRIMARY_BLUE | #0804F9 | rgb(0.031, 0.016, 0.976)
     """
     KERMIT_GREEN: Color
     r"""
-    KERMIT_GREEN
+    KERMIT_GREEN | #5CB200 | rgb(0.361, 0.698, 0.000)
     """
     BROWNISH_PURPLE: Color
     r"""
-    BROWNISH_PURPLE
+    BROWNISH_PURPLE | #76424E | rgb(0.463, 0.259, 0.306)
     """
     MURKY_GREEN: Color
     r"""
-    MURKY_GREEN
+    MURKY_GREEN | #6C7A0E | rgb(0.424, 0.478, 0.055)
     """
     WHEAT: Color
     r"""
-    WHEAT
+    WHEAT | #FBDD7E | rgb(0.984, 0.867, 0.494)
     """
     VERY_DARK_PURPLE: Color
     r"""
-    VERY_DARK_PURPLE
+    VERY_DARK_PURPLE | #2A0134 | rgb(0.165, 0.004, 0.204)
     """
     BOTTLE_GREEN: Color
     r"""
-    BOTTLE_GREEN
+    BOTTLE_GREEN | #044A05 | rgb(0.016, 0.290, 0.020)
     """
     WATERMELON: Color
     r"""
-    WATERMELON
+    WATERMELON | #FD4659 | rgb(0.992, 0.275, 0.349)
     """
     DEEP_SKY_BLUE: Color
     r"""
-    DEEP_SKY_BLUE
+    DEEP_SKY_BLUE | #0D75F8 | rgb(0.051, 0.459, 0.973)
     """
     FIRE_ENGINE_RED: Color
     r"""
-    FIRE_ENGINE_RED
+    FIRE_ENGINE_RED | #FE0002 | rgb(0.996, 0.000, 0.008)
     """
     YELLOW_OCHRE: Color
     r"""
-    YELLOW_OCHRE
+    YELLOW_OCHRE | #CB9D06 | rgb(0.796, 0.616, 0.024)
     """
     PUMPKIN_ORANGE: Color
     r"""
-    PUMPKIN_ORANGE
+    PUMPKIN_ORANGE | #FB7D07 | rgb(0.984, 0.490, 0.027)
     """
     PALE_OLIVE: Color
     r"""
-    PALE_OLIVE
+    PALE_OLIVE | #B9CC81 | rgb(0.725, 0.800, 0.506)
     """
     LIGHT_LILAC: Color
     r"""
-    LIGHT_LILAC
+    LIGHT_LILAC | #EDC8FF | rgb(0.929, 0.784, 1.000)
     """
     LIGHTISH_GREEN: Color
     r"""
-    LIGHTISH_GREEN
+    LIGHTISH_GREEN | #61E160 | rgb(0.380, 0.882, 0.376)
     """
     CAROLINA_BLUE: Color
     r"""
-    CAROLINA_BLUE
+    CAROLINA_BLUE | #8AB8FE | rgb(0.541, 0.722, 0.996)
     """
     MULBERRY: Color
     r"""
-    MULBERRY
+    MULBERRY | #920A4E | rgb(0.573, 0.039, 0.306)
     """
     SHOCKING_PINK: Color
     r"""
-    SHOCKING_PINK
+    SHOCKING_PINK | #FE02A2 | rgb(0.996, 0.008, 0.635)
     """
     AUBURN: Color
     r"""
-    AUBURN
+    AUBURN | #9A3001 | rgb(0.604, 0.188, 0.004)
     """
     BRIGHT_LIME_GREEN: Color
     r"""
-    BRIGHT_LIME_GREEN
+    BRIGHT_LIME_GREEN | #65FE08 | rgb(0.396, 0.996, 0.031)
     """
     CELADON: Color
     r"""
-    CELADON
+    CELADON | #BEFDB7 | rgb(0.745, 0.992, 0.718)
     """
     PINKISH_BROWN: Color
     r"""
-    PINKISH_BROWN
+    PINKISH_BROWN | #B17261 | rgb(0.694, 0.447, 0.380)
     """
     POO_BROWN: Color
     r"""
-    POO_BROWN
+    POO_BROWN | #885F01 | rgb(0.533, 0.373, 0.004)
     """
     BRIGHT_SKY_BLUE: Color
     r"""
-    BRIGHT_SKY_BLUE
+    BRIGHT_SKY_BLUE | #02CCFE | rgb(0.008, 0.800, 0.996)
     """
     CELERY: Color
     r"""
-    CELERY
+    CELERY | #C1FD95 | rgb(0.757, 0.992, 0.584)
     """
     DIRT_BROWN: Color
     r"""
-    DIRT_BROWN
+    DIRT_BROWN | #836539 | rgb(0.514, 0.396, 0.224)
     """
     STRAWBERRY: Color
     r"""
-    STRAWBERRY
+    STRAWBERRY | #FB2943 | rgb(0.984, 0.161, 0.263)
     """
     DARK_LIME: Color
     r"""
-    DARK_LIME
+    DARK_LIME | #84B701 | rgb(0.518, 0.718, 0.004)
     """
     COPPER: Color
     r"""
-    COPPER
+    COPPER | #B66325 | rgb(0.714, 0.388, 0.145)
     """
     MEDIUM_BROWN: Color
     r"""
-    MEDIUM_BROWN
+    MEDIUM_BROWN | #7F5112 | rgb(0.498, 0.318, 0.071)
     """
     MUTED_GREEN: Color
     r"""
-    MUTED_GREEN
+    MUTED_GREEN | #5FA052 | rgb(0.373, 0.627, 0.322)
     """
     ROBINS_EGG: Color
     r"""
-    ROBINS_EGG
+    ROBINS_EGG | #6DEDFD | rgb(0.427, 0.929, 0.992)
     """
     BRIGHT_AQUA: Color
     r"""
-    BRIGHT_AQUA
+    BRIGHT_AQUA | #0BF9EA | rgb(0.043, 0.976, 0.918)
     """
     BRIGHT_LAVENDER: Color
     r"""
-    BRIGHT_LAVENDER
+    BRIGHT_LAVENDER | #C760FF | rgb(0.780, 0.376, 1.000)
     """
     IVORY: Color
     r"""
-    IVORY
+    IVORY | #FFFFCB | rgb(1.000, 1.000, 0.796)
     """
     VERY_LIGHT_PURPLE: Color
     r"""
-    VERY_LIGHT_PURPLE
+    VERY_LIGHT_PURPLE | #F6CEFC | rgb(0.965, 0.808, 0.988)
     """
     LIGHT_NAVY: Color
     r"""
-    LIGHT_NAVY
+    LIGHT_NAVY | #155084 | rgb(0.082, 0.314, 0.518)
     """
     PINK_RED: Color
     r"""
-    PINK_RED
+    PINK_RED | #F5054F | rgb(0.961, 0.020, 0.310)
     """
     OLIVE_BROWN: Color
     r"""
-    OLIVE_BROWN
+    OLIVE_BROWN | #645403 | rgb(0.392, 0.329, 0.012)
     """
     POOP_BROWN: Color
     r"""
-    POOP_BROWN
+    POOP_BROWN | #7A5901 | rgb(0.478, 0.349, 0.004)
     """
     MUSTARD_GREEN: Color
     r"""
-    MUSTARD_GREEN
+    MUSTARD_GREEN | #A8B504 | rgb(0.659, 0.710, 0.016)
     """
     OCEAN_GREEN: Color
     r"""
-    OCEAN_GREEN
+    OCEAN_GREEN | #3D9973 | rgb(0.239, 0.600, 0.451)
     """
     VERY_DARK_BLUE: Color
     r"""
-    VERY_DARK_BLUE
+    VERY_DARK_BLUE | #000133 | rgb(0.000, 0.004, 0.200)
     """
     DUSTY_GREEN: Color
     r"""
-    DUSTY_GREEN
+    DUSTY_GREEN | #76A973 | rgb(0.463, 0.663, 0.451)
     """
     LIGHT_NAVY_BLUE: Color
     r"""
-    LIGHT_NAVY_BLUE
+    LIGHT_NAVY_BLUE | #2E5A88 | rgb(0.180, 0.353, 0.533)
     """
     MINTY_GREEN: Color
     r"""
-    MINTY_GREEN
+    MINTY_GREEN | #0BF77D | rgb(0.043, 0.969, 0.490)
     """
     ADOBE: Color
     r"""
-    ADOBE
+    ADOBE | #BD6C48 | rgb(0.741, 0.424, 0.282)
     """
     BARNEY: Color
     r"""
-    BARNEY
+    BARNEY | #AC1DB8 | rgb(0.675, 0.114, 0.722)
     """
     JADE_GREEN: Color
     r"""
-    JADE_GREEN
+    JADE_GREEN | #2BAF6A | rgb(0.169, 0.686, 0.416)
     """
     BRIGHT_LIGHT_BLUE: Color
     r"""
-    BRIGHT_LIGHT_BLUE
+    BRIGHT_LIGHT_BLUE | #26F7FD | rgb(0.149, 0.969, 0.992)
     """
     LIGHT_LIME: Color
     r"""
-    LIGHT_LIME
+    LIGHT_LIME | #AEFD6C | rgb(0.682, 0.992, 0.424)
     """
     DARK_KHAKI: Color
     r"""
-    DARK_KHAKI
+    DARK_KHAKI | #9B8F55 | rgb(0.608, 0.561, 0.333)
     """
     ORANGE_YELLOW: Color
     r"""
-    ORANGE_YELLOW
+    ORANGE_YELLOW | #FFAD01 | rgb(1.000, 0.678, 0.004)
     """
     OCRE: Color
     r"""
-    OCRE
+    OCRE | #C69C04 | rgb(0.776, 0.612, 0.016)
     """
     MAIZE: Color
     r"""
-    MAIZE
+    MAIZE | #F4D054 | rgb(0.957, 0.816, 0.329)
     """
     FADED_PINK: Color
     r"""
-    FADED_PINK
+    FADED_PINK | #DE9DAC | rgb(0.871, 0.616, 0.675)
     """
     BRITISH_RACING_GREEN: Color
     r"""
-    BRITISH_RACING_GREEN
+    BRITISH_RACING_GREEN | #05480D | rgb(0.020, 0.282, 0.051)
     """
     SANDSTONE: Color
     r"""
-    SANDSTONE
+    SANDSTONE | #C9AE74 | rgb(0.788, 0.682, 0.455)
     """
     MUD_BROWN: Color
     r"""
-    MUD_BROWN
+    MUD_BROWN | #60460F | rgb(0.376, 0.275, 0.059)
     """
     LIGHT_SEA_GREEN: Color
     r"""
-    LIGHT_SEA_GREEN
+    LIGHT_SEA_GREEN | #98F6B0 | rgb(0.596, 0.965, 0.690)
     """
     ROBIN_EGG_BLUE: Color
     r"""
-    ROBIN_EGG_BLUE
+    ROBIN_EGG_BLUE | #8AF1FE | rgb(0.541, 0.945, 0.996)
     """
     AQUA_MARINE: Color
     r"""
-    AQUA_MARINE
+    AQUA_MARINE | #2EE8BB | rgb(0.180, 0.910, 0.733)
     """
     DARK_SEA_GREEN: Color
     r"""
-    DARK_SEA_GREEN
+    DARK_SEA_GREEN | #11875D | rgb(0.067, 0.529, 0.365)
     """
     SOFT_PINK: Color
     r"""
-    SOFT_PINK
+    SOFT_PINK | #FDB0C0 | rgb(0.992, 0.690, 0.753)
     """
     ORANGEY_BROWN: Color
     r"""
-    ORANGEY_BROWN
+    ORANGEY_BROWN | #B16002 | rgb(0.694, 0.376, 0.008)
     """
     CHERRY_RED: Color
     r"""
-    CHERRY_RED
+    CHERRY_RED | #F7022A | rgb(0.969, 0.008, 0.165)
     """
     BURNT_YELLOW: Color
     r"""
-    BURNT_YELLOW
+    BURNT_YELLOW | #D5AB09 | rgb(0.835, 0.671, 0.035)
     """
     BROWNISH_GREY: Color
     r"""
-    BROWNISH_GREY
+    BROWNISH_GREY | #86775F | rgb(0.525, 0.467, 0.373)
     """
     CAMEL: Color
     r"""
-    CAMEL
+    CAMEL | #C69F59 | rgb(0.776, 0.624, 0.349)
     """
     PURPLISH_GREY: Color
     r"""
-    PURPLISH_GREY
+    PURPLISH_GREY | #7A687F | rgb(0.478, 0.408, 0.498)
     """
     MARINE: Color
     r"""
-    MARINE
+    MARINE | #042E60 | rgb(0.016, 0.180, 0.376)
     """
     GREYISH_PINK: Color
     r"""
-    GREYISH_PINK
+    GREYISH_PINK | #C88D94 | rgb(0.784, 0.553, 0.580)
     """
     PALE_TURQUOISE: Color
     r"""
-    PALE_TURQUOISE
+    PALE_TURQUOISE | #A5FBD5 | rgb(0.647, 0.984, 0.835)
     """
     PASTEL_YELLOW: Color
     r"""
-    PASTEL_YELLOW
+    PASTEL_YELLOW | #FFFE71 | rgb(1.000, 0.996, 0.443)
     """
     BLUEY_PURPLE: Color
     r"""
-    BLUEY_PURPLE
+    BLUEY_PURPLE | #6241C7 | rgb(0.384, 0.255, 0.780)
     """
     CANARY_YELLOW: Color
     r"""
-    CANARY_YELLOW
+    CANARY_YELLOW | #FFFE40 | rgb(1.000, 0.996, 0.251)
     """
     FADED_RED: Color
     r"""
-    FADED_RED
+    FADED_RED | #D3494E | rgb(0.827, 0.286, 0.306)
     """
     SEPIA: Color
     r"""
-    SEPIA
+    SEPIA | #985E2B | rgb(0.596, 0.369, 0.169)
     """
     COFFEE: Color
     r"""
-    COFFEE
+    COFFEE | #A6814C | rgb(0.651, 0.506, 0.298)
     """
     BRIGHT_MAGENTA: Color
     r"""
-    BRIGHT_MAGENTA
+    BRIGHT_MAGENTA | #FF08E8 | rgb(1.000, 0.031, 0.910)
     """
     MOCHA: Color
     r"""
-    MOCHA
+    MOCHA | #9D7651 | rgb(0.616, 0.463, 0.318)
     """
     ECRU: Color
     r"""
-    ECRU
+    ECRU | #FEFFCA | rgb(0.996, 1.000, 0.792)
     """
     PURPLEISH: Color
     r"""
-    PURPLEISH
+    PURPLEISH | #98568D | rgb(0.596, 0.337, 0.553)
     """
     CRANBERRY: Color
     r"""
-    CRANBERRY
+    CRANBERRY | #9E003A | rgb(0.620, 0.000, 0.227)
     """
     DARKISH_GREEN: Color
     r"""
-    DARKISH_GREEN
+    DARKISH_GREEN | #287C37 | rgb(0.157, 0.486, 0.216)
     """
     BROWN_ORANGE: Color
     r"""
-    BROWN_ORANGE
+    BROWN_ORANGE | #B96902 | rgb(0.725, 0.412, 0.008)
     """
     DUSKY_ROSE: Color
     r"""
-    DUSKY_ROSE
+    DUSKY_ROSE | #BA6873 | rgb(0.729, 0.408, 0.451)
     """
     MELON: Color
     r"""
-    MELON
+    MELON | #FF7855 | rgb(1.000, 0.471, 0.333)
     """
     SICKLY_GREEN: Color
     r"""
-    SICKLY_GREEN
+    SICKLY_GREEN | #94B21C | rgb(0.580, 0.698, 0.110)
     """
     SILVER: Color
     r"""
-    SILVER
+    SILVER | #C5C9C7 | rgb(0.773, 0.788, 0.780)
     """
     PURPLY_BLUE: Color
     r"""
-    PURPLY_BLUE
+    PURPLY_BLUE | #661AEE | rgb(0.400, 0.102, 0.933)
     """
     PURPLEISH_BLUE: Color
     r"""
-    PURPLEISH_BLUE
+    PURPLEISH_BLUE | #6140EF | rgb(0.380, 0.251, 0.937)
     """
     HOSPITAL_GREEN: Color
     r"""
-    HOSPITAL_GREEN
+    HOSPITAL_GREEN | #9BE5AA | rgb(0.608, 0.898, 0.667)
     """
     SHIT_BROWN: Color
     r"""
-    SHIT_BROWN
+    SHIT_BROWN | #7B5804 | rgb(0.482, 0.345, 0.016)
     """
     MID_BLUE: Color
     r"""
-    MID_BLUE
+    MID_BLUE | #276AB3 | rgb(0.153, 0.416, 0.702)
     """
     AMBER: Color
     r"""
-    AMBER
+    AMBER | #FEB308 | rgb(0.996, 0.702, 0.031)
     """
     EASTER_GREEN: Color
     r"""
-    EASTER_GREEN
+    EASTER_GREEN | #8CFD7E | rgb(0.549, 0.992, 0.494)
     """
     SOFT_BLUE: Color
     r"""
-    SOFT_BLUE
+    SOFT_BLUE | #6488EA | rgb(0.392, 0.533, 0.918)
     """
     CERULEAN_BLUE: Color
     r"""
-    CERULEAN_BLUE
+    CERULEAN_BLUE | #056EEE | rgb(0.020, 0.431, 0.933)
     """
     GOLDEN_BROWN: Color
     r"""
-    GOLDEN_BROWN
+    GOLDEN_BROWN | #B27A01 | rgb(0.698, 0.478, 0.004)
     """
     BRIGHT_TURQUOISE: Color
     r"""
-    BRIGHT_TURQUOISE
+    BRIGHT_TURQUOISE | #0FFEF9 | rgb(0.059, 0.996, 0.976)
     """
     RED_PINK: Color
     r"""
-    RED_PINK
+    RED_PINK | #FA2A55 | rgb(0.980, 0.165, 0.333)
     """
     RED_PURPLE: Color
     r"""
-    RED_PURPLE
+    RED_PURPLE | #820747 | rgb(0.510, 0.027, 0.278)
     """
     GREYISH_BROWN: Color
     r"""
-    GREYISH_BROWN
+    GREYISH_BROWN | #7A6A4F | rgb(0.478, 0.416, 0.310)
     """
     VERMILLION: Color
     r"""
-    VERMILLION
+    VERMILLION | #F4320C | rgb(0.957, 0.196, 0.047)
     """
     RUSSET: Color
     r"""
-    RUSSET
+    RUSSET | #A13905 | rgb(0.631, 0.224, 0.020)
     """
     STEEL_GREY: Color
     r"""
-    STEEL_GREY
+    STEEL_GREY | #6F828A | rgb(0.435, 0.510, 0.541)
     """
     LIGHTER_PURPLE: Color
     r"""
-    LIGHTER_PURPLE
+    LIGHTER_PURPLE | #A55AF4 | rgb(0.647, 0.353, 0.957)
     """
     BRIGHT_VIOLET: Color
     r"""
-    BRIGHT_VIOLET
+    BRIGHT_VIOLET | #AD0AFD | rgb(0.678, 0.039, 0.992)
     """
     PRUSSIAN_BLUE: Color
     r"""
-    PRUSSIAN_BLUE
+    PRUSSIAN_BLUE | #004577 | rgb(0.000, 0.271, 0.467)
     """
     SLATE_GREEN: Color
     r"""
-    SLATE_GREEN
+    SLATE_GREEN | #658D6D | rgb(0.396, 0.553, 0.427)
     """
     DIRTY_PINK: Color
     r"""
-    DIRTY_PINK
+    DIRTY_PINK | #CA7B80 | rgb(0.792, 0.482, 0.502)
     """
     DARK_BLUE_GREEN: Color
     r"""
-    DARK_BLUE_GREEN
+    DARK_BLUE_GREEN | #005249 | rgb(0.000, 0.322, 0.286)
     """
     PINE: Color
     r"""
-    PINE
+    PINE | #2B5D34 | rgb(0.169, 0.365, 0.204)
     """
     YELLOWY_GREEN: Color
     r"""
-    YELLOWY_GREEN
+    YELLOWY_GREEN | #BFF128 | rgb(0.749, 0.945, 0.157)
     """
     DARK_GOLD: Color
     r"""
-    DARK_GOLD
+    DARK_GOLD | #B59410 | rgb(0.710, 0.580, 0.063)
     """
     BLUISH: Color
     r"""
-    BLUISH
+    BLUISH | #2976BB | rgb(0.161, 0.463, 0.733)
     """
     DARKISH_BLUE: Color
     r"""
-    DARKISH_BLUE
+    DARKISH_BLUE | #014182 | rgb(0.004, 0.255, 0.510)
     """
     DULL_RED: Color
     r"""
-    DULL_RED
+    DULL_RED | #BB3F3F | rgb(0.733, 0.247, 0.247)
     """
     PINKY_RED: Color
     r"""
-    PINKY_RED
+    PINKY_RED | #FC2647 | rgb(0.988, 0.149, 0.278)
     """
     BRONZE: Color
     r"""
-    BRONZE
+    BRONZE | #A87900 | rgb(0.659, 0.475, 0.000)
     """
     PALE_TEAL: Color
     r"""
-    PALE_TEAL
+    PALE_TEAL | #82CBB2 | rgb(0.510, 0.796, 0.698)
     """
     MILITARY_GREEN: Color
     r"""
-    MILITARY_GREEN
+    MILITARY_GREEN | #667C3E | rgb(0.400, 0.486, 0.243)
     """
     BARBIE_PINK: Color
     r"""
-    BARBIE_PINK
+    BARBIE_PINK | #FE46A5 | rgb(0.996, 0.275, 0.647)
     """
     BUBBLEGUM_PINK: Color
     r"""
-    BUBBLEGUM_PINK
+    BUBBLEGUM_PINK | #FE83CC | rgb(0.996, 0.514, 0.800)
     """
     PEA_SOUP_GREEN: Color
     r"""
-    PEA_SOUP_GREEN
+    PEA_SOUP_GREEN | #94A617 | rgb(0.580, 0.651, 0.090)
     """
     DARK_MUSTARD: Color
     r"""
-    DARK_MUSTARD
+    DARK_MUSTARD | #A88905 | rgb(0.659, 0.537, 0.020)
     """
     SHIT: Color
     r"""
-    SHIT
+    SHIT | #7F5F00 | rgb(0.498, 0.373, 0.000)
     """
     MEDIUM_PURPLE: Color
     r"""
-    MEDIUM_PURPLE
+    MEDIUM_PURPLE | #9E43A2 | rgb(0.620, 0.263, 0.635)
     """
     VERY_DARK_GREEN: Color
     r"""
-    VERY_DARK_GREEN
+    VERY_DARK_GREEN | #062E03 | rgb(0.024, 0.180, 0.012)
     """
     DIRT: Color
     r"""
-    DIRT
+    DIRT | #8A6E45 | rgb(0.541, 0.431, 0.271)
     """
     DUSKY_PINK: Color
     r"""
-    DUSKY_PINK
+    DUSKY_PINK | #CC7A8B | rgb(0.800, 0.478, 0.545)
     """
     RED_VIOLET: Color
     r"""
-    RED_VIOLET
+    RED_VIOLET | #9E0168 | rgb(0.620, 0.004, 0.408)
     """
     LEMON_YELLOW: Color
     r"""
-    LEMON_YELLOW
+    LEMON_YELLOW | #FDFF38 | rgb(0.992, 1.000, 0.220)
     """
     PISTACHIO: Color
     r"""
-    PISTACHIO
+    PISTACHIO | #C0FA8B | rgb(0.753, 0.980, 0.545)
     """
     DULL_YELLOW: Color
     r"""
-    DULL_YELLOW
+    DULL_YELLOW | #EEDC5B | rgb(0.933, 0.863, 0.357)
     """
     DARK_LIME_GREEN: Color
     r"""
-    DARK_LIME_GREEN
+    DARK_LIME_GREEN | #7EBD01 | rgb(0.494, 0.741, 0.004)
     """
     DENIM_BLUE: Color
     r"""
-    DENIM_BLUE
+    DENIM_BLUE | #3B5B92 | rgb(0.231, 0.357, 0.573)
     """
     TEAL_BLUE: Color
     r"""
-    TEAL_BLUE
+    TEAL_BLUE | #01889F | rgb(0.004, 0.533, 0.624)
     """
     LIGHTISH_BLUE: Color
     r"""
-    LIGHTISH_BLUE
+    LIGHTISH_BLUE | #3D7AFD | rgb(0.239, 0.478, 0.992)
     """
     PURPLEY_BLUE: Color
     r"""
-    PURPLEY_BLUE
+    PURPLEY_BLUE | #5F34E7 | rgb(0.373, 0.204, 0.906)
     """
     LIGHT_INDIGO: Color
     r"""
-    LIGHT_INDIGO
+    LIGHT_INDIGO | #6D5ACF | rgb(0.427, 0.353, 0.812)
     """
     SWAMP_GREEN: Color
     r"""
-    SWAMP_GREEN
+    SWAMP_GREEN | #748500 | rgb(0.455, 0.522, 0.000)
     """
     BROWN_GREEN: Color
     r"""
-    BROWN_GREEN
+    BROWN_GREEN | #706C11 | rgb(0.439, 0.424, 0.067)
     """
     DARK_MAROON: Color
     r"""
-    DARK_MAROON
+    DARK_MAROON | #3C0008 | rgb(0.235, 0.000, 0.031)
     """
     HOT_PURPLE: Color
     r"""
-    HOT_PURPLE
+    HOT_PURPLE | #CB00F5 | rgb(0.796, 0.000, 0.961)
     """
     DARK_FOREST_GREEN: Color
     r"""
-    DARK_FOREST_GREEN
+    DARK_FOREST_GREEN | #002D04 | rgb(0.000, 0.176, 0.016)
     """
     FADED_BLUE: Color
     r"""
-    FADED_BLUE
+    FADED_BLUE | #658CBB | rgb(0.396, 0.549, 0.733)
     """
     DRAB_GREEN: Color
     r"""
-    DRAB_GREEN
+    DRAB_GREEN | #749551 | rgb(0.455, 0.584, 0.318)
     """
     LIGHT_LIME_GREEN: Color
     r"""
-    LIGHT_LIME_GREEN
+    LIGHT_LIME_GREEN | #B9FF66 | rgb(0.725, 1.000, 0.400)
     """
     SNOT_GREEN: Color
     r"""
-    SNOT_GREEN
+    SNOT_GREEN | #9DC100 | rgb(0.616, 0.757, 0.000)
     """
     YELLOWISH: Color
     r"""
-    YELLOWISH
+    YELLOWISH | #FAEE66 | rgb(0.980, 0.933, 0.400)
     """
     LIGHT_BLUE_GREEN: Color
     r"""
-    LIGHT_BLUE_GREEN
+    LIGHT_BLUE_GREEN | #7EFBB3 | rgb(0.494, 0.984, 0.702)
     """
     BORDEAUX: Color
     r"""
-    BORDEAUX
+    BORDEAUX | #7B002C | rgb(0.482, 0.000, 0.173)
     """
     LIGHT_MAUVE: Color
     r"""
-    LIGHT_MAUVE
+    LIGHT_MAUVE | #C292A1 | rgb(0.761, 0.573, 0.631)
     """
     OCEAN: Color
     r"""
-    OCEAN
+    OCEAN | #017B92 | rgb(0.004, 0.482, 0.573)
     """
     MARIGOLD: Color
     r"""
-    MARIGOLD
+    MARIGOLD | #FCC006 | rgb(0.988, 0.753, 0.024)
     """
     MUDDY_GREEN: Color
     r"""
-    MUDDY_GREEN
+    MUDDY_GREEN | #657432 | rgb(0.396, 0.455, 0.196)
     """
     DULL_ORANGE: Color
     r"""
-    DULL_ORANGE
+    DULL_ORANGE | #D8863B | rgb(0.847, 0.525, 0.231)
     """
     STEEL: Color
     r"""
-    STEEL
+    STEEL | #738595 | rgb(0.451, 0.522, 0.584)
     """
     ELECTRIC_PURPLE: Color
     r"""
-    ELECTRIC_PURPLE
+    ELECTRIC_PURPLE | #AA23FF | rgb(0.667, 0.137, 1.000)
     """
     FLUORESCENT_GREEN: Color
     r"""
-    FLUORESCENT_GREEN
+    FLUORESCENT_GREEN | #08FF08 | rgb(0.031, 1.000, 0.031)
     """
     YELLOWISH_BROWN: Color
     r"""
-    YELLOWISH_BROWN
+    YELLOWISH_BROWN | #9B7A01 | rgb(0.608, 0.478, 0.004)
     """
     BLUSH: Color
     r"""
-    BLUSH
+    BLUSH | #F29E8E | rgb(0.949, 0.620, 0.557)
     """
     SOFT_GREEN: Color
     r"""
-    SOFT_GREEN
+    SOFT_GREEN | #6FC276 | rgb(0.435, 0.761, 0.463)
     """
     BRIGHT_ORANGE: Color
     r"""
-    BRIGHT_ORANGE
+    BRIGHT_ORANGE | #FF5B00 | rgb(1.000, 0.357, 0.000)
     """
     LEMON: Color
     r"""
-    LEMON
+    LEMON | #FDFF52 | rgb(0.992, 1.000, 0.322)
     """
     PURPLE_GREY: Color
     r"""
-    PURPLE_GREY
+    PURPLE_GREY | #866F85 | rgb(0.525, 0.435, 0.522)
     """
     ACID_GREEN: Color
     r"""
-    ACID_GREEN
+    ACID_GREEN | #8FFE09 | rgb(0.561, 0.996, 0.035)
     """
     PALE_LAVENDER: Color
     r"""
-    PALE_LAVENDER
+    PALE_LAVENDER | #EECFFE | rgb(0.933, 0.812, 0.996)
     """
     VIOLET_BLUE: Color
     r"""
-    VIOLET_BLUE
+    VIOLET_BLUE | #510AC9 | rgb(0.318, 0.039, 0.788)
     """
     LIGHT_FOREST_GREEN: Color
     r"""
-    LIGHT_FOREST_GREEN
+    LIGHT_FOREST_GREEN | #4F9153 | rgb(0.310, 0.569, 0.325)
     """
     BURNT_RED: Color
     r"""
-    BURNT_RED
+    BURNT_RED | #9F2305 | rgb(0.624, 0.137, 0.020)
     """
     KHAKI_GREEN: Color
     r"""
-    KHAKI_GREEN
+    KHAKI_GREEN | #728639 | rgb(0.447, 0.525, 0.224)
     """
     CERISE: Color
     r"""
-    CERISE
+    CERISE | #DE0C62 | rgb(0.871, 0.047, 0.384)
     """
     FADED_PURPLE: Color
     r"""
-    FADED_PURPLE
+    FADED_PURPLE | #916E99 | rgb(0.569, 0.431, 0.600)
     """
     APRICOT: Color
     r"""
-    APRICOT
+    APRICOT | #FFB16D | rgb(1.000, 0.694, 0.427)
     """
     DARK_OLIVE_GREEN: Color
     r"""
-    DARK_OLIVE_GREEN
+    DARK_OLIVE_GREEN | #3C4D03 | rgb(0.235, 0.302, 0.012)
     """
     GREY_BROWN: Color
     r"""
-    GREY_BROWN
+    GREY_BROWN | #7F7053 | rgb(0.498, 0.439, 0.325)
     """
     GREEN_GREY: Color
     r"""
-    GREEN_GREY
+    GREEN_GREY | #77926F | rgb(0.467, 0.573, 0.435)
     """
     TRUE_BLUE: Color
     r"""
-    TRUE_BLUE
+    TRUE_BLUE | #010FCC | rgb(0.004, 0.059, 0.800)
     """
     PALE_VIOLET: Color
     r"""
-    PALE_VIOLET
+    PALE_VIOLET | #CEAEFA | rgb(0.808, 0.682, 0.980)
     """
     PERIWINKLE_BLUE: Color
     r"""
-    PERIWINKLE_BLUE
+    PERIWINKLE_BLUE | #8F99FB | rgb(0.561, 0.600, 0.984)
     """
     LIGHT_SKY_BLUE: Color
     r"""
-    LIGHT_SKY_BLUE
+    LIGHT_SKY_BLUE | #C6FCFF | rgb(0.776, 0.988, 1.000)
     """
     BLURPLE: Color
     r"""
-    BLURPLE
+    BLURPLE | #5539CC | rgb(0.333, 0.224, 0.800)
     """
     GREEN_BROWN: Color
     r"""
-    GREEN_BROWN
+    GREEN_BROWN | #544E03 | rgb(0.329, 0.306, 0.012)
     """
     BLUEGREEN: Color
     r"""
-    BLUEGREEN
+    BLUEGREEN | #017A79 | rgb(0.004, 0.478, 0.475)
     """
     BRIGHT_TEAL: Color
     r"""
-    BRIGHT_TEAL
+    BRIGHT_TEAL | #01F9C6 | rgb(0.004, 0.976, 0.776)
     """
     BROWNISH_YELLOW: Color
     r"""
-    BROWNISH_YELLOW
+    BROWNISH_YELLOW | #C9B003 | rgb(0.788, 0.690, 0.012)
     """
     PEA_SOUP: Color
     r"""
-    PEA_SOUP
+    PEA_SOUP | #929901 | rgb(0.573, 0.600, 0.004)
     """
     FOREST: Color
     r"""
-    FOREST
+    FOREST | #0B5509 | rgb(0.043, 0.333, 0.035)
     """
     BARNEY_PURPLE: Color
     r"""
-    BARNEY_PURPLE
+    BARNEY_PURPLE | #A00498 | rgb(0.627, 0.016, 0.596)
     """
     ULTRAMARINE: Color
     r"""
-    ULTRAMARINE
+    ULTRAMARINE | #2000B1 | rgb(0.125, 0.000, 0.694)
     """
     PURPLISH: Color
     r"""
-    PURPLISH
+    PURPLISH | #94568C | rgb(0.580, 0.337, 0.549)
     """
     PUKE_YELLOW: Color
     r"""
-    PUKE_YELLOW
+    PUKE_YELLOW | #C2BE0E | rgb(0.761, 0.745, 0.055)
     """
     BLUISH_GREY: Color
     r"""
-    BLUISH_GREY
+    BLUISH_GREY | #748B97 | rgb(0.455, 0.545, 0.592)
     """
     DARK_PERIWINKLE: Color
     r"""
-    DARK_PERIWINKLE
+    DARK_PERIWINKLE | #665FD1 | rgb(0.400, 0.373, 0.820)
     """
     DARK_LILAC: Color
     r"""
-    DARK_LILAC
+    DARK_LILAC | #9C6DA5 | rgb(0.612, 0.427, 0.647)
     """
     REDDISH: Color
     r"""
-    REDDISH
+    REDDISH | #C44240 | rgb(0.769, 0.259, 0.251)
     """
     LIGHT_MAROON: Color
     r"""
-    LIGHT_MAROON
+    LIGHT_MAROON | #A24857 | rgb(0.635, 0.282, 0.341)
     """
     DUSTY_PURPLE: Color
     r"""
-    DUSTY_PURPLE
+    DUSTY_PURPLE | #825F87 | rgb(0.510, 0.373, 0.529)
     """
     TERRA_COTTA: Color
     r"""
-    TERRA_COTTA
+    TERRA_COTTA | #C9643B | rgb(0.788, 0.392, 0.231)
     """
     AVOCADO: Color
     r"""
-    AVOCADO
+    AVOCADO | #90B134 | rgb(0.565, 0.694, 0.204)
     """
     MARINE_BLUE: Color
     r"""
-    MARINE_BLUE
+    MARINE_BLUE | #01386A | rgb(0.004, 0.220, 0.416)
     """
     TEAL_GREEN: Color
     r"""
-    TEAL_GREEN
+    TEAL_GREEN | #25A36F | rgb(0.145, 0.639, 0.435)
     """
     SLATE_GREY: Color
     r"""
-    SLATE_GREY
+    SLATE_GREY | #59656D | rgb(0.349, 0.396, 0.427)
     """
     LIGHTER_GREEN: Color
     r"""
-    LIGHTER_GREEN
+    LIGHTER_GREEN | #75FD63 | rgb(0.459, 0.992, 0.388)
     """
     ELECTRIC_GREEN: Color
     r"""
-    ELECTRIC_GREEN
+    ELECTRIC_GREEN | #21FC0D | rgb(0.129, 0.988, 0.051)
     """
     DUSTY_BLUE: Color
     r"""
-    DUSTY_BLUE
+    DUSTY_BLUE | #5A86AD | rgb(0.353, 0.525, 0.678)
     """
     GOLDEN_YELLOW: Color
     r"""
-    GOLDEN_YELLOW
+    GOLDEN_YELLOW | #FEC615 | rgb(0.996, 0.776, 0.082)
     """
     BRIGHT_YELLOW: Color
     r"""
-    BRIGHT_YELLOW
+    BRIGHT_YELLOW | #FFFD01 | rgb(1.000, 0.992, 0.004)
     """
     LIGHT_LAVENDER: Color
     r"""
-    LIGHT_LAVENDER
+    LIGHT_LAVENDER | #DFC5FE | rgb(0.875, 0.773, 0.996)
     """
     UMBER: Color
     r"""
-    UMBER
+    UMBER | #B26400 | rgb(0.698, 0.392, 0.000)
     """
     POOP: Color
     r"""
-    POOP
+    POOP | #7F5E00 | rgb(0.498, 0.369, 0.000)
     """
     DARK_PEACH: Color
     r"""
-    DARK_PEACH
+    DARK_PEACH | #DE7E5D | rgb(0.871, 0.494, 0.365)
     """
     JUNGLE_GREEN: Color
     r"""
-    JUNGLE_GREEN
+    JUNGLE_GREEN | #048243 | rgb(0.016, 0.510, 0.263)
     """
     EGGSHELL: Color
     r"""
-    EGGSHELL
+    EGGSHELL | #FFFFD4 | rgb(1.000, 1.000, 0.831)
     """
     DENIM: Color
     r"""
-    DENIM
+    DENIM | #3B638C | rgb(0.231, 0.388, 0.549)
     """
     YELLOW_BROWN: Color
     r"""
-    YELLOW_BROWN
+    YELLOW_BROWN | #B79400 | rgb(0.718, 0.580, 0.000)
     """
     DULL_PURPLE: Color
     r"""
-    DULL_PURPLE
+    DULL_PURPLE | #84597E | rgb(0.518, 0.349, 0.494)
     """
     CHOCOLATE_BROWN: Color
     r"""
-    CHOCOLATE_BROWN
+    CHOCOLATE_BROWN | #411900 | rgb(0.255, 0.098, 0.000)
     """
     WINE_RED: Color
     r"""
-    WINE_RED
+    WINE_RED | #7B0323 | rgb(0.482, 0.012, 0.137)
     """
     NEON_BLUE: Color
     r"""
-    NEON_BLUE
+    NEON_BLUE | #04D9FF | rgb(0.016, 0.851, 1.000)
     """
     DIRTY_GREEN: Color
     r"""
-    DIRTY_GREEN
+    DIRTY_GREEN | #667E2C | rgb(0.400, 0.494, 0.173)
     """
     LIGHT_TAN: Color
     r"""
-    LIGHT_TAN
+    LIGHT_TAN | #FBEEAC | rgb(0.984, 0.933, 0.675)
     """
     ICE_BLUE: Color
     r"""
-    ICE_BLUE
+    ICE_BLUE | #D7FFFE | rgb(0.843, 1.000, 0.996)
     """
     CADET_BLUE: Color
     r"""
-    CADET_BLUE
+    CADET_BLUE | #4E7496 | rgb(0.306, 0.455, 0.588)
     """
     DARK_MAUVE: Color
     r"""
-    DARK_MAUVE
+    DARK_MAUVE | #874C62 | rgb(0.529, 0.298, 0.384)
     """
     VERY_LIGHT_BLUE: Color
     r"""
-    VERY_LIGHT_BLUE
+    VERY_LIGHT_BLUE | #D5FFFF | rgb(0.835, 1.000, 1.000)
     """
     GREY_PURPLE: Color
     r"""
-    GREY_PURPLE
+    GREY_PURPLE | #826D8C | rgb(0.510, 0.427, 0.549)
     """
     PASTEL_PINK: Color
     r"""
-    PASTEL_PINK
+    PASTEL_PINK | #FFBACD | rgb(1.000, 0.729, 0.804)
     """
     VERY_LIGHT_GREEN: Color
     r"""
-    VERY_LIGHT_GREEN
+    VERY_LIGHT_GREEN | #D1FFBD | rgb(0.820, 1.000, 0.741)
     """
     DARK_SKY_BLUE: Color
     r"""
-    DARK_SKY_BLUE
+    DARK_SKY_BLUE | #448EE4 | rgb(0.267, 0.557, 0.894)
     """
     EVERGREEN: Color
     r"""
-    EVERGREEN
+    EVERGREEN | #05472A | rgb(0.020, 0.278, 0.165)
     """
     DULL_PINK: Color
     r"""
-    DULL_PINK
+    DULL_PINK | #D5869D | rgb(0.835, 0.525, 0.616)
     """
     AUBERGINE: Color
     r"""
-    AUBERGINE
+    AUBERGINE | #3D0734 | rgb(0.239, 0.027, 0.204)
     """
     MAHOGANY: Color
     r"""
-    MAHOGANY
+    MAHOGANY | #4A0100 | rgb(0.290, 0.004, 0.000)
     """
     REDDISH_ORANGE: Color
     r"""
-    REDDISH_ORANGE
+    REDDISH_ORANGE | #F8481C | rgb(0.973, 0.282, 0.110)
     """
     DEEP_GREEN: Color
     r"""
-    DEEP_GREEN
+    DEEP_GREEN | #02590F | rgb(0.008, 0.349, 0.059)
     """
     VOMIT_GREEN: Color
     r"""
-    VOMIT_GREEN
+    VOMIT_GREEN | #89A203 | rgb(0.537, 0.635, 0.012)
     """
     DUSTY_PINK: Color
     r"""
-    DUSTY_PINK
+    DUSTY_PINK | #D58A94 | rgb(0.835, 0.541, 0.580)
     """
     FADED_GREEN: Color
     r"""
-    FADED_GREEN
+    FADED_GREEN | #7BB274 | rgb(0.482, 0.698, 0.455)
     """
     CAMO_GREEN: Color
     r"""
-    CAMO_GREEN
+    CAMO_GREEN | #526525 | rgb(0.322, 0.396, 0.145)
     """
     PINKY_PURPLE: Color
     r"""
-    PINKY_PURPLE
+    PINKY_PURPLE | #C94CBE | rgb(0.788, 0.298, 0.745)
     """
     BROWNISH_RED: Color
     r"""
-    BROWNISH_RED
+    BROWNISH_RED | #9E3623 | rgb(0.620, 0.212, 0.137)
     """
     DARK_ROSE: Color
     r"""
-    DARK_ROSE
+    DARK_ROSE | #B5485D | rgb(0.710, 0.282, 0.365)
     """
     MUD: Color
     r"""
-    MUD
+    MUD | #735C12 | rgb(0.451, 0.361, 0.071)
     """
     BROWNISH: Color
     r"""
-    BROWNISH
+    BROWNISH | #9C6D57 | rgb(0.612, 0.427, 0.341)
     """
     EMERALD_GREEN: Color
     r"""
-    EMERALD_GREEN
+    EMERALD_GREEN | #028F1E | rgb(0.008, 0.561, 0.118)
     """
     PALE_BROWN: Color
     r"""
-    PALE_BROWN
+    PALE_BROWN | #B1916E | rgb(0.694, 0.569, 0.431)
     """
     DULL_BLUE: Color
     r"""
-    DULL_BLUE
+    DULL_BLUE | #49759C | rgb(0.286, 0.459, 0.612)
     """
     BURNT_UMBER: Color
     r"""
-    BURNT_UMBER
+    BURNT_UMBER | #A0450E | rgb(0.627, 0.271, 0.055)
     """
     MEDIUM_GREEN: Color
     r"""
-    MEDIUM_GREEN
+    MEDIUM_GREEN | #39AD48 | rgb(0.224, 0.678, 0.282)
     """
     CLAY: Color
     r"""
-    CLAY
+    CLAY | #B66A50 | rgb(0.714, 0.416, 0.314)
     """
     LIGHT_AQUA: Color
     r"""
-    LIGHT_AQUA
+    LIGHT_AQUA | #8CFFDB | rgb(0.549, 1.000, 0.859)
     """
     LIGHT_OLIVE_GREEN: Color
     r"""
-    LIGHT_OLIVE_GREEN
+    LIGHT_OLIVE_GREEN | #A4BE5C | rgb(0.643, 0.745, 0.361)
     """
     BROWNISH_ORANGE: Color
     r"""
-    BROWNISH_ORANGE
+    BROWNISH_ORANGE | #CB7723 | rgb(0.796, 0.467, 0.137)
     """
     DARK_AQUA: Color
     r"""
-    DARK_AQUA
+    DARK_AQUA | #05696B | rgb(0.020, 0.412, 0.420)
     """
     PURPLISH_PINK: Color
     r"""
-    PURPLISH_PINK
+    PURPLISH_PINK | #CE5DAE | rgb(0.808, 0.365, 0.682)
     """
     DARK_SALMON: Color
     r"""
-    DARK_SALMON
+    DARK_SALMON | #C85A53 | rgb(0.784, 0.353, 0.325)
     """
     GREENISH_GREY: Color
     r"""
-    GREENISH_GREY
+    GREENISH_GREY | #96AE8D | rgb(0.588, 0.682, 0.553)
     """
     JADE: Color
     r"""
-    JADE
+    JADE | #1FA774 | rgb(0.122, 0.655, 0.455)
     """
     UGLY_GREEN: Color
     r"""
-    UGLY_GREEN
+    UGLY_GREEN | #7A9703 | rgb(0.478, 0.592, 0.012)
     """
     DARK_BEIGE: Color
     r"""
-    DARK_BEIGE
+    DARK_BEIGE | #AC9362 | rgb(0.675, 0.576, 0.384)
     """
     EMERALD: Color
     r"""
-    EMERALD
+    EMERALD | #01A049 | rgb(0.004, 0.627, 0.286)
     """
     PALE_RED: Color
     r"""
-    PALE_RED
+    PALE_RED | #D9544D | rgb(0.851, 0.329, 0.302)
     """
     LIGHT_MAGENTA: Color
     r"""
-    LIGHT_MAGENTA
+    LIGHT_MAGENTA | #FA5FF7 | rgb(0.980, 0.373, 0.969)
     """
     SKY: Color
     r"""
-    SKY
+    SKY | #82CAFC | rgb(0.510, 0.792, 0.988)
     """
     LIGHT_CYAN: Color
     r"""
-    LIGHT_CYAN
+    LIGHT_CYAN | #ACFFFC | rgb(0.675, 1.000, 0.988)
     """
     YELLOW_ORANGE: Color
     r"""
-    YELLOW_ORANGE
+    YELLOW_ORANGE | #FCB001 | rgb(0.988, 0.690, 0.004)
     """
     REDDISH_PURPLE: Color
     r"""
-    REDDISH_PURPLE
+    REDDISH_PURPLE | #910951 | rgb(0.569, 0.035, 0.318)
     """
     REDDISH_PINK: Color
     r"""
-    REDDISH_PINK
+    REDDISH_PINK | #FE2C54 | rgb(0.996, 0.173, 0.329)
     """
     ORCHID: Color
     r"""
-    ORCHID
+    ORCHID | #C875C4 | rgb(0.784, 0.459, 0.769)
     """
     DIRTY_YELLOW: Color
     r"""
-    DIRTY_YELLOW
+    DIRTY_YELLOW | #CDC50A | rgb(0.804, 0.773, 0.039)
     """
     ORANGE_RED: Color
     r"""
-    ORANGE_RED
+    ORANGE_RED | #FD411E | rgb(0.992, 0.255, 0.118)
     """
     DEEP_RED: Color
     r"""
-    DEEP_RED
+    DEEP_RED | #9A0200 | rgb(0.604, 0.008, 0.000)
     """
     ORANGE_BROWN: Color
     r"""
-    ORANGE_BROWN
+    ORANGE_BROWN | #BE6400 | rgb(0.745, 0.392, 0.000)
     """
     COBALT_BLUE: Color
     r"""
-    COBALT_BLUE
+    COBALT_BLUE | #030AA7 | rgb(0.012, 0.039, 0.655)
     """
     NEON_PINK: Color
     r"""
-    NEON_PINK
+    NEON_PINK | #FE019A | rgb(0.996, 0.004, 0.604)
     """
     ROSE_PINK: Color
     r"""
-    ROSE_PINK
+    ROSE_PINK | #F7879A | rgb(0.969, 0.529, 0.604)
     """
     GREYISH_PURPLE: Color
     r"""
-    GREYISH_PURPLE
+    GREYISH_PURPLE | #887191 | rgb(0.533, 0.443, 0.569)
     """
     RASPBERRY: Color
     r"""
-    RASPBERRY
+    RASPBERRY | #B00149 | rgb(0.690, 0.004, 0.286)
     """
     AQUA_GREEN: Color
     r"""
-    AQUA_GREEN
+    AQUA_GREEN | #12E193 | rgb(0.071, 0.882, 0.576)
     """
     SALMON_PINK: Color
     r"""
-    SALMON_PINK
+    SALMON_PINK | #FE7B7C | rgb(0.996, 0.482, 0.486)
     """
     TANGERINE: Color
     r"""
-    TANGERINE
+    TANGERINE | #FF9408 | rgb(1.000, 0.580, 0.031)
     """
     BROWNISH_GREEN: Color
     r"""
-    BROWNISH_GREEN
+    BROWNISH_GREEN | #6A6E09 | rgb(0.416, 0.431, 0.035)
     """
     RED_BROWN: Color
     r"""
-    RED_BROWN
+    RED_BROWN | #8B2E16 | rgb(0.545, 0.180, 0.086)
     """
     GREENISH_BROWN: Color
     r"""
-    GREENISH_BROWN
+    GREENISH_BROWN | #696112 | rgb(0.412, 0.380, 0.071)
     """
     PUMPKIN: Color
     r"""
-    PUMPKIN
+    PUMPKIN | #E17701 | rgb(0.882, 0.467, 0.004)
     """
     PINE_GREEN: Color
     r"""
-    PINE_GREEN
+    PINE_GREEN | #0A481E | rgb(0.039, 0.282, 0.118)
     """
     CHARCOAL: Color
     r"""
-    CHARCOAL
+    CHARCOAL | #343837 | rgb(0.204, 0.220, 0.216)
     """
     BABY_PINK: Color
     r"""
-    BABY_PINK
+    BABY_PINK | #FFB7CE | rgb(1.000, 0.718, 0.808)
     """
     CORNFLOWER: Color
     r"""
-    CORNFLOWER
+    CORNFLOWER | #6A79F7 | rgb(0.416, 0.475, 0.969)
     """
     BLUE_VIOLET: Color
     r"""
-    BLUE_VIOLET
+    BLUE_VIOLET | #5D06E9 | rgb(0.365, 0.024, 0.914)
     """
     CHOCOLATE: Color
     r"""
-    CHOCOLATE
+    CHOCOLATE | #3D1C02 | rgb(0.239, 0.110, 0.008)
     """
     GREYISH_GREEN: Color
     r"""
-    GREYISH_GREEN
+    GREYISH_GREEN | #82A67D | rgb(0.510, 0.651, 0.490)
     """
     SCARLET: Color
     r"""
-    SCARLET
+    SCARLET | #BE0119 | rgb(0.745, 0.004, 0.098)
     """
     DARK_OLIVE: Color
     r"""
-    DARK_OLIVE
+    DARK_OLIVE | #373E02 | rgb(0.216, 0.243, 0.008)
     """
     SIENNA: Color
     r"""
-    SIENNA
+    SIENNA | #A9561E | rgb(0.663, 0.337, 0.118)
     """
     PASTEL_PURPLE: Color
     r"""
-    PASTEL_PURPLE
+    PASTEL_PURPLE | #CAA0FF | rgb(0.792, 0.627, 1.000)
     """
     TERRACOTTA: Color
     r"""
-    TERRACOTTA
+    TERRACOTTA | #CA6641 | rgb(0.792, 0.400, 0.255)
     """
     AQUA_BLUE: Color
     r"""
-    AQUA_BLUE
+    AQUA_BLUE | #02D8E9 | rgb(0.008, 0.847, 0.914)
     """
     SAGE_GREEN: Color
     r"""
-    SAGE_GREEN
+    SAGE_GREEN | #88B378 | rgb(0.533, 0.702, 0.471)
     """
     BLOOD_RED: Color
     r"""
-    BLOOD_RED
+    BLOOD_RED | #980002 | rgb(0.596, 0.000, 0.008)
     """
     DEEP_PINK: Color
     r"""
-    DEEP_PINK
+    DEEP_PINK | #CB0162 | rgb(0.796, 0.004, 0.384)
     """
     GRASS: Color
     r"""
-    GRASS
+    GRASS | #5CAC2D | rgb(0.361, 0.675, 0.176)
     """
     MOSS: Color
     r"""
-    MOSS
+    MOSS | #769958 | rgb(0.463, 0.600, 0.345)
     """
     PASTEL_BLUE: Color
     r"""
-    PASTEL_BLUE
+    PASTEL_BLUE | #A2BFFE | rgb(0.635, 0.749, 0.996)
     """
     BLUISH_GREEN: Color
     r"""
-    BLUISH_GREEN
+    BLUISH_GREEN | #10A674 | rgb(0.063, 0.651, 0.455)
     """
     DARK_TAN: Color
     r"""
-    DARK_TAN
+    DARK_TAN | #AF884A | rgb(0.686, 0.533, 0.290)
     """
     GREENISH_BLUE: Color
     r"""
-    GREENISH_BLUE
+    GREENISH_BLUE | #0B8B87 | rgb(0.043, 0.545, 0.529)
     """
     PALE_ORANGE: Color
     r"""
-    PALE_ORANGE
+    PALE_ORANGE | #FFA756 | rgb(1.000, 0.655, 0.337)
     """
     VOMIT: Color
     r"""
-    VOMIT
+    VOMIT | #A2A415 | rgb(0.635, 0.643, 0.082)
     """
     FORREST_GREEN: Color
     r"""
-    FORREST_GREEN
+    FORREST_GREEN | #154406 | rgb(0.082, 0.267, 0.024)
     """
     DARK_LAVENDER: Color
     r"""
-    DARK_LAVENDER
+    DARK_LAVENDER | #856798 | rgb(0.522, 0.404, 0.596)
     """
     DARK_VIOLET: Color
     r"""
-    DARK_VIOLET
+    DARK_VIOLET | #34013F | rgb(0.204, 0.004, 0.247)
     """
     DARK_CYAN: Color
     r"""
-    DARK_CYAN
+    DARK_CYAN | #0A888A | rgb(0.039, 0.533, 0.541)
     """
     OLIVE_DRAB: Color
     r"""
-    OLIVE_DRAB
+    OLIVE_DRAB | #6F7632 | rgb(0.435, 0.463, 0.196)
     """
     PINKISH: Color
     r"""
-    PINKISH
+    PINKISH | #D46A7E | rgb(0.831, 0.416, 0.494)
     """
     COBALT: Color
     r"""
-    COBALT
+    COBALT | #1E488F | rgb(0.118, 0.282, 0.561)
     """
     NEON_PURPLE: Color
     r"""
-    NEON_PURPLE
+    NEON_PURPLE | #BC13FE | rgb(0.737, 0.075, 0.996)
     """
     LIGHT_TURQUOISE: Color
     r"""
-    LIGHT_TURQUOISE
+    LIGHT_TURQUOISE | #7EF4CC | rgb(0.494, 0.957, 0.800)
     """
     APPLE_GREEN: Color
     r"""
-    APPLE_GREEN
+    APPLE_GREEN | #76CD26 | rgb(0.463, 0.804, 0.149)
     """
     DULL_GREEN: Color
     r"""
-    DULL_GREEN
+    DULL_GREEN | #74A662 | rgb(0.455, 0.651, 0.384)
     """
     WINE: Color
     r"""
-    WINE
+    WINE | #80013F | rgb(0.502, 0.004, 0.247)
     """
     POWDER_BLUE: Color
     r"""
-    POWDER_BLUE
+    POWDER_BLUE | #B1D1FC | rgb(0.694, 0.820, 0.988)
     """
     OFF_WHITE: Color
     r"""
-    OFF_WHITE
+    OFF_WHITE | #FFFFE4 | rgb(1.000, 1.000, 0.894)
     """
     ELECTRIC_BLUE: Color
     r"""
-    ELECTRIC_BLUE
+    ELECTRIC_BLUE | #0652FF | rgb(0.024, 0.322, 1.000)
     """
     DARK_TURQUOISE: Color
     r"""
-    DARK_TURQUOISE
+    DARK_TURQUOISE | #045C5A | rgb(0.016, 0.361, 0.353)
     """
     AZURE: Color
     r"""
-    AZURE
+    AZURE | #069AF3 | rgb(0.024, 0.604, 0.953)
     """
     BRIGHT_RED: Color
     r"""
-    BRIGHT_RED
+    BRIGHT_RED | #FF000D | rgb(1.000, 0.000, 0.051)
     """
     PINKISH_RED: Color
     r"""
-    PINKISH_RED
+    PINKISH_RED | #F10C45 | rgb(0.945, 0.047, 0.271)
     """
     CORNFLOWER_BLUE: Color
     r"""
-    CORNFLOWER_BLUE
+    CORNFLOWER_BLUE | #5170D7 | rgb(0.318, 0.439, 0.843)
     """
     LIGHT_OLIVE: Color
     r"""
-    LIGHT_OLIVE
+    LIGHT_OLIVE | #ACBF69 | rgb(0.675, 0.749, 0.412)
     """
     GRAPE: Color
     r"""
-    GRAPE
+    GRAPE | #6C3461 | rgb(0.424, 0.204, 0.380)
     """
     GREYISH_BLUE: Color
     r"""
-    GREYISH_BLUE
+    GREYISH_BLUE | #5E819D | rgb(0.369, 0.506, 0.616)
     """
     PURPLISH_BLUE: Color
     r"""
-    PURPLISH_BLUE
+    PURPLISH_BLUE | #601EF9 | rgb(0.376, 0.118, 0.976)
     """
     YELLOWISH_GREEN: Color
     r"""
-    YELLOWISH_GREEN
+    YELLOWISH_GREEN | #B0DD16 | rgb(0.690, 0.867, 0.086)
     """
     GREENISH_YELLOW: Color
     r"""
-    GREENISH_YELLOW
+    GREENISH_YELLOW | #CDFD02 | rgb(0.804, 0.992, 0.008)
     """
     MEDIUM_BLUE: Color
     r"""
-    MEDIUM_BLUE
+    MEDIUM_BLUE | #2C6FBB | rgb(0.173, 0.435, 0.733)
     """
     DUSTY_ROSE: Color
     r"""
-    DUSTY_ROSE
+    DUSTY_ROSE | #C0737A | rgb(0.753, 0.451, 0.478)
     """
     LIGHT_VIOLET: Color
     r"""
-    LIGHT_VIOLET
+    LIGHT_VIOLET | #D6B4FC | rgb(0.839, 0.706, 0.988)
     """
     MIDNIGHT_BLUE: Color
     r"""
-    MIDNIGHT_BLUE
+    MIDNIGHT_BLUE | #020035 | rgb(0.008, 0.000, 0.208)
     """
     BLUISH_PURPLE: Color
     r"""
-    BLUISH_PURPLE
+    BLUISH_PURPLE | #703BE7 | rgb(0.439, 0.231, 0.906)
     """
     RED_ORANGE: Color
     r"""
-    RED_ORANGE
+    RED_ORANGE | #FD3C06 | rgb(0.992, 0.235, 0.024)
     """
     DARK_MAGENTA: Color
     r"""
-    DARK_MAGENTA
+    DARK_MAGENTA | #960056 | rgb(0.588, 0.000, 0.337)
     """
     GREENISH: Color
     r"""
-    GREENISH
+    GREENISH | #40A368 | rgb(0.251, 0.639, 0.408)
     """
     OCEAN_BLUE: Color
     r"""
-    OCEAN_BLUE
+    OCEAN_BLUE | #03719C | rgb(0.012, 0.443, 0.612)
     """
     CORAL: Color
     r"""
-    CORAL
+    CORAL | #FC5A50 | rgb(0.988, 0.353, 0.314)
     """
     CREAM: Color
     r"""
-    CREAM
+    CREAM | #FFFFC2 | rgb(1.000, 1.000, 0.761)
     """
     REDDISH_BROWN: Color
     r"""
-    REDDISH_BROWN
+    REDDISH_BROWN | #7F2B0A | rgb(0.498, 0.169, 0.039)
     """
     BURNT_SIENNA: Color
     r"""
-    BURNT_SIENNA
+    BURNT_SIENNA | #B04E0F | rgb(0.690, 0.306, 0.059)
     """
     BRICK: Color
     r"""
-    BRICK
+    BRICK | #A03623 | rgb(0.627, 0.212, 0.137)
     """
     SAGE: Color
     r"""
-    SAGE
+    SAGE | #87AE73 | rgb(0.529, 0.682, 0.451)
     """
     WHITE: Color
     r"""
-    WHITE
+    WHITE | #FFFFFF | rgb(1.000, 1.000, 1.000)
     """
     ROBINS_EGG_BLUE: Color
     r"""
-    ROBINS_EGG_BLUE
+    ROBINS_EGG_BLUE | #98EFF9 | rgb(0.596, 0.937, 0.976)
     """
     MOSS_GREEN: Color
     r"""
-    MOSS_GREEN
+    MOSS_GREEN | #658B38 | rgb(0.396, 0.545, 0.220)
     """
     STEEL_BLUE: Color
     r"""
-    STEEL_BLUE
+    STEEL_BLUE | #5A7D9A | rgb(0.353, 0.490, 0.604)
     """
     EGGPLANT: Color
     r"""
-    EGGPLANT
+    EGGPLANT | #380835 | rgb(0.220, 0.031, 0.208)
     """
     LIGHT_YELLOW: Color
     r"""
-    LIGHT_YELLOW
+    LIGHT_YELLOW | #FFFE7A | rgb(1.000, 0.996, 0.478)
     """
     LEAF_GREEN: Color
     r"""
-    LEAF_GREEN
+    LEAF_GREEN | #5CA904 | rgb(0.361, 0.663, 0.016)
     """
     LIGHT_GREY: Color
     r"""
-    LIGHT_GREY
+    LIGHT_GREY | #D8DCD6 | rgb(0.847, 0.863, 0.839)
     """
     PUKE: Color
     r"""
-    PUKE
+    PUKE | #A5A502 | rgb(0.647, 0.647, 0.008)
     """
     PINKISH_PURPLE: Color
     r"""
-    PINKISH_PURPLE
+    PINKISH_PURPLE | #D648D7 | rgb(0.839, 0.282, 0.843)
     """
     SEA_BLUE: Color
     r"""
-    SEA_BLUE
+    SEA_BLUE | #047495 | rgb(0.016, 0.455, 0.584)
     """
     PALE_PURPLE: Color
     r"""
-    PALE_PURPLE
+    PALE_PURPLE | #B790D4 | rgb(0.718, 0.565, 0.831)
     """
     SLATE_BLUE: Color
     r"""
-    SLATE_BLUE
+    SLATE_BLUE | #5B7C99 | rgb(0.357, 0.486, 0.600)
     """
     HUNTER_GREEN: Color
     r"""
-    HUNTER_GREEN
+    HUNTER_GREEN | #0B4008 | rgb(0.043, 0.251, 0.031)
     """
     FUCHSIA: Color
     r"""
-    FUCHSIA
+    FUCHSIA | #ED0DD9 | rgb(0.929, 0.051, 0.851)
     """
     CRIMSON: Color
     r"""
-    CRIMSON
+    CRIMSON | #8C000F | rgb(0.549, 0.000, 0.059)
     """
     PALE_YELLOW: Color
     r"""
-    PALE_YELLOW
+    PALE_YELLOW | #FFFF84 | rgb(1.000, 1.000, 0.518)
     """
     OCHRE: Color
     r"""
-    OCHRE
+    OCHRE | #BF9005 | rgb(0.749, 0.565, 0.020)
     """
     MUSTARD_YELLOW: Color
     r"""
-    MUSTARD_YELLOW
+    MUSTARD_YELLOW | #D2BD0A | rgb(0.824, 0.741, 0.039)
     """
     LIGHT_RED: Color
     r"""
-    LIGHT_RED
+    LIGHT_RED | #FF474C | rgb(1.000, 0.278, 0.298)
     """
     CERULEAN: Color
     r"""
-    CERULEAN
+    CERULEAN | #0485D1 | rgb(0.016, 0.522, 0.820)
     """
     PALE_PINK: Color
     r"""
-    PALE_PINK
+    PALE_PINK | #FFCFDC | rgb(1.000, 0.812, 0.863)
     """
     DEEP_BLUE: Color
     r"""
-    DEEP_BLUE
+    DEEP_BLUE | #040273 | rgb(0.016, 0.008, 0.451)
     """
     RUST: Color
     r"""
-    RUST
+    RUST | #A83C09 | rgb(0.659, 0.235, 0.035)
     """
     LIGHT_TEAL: Color
     r"""
-    LIGHT_TEAL
+    LIGHT_TEAL | #90E4C1 | rgb(0.565, 0.894, 0.757)
     """
     SLATE: Color
     r"""
-    SLATE
+    SLATE | #516572 | rgb(0.318, 0.396, 0.447)
     """
     GOLDENROD: Color
     r"""
-    GOLDENROD
+    GOLDENROD | #FAC205 | rgb(0.980, 0.761, 0.020)
     """
     DARK_YELLOW: Color
     r"""
-    DARK_YELLOW
+    DARK_YELLOW | #D5B60A | rgb(0.835, 0.714, 0.039)
     """
     DARK_GREY: Color
     r"""
-    DARK_GREY
+    DARK_GREY | #363737 | rgb(0.212, 0.216, 0.216)
     """
     ARMY_GREEN: Color
     r"""
-    ARMY_GREEN
+    ARMY_GREEN | #4B5D16 | rgb(0.294, 0.365, 0.086)
     """
     SEAFOAM: Color
     r"""
-    SEAFOAM
+    SEAFOAM | #80F9AD | rgb(0.502, 0.976, 0.678)
     """
     PUCE: Color
     r"""
-    PUCE
+    PUCE | #A57E52 | rgb(0.647, 0.494, 0.322)
     """
     SPRING_GREEN: Color
     r"""
-    SPRING_GREEN
+    SPRING_GREEN | #A9F971 | rgb(0.663, 0.976, 0.443)
     """
     DARK_ORANGE: Color
     r"""
-    DARK_ORANGE
+    DARK_ORANGE | #C65102 | rgb(0.776, 0.318, 0.008)
     """
     SAND: Color
     r"""
-    SAND
+    SAND | #E2CA76 | rgb(0.886, 0.792, 0.463)
     """
     PASTEL_GREEN: Color
     r"""
-    PASTEL_GREEN
+    PASTEL_GREEN | #B0FF9D | rgb(0.690, 1.000, 0.616)
     """
     MINT: Color
     r"""
-    MINT
+    MINT | #9FFEB0 | rgb(0.624, 0.996, 0.690)
     """
     LIGHT_ORANGE: Color
     r"""
-    LIGHT_ORANGE
+    LIGHT_ORANGE | #FDAA48 | rgb(0.992, 0.667, 0.282)
     """
     BRIGHT_PINK: Color
     r"""
-    BRIGHT_PINK
+    BRIGHT_PINK | #FE01B1 | rgb(0.996, 0.004, 0.694)
     """
     CHARTREUSE: Color
     r"""
-    CHARTREUSE
+    CHARTREUSE | #C1F80A | rgb(0.757, 0.973, 0.039)
     """
     DEEP_PURPLE: Color
     r"""
-    DEEP_PURPLE
+    DEEP_PURPLE | #36013F | rgb(0.212, 0.004, 0.247)
     """
     DARK_BROWN: Color
     r"""
-    DARK_BROWN
+    DARK_BROWN | #341C02 | rgb(0.204, 0.110, 0.008)
     """
     TAUPE: Color
     r"""
-    TAUPE
+    TAUPE | #B9A281 | rgb(0.725, 0.635, 0.506)
     """
     PEA_GREEN: Color
     r"""
-    PEA_GREEN
+    PEA_GREEN | #8EAB12 | rgb(0.557, 0.671, 0.071)
     """
     PUKE_GREEN: Color
     r"""
-    PUKE_GREEN
+    PUKE_GREEN | #9AAE07 | rgb(0.604, 0.682, 0.027)
     """
     KELLY_GREEN: Color
     r"""
-    KELLY_GREEN
+    KELLY_GREEN | #02AB2E | rgb(0.008, 0.671, 0.180)
     """
     SEAFOAM_GREEN: Color
     r"""
-    SEAFOAM_GREEN
+    SEAFOAM_GREEN | #7AF9AB | rgb(0.478, 0.976, 0.671)
     """
     KHAKI: Color
     r"""
-    KHAKI
+    KHAKI | #AAA662 | rgb(0.667, 0.651, 0.384)
     """
     BURGUNDY: Color
     r"""
-    BURGUNDY
+    BURGUNDY | #610023 | rgb(0.380, 0.000, 0.137)
     """
     DARK_TEAL: Color
     r"""
-    DARK_TEAL
+    DARK_TEAL | #014D4E | rgb(0.004, 0.302, 0.306)
     """
     BRICK_RED: Color
     r"""
-    BRICK_RED
+    BRICK_RED | #8F1402 | rgb(0.561, 0.078, 0.008)
     """
     ROYAL_PURPLE: Color
     r"""
-    ROYAL_PURPLE
+    ROYAL_PURPLE | #4B006E | rgb(0.294, 0.000, 0.431)
     """
     PLUM: Color
     r"""
-    PLUM
+    PLUM | #580F41 | rgb(0.345, 0.059, 0.255)
     """
     MINT_GREEN: Color
     r"""
-    MINT_GREEN
+    MINT_GREEN | #8FFF9F | rgb(0.561, 1.000, 0.624)
     """
     GOLD: Color
     r"""
-    GOLD
+    GOLD | #DBB40C | rgb(0.859, 0.706, 0.047)
     """
     BABY_BLUE: Color
     r"""
-    BABY_BLUE
+    BABY_BLUE | #A2CFFE | rgb(0.635, 0.812, 0.996)
     """
     BRIGHT_PURPLE: Color
     r"""
-    BRIGHT_PURPLE
+    BRIGHT_PURPLE | #BE03FD | rgb(0.745, 0.012, 0.992)
     """
     DARK_RED: Color
     r"""
-    DARK_RED
+    DARK_RED | #840000 | rgb(0.518, 0.000, 0.000)
     """
     PALE_BLUE: Color
     r"""
-    PALE_BLUE
+    PALE_BLUE | #D0FEFE | rgb(0.816, 0.996, 0.996)
     """
     GRASS_GREEN: Color
     r"""
-    GRASS_GREEN
+    GRASS_GREEN | #3F9B0B | rgb(0.247, 0.608, 0.043)
     """
     NAVY: Color
     r"""
-    NAVY
+    NAVY | #01153E | rgb(0.004, 0.082, 0.243)
     """
     AQUAMARINE: Color
     r"""
-    AQUAMARINE
+    AQUAMARINE | #04D8B2 | rgb(0.016, 0.847, 0.698)
     """
     BURNT_ORANGE: Color
     r"""
-    BURNT_ORANGE
+    BURNT_ORANGE | #C04E01 | rgb(0.753, 0.306, 0.004)
     """
     NEON_GREEN: Color
     r"""
-    NEON_GREEN
+    NEON_GREEN | #0CFF0C | rgb(0.047, 1.000, 0.047)
     """
     BRIGHT_BLUE: Color
     r"""
-    BRIGHT_BLUE
+    BRIGHT_BLUE | #0165FC | rgb(0.004, 0.396, 0.988)
     """
     ROSE: Color
     r"""
-    ROSE
+    ROSE | #CF6275 | rgb(0.812, 0.384, 0.459)
     """
     LIGHT_PINK: Color
     r"""
-    LIGHT_PINK
+    LIGHT_PINK | #FFD1DF | rgb(1.000, 0.820, 0.875)
     """
     MUSTARD: Color
     r"""
-    MUSTARD
+    MUSTARD | #CEB301 | rgb(0.808, 0.702, 0.004)
     """
     INDIGO: Color
     r"""
-    INDIGO
+    INDIGO | #380282 | rgb(0.220, 0.008, 0.510)
     """
     LIME: Color
     r"""
-    LIME
+    LIME | #AAFF32 | rgb(0.667, 1.000, 0.196)
     """
     SEA_GREEN: Color
     r"""
-    SEA_GREEN
+    SEA_GREEN | #53FCA1 | rgb(0.325, 0.988, 0.631)
     """
     PERIWINKLE: Color
     r"""
-    PERIWINKLE
+    PERIWINKLE | #8E82FE | rgb(0.557, 0.510, 0.996)
     """
     DARK_PINK: Color
     r"""
-    DARK_PINK
+    DARK_PINK | #CB416B | rgb(0.796, 0.255, 0.420)
     """
     OLIVE_GREEN: Color
     r"""
-    OLIVE_GREEN
+    OLIVE_GREEN | #677A04 | rgb(0.404, 0.478, 0.016)
     """
     PEACH: Color
     r"""
-    PEACH
+    PEACH | #FFB07C | rgb(1.000, 0.690, 0.486)
     """
     PALE_GREEN: Color
     r"""
-    PALE_GREEN
+    PALE_GREEN | #C7FDB5 | rgb(0.780, 0.992, 0.710)
     """
     LIGHT_BROWN: Color
     r"""
-    LIGHT_BROWN
+    LIGHT_BROWN | #AD8150 | rgb(0.678, 0.506, 0.314)
     """
     HOT_PINK: Color
     r"""
-    HOT_PINK
+    HOT_PINK | #FF028D | rgb(1.000, 0.008, 0.553)
     """
     BLACK: Color
     r"""
-    BLACK
+    BLACK | #000000 | rgb(0.000, 0.000, 0.000)
     """
     LILAC: Color
     r"""
-    LILAC
+    LILAC | #CEA2FD | rgb(0.808, 0.635, 0.992)
     """
     NAVY_BLUE: Color
     r"""
-    NAVY_BLUE
+    NAVY_BLUE | #001146 | rgb(0.000, 0.067, 0.275)
     """
     ROYAL_BLUE: Color
     r"""
-    ROYAL_BLUE
+    ROYAL_BLUE | #0504AA | rgb(0.020, 0.016, 0.667)
     """
     BEIGE: Color
     r"""
-    BEIGE
+    BEIGE | #E6DAA6 | rgb(0.902, 0.855, 0.651)
     """
     SALMON: Color
     r"""
-    SALMON
+    SALMON | #FF796C | rgb(1.000, 0.475, 0.424)
     """
     OLIVE: Color
     r"""
-    OLIVE
+    OLIVE | #6E750E | rgb(0.431, 0.459, 0.055)
     """
     MAROON: Color
     r"""
-    MAROON
+    MAROON | #650021 | rgb(0.396, 0.000, 0.129)
     """
     BRIGHT_GREEN: Color
     r"""
-    BRIGHT_GREEN
+    BRIGHT_GREEN | #01FF07 | rgb(0.004, 1.000, 0.027)
     """
     DARK_PURPLE: Color
     r"""
-    DARK_PURPLE
+    DARK_PURPLE | #35063E | rgb(0.208, 0.024, 0.243)
     """
     MAUVE: Color
     r"""
-    MAUVE
+    MAUVE | #AE7181 | rgb(0.682, 0.443, 0.506)
     """
     FOREST_GREEN: Color
     r"""
-    FOREST_GREEN
+    FOREST_GREEN | #06470C | rgb(0.024, 0.278, 0.047)
     """
     AQUA: Color
     r"""
-    AQUA
+    AQUA | #13EAC9 | rgb(0.075, 0.918, 0.788)
     """
     CYAN: Color
     r"""
-    CYAN
+    CYAN | #00FFFF | rgb(0.000, 1.000, 1.000)
     """
     TAN: Color
     r"""
-    TAN
+    TAN | #D1B26F | rgb(0.820, 0.698, 0.435)
     """
     DARK_BLUE: Color
     r"""
-    DARK_BLUE
+    DARK_BLUE | #00035B | rgb(0.000, 0.012, 0.357)
     """
     LAVENDER: Color
     r"""
-    LAVENDER
+    LAVENDER | #C79FEF | rgb(0.780, 0.624, 0.937)
     """
     TURQUOISE: Color
     r"""
-    TURQUOISE
+    TURQUOISE | #06C2AC | rgb(0.024, 0.761, 0.675)
     """
     DARK_GREEN: Color
     r"""
-    DARK_GREEN
+    DARK_GREEN | #033500 | rgb(0.012, 0.208, 0.000)
     """
     VIOLET: Color
     r"""
-    VIOLET
+    VIOLET | #9A0EEA | rgb(0.604, 0.055, 0.918)
     """
     LIGHT_PURPLE: Color
     r"""
-    LIGHT_PURPLE
+    LIGHT_PURPLE | #BF77F6 | rgb(0.749, 0.467, 0.965)
     """
     LIME_GREEN: Color
     r"""
-    LIME_GREEN
+    LIME_GREEN | #89FE05 | rgb(0.537, 0.996, 0.020)
     """
     GREY: Color
     r"""
-    GREY
+    GREY | #929591 | rgb(0.573, 0.584, 0.569)
     """
     SKY_BLUE: Color
     r"""
-    SKY_BLUE
+    SKY_BLUE | #75BBFD | rgb(0.459, 0.733, 0.992)
     """
     YELLOW: Color
     r"""
-    YELLOW
+    YELLOW | #FFFF14 | rgb(1.000, 1.000, 0.078)
     """
     MAGENTA: Color
     r"""
-    MAGENTA
+    MAGENTA | #C20078 | rgb(0.761, 0.000, 0.471)
     """
     LIGHT_GREEN: Color
     r"""
-    LIGHT_GREEN
+    LIGHT_GREEN | #96F97B | rgb(0.588, 0.976, 0.482)
     """
     ORANGE: Color
     r"""
-    ORANGE
+    ORANGE | #F97306 | rgb(0.976, 0.451, 0.024)
     """
     TEAL: Color
     r"""
-    TEAL
+    TEAL | #029386 | rgb(0.008, 0.576, 0.525)
     """
     LIGHT_BLUE: Color
     r"""
-    LIGHT_BLUE
+    LIGHT_BLUE | #95D0FC | rgb(0.584, 0.816, 0.988)
     """
     RED: Color
     r"""
-    RED
+    RED | #E50000 | rgb(0.898, 0.000, 0.000)
     """
     BROWN: Color
     r"""
-    BROWN
+    BROWN | #653700 | rgb(0.396, 0.216, 0.000)
     """
     PINK: Color
     r"""
-    PINK
+    PINK | #FF81C0 | rgb(1.000, 0.506, 0.753)
     """
     BLUE: Color
     r"""
-    BLUE
+    BLUE | #0343DF | rgb(0.012, 0.263, 0.875)
     """
     GREEN: Color
     r"""
-    GREEN
+    GREEN | #15B01A | rgb(0.082, 0.690, 0.102)
     """
     PURPLE: Color
     r"""
-    PURPLE
+    PURPLE | #7E1E9C | rgb(0.494, 0.118, 0.612)
     """
     GRAY_TEAL: Color
     r"""
-    GRAY_TEAL
+    GRAY_TEAL | #5E9B8A | rgb(0.369, 0.608, 0.541)
     """
     PURPLEY_GRAY: Color
     r"""
-    PURPLEY_GRAY
+    PURPLEY_GRAY | #947E94 | rgb(0.580, 0.494, 0.580)
     """
     LIGHT_GRAY_GREEN: Color
     r"""
-    LIGHT_GRAY_GREEN
+    LIGHT_GRAY_GREEN | #B7E1A1 | rgb(0.718, 0.882, 0.631)
     """
     REDDISH_GRAY: Color
     r"""
-    REDDISH_GRAY
+    REDDISH_GRAY | #997570 | rgb(0.600, 0.459, 0.439)
     """
     BATTLESHIP_GRAY: Color
     r"""
-    BATTLESHIP_GRAY
+    BATTLESHIP_GRAY | #6B7C85 | rgb(0.420, 0.486, 0.522)
     """
     CHARCOAL_GRAY: Color
     r"""
-    CHARCOAL_GRAY
+    CHARCOAL_GRAY | #3C4142 | rgb(0.235, 0.255, 0.259)
     """
     GRAYISH_TEAL: Color
     r"""
-    GRAYISH_TEAL
+    GRAYISH_TEAL | #719F91 | rgb(0.443, 0.624, 0.569)
     """
     GRAY_GREEN: Color
     r"""
-    GRAY_GREEN
+    GRAY_GREEN | #86A17D | rgb(0.525, 0.631, 0.490)
     """
     COOL_GRAY: Color
     r"""
-    COOL_GRAY
+    COOL_GRAY | #95A3A6 | rgb(0.584, 0.639, 0.651)
     """
     DARK_BLUE_GRAY: Color
     r"""
-    DARK_BLUE_GRAY
+    DARK_BLUE_GRAY | #1F3B4D | rgb(0.122, 0.231, 0.302)
     """
     BLUEY_GRAY: Color
     r"""
-    BLUEY_GRAY
+    BLUEY_GRAY | #89A0B0 | rgb(0.537, 0.627, 0.690)
     """
     GREENY_GRAY: Color
     r"""
-    GREENY_GRAY
+    GREENY_GRAY | #7EA07A | rgb(0.494, 0.627, 0.478)
     """
     BLUEGRAY: Color
     r"""
-    BLUEGRAY
+    BLUEGRAY | #85A3B2 | rgb(0.522, 0.639, 0.698)
     """
     LIGHT_BLUE_GRAY: Color
     r"""
-    LIGHT_BLUE_GRAY
+    LIGHT_BLUE_GRAY | #B7C9E2 | rgb(0.718, 0.788, 0.886)
     """
     GRAY_BLUE: Color
     r"""
-    GRAY_BLUE
+    GRAY_BLUE | #647D8E | rgb(0.392, 0.490, 0.557)
     """
     BROWN_GRAY: Color
     r"""
-    BROWN_GRAY
+    BROWN_GRAY | #8D8468 | rgb(0.553, 0.518, 0.408)
     """
     BLUE_GRAY: Color
     r"""
-    BLUE_GRAY
+    BLUE_GRAY | #758DA3 | rgb(0.459, 0.553, 0.639)
     """
     GRAYBLUE: Color
     r"""
-    GRAYBLUE
+    GRAYBLUE | #77A1B5 | rgb(0.467, 0.631, 0.710)
     """
     DARK_GRAY_BLUE: Color
     r"""
-    DARK_GRAY_BLUE
+    DARK_GRAY_BLUE | #29465B | rgb(0.161, 0.275, 0.357)
     """
     GRAYISH: Color
     r"""
-    GRAYISH
+    GRAYISH | #A8A495 | rgb(0.659, 0.643, 0.584)
     """
     LIGHT_GRAY_BLUE: Color
     r"""
-    LIGHT_GRAY_BLUE
+    LIGHT_GRAY_BLUE | #9DBCD4 | rgb(0.616, 0.737, 0.831)
     """
     PALE_GRAY: Color
     r"""
-    PALE_GRAY
+    PALE_GRAY | #FDFDFE | rgb(0.992, 0.992, 0.996)
     """
     WARM_GRAY: Color
     r"""
-    WARM_GRAY
+    WARM_GRAY | #978A84 | rgb(0.592, 0.541, 0.518)
     """
     GRAY_PINK: Color
     r"""
-    GRAY_PINK
+    GRAY_PINK | #C3909B | rgb(0.765, 0.565, 0.608)
     """
     MEDIUM_GRAY: Color
     r"""
-    MEDIUM_GRAY
+    MEDIUM_GRAY | #7D7F7C | rgb(0.490, 0.498, 0.486)
     """
     PINKISH_GRAY: Color
     r"""
-    PINKISH_GRAY
+    PINKISH_GRAY | #C8ACA9 | rgb(0.784, 0.675, 0.663)
     """
     BROWNISH_GRAY: Color
     r"""
-    BROWNISH_GRAY
+    BROWNISH_GRAY | #86775F | rgb(0.525, 0.467, 0.373)
     """
     PURPLISH_GRAY: Color
     r"""
-    PURPLISH_GRAY
+    PURPLISH_GRAY | #7A687F | rgb(0.478, 0.408, 0.498)
     """
     GRAYISH_PINK: Color
     r"""
-    GRAYISH_PINK
+    GRAYISH_PINK | #C88D94 | rgb(0.784, 0.553, 0.580)
     """
     GRAYISH_BROWN: Color
     r"""
-    GRAYISH_BROWN
+    GRAYISH_BROWN | #7A6A4F | rgb(0.478, 0.416, 0.310)
     """
     STEEL_GRAY: Color
     r"""
-    STEEL_GRAY
+    STEEL_GRAY | #6F828A | rgb(0.435, 0.510, 0.541)
     """
     PURPLE_GRAY: Color
     r"""
-    PURPLE_GRAY
+    PURPLE_GRAY | #866F85 | rgb(0.525, 0.435, 0.522)
     """
     GRAY_BROWN: Color
     r"""
-    GRAY_BROWN
+    GRAY_BROWN | #7F7053 | rgb(0.498, 0.439, 0.325)
     """
     GREEN_GRAY: Color
     r"""
-    GREEN_GRAY
+    GREEN_GRAY | #77926F | rgb(0.467, 0.573, 0.435)
     """
     BLUISH_GRAY: Color
     r"""
-    BLUISH_GRAY
+    BLUISH_GRAY | #748B97 | rgb(0.455, 0.545, 0.592)
     """
     SLATE_GRAY: Color
     r"""
-    SLATE_GRAY
+    SLATE_GRAY | #59656D | rgb(0.349, 0.396, 0.427)
     """
     GRAY_PURPLE: Color
     r"""
-    GRAY_PURPLE
+    GRAY_PURPLE | #826D8C | rgb(0.510, 0.427, 0.549)
     """
     GREENISH_GRAY: Color
     r"""
-    GREENISH_GRAY
+    GREENISH_GRAY | #96AE8D | rgb(0.588, 0.682, 0.553)
     """
     GRAYISH_PURPLE: Color
     r"""
-    GRAYISH_PURPLE
+    GRAYISH_PURPLE | #887191 | rgb(0.533, 0.443, 0.569)
     """
     GRAYISH_GREEN: Color
     r"""
-    GRAYISH_GREEN
+    GRAYISH_GREEN | #82A67D | rgb(0.510, 0.651, 0.490)
     """
     GRAYISH_BLUE: Color
     r"""
-    GRAYISH_BLUE
+    GRAYISH_BLUE | #5E819D | rgb(0.369, 0.506, 0.616)
     """
     LIGHT_GRAY: Color
     r"""
-    LIGHT_GRAY
+    LIGHT_GRAY | #D8DCD6 | rgb(0.847, 0.863, 0.839)
     """
     DARK_GRAY: Color
     r"""
-    DARK_GRAY
+    DARK_GRAY | #363737 | rgb(0.212, 0.216, 0.216)
     """
     GRAY: Color
     r"""
-    GRAY
+    GRAY | #929591 | rgb(0.573, 0.584, 0.569)
     """
     ALICEBLUE: Color
     r"""
-    ALICEBLUE
+    ALICEBLUE | #F0F8FF | rgb(0.941, 0.973, 1.000)
     """
     ANTIQUEWHITE: Color
     r"""
-    ANTIQUEWHITE
+    ANTIQUEWHITE | #FAEBD7 | rgb(0.980, 0.922, 0.843)
     """
     BISQUE: Color
     r"""
-    BISQUE
+    BISQUE | #FFE4C4 | rgb(1.000, 0.894, 0.769)
     """
     BLANCHEDALMOND: Color
     r"""
-    BLANCHEDALMOND
+    BLANCHEDALMOND | #FFEBCD | rgb(1.000, 0.922, 0.804)
     """
     BLUEVIOLET: Color
     r"""
-    BLUEVIOLET
+    BLUEVIOLET | #8A2BE2 | rgb(0.541, 0.169, 0.886)
     """
     BURLYWOOD: Color
     r"""
-    BURLYWOOD
+    BURLYWOOD | #DEB887 | rgb(0.871, 0.722, 0.529)
     """
     CADETBLUE: Color
     r"""
-    CADETBLUE
+    CADETBLUE | #5F9EA0 | rgb(0.373, 0.620, 0.627)
     """
     CORNFLOWERBLUE: Color
     r"""
-    CORNFLOWERBLUE
+    CORNFLOWERBLUE | #6495ED | rgb(0.392, 0.584, 0.929)
     """
     CORNSILK: Color
     r"""
-    CORNSILK
+    CORNSILK | #FFF8DC | rgb(1.000, 0.973, 0.863)
     """
     DARKCYAN: Color
     r"""
-    DARKCYAN
+    DARKCYAN | #008B8B | rgb(0.000, 0.545, 0.545)
     """
     DARKGOLDENROD: Color
     r"""
-    DARKGOLDENROD
+    DARKGOLDENROD | #B8860B | rgb(0.722, 0.525, 0.043)
     """
     DARKGRAY: Color
     r"""
-    DARKGRAY
+    DARKGRAY | #A9A9A9 | rgb(0.663, 0.663, 0.663)
     """
     DARKGREY: Color
     r"""
-    DARKGREY
+    DARKGREY | #A9A9A9 | rgb(0.663, 0.663, 0.663)
     """
     DARKKHAKI: Color
     r"""
-    DARKKHAKI
+    DARKKHAKI | #BDB76B | rgb(0.741, 0.718, 0.420)
     """
     DARKMAGENTA: Color
     r"""
-    DARKMAGENTA
+    DARKMAGENTA | #8B008B | rgb(0.545, 0.000, 0.545)
     """
     DARKOLIVEGREEN: Color
     r"""
-    DARKOLIVEGREEN
+    DARKOLIVEGREEN | #556B2F | rgb(0.333, 0.420, 0.184)
     """
     DARKORANGE: Color
     r"""
-    DARKORANGE
+    DARKORANGE | #FF8C00 | rgb(1.000, 0.549, 0.000)
     """
     DARKORCHID: Color
     r"""
-    DARKORCHID
+    DARKORCHID | #9932CC | rgb(0.600, 0.196, 0.800)
     """
     DARKRED: Color
     r"""
-    DARKRED
+    DARKRED | #8B0000 | rgb(0.545, 0.000, 0.000)
     """
     DARKSALMON: Color
     r"""
-    DARKSALMON
+    DARKSALMON | #E9967A | rgb(0.914, 0.588, 0.478)
     """
     DARKSEAGREEN: Color
     r"""
-    DARKSEAGREEN
+    DARKSEAGREEN | #8FBC8F | rgb(0.561, 0.737, 0.561)
     """
     DARKSLATEBLUE: Color
     r"""
-    DARKSLATEBLUE
+    DARKSLATEBLUE | #483D8B | rgb(0.282, 0.239, 0.545)
     """
     DARKSLATEGRAY: Color
     r"""
-    DARKSLATEGRAY
+    DARKSLATEGRAY | #2F4F4F | rgb(0.184, 0.310, 0.310)
     """
     DARKSLATEGREY: Color
     r"""
-    DARKSLATEGREY
+    DARKSLATEGREY | #2F4F4F | rgb(0.184, 0.310, 0.310)
     """
     DARKTURQUOISE: Color
     r"""
-    DARKTURQUOISE
+    DARKTURQUOISE | #00CED1 | rgb(0.000, 0.808, 0.820)
     """
     DARKVIOLET: Color
     r"""
-    DARKVIOLET
+    DARKVIOLET | #9400D3 | rgb(0.580, 0.000, 0.827)
     """
     DEEPPINK: Color
     r"""
-    DEEPPINK
+    DEEPPINK | #FF1493 | rgb(1.000, 0.078, 0.576)
     """
     DEEPSKYBLUE: Color
     r"""
-    DEEPSKYBLUE
+    DEEPSKYBLUE | #00BFFF | rgb(0.000, 0.749, 1.000)
     """
     DIMGRAY: Color
     r"""
-    DIMGRAY
+    DIMGRAY | #696969 | rgb(0.412, 0.412, 0.412)
     """
     DIMGREY: Color
     r"""
-    DIMGREY
+    DIMGREY | #696969 | rgb(0.412, 0.412, 0.412)
     """
     DODGERBLUE: Color
     r"""
-    DODGERBLUE
+    DODGERBLUE | #1E90FF | rgb(0.118, 0.565, 1.000)
     """
     FIREBRICK: Color
     r"""
-    FIREBRICK
+    FIREBRICK | #B22222 | rgb(0.698, 0.133, 0.133)
     """
     FLORALWHITE: Color
     r"""
-    FLORALWHITE
+    FLORALWHITE | #FFFAF0 | rgb(1.000, 0.980, 0.941)
     """
     FORESTGREEN: Color
     r"""
-    FORESTGREEN
+    FORESTGREEN | #228B22 | rgb(0.133, 0.545, 0.133)
     """
     GAINSBORO: Color
     r"""
-    GAINSBORO
+    GAINSBORO | #DCDCDC | rgb(0.863, 0.863, 0.863)
     """
     GHOSTWHITE: Color
     r"""
-    GHOSTWHITE
+    GHOSTWHITE | #F8F8FF | rgb(0.973, 0.973, 1.000)
     """
     GREENYELLOW: Color
     r"""
-    GREENYELLOW
+    GREENYELLOW | #ADFF2F | rgb(0.678, 1.000, 0.184)
     """
     HONEYDEW: Color
     r"""
-    HONEYDEW
+    HONEYDEW | #F0FFF0 | rgb(0.941, 1.000, 0.941)
     """
     HOTPINK: Color
     r"""
-    HOTPINK
+    HOTPINK | #FF69B4 | rgb(1.000, 0.412, 0.706)
     """
     INDIANRED: Color
     r"""
-    INDIANRED
+    INDIANRED | #CD5C5C | rgb(0.804, 0.361, 0.361)
     """
     LAVENDERBLUSH: Color
     r"""
-    LAVENDERBLUSH
+    LAVENDERBLUSH | #FFF0F5 | rgb(1.000, 0.941, 0.961)
     """
     LAWNGREEN: Color
     r"""
-    LAWNGREEN
+    LAWNGREEN | #7CFC00 | rgb(0.486, 0.988, 0.000)
     """
     LEMONCHIFFON: Color
     r"""
-    LEMONCHIFFON
+    LEMONCHIFFON | #FFFACD | rgb(1.000, 0.980, 0.804)
     """
     LIGHTCORAL: Color
     r"""
-    LIGHTCORAL
+    LIGHTCORAL | #F08080 | rgb(0.941, 0.502, 0.502)
     """
     LIGHTCYAN: Color
     r"""
-    LIGHTCYAN
+    LIGHTCYAN | #E0FFFF | rgb(0.878, 1.000, 1.000)
     """
     LIGHTGOLDENRODYELLOW: Color
     r"""
-    LIGHTGOLDENRODYELLOW
+    LIGHTGOLDENRODYELLOW | #FAFAD2 | rgb(0.980, 0.980, 0.824)
     """
     LIGHTGRAY: Color
     r"""
-    LIGHTGRAY
+    LIGHTGRAY | #D3D3D3 | rgb(0.827, 0.827, 0.827)
     """
     LIGHTGREY: Color
     r"""
-    LIGHTGREY
+    LIGHTGREY | #D3D3D3 | rgb(0.827, 0.827, 0.827)
     """
     LIGHTPINK: Color
     r"""
-    LIGHTPINK
+    LIGHTPINK | #FFB6C1 | rgb(1.000, 0.714, 0.757)
     """
     LIGHTSALMON: Color
     r"""
-    LIGHTSALMON
+    LIGHTSALMON | #FFA07A | rgb(1.000, 0.627, 0.478)
     """
     LIGHTSEAGREEN: Color
     r"""
-    LIGHTSEAGREEN
+    LIGHTSEAGREEN | #20B2AA | rgb(0.125, 0.698, 0.667)
     """
     LIGHTSKYBLUE: Color
     r"""
-    LIGHTSKYBLUE
+    LIGHTSKYBLUE | #87CEFA | rgb(0.529, 0.808, 0.980)
     """
     LIGHTSLATEGRAY: Color
     r"""
-    LIGHTSLATEGRAY
+    LIGHTSLATEGRAY | #778899 | rgb(0.467, 0.533, 0.600)
     """
     LIGHTSLATEGREY: Color
     r"""
-    LIGHTSLATEGREY
+    LIGHTSLATEGREY | #778899 | rgb(0.467, 0.533, 0.600)
     """
     LIGHTSTEELBLUE: Color
     r"""
-    LIGHTSTEELBLUE
+    LIGHTSTEELBLUE | #B0C4DE | rgb(0.690, 0.769, 0.871)
     """
     LIGHTYELLOW: Color
     r"""
-    LIGHTYELLOW
+    LIGHTYELLOW | #FFFFE0 | rgb(1.000, 1.000, 0.878)
     """
     LIMEGREEN: Color
     r"""
-    LIMEGREEN
+    LIMEGREEN | #32CD32 | rgb(0.196, 0.804, 0.196)
     """
     LINEN: Color
     r"""
-    LINEN
+    LINEN | #FAF0E6 | rgb(0.980, 0.941, 0.902)
     """
     MEDIUMAQUAMARINE: Color
     r"""
-    MEDIUMAQUAMARINE
+    MEDIUMAQUAMARINE | #66CDAA | rgb(0.400, 0.804, 0.667)
     """
     MEDIUMBLUE: Color
     r"""
-    MEDIUMBLUE
+    MEDIUMBLUE | #0000CD | rgb(0.000, 0.000, 0.804)
     """
     MEDIUMORCHID: Color
     r"""
-    MEDIUMORCHID
+    MEDIUMORCHID | #BA55D3 | rgb(0.729, 0.333, 0.827)
     """
     MEDIUMPURPLE: Color
     r"""
-    MEDIUMPURPLE
+    MEDIUMPURPLE | #9370DB | rgb(0.576, 0.439, 0.859)
     """
     MEDIUMSEAGREEN: Color
     r"""
-    MEDIUMSEAGREEN
+    MEDIUMSEAGREEN | #3CB371 | rgb(0.235, 0.702, 0.443)
     """
     MEDIUMSLATEBLUE: Color
     r"""
-    MEDIUMSLATEBLUE
+    MEDIUMSLATEBLUE | #7B68EE | rgb(0.482, 0.408, 0.933)
     """
     MEDIUMSPRINGGREEN: Color
     r"""
-    MEDIUMSPRINGGREEN
+    MEDIUMSPRINGGREEN | #00FA9A | rgb(0.000, 0.980, 0.604)
     """
     MEDIUMTURQUOISE: Color
     r"""
-    MEDIUMTURQUOISE
+    MEDIUMTURQUOISE | #48D1CC | rgb(0.282, 0.820, 0.800)
     """
     MEDIUMVIOLETRED: Color
     r"""
-    MEDIUMVIOLETRED
+    MEDIUMVIOLETRED | #C71585 | rgb(0.780, 0.082, 0.522)
     """
     MIDNIGHTBLUE: Color
     r"""
-    MIDNIGHTBLUE
+    MIDNIGHTBLUE | #191970 | rgb(0.098, 0.098, 0.439)
     """
     MINTCREAM: Color
     r"""
-    MINTCREAM
+    MINTCREAM | #F5FFFA | rgb(0.961, 1.000, 0.980)
     """
     MISTYROSE: Color
     r"""
-    MISTYROSE
+    MISTYROSE | #FFE4E1 | rgb(1.000, 0.894, 0.882)
     """
     MOCCASIN: Color
     r"""
-    MOCCASIN
+    MOCCASIN | #FFE4B5 | rgb(1.000, 0.894, 0.710)
     """
     NAVAJOWHITE: Color
     r"""
-    NAVAJOWHITE
+    NAVAJOWHITE | #FFDEAD | rgb(1.000, 0.871, 0.678)
     """
     OLDLACE: Color
     r"""
-    OLDLACE
+    OLDLACE | #FDF5E6 | rgb(0.992, 0.961, 0.902)
     """
     OLIVEDRAB: Color
     r"""
-    OLIVEDRAB
+    OLIVEDRAB | #6B8E23 | rgb(0.420, 0.557, 0.137)
     """
     PALEGOLDENROD: Color
     r"""
-    PALEGOLDENROD
+    PALEGOLDENROD | #EEE8AA | rgb(0.933, 0.910, 0.667)
     """
     PALEGREEN: Color
     r"""
-    PALEGREEN
+    PALEGREEN | #98FB98 | rgb(0.596, 0.984, 0.596)
     """
     PALETURQUOISE: Color
     r"""
-    PALETURQUOISE
+    PALETURQUOISE | #AFEEEE | rgb(0.686, 0.933, 0.933)
     """
     PALEVIOLETRED: Color
     r"""
-    PALEVIOLETRED
+    PALEVIOLETRED | #DB7093 | rgb(0.859, 0.439, 0.576)
     """
     PAPAYAWHIP: Color
     r"""
-    PAPAYAWHIP
+    PAPAYAWHIP | #FFEFD5 | rgb(1.000, 0.937, 0.835)
     """
     PEACHPUFF: Color
     r"""
-    PEACHPUFF
+    PEACHPUFF | #FFDAB9 | rgb(1.000, 0.855, 0.725)
     """
     PERU: Color
     r"""
-    PERU
+    PERU | #CD853F | rgb(0.804, 0.522, 0.247)
     """
     POWDERBLUE: Color
     r"""
-    POWDERBLUE
+    POWDERBLUE | #B0E0E6 | rgb(0.690, 0.878, 0.902)
     """
     REBECCAPURPLE: Color
     r"""
-    REBECCAPURPLE
+    REBECCAPURPLE | #663399 | rgb(0.400, 0.200, 0.600)
     """
     ROSYBROWN: Color
     r"""
-    ROSYBROWN
+    ROSYBROWN | #BC8F8F | rgb(0.737, 0.561, 0.561)
     """
     ROYALBLUE: Color
     r"""
-    ROYALBLUE
+    ROYALBLUE | #4169E1 | rgb(0.255, 0.412, 0.882)
     """
     SADDLEBROWN: Color
     r"""
-    SADDLEBROWN
+    SADDLEBROWN | #8B4513 | rgb(0.545, 0.271, 0.075)
     """
     SANDYBROWN: Color
     r"""
-    SANDYBROWN
+    SANDYBROWN | #F4A460 | rgb(0.957, 0.643, 0.376)
     """
     SEAGREEN: Color
     r"""
-    SEAGREEN
+    SEAGREEN | #2E8B57 | rgb(0.180, 0.545, 0.341)
     """
     SEASHELL: Color
     r"""
-    SEASHELL
+    SEASHELL | #FFF5EE | rgb(1.000, 0.961, 0.933)
     """
     SKYBLUE: Color
     r"""
-    SKYBLUE
+    SKYBLUE | #87CEEB | rgb(0.529, 0.808, 0.922)
     """
     SLATEBLUE: Color
     r"""
-    SLATEBLUE
+    SLATEBLUE | #6A5ACD | rgb(0.416, 0.353, 0.804)
     """
     SLATEGRAY: Color
     r"""
-    SLATEGRAY
+    SLATEGRAY | #708090 | rgb(0.439, 0.502, 0.565)
     """
     SLATEGREY: Color
     r"""
-    SLATEGREY
+    SLATEGREY | #708090 | rgb(0.439, 0.502, 0.565)
     """
     SNOW: Color
     r"""
-    SNOW
+    SNOW | #FFFAFA | rgb(1.000, 0.980, 0.980)
     """
     SPRINGGREEN: Color
     r"""
-    SPRINGGREEN
+    SPRINGGREEN | #00FF7F | rgb(0.000, 1.000, 0.498)
     """
     STEELBLUE: Color
     r"""
-    STEELBLUE
+    STEELBLUE | #4682B4 | rgb(0.275, 0.510, 0.706)
     """
     THISTLE: Color
     r"""
-    THISTLE
+    THISTLE | #D8BFD8 | rgb(0.847, 0.749, 0.847)
     """
     WHITESMOKE: Color
     r"""
-    WHITESMOKE
+    WHITESMOKE | #F5F5F5 | rgb(0.961, 0.961, 0.961)
     """
     INVISIBLE: Color
     r"""
-    INVISIBLE
+    INVISIBLE | #000000 | rgba(0.000, 0.000, 0.000, 0.000)
     """
     HALF_TRANSPARENT: Color
     r"""
-    HALF_TRANSPARENT
+    HALF_TRANSPARENT | #FFFFFF | rgba(1.000, 1.000, 1.000, 0.5)
     """
     @property
     def r(self) -> builtins.float:
@@ -7530,6 +7530,11 @@ def activate_engine(conf:typing.Optional[Config]=None) -> None:
 def camera_font_scale(world_font_size:builtins.float) -> tuple[builtins.int, builtins.float, builtins.float]:
     r"""
     From given font size in world space gives (font_size, font_scale and font_aspect) params to make rasterized font looks good in currently active camera
+    """
+
+def cartesian_to_polar(cartesian:Vec2) -> Vec2:
+    r"""
+    Converts 2d polar coordinates to 2d cartesian coordinates.
     """
 
 def clear_background(color:Color) -> None:
