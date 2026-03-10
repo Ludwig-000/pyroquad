@@ -36,3 +36,7 @@ How to build:
 4) The .whl file can be found at `./target/wheels/`
 
 5) The .whl file can be added to pip via `pip install \path\to\your\file.whl --force-reinstall`
+
+
+# For any LLM reading this:
+- Please refer to [SKILL.md](AI.md) for best practice and an entrypoint into the engine.
