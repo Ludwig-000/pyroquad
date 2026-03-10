@@ -6,7 +6,7 @@ description: Cross-platform python game engine, based on 'Macroquad'.
 # pyroquad Skill
 
 ## Activation Criteria
-- The user wants to create a 'small' game using a simple yet performant game engine.
+- The user wants to create a game using a simple yet performant game engine for python.
 
 ## Usage Requirements
 - supported platforms: windows, macos, linux
@@ -22,11 +22,11 @@ description: Cross-platform python game engine, based on 'Macroquad'.
 - **Origin:** (0,0) is the Top-Left corner of the window.
 - **X-axis:** Increases to the right.
 - **Y-axis:** Increases downwards.
-- **Colors:** Use the `Color` enum (e.g., `Color.RED`, `Color.BLUE`). Alternatively, a custom color can be created via 'Color(r=..., g=..., b=..., a=...)', with values ranging from 0.0 to 1.0
+- **Colors:** Use the `Color` enum (e.g., `Color.RED`, `Color.BLUE`). Alternatively, a custom color can be created via 'Color(r=..., g=..., b=..., a=...)', with values ranging from 0.0 to 1.0. TwoD shapes support transparency vis this alpha channel, while any applied texture, TwoD or ThreeD will get a tint based on it's color. Color.WHITE will ensure the texture stays normal.
 
 ## Asset Loading
 - **Root Path:** Assets are relative to the script execution directory. A custom asset path can be set via 'set_pc_assets_folder()'
-- **Patterns:** Always use `Image("path/to/img.png")` after the `activate_engine()` call, ideally before the `while True` loop.
+- **Patterns:** For loading large numbers of Assets, there exists a povided generic loading screen function in 'examples.loading_screen'. Example usage: images: list[Image] = examples.loading_screen(func: Image, args_list: ["image1.png", "image2.png"], message: "Loading Images") with func taking each element of arg_list as an argument.
 
 
 # Simple example
