@@ -51,7 +51,7 @@ impl Circle{
         Circle { position, rotation, radius, color, sides: 20,texture, function_key: None }
     }
     pub fn draw(&self){
-        COMMAND_QUEUE.push(  Command::DrawCircleFromPyClass(partial_clone(self)));
+        COMMAND_QUEUE.push(  Command::DrawCircleFromPyClass(self.partial_clone()));
     }
 
     
@@ -109,15 +109,16 @@ impl Circle{
 }
 
 
-
-
-pub fn partial_clone(circ: &Circle) -> Circle{
-    Circle { position: circ.position, 
-        rotation: circ.rotation, 
-        radius: circ.radius, 
-        sides: circ.sides,
-        color: circ.color, 
-        texture: circ.texture.clone(), 
-        function_key: None 
+impl Circle{
+    /// Does NOT clone the function key.
+    fn partial_clone(&self) -> Circle{
+        Circle { position: self.position, 
+            rotation: self.rotation, 
+            radius: self.radius, 
+            sides: self.sides,
+            color: self.color, 
+            texture: self.texture.clone(), 
+            function_key: None 
+        }
     }
 }

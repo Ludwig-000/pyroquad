@@ -19,7 +19,12 @@ lazy_static!{
 pub fn load_file(path: &str)-> PyResult<FileData>{
 
     let path = {
-        format!("{}/{}",PcAssetFolder.lock().unwrap().clone(), path)
+        let folder = PcAssetFolder.lock().unwrap();
+        if folder.is_empty() {
+            path.to_string()
+        } else {
+            format!("{}/{}", folder, path)
+        }
     };
 
     match std::fs::read(&path) {
@@ -88,7 +93,12 @@ pub fn write_to_file(contents: &FileData, path: String) -> PyResult<()> {
 
 
     let path = {
-        format!("{}/{}",PcAssetFolder.lock().unwrap().clone(), path)
+        let folder = PcAssetFolder.lock().unwrap();
+        if folder.is_empty() {
+            path.to_string()
+        } else {
+            format!("{}/{}", folder, path)
+        }
     };
 
     // ensure the asset folder exists.
@@ -111,7 +121,12 @@ pub fn write_to_file(contents: &FileData, path: String) -> PyResult<()> {
 pub fn does_file_exist(path: &str) -> bool{
 
     let path = {
-        format!("{}/{}",PcAssetFolder.lock().unwrap().clone(), path)
+        let folder = PcAssetFolder.lock().unwrap();
+        if folder.is_empty() {
+            path.to_string()
+        } else {
+            format!("{}/{}", folder, path)
+        }
     };
     Path::new(&path).exists()
 }

@@ -53,7 +53,7 @@ impl Rectangle{
     }
 
     pub fn draw(&self){
-        COMMAND_QUEUE.push(  Command::DrawRectangleFromPyClass(partial_clone(self)));
+        COMMAND_QUEUE.push(  Command::DrawRectangleFromPyClass(self.partial_clone()));
     }
 
     /// Check collision between two 2D Objects.
@@ -126,11 +126,15 @@ impl Rectangle{
     }
 }
 
-fn partial_clone(rec: &Rectangle) -> Rectangle{
-    Rectangle { position: rec.position, 
-        rotation: rec.rotation, 
-        scale: rec.scale, 
-        color: rec.color, 
-        texture: rec.texture.clone(), 
-        function_key: None }
+
+impl Rectangle{
+    /// Does NOT clone the function key.
+    fn partial_clone(&self) -> Rectangle{
+        Rectangle { position: self.position, 
+            rotation: self.rotation, 
+            scale: self.scale, 
+            color: self.color, 
+            texture: self.texture.clone(), 
+            function_key: None }
+    }
 }
