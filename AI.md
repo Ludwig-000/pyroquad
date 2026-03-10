@@ -34,7 +34,7 @@ description: Cross-platform python game engine, based on 'Macroquad'.
 Configured via `Config(...)` passed to `activate_engine()`:
 - **Fullscreen:** If `True`, `window_width/height` are overwritten by monitor max.
 - **Swap Interval:** `None` (V-Sync), `0` (Max speed). Driver dependent; manual caps recommended if the user requests such.
-- **Termination:** `stop_python_when_closing_window` closes the process on window exit. Works with `prevent_quit()` and 'is_quit_requested()' to allow for finer window control.
+- **Advanced Exit Flow:** `stop_python_when_closing_window` When set to False, combine with `prevent_quit()` -> prevents the window from closing, and `is_quit_requested()` to intercept the close signal and perform cleanup before the process terminates.
 
 
 

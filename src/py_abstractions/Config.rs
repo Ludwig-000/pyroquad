@@ -47,7 +47,7 @@ pub struct Config {
 
     /// once the window gets closed ( not minimized ) the python script gets terminated.
     #[pyo3(get, set)] 
-    pub stop_pyton_when_closing_window: bool    
+    pub stop_python_when_closing_window: bool    
 }
 
 
@@ -63,7 +63,7 @@ impl Config {
         swap_interval= None,
         sample_count= 1,
         window_resizable= true,
-        stop_pyton_when_closing_window= true,
+        stop_python_when_closing_window= true,
     ))]
     pub fn new(
         window_title: String,
@@ -73,7 +73,7 @@ impl Config {
         swap_interval: Option<i32>,
         sample_count: i32,
         window_resizable: bool,
-        stop_pyton_when_closing_window: bool,
+        stop_python_when_closing_window: bool,
     ) -> Self {
         Config {
             window_title,
@@ -83,7 +83,7 @@ impl Config {
             swap_interval,
             sample_count,
             window_resizable,
-            stop_pyton_when_closing_window,
+            stop_python_when_closing_window,
         }
     }
 }
@@ -125,7 +125,7 @@ impl Default for Config {
                 swap_interval: None,
                 sample_count: 1,
                 window_resizable: true,
-                stop_pyton_when_closing_window: true,
+                stop_python_when_closing_window: true,
             }
 
     }

@@ -181,6 +181,9 @@ class Camera2D:
         """
 
 class Camera3D:
+    r"""
+    TODO: make it easy to 'target' a specific location in space.
+    """
     @property
     def position(self) -> Vec3:
         r"""
@@ -382,8 +385,6 @@ class Circle:
         Removes any assigned tick-function from this object.
         If the object does not have a tick function, this will do nothing.
         """
-    def __copy__(self) -> Circle: ...
-    def __deepcopy__(self, _memo:dict) -> Circle: ...
 
 class ColliderOptions:
     r"""
@@ -4870,16 +4871,16 @@ class Config:
     @window_resizable.setter
     def window_resizable(self, value: builtins.bool) -> None: ...
     @property
-    def stop_pyton_when_closing_window(self) -> builtins.bool:
+    def stop_python_when_closing_window(self) -> builtins.bool:
         r"""
         once the window gets closed ( not minimized ) the python script gets terminated.
         """
-    @stop_pyton_when_closing_window.setter
-    def stop_pyton_when_closing_window(self, value: builtins.bool) -> None:
+    @stop_python_when_closing_window.setter
+    def stop_python_when_closing_window(self, value: builtins.bool) -> None:
         r"""
         once the window gets closed ( not minimized ) the python script gets terminated.
         """
-    def __new__(cls, window_title:builtins.str='', window_width:builtins.int=800, window_height:builtins.int=600, fullscreen:builtins.bool=False, swap_interval:typing.Optional[builtins.int]=None, sample_count:builtins.int=1, window_resizable:builtins.bool=True, stop_pyton_when_closing_window:builtins.bool=True) -> Config: ...
+    def __new__(cls, window_title:builtins.str='', window_width:builtins.int=800, window_height:builtins.int=600, fullscreen:builtins.bool=False, swap_interval:typing.Optional[builtins.int]=None, sample_count:builtins.int=1, window_resizable:builtins.bool=True, stop_python_when_closing_window:builtins.bool=True) -> Config: ...
 
 class Cube:
     @property
@@ -5846,8 +5847,6 @@ class Rectangle:
     def min_x(self) -> builtins.float: ...
     def max_y(self) -> builtins.float: ...
     def min_y(self) -> builtins.float: ...
-    def __copy__(self) -> Rectangle: ...
-    def __deepcopy__(self, _memo:dict) -> Rectangle: ...
 
 class RenderTarget:
     ...

@@ -75,7 +75,7 @@ pub fn activate_engine( conf: Option<Config>) -> PyResult<()>{
     
             ENGINE_CURRENTLY_ACTIVE.store(false, Ordering::SeqCst);
     
-            if conf.stop_pyton_when_closing_window{
+            if conf.stop_python_when_closing_window{
                 println!("Pyquad window closed. Exiting process.");
                 process::exit(0);
             }
