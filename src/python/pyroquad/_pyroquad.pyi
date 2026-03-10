@@ -336,7 +336,7 @@ class Circle:
     @texture.setter
     def texture(self, value: typing.Optional[Texture2D]) -> None: ...
     def __eq__(self, other:builtins.object) -> builtins.bool: ...
-    def __new__(cls, position:Vec2, rotation:builtins.float, radius:builtins.float, color:Color) -> Circle: ...
+    def __new__(cls, position:Vec2, rotation:builtins.float, radius:builtins.float, color:Color, texture:typing.Optional[Texture2D]=None) -> Circle: ...
     def draw(self) -> None: ...
     def collides_with(self, rhs:Rectangle | Circle) -> builtins.bool:
         r"""
@@ -347,6 +347,10 @@ class Circle:
         r"""
         takes a list of 2D shapes, and returns every element that Collides with self.
         """
+    def max_x(self) -> builtins.float: ...
+    def min_x(self) -> builtins.float: ...
+    def max_y(self) -> builtins.float: ...
+    def min_y(self) -> builtins.float: ...
     def tick(self, function:typing.Any) -> None:
         r"""
         Add a function to this object, which will automatically be executed each frame.
@@ -372,6 +376,7 @@ class Circle:
         ...    next_frame()
         ```
         """
+    def has_tick(self) -> builtins.bool: ...
     def remove_tick(self) -> None:
         r"""
         Removes any assigned tick-function from this object.
@@ -5389,7 +5394,10 @@ class Loading:
         Does nothing if the given filepath already exists.
         """
     @staticmethod
-    def download_file_and_save_and_load(url:builtins.str, filepath:builtins.str) -> FileData: ...
+    def download_file_and_save_and_load(url:builtins.str, filepath:builtins.str) -> FileData:
+        r"""
+        TODO: do not download if file exists already.
+        """
     @staticmethod
     def download_file(url:builtins.str) -> FileData: ...
     @staticmethod
@@ -5817,12 +5825,13 @@ class Rectangle:
         ...    next_frame()
         ```
         """
+    def has_tick(self) -> builtins.bool: ...
     def remove_tick(self) -> None:
         r"""
         Removes any assigned tick-function from this object.
         If the object does not have a tick function, this will do nothing.
         """
-    def __new__(cls, position:Vec2, rotation:builtins.float, scale:Vec2, color:Color) -> Rectangle: ...
+    def __new__(cls, position:Vec2, rotation:builtins.float, scale:Vec2, color:Color, texture:typing.Optional[Texture2D]=None) -> Rectangle: ...
     def draw(self) -> None: ...
     def collides_with(self, rhs:Rectangle | Circle) -> builtins.bool:
         r"""
@@ -5833,6 +5842,10 @@ class Rectangle:
         r"""
         takes a list of 2D shapes, and returns every element that Collides with self.
         """
+    def max_x(self) -> builtins.float: ...
+    def min_x(self) -> builtins.float: ...
+    def max_y(self) -> builtins.float: ...
+    def min_y(self) -> builtins.float: ...
     def __copy__(self) -> Rectangle: ...
     def __deepcopy__(self, _memo:dict) -> Rectangle: ...
 
@@ -7646,7 +7659,7 @@ def draw_skybox(texture:Texture2D, tint:Color=...) -> None:
      * Also, you might need to mirror the Image vertically before converting it to a Texture2D.
     """
 
-def draw_text(text:builtins.str, x:builtins.float, y:builtins.float, color:Color=..., font:typing.Optional[Font]=None, font_size:builtins.int=20, font_scale:builtins.float=1.0, font_scale_aspect:builtins.float=1.0, rotation:builtins.float=0.0) -> TextDimensions:
+def draw_text(text:builtins.str, x:builtins.float, y:builtins.float, color:Color=..., font_size:builtins.int=20, font:typing.Optional[Font]=None, font_scale:builtins.float=1.0, font_scale_aspect:builtins.float=1.0, rotation:builtins.float=0.0) -> TextDimensions:
     r"""
     draws a text in 2d space.
     requires a 2d camera to be seen.
@@ -7736,7 +7749,11 @@ def get_screen_data() -> Image: ...
 
 def get_text_center(text:builtins.str, font:typing.Optional[Font], font_size:builtins.int, font_scale:builtins.float, rotation:builtins.float) -> Vec2: ...
 
-def is_quit_requested() -> builtins.bool: ...
+def is_quit_requested() -> builtins.bool:
+    r"""
+    This function is useful in combination with 'prevent_quit()', 
+        to run some cleanup logic before closing the window and terminating the process.
+    """
 
 def is_simulating_mouse_with_touch() -> builtins.bool:
     r"""
@@ -7764,7 +7781,14 @@ def polar_to_cartesian(rho:builtins.float, theta:builtins.float) -> Vec2:
 
 def pop_camera_state() -> None: ...
 
-def prevent_quit() -> None: ...
+def prevent_quit() -> None:
+    r"""
+    Prevents clowsing the window via 'Alt + F4', clicking 'X' on the window or similar.
+    Instead, the 'is_quit_requested()' flag will be toggled, and python is expected to close the window.
+    This is useful, if some cleanup HAS to be done, before the window can be safely closed, and the process terminated.
+    
+    Once called, this flag will last the entire program.
+    """
 
 def push_camera_state() -> None: ...
 

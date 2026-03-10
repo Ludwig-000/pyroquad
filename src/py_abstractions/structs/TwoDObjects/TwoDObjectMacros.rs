@@ -77,6 +77,16 @@ Example:
                     Ok(())
                 }
 
+                // returns if the object has a registered tick function
+                pub fn has_tick(&self)-> bool{
+                    if let Some(key) = self.function_key{
+                        let mut storage = ObjectFunctionStorage::get_fun_storage();
+                        if let Some(_) = storage.get(key){
+                            true
+                        } else{ false }
+                    } else{ false }
+                }
+
 
                 /// Removes any assigned tick-function from this object.
                 /// If the object does not have a tick function, this will do nothing.
@@ -113,14 +123,15 @@ macro_rules! implement_magic_methods2D {
             #[gen_stub_pymethods]
             #[pymethods]
             impl $name {
+                // TODO: Write proper clone.
 
-                fn __copy__(&self) -> Self {
-                    self.clone()
-                }
+                // fn __copy__(&self) -> Self {
+                //     self.clone()
+                // }
 
-                fn __deepcopy__(&self, _memo: &Bound<'_, PyDict>) -> Self {
-                    self.clone()
-                }
+                // fn __deepcopy__(&self, _memo: &Bound<'_, PyDict>) -> Self {
+                //     self.clone()
+                // }
 
             }
         }

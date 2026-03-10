@@ -1,3 +1,4 @@
+use std::ops::Deref;
 use std::sync::Mutex;
 use std::sync::MutexGuard;
 
@@ -64,6 +65,10 @@ impl FunctionStorage {
                 }
             }
         }
+    }
+
+    pub fn get(&mut self, key: FunctionKey) -> Option<usize>{
+        self.map.get(key).copied()
     }
 
     

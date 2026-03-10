@@ -20,15 +20,20 @@ impl Loading {
     
     /// downloads a ressource file and saves it at the given filepath.
     /// Does nothing if the given filepath already exists.
+    #[cfg(not(any(target_arch = "wasm32", target_os = "ios")))]
     #[staticmethod]
     pub fn download_file_and_save(url: String, filepath: String)-> PyResult<()>{
+        use crate::py_abstractions::Loading::Loading::does_file_exist;
+
+        if does_file_exist(&filepath){return Ok(())}
         let data = download_file(&url)?;
         write_to_file(&data, filepath)
     }
 
-
+    /// TODO: do not download if file exists already.
     #[staticmethod]
     pub fn download_file_and_save_and_load(url: String, filepath: String)-> PyResult<FileData>{
+        
         let data = download_file(&url)?;
         write_to_file(&data, filepath)?;
         Ok(data)

@@ -21,7 +21,7 @@ use pyo3::types::PyDict;
 
 #[gen_stub_pyclass]
 #[pyclass(eq)]
-#[derive(Clone, PartialEq)]
+#[derive(PartialEq)]
 pub struct Circle{
     #[pyo3(get,set)]
     pub position: Vec2,
@@ -46,11 +46,12 @@ crate::implement_magic_methods2D!(Circle);
 #[pymethods]
 impl Circle{
     #[new]
-    pub fn new(position: Vec2, rotation: f32, radius: f32, color: Color)-> Self{
-        Circle { position, rotation, radius, color, sides: 20,texture: None, function_key: None }
+    #[pyo3(signature = ( position, rotation, radius, color, texture = None))]
+    pub fn new(position: Vec2, rotation: f32, radius: f32, color: Color, texture: Option<Texture2D>)-> Self{
+        Circle { position, rotation, radius, color, sides: 20,texture, function_key: None }
     }
     pub fn draw(&self){
-        COMMAND_QUEUE.push(  Command::DrawCircleFromPyClass(self.clone()));
+        COMMAND_QUEUE.push(  Command::DrawCircleFromPyClass(partial_clone(self)));
     }
 
     
@@ -90,4 +91,33 @@ impl Circle{
     }
 
 
+    pub fn max_x(&self) -> f32{
+        self.position.x + self.radius
+    }
+    pub fn min_x(&self) -> f32{
+        self.position.x - self.radius
+    }
+    pub fn max_y(&self) -> f32{
+        self.position.y + self.radius
+    }
+    pub fn min_y(&self) -> f32{
+        self.position.y - self.radius
+    }
+    
+
+
+}
+
+
+
+
+pub fn partial_clone(circ: &Circle) -> Circle{
+    Circle { position: circ.position, 
+        rotation: circ.rotation, 
+        radius: circ.radius, 
+        sides: circ.sides,
+        color: circ.color, 
+        texture: circ.texture.clone(), 
+        function_key: None 
+    }
 }

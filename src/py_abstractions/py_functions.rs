@@ -6,6 +6,7 @@
 // also, any conversion between my abstracted pyclasses and the structs used in macroquad is being done here.
 // ( example:  Color -> mq::Color )
 
+use crate::py_abstractions::Loading::Loading::PcAssetFolder;
 use crate::py_abstractions::Text::Font;
 use crate::py_abstractions::Text::TextDimensions;
 use crate::py_abstractions::structs::ThreeDObjects::ObjectFunctionStorage;
@@ -322,11 +323,10 @@ pub fn next_frame(py: Python<'_>, physics_step: Option<f32>) -> PyResult<()>{
 ///
 #[gen_stub_pyfunction]
 #[pyfunction]
-
-#[pyo3(signature = (text, x, y, color = Color::WHITE(), font = None, 
-    font_size  = 20, font_scale = 1.0, font_scale_aspect =  1.0, rotation = 0.0))] 
-pub fn draw_text(text: String, x: f32, y: f32, color: Color, font: Option<Font>, 
-    font_size: u16, font_scale: f32, font_scale_aspect: f32, rotation: f32) -> PyResult<TextDimensions>{
+#[pyo3(signature = (text, x, y, color = Color::WHITE(), font_size  = 20,
+    font = None,  font_scale = 1.0, font_scale_aspect =  1.0, rotation = 0.0))] 
+pub fn draw_text(text: String, x: f32, y: f32, color: Color, font_size: u16,
+    font: Option<Font>, font_scale: f32, font_scale_aspect: f32, rotation: f32) -> PyResult<TextDimensions>{
 
     let (sender, receiver) = PChannel::PChannel::sync_channel(1);
     COMMAND_QUEUE.push(Command::DrawText { 
@@ -504,7 +504,8 @@ pub fn get_keys_down() -> HashSet<KeyCode> {
     converted_keys
 }
 
-
+/// This function is useful in combination with 'prevent_quit()', 
+///     to run some cleanup logic before closing the window and terminating the process.
 #[gen_stub_pyfunction]
 #[pyfunction]
 pub fn is_quit_requested() -> PyResult<bool> {
@@ -512,6 +513,13 @@ pub fn is_quit_requested() -> PyResult<bool> {
     COMMAND_QUEUE.push( Command::IsQuitRequested(sender));
     Ok(receiver.recv()?)
 }
+
+/// Prevents clowsing the window via 'Alt + F4', clicking 'X' on the window or similar.
+/// Instead, the 'is_quit_requested()' flag will be toggled, and python is expected to close the window.
+/// This is useful, if some cleanup HAS to be done, before the window can be safely closed, and the process terminated.
+/// 
+/// Once called, this flag will last the entire program.
+/// 
 #[gen_stub_pyfunction]
 #[pyfunction]
 pub fn prevent_quit() {
@@ -645,5 +653,8 @@ pub fn cartesian_to_polar(cartesian: Vec2) -> Vec2{
 #[gen_stub_pyfunction]
 #[pyfunction]
 pub fn set_pc_assets_folder(path: String){
-    mq::set_pc_assets_folder(&path);
+
+    *PcAssetFolder.lock().unwrap() = path.clone();
+
+    COMMAND_QUEUE.push(Command::SetPcAssetFolder(path));
 }

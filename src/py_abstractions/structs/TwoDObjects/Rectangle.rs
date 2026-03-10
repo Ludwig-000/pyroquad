@@ -20,7 +20,7 @@ use pyo3::types::PyDict;
 
 #[gen_stub_pyclass]
 #[pyclass(eq)]
-#[derive(Clone, PartialEq)]
+#[derive(PartialEq)]
 pub struct Rectangle{
 
     #[pyo3(get,set)]
@@ -47,12 +47,13 @@ crate::implement_magic_methods2D!(Rectangle);
 #[pymethods]
 impl Rectangle{
     #[new]
-    pub fn new(position: Vec2, rotation: f32, scale: Vec2, color: Color)-> Self{
-        Rectangle { position, rotation, scale, color, texture: None, function_key: None }
+    #[pyo3(signature = ( position, rotation, scale, color, texture = None))]
+    pub fn new(position: Vec2, rotation: f32, scale: Vec2, color: Color, texture: Option<Texture2D>)-> Self{
+        Rectangle { position, rotation, scale, color, texture, function_key: None }
     }
 
     pub fn draw(&self){
-        COMMAND_QUEUE.push(  Command::DrawRectangleFromPyClass(self.clone()));
+        COMMAND_QUEUE.push(  Command::DrawRectangleFromPyClass(partial_clone(self)));
     }
 
     /// Check collision between two 2D Objects.
@@ -91,5 +92,45 @@ impl Rectangle{
 
         }).collect()
     }
+
+
+    pub fn max_x(&self) -> f32 {
+        let (sin_r, cos_r) = self.rotation.sin_cos();
+        let half_w = (self.scale.x / 2.0).abs();
+        let half_h = (self.scale.y / 2.0).abs();
+        
+        self.position.x + (half_w * cos_r.abs() + half_h * sin_r.abs())
+    }
+
+    pub fn min_x(&self) -> f32 {
+        let (sin_r, cos_r) = self.rotation.sin_cos();
+        let half_w = (self.scale.x / 2.0).abs();
+        let half_h = (self.scale.y / 2.0).abs();
+        
+        self.position.x - (half_w * cos_r.abs() + half_h * sin_r.abs())
+    }
+
+    pub fn max_y(&self) -> f32 {
+        let (sin_r, cos_r) = self.rotation.sin_cos();
+        let half_w = (self.scale.x / 2.0).abs();
+        let half_h = (self.scale.y / 2.0).abs();
+        self.position.y + (half_w * sin_r.abs() + half_h * cos_r.abs())
+    }
+
+    pub fn min_y(&self) -> f32 {
+        let (sin_r, cos_r) = self.rotation.sin_cos();
+        let half_w = (self.scale.x / 2.0).abs();
+        let half_h = (self.scale.y / 2.0).abs();
+        
+        self.position.y - (half_w * sin_r.abs() + half_h * cos_r.abs())
+    }
 }
 
+fn partial_clone(rec: &Rectangle) -> Rectangle{
+    Rectangle { position: rec.position, 
+        rotation: rec.rotation, 
+        scale: rec.scale, 
+        color: rec.color, 
+        texture: rec.texture.clone(), 
+        function_key: None }
+}

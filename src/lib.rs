@@ -58,7 +58,7 @@ pub fn _pyroquad( m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(crate::py_abstractions::py_functions::get_keys_down, m)?)?;
     m.add_function(wrap_pyfunction!(crate::py_abstractions::py_functions::get_keys_released, m)?)?;
     m.add_function(wrap_pyfunction!(crate::py_abstractions::py_functions::get_char_pressed, m)?)?;
-
+    
     m.add_function(wrap_pyfunction!(crate::py_abstractions::Mouse::get_mouse_buttons_down, m)?)?;
     m.add_function(wrap_pyfunction!(crate::py_abstractions::Mouse::get_mouse_buttons_pressed, m)?)?;
     m.add_function(wrap_pyfunction!(crate::py_abstractions::Mouse::get_mouse_buttons_released, m)?)?;
@@ -119,7 +119,6 @@ pub fn _pyroquad( m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(crate::py_abstractions::py_functions::prevent_quit, m)?)?;
     
     m.add_class::<crate::py_abstractions::GL::InternalGL>()?;
-
     m.add_class::<crate::py_abstractions::RenderTarget::RenderTarget>()?;
     m.add_class::<crate::py_abstractions::RenderTarget::RenderTargetParams>()?;
     m.add_class::<crate::py_abstractions::Textures_and_Images::Texture2D>()?;
@@ -166,7 +165,7 @@ pub fn _pyroquad( m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<crate::py_abstractions::UniformType::UniformType>()?;
     m.add_class::<crate::py_abstractions::UniformType::EulerRot>()?;
     m.add_class::<crate::py_abstractions::UniformType::Comparison>()?;
-
+    
     Ok(())
 }
 

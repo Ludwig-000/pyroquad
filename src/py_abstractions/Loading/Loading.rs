@@ -1,23 +1,34 @@
+use std::path::Path;
+use std::sync::Mutex;
+
+use lazy_static::lazy_static;
 use pyo3::prelude::*;
 use pyo3_stub_gen::derive::* ;
 use crate::engine::PError::PError;
 
 use crate::py_abstractions::Loading::FileData::FileData;
 
-
+lazy_static!{
+    pub static ref PcAssetFolder: Mutex<String> = Mutex::new("".to_string());
+}
 
 /// Loads a file.
 #[cfg(not(any(target_arch = "wasm32", target_os = "ios")))]
 #[gen_stub_pyfunction]
 #[pyfunction]
 pub fn load_file(path: &str)-> PyResult<FileData>{
-    match std::fs::read(path) {
+
+    let path = {
+        format!("{}/{}",PcAssetFolder.lock().unwrap().clone(), path)
+    };
+
+    match std::fs::read(&path) {
         Ok(bytes) => Ok(
             FileData { bytes }
         ),
         Err(e) => {
             Err(PError::BasicErr(
-                format!("Failed to load file {path}: {e}")
+                format!("Failed to load file {}: {}",&path, e)
             ).into())
         }
     }
@@ -73,8 +84,34 @@ pub fn download_file(url: &str) -> PyResult<FileData> {
 #[gen_stub_pyfunction]
 #[pyfunction]
 pub fn write_to_file(contents: &FileData, path: String) -> PyResult<()> {
+    use std::path::Path;
+
+
+    let path = {
+        format!("{}/{}",PcAssetFolder.lock().unwrap().clone(), path)
+    };
+
+    // ensure the asset folder exists.
+    let p = Path::new(&path);
+    if let Some(parent) = p.parent() {
+        std::fs::create_dir_all(parent).map_err(|e| {
+            PError::BasicErr(format!("Failed to create directory {:?}: {}", parent, e))
+        })?;
+    }
+
     std::fs::write(path.clone(), contents.bytes.clone()).map_err(|e|{
         PError::BasicErr(format!("Failed to write to file {path}: {e}"))
     })?;
     Ok(())
+}
+
+
+
+#[cfg(not(any(target_arch = "wasm32", target_os = "ios")))]
+pub fn does_file_exist(path: &str) -> bool{
+
+    let path = {
+        format!("{}/{}",PcAssetFolder.lock().unwrap().clone(), path)
+    };
+    Path::new(&path).exists()
 }

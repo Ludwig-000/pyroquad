@@ -46,6 +46,7 @@ use crate::engine::Objects::ObjectManagement::ObjectManagement;
 
 
 pub enum Command {
+    SetPcAssetFolder(String),
     Touches(PSyncSender<Vec<Touch>>),
     TouchesLocal(PSyncSender<Vec<Touch>>),
     SimulateMouseWithTouch(bool),
@@ -308,6 +309,7 @@ pub async fn proccess_commands_loop() {
         while let Some(command) = COMMAND_QUEUE.pop() {
             
             match command {
+                Command::SetPcAssetFolder(path)=> mq::set_pc_assets_folder(&path),
                 Command::Touches(sender)=>{
                     let touches = mq::touches();
                     let _ = sender.send(touches);
