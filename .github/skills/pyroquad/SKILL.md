@@ -14,9 +14,11 @@ description: Cross-platform python game engine, based on 'Macroquad'.
 
 ## General information
 - none of the engine's classes implement subclassing.
+- none of the engine's functions are async.
 - the engine is fully thread-safe.
 - 'activate_engine()' turns on the engine. Most function calls rely on the engine to be active.
 - 'next_frame()' draws the next scene, clears the draw_buffer and cleans up memory.
+- 'get_delta_time()', 'window_width()' and 'window_height()' are common functions.
 
 ## Coordinate System
 - **Origin:** (0,0) is the Top-Left corner of the window.
@@ -28,6 +30,11 @@ description: Cross-platform python game engine, based on 'Macroquad'.
 - **Root Path:** Assets are relative to the script execution directory. A custom asset path can be set via 'set_pc_assets_folder()'
 - **Patterns:** For loading large numbers of Assets, there exists a povided generic loading screen function in 'examples.loading_screen'. Example usage: images: list[Image] = examples.loading_screen(func: Image, args_list: ["image1.png", "image2.png"], message: "Loading Images") with func taking each element of arg_list as an argument.
 
+
+## Math
+- The engine is equipped with 'Vec2', 'Vec3', 'BVec2', 'BVec3'.
+- All for vector types are immutable types, that are the key to concise and readable math. It is reccomended to use these in most usecases, where applicable.
+- They implement everything from '+', '+=' '-', '*', '/' aswell as all common vector operations. These types directly implement all of Rust: Glam Vector types.
 
 # Simple example
 ```Python
