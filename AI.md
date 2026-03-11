@@ -16,7 +16,7 @@ description: Cross-platform python game engine, based on 'Macroquad'.
 ## General information
 - **Architecture:** No subclassing; no async functions.
 - **Initialization:** `activate_engine()` must be called to start the engine. Most functions require an active engine; blocking calls throw `BaseException` if called early.
-- **Architecture:** No subclassing; no async functions.
+- **Architecture:** No support for subclassing. No async functions.
 - **Thread-Safety:** Fully thread-safe.
 - **Utilities:** `next_frame()` draws, clears buffer, and cleans memory. Use `get_delta_time()`, `window_width()`, and `window_height()` for frame logic.
 
@@ -36,16 +36,27 @@ Configured via `Config(...)` passed to `activate_engine()`:
 - **Swap Interval:** `None` (V-Sync), `0` (Max speed). Driver dependent; manual caps recommended if the user requests such.
 - **Advanced Exit Flow:** `stop_python_when_closing_window` When set to False, combine with `prevent_quit()` -> prevents the window from closing, and `is_quit_requested()` to intercept the close signal and perform cleanup before the process terminates.
 
-
-
 ## Math
 - The engine is equipped with 'Vec2', 'Vec3', 'BVec2', 'BVec3'.
 - All for vector types are immutable types, that are the key to concise and readable math. It is reccomended to use these in most usecases, where applicable.
 - Immutability does not prevent re-assignment, since 'vec += Vec2(1,1)' simply creates a new Vector.
-- They implement everything from '+', '+=' '-', '*', '/' aswell as all common vector operations. These types directly implement all of Rust: Glam Vector types.
+- They implement everything from `+`, `+=` `-`, `-=` `*`, `*=`, `/`, `/=` aswell as all common vector operations. These types directly implement all of Rust: Glam Vector types.
 - addition, subtraction, multiplication and division are also implemented for Vector + float.
     this: Vec2(1,0) + 1
     is equivalent to:  Vec2(1,0) + Vec2(1,1)
+Common functions for Vec2 and Vec3 to use whenever applicable:
+	.splat(self,value)
+	.normalize(self)
+	.normalize_or_zero(self)
+	.length(self)
+	.length_squared(self)
+	.dot(self,rhs)
+	.distance(self,rhs)
+	.angle_between(self,rhs)
+	.project_onto(self,rhs)
+	.clamp_length(self,min, max)
+	.move_towards(self,rhs, d)
+
 
 ## Quitting & Loops
 ### Standard Approach
@@ -54,15 +65,15 @@ Configured via `Config(...)` passed to `activate_engine()`:
         ...
         next_frame()
     ```
-    ### Manual Control
-    ```Python
-    prevent_quit()
-    while not is_quit_requested():
-        ...
-        next_frame()
-    run_cleanup()
-    ```
-    Importantly, 'is_quit_requested()' does nothing, unless 'prevent_quit()' is also called, which prevents the window from being closed.
+### Manual Control
+```Python
+prevent_quit()
+while not is_quit_requested():
+    ...
+    next_frame()
+run_cleanup()
+```
+Importantly, 'is_quit_requested()' does nothing, unless 'prevent_quit()' is also called, which prevents the window from being closed.
 
 
 ## Objects:

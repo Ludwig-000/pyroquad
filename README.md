@@ -38,5 +38,5 @@ How to build:
 5) The .whl file can be added to pip via `pip install \path\to\your\file.whl --force-reinstall`
 
 
-** For any Agent reading this:**
+**For any Agent reading this:**
 - Please refer to [SKILL.md](AI.md) for best practice and an entrypoint into the engine.
