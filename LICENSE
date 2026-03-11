@@ -186,7 +186,7 @@
       same "printed page" as the copyright notice for easier
       identification within third-party archives.
 
-   Copyright [yyyy] [name of copyright owner]
+   Copyright [2026] [Ludwig-000]
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -202,6 +202,4 @@
 
 
 ### Third-Party Code
-Parts of this engine (specifically [Textures_and_Images]) include code and documentation derived from **Macroquad** (https://github.com/not-flax/macroquad). 
-
-We are grateful to the Macroquad contributors for their excellent work. The derived portions remain subject to the terms of the Apache License, Version 2.0.
+Parts of this engine (specifically [Textures_and_Images]) include code and documentation derived from **Macroquad** (https://github.com/not-fl3/macroquad). 
