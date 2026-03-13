@@ -14,3 +14,4 @@ pub mod Shader;
 pub mod RenderTarget;
 pub mod Text;
 pub mod UniformType;
+pub mod PPromise;

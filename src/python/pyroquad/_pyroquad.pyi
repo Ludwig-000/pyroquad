@@ -5251,6 +5251,10 @@ class FileData:
         """
     def to_font(self) -> Font: ...
 
+class FileDataPromise:
+    def check(self) -> typing.Optional[FileData]: ...
+    def await_sync(self) -> FileData: ...
+
 class Font:
     def __new__(cls, path:builtins.str) -> Font:
         r"""
@@ -5342,6 +5346,10 @@ class Image:
         r"""
         Flip the image vertically (mirror top-bottom)
         """
+
+class ImagePromise:
+    def check(self) -> typing.Optional[Image]: ...
+    def await_sync(self) -> Image: ...
 
 class InternalGL:
     r"""
@@ -7565,6 +7573,8 @@ def download_file(url:builtins.str) -> FileData:
     Downloads a file and returning it's raw data.
     """
 
+def download_file_async(url:builtins.str) -> FileDataPromise: ...
+
 def draw_affine_parallelepiped(offset:Vec3, e1:Vec3, e2:Vec3, e3:Vec3, texture:typing.Optional[Texture2D], color:Color) -> None: ...
 
 def draw_affine_parallelogram(offset:Vec3, e1:Vec3, e2:Vec3, e3:Vec3, texture:typing.Optional[Texture2D], color:Color) -> None: ...
@@ -7764,6 +7774,8 @@ def load_file(path:builtins.str) -> FileData:
     r"""
     Loads a file.
     """
+
+def measure_text(text:builtins.str, font:typing.Optional[Font], font_size:builtins.int, font_scale:builtins.float) -> TextDimensions: ...
 
 def next_frame(physics_step:typing.Optional[builtins.float]=0.0) -> None:
     r"""

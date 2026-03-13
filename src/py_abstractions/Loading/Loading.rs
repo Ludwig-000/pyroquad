@@ -4,9 +4,11 @@ use std::sync::Mutex;
 use lazy_static::lazy_static;
 use pyo3::prelude::*;
 use pyo3_stub_gen::derive::* ;
+use crate::engine::PChannel::PChannel;
 use crate::engine::PError::PError;
 
 use crate::py_abstractions::Loading::FileData::FileData;
+use crate::py_abstractions::PPromise::{FileDataFuture};
 
 lazy_static!{
     pub static ref PcAssetFolder: Mutex<String> = Mutex::new("".to_string());
@@ -82,6 +84,35 @@ pub fn download_file(url: &str) -> PyResult<FileData> {
     )
 }
 
+
+#[gen_stub_pyfunction]
+#[pyfunction]
+pub fn download_file_async(url: &str) -> PyResult<FileDataFuture> {
+    let (tx, rx) = PChannel::sync_channel(1);
+    let url = url.to_string();
+
+    std::thread::spawn(move || {
+        let result: PyResult<FileData> = (|| {
+            let resp = reqwest::blocking::get(&url)
+                .map_err(|e| PError::BasicErr(format!("Request failed for {url}: {e}")))?;
+
+            let resp = resp.error_for_status()
+                .map_err(|e| PError::BasicErr(format!("HTTP error for {url}: {e}")))?;
+            
+            let bytes = resp.bytes()
+                .map_err(|e| PError::BasicErr(format!("Failed to read body for {url}: {e}")))?;
+            
+            Ok(
+                FileData { bytes: bytes.to_vec() }
+            )
+        })();
+        let _ = tx.send(result); 
+    });
+
+    Ok(FileDataFuture {
+        future: std::sync::Mutex::new(Some(rx)),
+    })
+}
 
 
 /// Writes raw data to file.

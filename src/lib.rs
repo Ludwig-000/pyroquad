@@ -1,4 +1,5 @@
-#![allow(non_snake_case)] // alot of Python Constants are defined via function, so this prevents compiler spam.
+// alot of Python Constants are defined via function, so this prevents compiler spam.
+#![allow(non_snake_case)]
 
 #![warn(clippy::large_enum_variant)]
 
@@ -51,6 +52,7 @@ pub fn _pyroquad( m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(crate::py_abstractions::py_functions::draw_multiline_text, m)?)?;
     m.add_function(wrap_pyfunction!(crate::py_abstractions::py_functions::draw_text, m)?)?;
     m.add_function(wrap_pyfunction!(crate::py_abstractions::py_functions::get_text_center, m)?)?;
+    
 
     m.add_function(wrap_pyfunction!(crate::py_abstractions::py_functions::get_fps, m)?)?;
     m.add_function(wrap_pyfunction!(crate::py_abstractions::py_functions::get_delta_time, m)?)?;
@@ -104,13 +106,15 @@ pub fn _pyroquad( m: &Bound<'_, PyModule>) -> PyResult<()> {
 
     m.add_class::<crate::py_abstractions::Text::Font>()?;
     m.add_class::<crate::py_abstractions::Text::TextDimensions>()?;
-
+    m.add_function(wrap_pyfunction!(crate::py_abstractions::Text::measure_text, m)?)?;
+    
     m.add_class::<crate::py_abstractions::Color::Color>()?;
 
     m.add_class::<crate::py_abstractions::Loading::ThreadedLoading::Loading>()?;
     m.add_class::<crate::py_abstractions::Loading::FileData::FileData>()?;
     m.add_function(wrap_pyfunction!(crate::py_abstractions::Loading::Loading::load_file, m)?)?;
     m.add_function(wrap_pyfunction!(crate::py_abstractions::Loading::Loading::download_file, m)?)?;
+    m.add_function(wrap_pyfunction!(crate::py_abstractions::Loading::Loading::download_file_async, m)?)?;
     m.add_function(wrap_pyfunction!(crate::py_abstractions::Loading::Loading::write_to_file, m)?)?;
 
     m.add_class::<crate::py_abstractions::GL::Vertex>()?;
@@ -165,6 +169,10 @@ pub fn _pyroquad( m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<crate::py_abstractions::UniformType::UniformType>()?;
     m.add_class::<crate::py_abstractions::UniformType::EulerRot>()?;
     m.add_class::<crate::py_abstractions::UniformType::Comparison>()?;
+
+
+    m.add_class::<crate::py_abstractions::PPromise::ImageFuture>()?;
+    m.add_class::<crate::py_abstractions::PPromise::FileDataFuture>()?;
     
     Ok(())
 }

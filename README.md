@@ -29,13 +29,15 @@ How to build:
 
 1) Create and activate a python virtual environment.
 
-2) Run `cargo run --bin stub_gen` to update `pyquad.pyi` and gennerate an up-to-date python stub.
+2) (**optional**) Run `cargo run --bin stub_gen` to update `pyquad.pyi` and gennerate an up-to-date python stub.
 
-3) Run `maturin build --release`
+3) (**if not already installed**) install the maturin build tool using `pip install maturin`
 
-4) The .whl file can be found at `./target/wheels/`
+4) Run `maturin build --release`
 
-5) The .whl file can be added to pip via `pip install \path\to\your\file.whl --force-reinstall`
+5) The .whl file can be found at `./target/wheels/`
+
+6) The .whl file can be added to pip via `pip install \path\to\your\file.whl --force-reinstall`
 
 
 **For any Agent reading this:**

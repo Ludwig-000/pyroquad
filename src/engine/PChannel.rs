@@ -46,6 +46,7 @@ impl<T> Drop for PSyncSender<T>{
 }
 impl<T> PReceiver<T> {
     pub fn recv(&self) -> Result<T, PChannelError> {
+        
         loop{
             let res  = self.inner.recv_timeout(Duration::from_millis(100));
 
@@ -60,7 +61,27 @@ impl<T> PReceiver<T> {
 
         }
     }
+    pub fn try_recv(&self) -> Option<Result<T, PChannelError>>{
+        self.inner.try_recv().ok()
+    }
 
+    /// timeout in seconds
+    pub fn recv_timeout(&self, timeout: f32) -> Option<Result<T, PChannelError>> {
+        use std::sync::mpsc::RecvTimeoutError;
+
+        if !crate::py_abstractions::py_functions::ENGINE_CURRENTLY_ACTIVE.load(Ordering::Relaxed) {
+            return Some(Err(PChannelError::DeadlockError));
+        }
+        
+        match self.inner.recv_timeout( Duration::from_secs_f32(timeout) ) {
+            Ok(val) => return Some(val),
+            Err(RecvTimeoutError::Timeout) => None,
+            Err(RecvTimeoutError::Disconnected) => {
+                return Some(Err(PChannelError::SendError))
+            }
+        }
+        
+    }
     
 }
 

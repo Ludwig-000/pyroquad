@@ -116,3 +116,10 @@ impl From<TextDimensions> for mq::TextDimensions{
         mq::TextDimensions{ width: value.width, height: value.height, offset_y: value.offset_y  }
     }
 }
+
+
+#[gen_stub_pyfunction]
+#[pyfunction]
+pub fn measure_text(text: &str, font: Option<Font>, font_size: u16, font_scale: f32)-> TextDimensions{
+    mq::measure_text(text, font.map( Into::into ).as_ref(), font_size, font_scale).into()
+}

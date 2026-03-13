@@ -11,7 +11,7 @@ description: Cross-platform python game engine, based on 'Macroquad'.
 ## Usage Requirements
 - **Platforms:** Windows, macOS, Linux
 - **Python:** >= 3.9
-- **Tooling:** Highly recommended to use **Pylance / Type Checking (Standard)**. The engine is built with strict typing and avoids `Any`, allowing the IDE to provide full API discovery.
+- **Tooling:** Highly recommended to use **Pylance + Type Checking =(Standard)**. The engine is built with strict typing and avoids `Any`, allowing the IDE to provide full API discovery.
 
 ## General information
 - **Architecture:** No subclassing; no async functions.
@@ -23,7 +23,7 @@ description: Cross-platform python game engine, based on 'Macroquad'.
 ## Coordinate System & Colors
 
 - **Origin:** (0,0) is Top-Left. X increases right, Y increases down.
-- **Colors:** Use `Color` enum or `Color(r, g, b, a)` (0.0 to 1.0).
+- **Colors:** Use `Color` enum or `Color(r, g, b, a)` (0.0 to 1.0). All pre-defined colors are properties.
 - **Textures:** 2D shapes support alpha; textures are tinted by the current color (`Color.WHITE` for no tint).
 
 ## Asset Loading
@@ -37,9 +37,9 @@ Configured via `Config(...)` passed to `activate_engine()`:
 - **Advanced Exit Flow:** `stop_python_when_closing_window` When set to False, combine with `prevent_quit()` -> prevents the window from closing, and `is_quit_requested()` to intercept the close signal and perform cleanup before the process terminates.
 
 ## Math
-- The engine is equipped with 'Vec2', 'Vec3', 'BVec2', 'BVec3'.
+- The engine is equipped with `Vec2`, `Vec3`, `BVec2`, `BVec3`.
 - All for vector types are immutable types, that are the key to concise and readable math. It is reccomended to use these in most usecases, where applicable.
-- Immutability does not prevent re-assignment, since 'vec += Vec2(1,1)' simply creates a new Vector.
+- Immutability does not prevent re-assignment, since `vec += Vec2(1,1)` simply creates a new Vector.
 - They implement everything from `+`, `+=` `-`, `-=` `*`, `*=`, `/`, `/=` aswell as all common vector operations. These types directly implement all of Rust: Glam Vector types.
 - addition, subtraction, multiplication and division are also implemented for Vector + float.
     this: Vec2(1,0) + 1
@@ -60,11 +60,12 @@ Common functions for Vec2 and Vec3 to use whenever applicable:
 
 ## Quitting & Loops
 ### Standard Approach
-    ```Python
-    while True
-        ...
-        next_frame()
-    ```
+```Python
+while True
+    ...
+    next_frame()
+```
+
 ### Manual Control
 ```Python
 prevent_quit()
@@ -73,7 +74,7 @@ while not is_quit_requested():
     next_frame()
 run_cleanup()
 ```
-Importantly, 'is_quit_requested()' does nothing, unless 'prevent_quit()' is also called, which prevents the window from being closed.
+Importantly, `is_quit_requested()` does nothing, unless `prevent_quit()` is also called, which prevents the window from being closed.
 
 
 ## Objects:
@@ -81,51 +82,48 @@ Importantly, 'is_quit_requested()' does nothing, unless 'prevent_quit()' is also
 - 2D Objects:
     Rectangle
     Circle
-    # Rectangle especially is the recommended way of drawing almost ANY twoDObject.
-    # Both Types support rotating, scaling on x,y axes, Transparency via Color, applying a Texture, collision and a 'tick()' function.
+    - Rectangle especially is the recommended way of drawing almost ANY twoDObject.
+    - Both Types support rotating, scaling on x,y axes, Transparency via Color, applying a Texture, collision and a `tick()` function.
 - 3D Objects:
     Cube
     Cylinder
     Mesh
     Pill
     Sphere
-    # All objects here are optimized for performant drawing and collision detection. They implement collision detection via rust's 'rapier3D'.
-    # ThreeD objects do not yet support transparency.
-    # They support Physics, also implemented via 'rapier3D' that can be accessed via obj.physics
-    # rotation on all 3 Axes,
-    # movement on all 3 Axes,
-    # scaling on all 3 Axes,
+    - All objects here are optimized for performant drawing and collision detection. They implement collision detection via rust's `rapier3D`.
+    - ThreeD objects do not yet support transparency.
+    - They support Physics, also implemented via `rapier3D` that can be accessed via obj.physics
+    - rotation on all 3 Axes,
+    - movement on all 3 Axes,
+    - scaling on all 3 Axes,
 
-    - IMPORTANT:
-        For Three-D object collision and physics, both will be stepped via 'next_frame()', with next frame taking as an argument None | int
-        with None meaning neither collision nor physics,
-        0 meaning collision but physics do not step,
-        and a value of 'next_frame( get_delta_time() )' being the reccommended value for realistic physics.
-        TwoD objects do not yet implement physics.
+    **IMPORTANT:**
+    For Three-D object collision and physics, both will be stepped via `next_frame()`, with next frame taking as an argument None | int
+    with None meaning neither collision nor physics,
+    0 meaning collision but physics do not step,
+    and a value of `next_frame( get_delta_time() )` being the reccommended value for realistic physics.
+    TwoD objects do not yet implement physics.
 
-        also, threeDObjects implement a depth buffer, meaning they generally should not be drawn manually, and the order of draws does not matter.
-        By default, a ThreeD is queued to be drawn next frame, but to actually draw them the call: 'draw_all_objects()' is requied.
+    - Also, threeDObjects implement a depth buffer, meaning they generally should not be drawn manually, and the order of draws does not matter.
+    By default, a ThreeD is queued to be drawn next frame, but to actually draw them the call: `draw_all_objects()` is requied.
 
-        To manage large ammounts of Objects, the running of an object's tick function is based on the lifetime of the object.
-        AKA. an object's tick function will stop executing, once an object has been deleted,
+    - To manage large ammounts of Objects, the running of an object's tick function is based on the lifetime of the object. AKA. an object's tick function will stop executing, once an object has been deleted,
 
-        And specifically for 3D objects, the same goes for their Physics and drawing.
-        for this reason, it is recommended, in case of many objects, to keep them all in arrays, where they can be kept and deleted at will.
+    - And specifically for 3D objects, the same goes for their Physics and drawing. for this reason, it is recommended, in case of many objects, to keep them all in arrays, where they can be kept and deleted at will.
+
 - For mixed ThreeD - and TwoD scenes, it is recommended to FIRST draw all twoD objects, THEN all ThreeD objects, since TwoD objects do not have a depth buffer, while ThreeD objects do.
 
 - Also, and this goes for TwoD objects aswell, the appropriate camera has to be set.
 - The Default Camera is a 2D camera, covering the entire window.
-- The camera will be reset after calling 'next_frame()'
+- The camera will be reset after calling `next_frame()`
 - A 3D camera has to be active for 3D object draw calls to be visible,
 - A 2D camera has to be active for 2D object draw calls to be visible.
-
-
 
 
 ## Common Pitfalls
 - Draw Order: Draw 2D objects before 3D objects.
 - Cameras: 2D/3D cameras must be explicitly set for their respective objects to appear. Camera resets after next_frame().
-- Lifetimes: 'tick()' and physics stop when the object is deleted. Manage via arrays.
+- Lifetimes: `tick()` and physics stop when the object is deleted. Manage via arrays.
 
 ## Debugging & Resources
 1. **Source Code/Repo:** [Github Repository](https://github.com/Ludwig-000/pyroquad) — This is the primary source for the most up-to-date documentation and logic.
