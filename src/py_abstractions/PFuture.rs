@@ -9,12 +9,12 @@ use pyo3::PyErr;
 crate::generate_pfuture!(Image);
 crate::generate_pfuture!(FileData);
 
-
-
-
-
-
-
+#[gen_stub_pyclass_enum]
+#[pyclass]
+pub enum FutureResult{
+    Timeout(),
+    Empty(),
+}
 
 /// Non-async future.
 /// this feature is experimental
@@ -87,4 +87,71 @@ macro_rules! generate_pfuture {
             }
         }
     };
+}
+
+
+
+
+#[gen_stub_pyclass]
+#[pyclass]
+pub struct Future {
+    pub future: std::sync::Mutex<Option<PReceiver<PyResult<()>>>>,
+}
+
+#[gen_stub_pymethods]
+#[pymethods]
+impl Future {
+    pub fn result(&self) -> PyResult<Option<()>> {
+        let mut guard = self.future.lock()
+            .map_err(|_| pyo3::exceptions::PyRuntimeError::new_err("Mutex poisoned"))?;
+
+        let rx = guard.as_ref().ok_or_else(|| {
+            pyo3::exceptions::PyRuntimeError::new_err("Result already consumed")
+        })?;
+
+        match rx.try_recv() {
+            None => Ok(None),
+            Some(res) => {
+                let _ = guard.take(); 
+                Ok(Some(res??))
+            }
+        }
+    }
+
+    pub fn result_nowait(&self) -> PyResult<()> {
+        let mut guard = self.future.lock()
+            .map_err(|_| pyo3::exceptions::PyRuntimeError::new_err("Mutex poisoned"))?;
+        
+        let rx = guard.as_ref().ok_or_else(|| {
+            pyo3::exceptions::PyRuntimeError::new_err("Result already consumed")
+        })?;
+        
+        let res = rx.recv();
+        let _ = guard.take();
+        Ok(res??)
+    }
+
+    /// waits for the result, with timeout in seconds.
+    #[pyo3(signature = (timeout = f32::MAX))]
+    pub fn result_nowait_timeout(&self, timeout: f32) -> PyResult<Option<()>> {
+        let mut guard = self.future.lock().map_err(|_| {
+            pyo3::exceptions::PyRuntimeError::new_err("Mutex poisoned")
+        })?;
+
+        let rx = guard.as_ref().ok_or_else(|| {
+            pyo3::exceptions::PyRuntimeError::new_err("Result already consumed")
+        })?;
+
+        match rx.recv_timeout(timeout) {
+            None => Ok(None),
+            
+            Some(res) => {
+                let _ = guard.take();
+                
+                res.map_err( Into::into )
+                .flatten()
+                .map(Some)
+            }
+        }
+    }
 }

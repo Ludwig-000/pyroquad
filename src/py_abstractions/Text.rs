@@ -120,6 +120,8 @@ impl From<TextDimensions> for mq::TextDimensions{
 
 #[gen_stub_pyfunction]
 #[pyfunction]
-pub fn measure_text(text: &str, font: Option<Font>, font_size: u16, font_scale: f32)-> TextDimensions{
-    mq::measure_text(text, font.map( Into::into ).as_ref(), font_size, font_scale).into()
+pub fn measure_text(text: String, font: Option<Font>, font_size: u16, font_scale: f32)-> PyResult<TextDimensions>{
+    let (sender, receiver) = PChannel::sync_channel(1);
+    COMMAND_QUEUE.push( Command::MeasureText { text, font: font.map(Into::into ), font_size, font_scale, sender });
+    Ok(receiver.recv()?.into())
 }

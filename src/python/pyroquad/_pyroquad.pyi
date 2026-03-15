@@ -168,6 +168,17 @@ class Camera2D:
         Useful for things like splitscreen.
         """
     def __new__(cls, rotation:builtins.float=0.0, zoom:Vec2=..., target:Vec2=..., offset:Vec2=..., render_target:typing.Optional[RenderTarget]=None, viewport:typing.Optional[tuple[builtins.int, builtins.int, builtins.int, builtins.int]]=None) -> Camera2D: ...
+    def screen_to_world(self, point:Vec2) -> Vec2:
+        r"""
+        Returns the world space position for a 2d camera screen space position.
+        Point is a screen space position, often mouse x and y.
+        """
+    def world_to_screen(self, point:Vec2) -> Vec2:
+        r"""
+        Returns the screen space position for a 2d camera world space position.
+        Screen position in window space - from (0, 0) to (screen_width, screen_height()).
+        """
+    def matrix(self) -> Mat4: ...
     @staticmethod
     def from_display_rect(top_left_x:builtins.float, top_left_y:builtins.float, width:builtins.float, height:builtins.float) -> Camera2D:
         r"""
@@ -5251,9 +5262,13 @@ class FileData:
         """
     def to_font(self) -> Font: ...
 
-class FileDataPromise:
-    def check(self) -> typing.Optional[FileData]: ...
-    def await_sync(self) -> FileData: ...
+class FileDataFuture:
+    def result(self) -> typing.Optional[FileData]: ...
+    def result_nowait(self) -> FileData: ...
+    def result_nowait_timeout(self, timeout:builtins.float=0.0) -> typing.Optional[FileData]:
+        r"""
+        waits for the result, with timeout in seconds.
+        """
 
 class Font:
     def __new__(cls, path:builtins.str) -> Font:
@@ -5276,6 +5291,14 @@ class Font:
     def set_filter(self, filter_mode:FilterMode) -> None:
         r"""
         Sets the FilterMode of this font's texture atlas.
+        """
+
+class Future:
+    def result(self) -> typing.Optional[None]: ...
+    def result_nowait(self) -> None: ...
+    def result_nowait_timeout(self, timeout:builtins.float=0.0) -> typing.Optional[None]:
+        r"""
+        waits for the result, with timeout in seconds.
         """
 
 class Geometry:
@@ -5347,9 +5370,13 @@ class Image:
         Flip the image vertically (mirror top-bottom)
         """
 
-class ImagePromise:
-    def check(self) -> typing.Optional[Image]: ...
-    def await_sync(self) -> Image: ...
+class ImageFuture:
+    def result(self) -> typing.Optional[Image]: ...
+    def result_nowait(self) -> Image: ...
+    def result_nowait_timeout(self, timeout:builtins.float=0.0) -> typing.Optional[Image]:
+        r"""
+        waits for the result, with timeout in seconds.
+        """
 
 class InternalGL:
     r"""
@@ -7547,6 +7574,16 @@ def activate_engine(conf:typing.Optional[Config]=None) -> None:
     The engine is built, assuming none of it's library calls are ever executed without the engine being active.
     """
 
+def build_texture_atlas() -> None:
+    r"""
+    TODO: doesnt seem to work atm, find out why.
+    Build an atlas out of all currently loaded texture
+    Later on all draw_texture calls with texture available in the atlas will use
+    the one from the atlas
+    NOTE: the GPU memory and texture itself in Texture2D will still be allocated
+    and Texture->Image conversions will work with Texture2D content, not the atlas
+    """
+
 def camera_font_scale(world_font_size:builtins.float) -> tuple[builtins.int, builtins.float, builtins.float]:
     r"""
     From given font size in world space gives (font_size, font_scale and font_aspect) params to make rasterized font looks good in currently active camera
@@ -7573,7 +7610,7 @@ def download_file(url:builtins.str) -> FileData:
     Downloads a file and returning it's raw data.
     """
 
-def download_file_async(url:builtins.str) -> FileDataPromise: ...
+def download_file_async(url:builtins.str) -> FileDataFuture: ...
 
 def draw_affine_parallelepiped(offset:Vec3, e1:Vec3, e2:Vec3, e3:Vec3, texture:typing.Optional[Texture2D], color:Color) -> None: ...
 

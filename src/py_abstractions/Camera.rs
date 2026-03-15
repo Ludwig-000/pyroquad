@@ -1,9 +1,11 @@
+use macroquad::camera::Camera;
 use pyo3::prelude::*;
  
 use macroquad::prelude as mq;
 use crate::engine::CoreLoop::COMMAND_QUEUE;
 use crate::engine::CoreLoop::Command;
 use crate::engine::PChannel::PChannel;
+use crate::py_abstractions::structs::GLAM::Mat4::Mat4;
 use pyo3_stub_gen::{derive::gen_stub_pyfunction,derive::*};
 
 use crate::py_abstractions::structs::GLAM::Vec3::Vec3;
@@ -74,6 +76,29 @@ impl Camera2D {
             render_target,
             viewport,
         }
+    }
+
+    /// Returns the world space position for a 2d camera screen space position.
+    /// Point is a screen space position, often mouse x and y.
+    pub fn screen_to_world(&self, point: Vec2) -> PyResult<Vec2>{
+        let (sender, receiver) = PChannel::sync_channel(1);
+        COMMAND_QUEUE.push( Command::Camera2DScreenToWorld { cam:  self.clone().into(), point: point.into(), sender } );
+        Ok(receiver.recv()?.into())
+    }
+
+    /// Returns the screen space position for a 2d camera world space position.
+    /// Screen position in window space - from (0, 0) to (screen_width, screen_height()).
+    pub fn world_to_screen(&self, point: Vec2) -> PyResult<Vec2>{
+        let (sender, receiver) = PChannel::sync_channel(1);
+        COMMAND_QUEUE.push( Command::Camera2DWorldToScreen { cam:  self.clone().into(), point: point.into(), sender } );
+        Ok(receiver.recv()?.into())
+    }
+
+
+    pub fn matrix(&self) -> PyResult<Mat4>{
+        let (sender, receiver) = PChannel::sync_channel(1);
+        COMMAND_QUEUE.push( Command::Camera2DToMatrix { cam: self.clone().into() , sender });
+        Ok(receiver.recv()?.into())
     }
     /// Creates a camera based on a Retangle.
     /// Takes A 2D rectangle, defined by its top-left corner, width and height.

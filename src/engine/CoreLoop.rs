@@ -11,6 +11,7 @@ use macroquad::input::Touch;
 use macroquad::models::DrawSphereParams;
 use macroquad::prelude as mq;
 use macroquad::audio as au;
+use macroquad::text::TextDimensions;
 use macroquad::window::get_internal_gl;
 use crate::engine::CameraManager;
 use crate::engine::CameraManager::CamMemory;
@@ -46,6 +47,11 @@ use crate::engine::Objects::ObjectManagement::ObjectManagement;
 
 
 pub enum Command {
+    Camera2DWorldToScreen{cam: mq::Camera2D, point: mq::Vec2, sender: PSyncSender<mq::Vec2>},
+    Camera2DScreenToWorld{cam: mq::Camera2D, point: mq::Vec2, sender: PSyncSender<mq::Vec2>},
+    Camera2DToMatrix{cam: mq::Camera2D, sender: PSyncSender<mq::Mat4>},
+    MeasureText{text: String, font: Option<mq::Font>, font_size: u16, font_scale: f32, sender: PSyncSender<TextDimensions>},
+    BuildTextureAtlas,
     SetPcAssetFolder(String),
     Touches(PSyncSender<Vec<Touch>>),
     TouchesLocal(PSyncSender<Vec<Touch>>),
@@ -309,6 +315,28 @@ pub async fn proccess_commands_loop() {
         while let Some(command) = COMMAND_QUEUE.pop() {
             
             match command {
+                Command::Camera2DToMatrix { cam, sender } =>{
+                    use macroquad::camera::Camera as mqCam;
+                    let _ = sender.send( cam.matrix() );
+                }
+                Command::Camera2DWorldToScreen { cam, point, sender } =>{
+                    let _ = sender.send(
+                        cam.world_to_screen(point)
+                    );
+                }
+                Command::Camera2DScreenToWorld { cam, point, sender } =>{
+                    let _ = sender.send(
+                        cam.screen_to_world(point)
+                    );
+                }
+                Command::MeasureText { text, font, font_size, font_scale, sender }=>{
+                    let _ = sender.send(
+                        mq::measure_text(&text, font.as_ref(), font_size, font_scale)
+                    );
+                }
+                Command::BuildTextureAtlas => {
+                    mq::build_textures_atlas();
+                },
                 Command::SetPcAssetFolder(path)=> mq::set_pc_assets_folder(&path),
                 Command::Touches(sender)=>{
                     let touches = mq::touches();

@@ -526,3 +526,18 @@ impl EngineTexImgEnum{
         }
     }
 }
+
+
+
+
+/// TODO: doesnt seem to work atm, find out why.
+/// Build an atlas out of all currently loaded texture
+/// Later on all draw_texture calls with texture available in the atlas will use
+/// the one from the atlas
+/// NOTE: the GPU memory and texture itself in Texture2D will still be allocated
+/// and Texture->Image conversions will work with Texture2D content, not the atlas
+#[gen_stub_pyfunction]
+#[pyfunction]
+pub fn build_texture_atlas(){
+    COMMAND_QUEUE.push( Command::BuildTextureAtlas );
+}

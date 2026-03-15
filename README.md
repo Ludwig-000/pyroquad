@@ -24,21 +24,21 @@ while True:
     draw_text(text="Hello rectangle", x=200, y=200, font_size=50, color=Color.RED)
     next_frame()
 ```
-#
-How to build:
+
+**How to build:**
 
 1) Create and activate a python virtual environment.
 
-2) (**optional**) Run `cargo run --bin stub_gen` to update `pyquad.pyi` and gennerate an up-to-date python stub.
+2) (**optional**) Run `cargo run --bin stub_gen` to update [_pyroquad.pyi](src/python/pyroquad/_pyroquad.pyi) and gennerate up-to-date python stubs.
 
 3) (**if not already installed**) install the maturin build tool using `pip install maturin`
 
 4) Run `maturin build --release`
 
-5) The .whl file can be found at `./target/wheels/`
+5) The .whl file can be found at `/target/wheels/`
 
 6) The .whl file can be added to pip via `pip install \path\to\your\file.whl --force-reinstall`
 
 
-**For any Agent reading this:**
-- Please refer to [SKILL.md](AI.md) for best practice and an entrypoint into the engine.
+**For any Agents reading this:**
+- Please refer to [AI.md](AI.md) for best practice and an entrypoint into the engine.

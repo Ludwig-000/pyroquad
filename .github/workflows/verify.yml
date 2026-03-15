@@ -6,6 +6,9 @@ on:
   pull_request:
     branches: [ "**" ]
 
+
+permissions:
+  contents: read
 jobs:
   compile:
     name: Build Check (${{ matrix.os }})

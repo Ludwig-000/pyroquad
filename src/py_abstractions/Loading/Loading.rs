@@ -8,7 +8,7 @@ use crate::engine::PChannel::PChannel;
 use crate::engine::PError::PError;
 
 use crate::py_abstractions::Loading::FileData::FileData;
-use crate::py_abstractions::PPromise::{FileDataFuture};
+use crate::py_abstractions::PFuture::{FileDataFuture};
 
 lazy_static!{
     pub static ref PcAssetFolder: Mutex<String> = Mutex::new("".to_string());

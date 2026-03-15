@@ -3,6 +3,8 @@ name: Manual Linux GL Test
 on:
   workflow_dispatch: 
 
+permissions:
+  contents: read
 jobs:
   linux-gl-test:
     name: OpenGL Virtual Display Check

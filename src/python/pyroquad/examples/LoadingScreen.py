@@ -14,14 +14,19 @@ def loading_screen(
 
     results: list[R] = []
 
-    ds = screen_width() / 2200
+    
+    zoom = 0.0009115
+    camera = Camera2D(rotation=0,zoom=Vec2(zoom, zoom *16/9),target=Vec2.ZERO,offset=Vec2(-1,1))
+
+    factor = 2194.0 / 2200
 
     def draw(percent_text: str):
-        draw_text(message, 902*ds, 502*ds, Color.ORANGE, font_size=int(70*ds))
-        draw_text(message, 900*ds, 500*ds, Color.WHITE, font_size=int(70*ds))
-        draw_text(percent_text, 900*ds, 600*ds, Color.WHITE, font_size=int(70*ds))
+        draw_text(message, 902*factor, 502*factor, Color.ORANGE, font_size=int(70*factor))
+        draw_text(message, 900*factor, 500*factor, Color.WHITE, font_size=int(70*factor))
+        draw_text(percent_text, 900*factor, 600*factor, Color.WHITE, font_size=int(70*factor))
         next_frame(None)
 
+    Camera2D.set_camera(camera)
     draw("0%")
 
     min_interval = 0.05  # seconds between frames (~10 fps max for loading UI)
@@ -38,6 +43,7 @@ def loading_screen(
             now = time.perf_counter()
 
             if percent != last_percent and (now - last_draw) >= min_interval:
+                Camera2D.set_camera(camera)
                 draw(f"{percent}%")
                 last_draw = now
                 last_percent = percent

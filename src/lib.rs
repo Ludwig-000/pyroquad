@@ -128,6 +128,7 @@ pub fn _pyroquad( m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<crate::py_abstractions::Textures_and_Images::Texture2D>()?;
     m.add_class::<crate::py_abstractions::Textures_and_Images::FilterMode>()?;
     m.add_class::<crate::py_abstractions::Textures_and_Images::Image>()?;
+    m.add_function(wrap_pyfunction!(crate::py_abstractions::Textures_and_Images::build_texture_atlas, m)?)?;
     m.add_class::<crate::py_abstractions::Camera::Camera2D>()?;
     m.add_class::<crate::py_abstractions::Camera::Camera3D>()?;
     m.add_class::<crate::py_abstractions::Camera::Projection>()?;
@@ -171,8 +172,10 @@ pub fn _pyroquad( m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<crate::py_abstractions::UniformType::Comparison>()?;
 
 
-    m.add_class::<crate::py_abstractions::PPromise::ImageFuture>()?;
-    m.add_class::<crate::py_abstractions::PPromise::FileDataFuture>()?;
+    m.add_class::<crate::py_abstractions::PFuture::ImageFuture>()?;
+    m.add_class::<crate::py_abstractions::PFuture::FileDataFuture>()?;
+    m.add_class::<crate::py_abstractions::PFuture::Future>()?;
+    m.add_class::<crate::py_abstractions::PFuture::FutureResult>()?;
     
     Ok(())
 }
@@ -183,13 +186,8 @@ define_stub_info_gatherer!(stub_info);
 /*
 list of macroquad::prelude functions
 
-    mq::build_textures_atlas
     mq::get_dropped_files
     mq::gl_use_default_material
     mq::gl_use_material
     mq::load_material
-    mq::measure_text
-
-
-
 */
