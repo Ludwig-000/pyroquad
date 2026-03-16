@@ -14,10 +14,9 @@ profiler.start()
 
 activate_engine(Config("2D Game",fullscreen=True,swap_interval=0, sample_count=10))
 
-zoom = 0.0009115
-camera = Camera2D(rotation=0,zoom=Vec2(zoom, zoom*1.77777),target=Vec2.ZERO,offset=Vec2(-1,1))
+camera = Camera2D(rotation=0,zoom=Vec2(0.0009115, 0.0009115*16/9),target=Vec2.ZERO,offset=Vec2(-1,1))
 
-tileSize = int(0.015 * 2194.0)
+tileSize = 32
 
 
 set_pc_assets_folder("assets/TwoDGame")
@@ -71,7 +70,9 @@ def texture_loading() -> dict[str, Texture2D]:
         {"name": "skull_screen",    "url": "screens/skull.png", "path": "skull.png"},
         {"name": "tree_screen",    "url": "screens/Tree_wallapaper.png", "path": "Tree_wallapaper.png"},
 
-
+        # UI
+        {"name": "grey_button",    "url": "UiAssets/01_Flat_Theme/Sprites/UI_Flat_Frame.png", "path": "UI_Flat_Frame.png"},
+        {"name": "grey_button_selected",    "url": "UiAssets/01_Flat_Theme/Sprites/UI_Flat_Frame_selected.png", "path": "UI_Flat_Frame_selected.png"},
     ]
 
     examples.loading_screen_future(
@@ -102,19 +103,31 @@ def quit_program():
 class Button():
     button: Rectangle
     button_label: str
+    button_tex: Texture2D | None
+    button_tex_hovered: Texture2D | None
     def __init__(self, button_pos: Vec2, button_scale: Vec2, button_color: Color = Color.GREY, button_tex: None | Texture2D = None, label: str = "Button") -> None:
         self.button  = Rectangle(button_pos, 0, button_scale, button_color,button_tex)
+        if button_tex is None:
+            self.button.texture = assets.get("grey_button")
+            self.button_tex = assets.get("grey_button")
+            self.button_tex_hovered = assets.get("grey_button_selected")
         self.button_label = label
-    def draw(self):
-        tmp_col = self.button.color
-
-        pos = camera.screen_to_world( get_mouse_position())
         
+    def draw(self):
+        pos = camera.screen_to_world( get_mouse_position())
         temp_rec = Rectangle(pos, 0, Vec2.ONE,Color.INVISIBLE)
-        if temp_rec.collides_with(self.button): # highlighting
-            self.button.color = Color(tmp_col.r+ 0.1, tmp_col.g + 0.1 , tmp_col.b+ 0.1, tmp_col.a)
-        self.button.draw()
-        self.button.color = tmp_col
+        if self.button_tex is None: # highlighting via color
+            tmp_col = self.button.color
+            if temp_rec.collides_with(self.button):
+                self.button.color = Color(tmp_col.r+ 0.1, tmp_col.g + 0.1 , tmp_col.b+ 0.1, tmp_col.a)
+            self.button.draw()
+            self.button.color = tmp_col
+        else: #highlighting via texture
+            if temp_rec.collides_with(self.button):
+                self.button.texture = self.button_tex_hovered
+            else:
+                self.button.texture = self.button_tex
+            self.button.draw()
 
         draw_text( 
             self.button_label,  self.button.position.x - self.button.scale.x /2 + tileSize/2,  
@@ -209,6 +222,7 @@ class Menue():
                 examples.limit_fps(60)
                 
         elif screen == 1:
+            AudioManager.push_sound( page_turn_sound, 2 )
             clear_background(Color.GREY_PURPLE)
             next_frame()
             while True:
@@ -433,6 +447,7 @@ class Player():
     animation_frames: list[Texture2D] = []
     last_animation_switch  = time.time()
     hitbox_visual_offset = Vec2(0,tileSize/2)
+    has_moved_once =  False
     def __init__(self) -> None:
         self.playerSize = tileSize*2
         starting_pos = Vec2(tileSize*20,tileSize*15)
@@ -443,7 +458,6 @@ class Player():
         self.animation_frames = [assets.get("character_1"),assets.get("character_2"),assets.get("character_3")] # type: ignore
 
     def update(self, no_nav: NoNavArea):
-        global has_moved_once
         dt = get_delta_time()
         keys = get_keys_down()
 
@@ -454,7 +468,7 @@ class Player():
         if KeyCode.D in keys: dir += Vec2(1,0)
 
         if not dir == Vec2.ZERO:
-            has_moved_once = True
+            Player.has_moved_once = True
         direction = dir.normalize_or_zero() *self.speed * dt
         
         direction = no_nav_area.check_move(self.hitbox,direction)
@@ -479,7 +493,16 @@ class Player():
                 self.walking_animation_index += 1
             self.visual.parts[0].texture = self.animation_frames[self.walking_animation_index]
 
-
+class Enemy():
+    disabled: bool
+    hitbox: Rectangle
+    visual: Sprite
+    animation_frames = list[Rectangle]
+    speed: float = tileSize*15.0
+    def __init__(self) -> None:
+        pass
+    def update(self, player: Player, no_nav: NoNavArea):
+        ...
 class KeyHints():
     key_size: Vec2 = Vec2.splat(0.06*2194.0)
     w: Rectangle
@@ -487,6 +510,7 @@ class KeyHints():
     s: Rectangle
     d: Rectangle
     esc: Rectangle
+    __should_display_key_hints= True
     def __init__(self) -> None:
         sw = 2194.0
         sh = 1234.0
@@ -502,11 +526,12 @@ class KeyHints():
         self.esc.texture = assets.get("ESC_Key")
 
     def draw(self):
-        self.w.draw()
-        self.a.draw()
-        self.s.draw()
-        self.d.draw()
-        self.esc.draw()
+        if KeyHints.__should_display_key_hints and not (Player.has_moved_once == True):
+            self.w.draw()
+            self.a.draw()
+            self.s.draw()
+            self.d.draw()
+            self.esc.draw()
 
 
 class Tree(Sprite):
@@ -702,31 +727,40 @@ class Trigger():
         self.audio = audio
         self.transition_to = transition_to
         self.player_pos = player_pos
+
 assets = texture_loading()
 
 
-texture_list = examples.loading_screen( lambda a:a, [], "Loading Fonts and sounds" )
-Loading.download_file_and_save("https://raw.githubusercontent.com/Ludwig-000/Pyroquad_example_game_assets/main/TwoDGame/Fonts/BitCount/BitcountPropDoubleInk-VariableFont_CRSV,ELSH,ELXP,SZP1,SZP2,XPN1,XPN2,YPN1,YPN2,slnt,wght.ttf","BitcountPropDoubleInk-VariableFont_CRSV,ELSH,ELXP,SZP1,SZP2,XPN1,XPN2,YPN1,YPN2,slnt,wght.ttf")
+prefix = "https://raw.githubusercontent.com/Ludwig-000/Pyroquad_example_game_assets/main/TwoDGame/"
+
+examples.loading_screen( lambda a:a, [], "Downloading Fonts and sounds" )
+
+f1 = Loading.download_file_and_save_future(prefix+"Fonts/BitCount/BitcountPropDoubleInk-VariableFont_CRSV,ELSH,ELXP,SZP1,SZP2,XPN1,XPN2,YPN1,YPN2,slnt,wght.ttf","BitcountPropDoubleInk-VariableFont_CRSV,ELSH,ELXP,SZP1,SZP2,XPN1,XPN2,YPN1,YPN2,slnt,wght.ttf")
+
+f2 = Loading.download_file_and_save_future(prefix+"Fonts/Arimo/Arimo-VariableFont_wght.ttf", "Arimo-VariableFont_wght.ttf")
+
+f3= Loading.download_file_and_save_future(prefix+"sounds/birds.mp3", "birds.mp3")
+
+f4=Loading.download_file_and_save_future(prefix+"sounds/white_mist.mp3", "white_mist.mp3")
+
+f5=Loading.download_file_and_save_future(prefix+"sounds/select_button.mp3", "select_button.mp3")
+
+f6=Loading.download_file_and_save_future(prefix+"sounds/page_turn.mp3", "page_turn.mp3")
+_ = f1.result_nowait(), f2.result_nowait(), f3.result_nowait(), f4.result_nowait(), f5.result_nowait(), f6.result_nowait()
+
+examples.loading_screen( lambda a:a, [], "Loading Fonts and sounds" )
 bitcount_font = load_file("BitcountPropDoubleInk-VariableFont_CRSV,ELSH,ELXP,SZP1,SZP2,XPN1,XPN2,YPN1,YPN2,slnt,wght.ttf").to_font()
-
-Loading.download_file_and_save("https://raw.githubusercontent.com/Ludwig-000/Pyroquad_example_game_assets/main/TwoDGame/Fonts/Arimo/Arimo-VariableFont_wght.ttf", "Arimo-VariableFont_wght.ttf")
 arimo_font = load_file("Arimo-VariableFont_wght.ttf").to_font()
-
-Loading.download_file_and_save("https://raw.githubusercontent.com/Ludwig-000/Pyroquad_example_game_assets/main/TwoDGame/sounds/birds.mp3", "birds.mp3")
 bird_sounds = load_file("birds.mp3").to_Sound()
-
-Loading.download_file_and_save("https://raw.githubusercontent.com/Ludwig-000/Pyroquad_example_game_assets/main/TwoDGame/sounds/white_mist.mp3", "white_mist.mp3")
 white_mist_music = load_file("white_mist.mp3").to_Sound()
-
-Loading.download_file_and_save("https://raw.githubusercontent.com/Ludwig-000/Pyroquad_example_game_assets/main/TwoDGame/sounds/select_button.mp3", "select_button.mp3")
 select_button = load_file("select_button.mp3").to_Sound()
+page_turn_sound = load_file("page_turn.mp3").to_Sound()
 
 examples.loading_screen(lambda a: a, [],"Initializing Scene")
 
 
 background  = Background(0)
 menue = Menue()
-should_display_key_hints= True
 key_hints = KeyHints()
 player = Player()
 no_nav_area = NoNavArea(0)
@@ -734,7 +768,7 @@ middle_layer = MiddleLayer(0)
 level_triggers = LevelTriggers(0)
 fps = get_fps()
 last_fps_update = time.time()
-has_moved_once =  False
+
 
 should_quit = menue.start(0)
 
@@ -772,8 +806,8 @@ while True:
     middle_layer.draw([], player)
 
     #no_nav_area.debug_draw()
-    if not has_moved_once:
-        key_hints.draw()
+    
+    key_hints.draw()
     #level_triggers.debug_draw()
 
     if last_fps_update < time.time()-1:
