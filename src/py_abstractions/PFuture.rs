@@ -9,12 +9,16 @@ use pyo3::PyErr;
 crate::generate_pfuture!(Image);
 crate::generate_pfuture!(FileData);
 
-#[gen_stub_pyclass_enum]
+#[gen_stub_pyclass]
 #[pyclass]
-pub enum FutureResult{
-    Timeout(),
-    Empty(),
-}
+pub struct Timeout();
+
+#[gen_stub_pyclass]
+#[pyclass]
+pub struct EmptyFuture();
+
+
+
 
 /// Non-async future.
 /// this feature is experimental
@@ -101,7 +105,7 @@ pub struct Future {
 #[gen_stub_pymethods]
 #[pymethods]
 impl Future {
-    pub fn result(&self) -> PyResult<Option<()>> {
+    pub fn result(&self) -> PyResult<Option<EmptyFuture>> {
         let mut guard = self.future.lock()
             .map_err(|_| pyo3::exceptions::PyRuntimeError::new_err("Mutex poisoned"))?;
 
@@ -113,12 +117,13 @@ impl Future {
             None => Ok(None),
             Some(res) => {
                 let _ = guard.take(); 
-                Ok(Some(res??))
+                let _ = res??;
+                Ok(Some( EmptyFuture() ))
             }
         }
     }
 
-    pub fn result_nowait(&self) -> PyResult<()> {
+    pub fn result_nowait(&self) -> PyResult<EmptyFuture> {
         let mut guard = self.future.lock()
             .map_err(|_| pyo3::exceptions::PyRuntimeError::new_err("Mutex poisoned"))?;
         
@@ -128,12 +133,13 @@ impl Future {
         
         let res = rx.recv();
         let _ = guard.take();
-        Ok(res??)
+        let _ = res??;
+        Ok(EmptyFuture())
     }
 
     /// waits for the result, with timeout in seconds.
     #[pyo3(signature = (timeout = f32::MAX))]
-    pub fn result_nowait_timeout(&self, timeout: f32) -> PyResult<Option<()>> {
+    pub fn result_nowait_timeout(&self, timeout: f32) -> PyResult<FutureWaitResult> {
         let mut guard = self.future.lock().map_err(|_| {
             pyo3::exceptions::PyRuntimeError::new_err("Mutex poisoned")
         })?;
@@ -143,15 +149,38 @@ impl Future {
         })?;
 
         match rx.recv_timeout(timeout) {
-            None => Ok(None),
+            None => Ok(FutureWaitResult::Timeout(Timeout())),
             
             Some(res) => {
                 let _ = guard.take();
                 
-                res.map_err( Into::into )
-                .flatten()
-                .map(Some)
+                let _ = res??;
+                
+                Ok(FutureWaitResult::Empty(EmptyFuture()))
             }
         }
+    }
+}
+impl Future {
+    pub fn new(receiver: PReceiver<PyResult<()>>) -> Self {
+        Future {
+            future: std::sync::Mutex::new(Some(receiver)),
+        }
+    }
+}
+
+
+#[derive(IntoPyObject)]
+pub enum FutureWaitResult {
+    Timeout(Timeout),
+    Empty(EmptyFuture),
+}
+use pyo3_stub_gen::{PyStubType, TypeInfo};
+impl PyStubType for FutureWaitResult {
+    fn type_input() -> TypeInfo {
+        TypeInfo::unqualified("Timeout | EmptyFuture")
+    }
+    fn type_output() -> TypeInfo {
+        TypeInfo::unqualified("Timeout | EmptyFuture")
     }
 }

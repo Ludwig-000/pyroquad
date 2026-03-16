@@ -87,7 +87,7 @@ pub fn download_file(url: &str) -> PyResult<FileData> {
 
 #[gen_stub_pyfunction]
 #[pyfunction]
-pub fn download_file_async(url: &str) -> PyResult<FileDataFuture> {
+pub fn download_file_future(url: &str) -> PyResult<FileDataFuture> {
     let (tx, rx) = PChannel::sync_channel(1);
     let url = url.to_string();
 

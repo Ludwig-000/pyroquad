@@ -7,6 +7,8 @@ use pyo3::PyResult;
 use std::thread;
 use crate::py_abstractions::Loading::FileData::FileData;
 use crate::py_abstractions::Loading::Loading::{self as load, download_file, load_file, write_to_file};
+use crate::py_abstractions::PFuture::Future as FutureP;
+
 
 
 /// Namespace for static Download-related functions.
@@ -22,12 +24,37 @@ impl Loading {
     /// Does nothing if the given filepath already exists.
     #[cfg(not(any(target_arch = "wasm32", target_os = "ios")))]
     #[staticmethod]
-    pub fn download_file_and_save(url: String, filepath: String)-> PyResult<()>{
+    pub fn download_file_and_save(url: String, filepath: String) -> PyResult<()> {
         use crate::py_abstractions::Loading::Loading::does_file_exist;
-
-        if does_file_exist(&filepath){return Ok(())}
+        
+        if does_file_exist(&filepath) {
+            return Ok(());
+        }
+        
         let data = download_file(&url)?;
         write_to_file(&data, filepath)
+    }
+
+    /// downloads a ressource file and saves it at the given filepath.
+    /// Does nothing if the given filepath already exists.
+    #[cfg(not(any(target_arch = "wasm32", target_os = "ios")))]
+    #[staticmethod]
+    pub fn download_file_and_save_future(url: String, filepath: String) -> PyResult<FutureP> {
+        use crate::{engine::PChannel::PChannel, py_abstractions::Loading::Loading::does_file_exist};
+
+        let (tx, rx) = PChannel::sync_channel(1);
+
+        std::thread::spawn(move || {
+            let result = (|| -> PyResult<()> {
+                if !does_file_exist(&filepath) {
+                    let data = download_file(&url)?;
+                    write_to_file(&data, filepath)?;
+                }
+                Ok(())
+            })();
+            let _ = tx.send(result);
+        });
+        Ok(FutureP::new(rx))
     }
 
     /// TODO: do not download if file exists already.

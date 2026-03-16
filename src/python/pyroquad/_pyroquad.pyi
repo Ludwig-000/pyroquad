@@ -5203,6 +5203,9 @@ class Cylinder:
         Checks if the object collides with any other 3D object.
         """
 
+class EmptyFuture:
+    ...
+
 class FileData:
     r"""
     A wrapper around raw filedata that has not yet been parsed.
@@ -5294,9 +5297,9 @@ class Font:
         """
 
 class Future:
-    def result(self) -> typing.Optional[None]: ...
-    def result_nowait(self) -> None: ...
-    def result_nowait_timeout(self, timeout:builtins.float=0.0) -> typing.Optional[None]:
+    def result(self) -> typing.Optional[EmptyFuture]: ...
+    def result_nowait(self) -> EmptyFuture: ...
+    def result_nowait_timeout(self, timeout:builtins.float=3.4028234663852886e+38) -> Timeout | EmptyFuture:
         r"""
         waits for the result, with timeout in seconds.
         """
@@ -5425,6 +5428,12 @@ class Loading:
     """
     @staticmethod
     def download_file_and_save(url:builtins.str, filepath:builtins.str) -> None:
+        r"""
+        downloads a ressource file and saves it at the given filepath.
+        Does nothing if the given filepath already exists.
+        """
+    @staticmethod
+    def download_file_and_save_future(url:builtins.str, filepath:builtins.str) -> Future:
         r"""
         downloads a ressource file and saves it at the given filepath.
         Does nothing if the given filepath already exists.
@@ -6259,6 +6268,9 @@ class Texture2D:
         
         This operation can be expensive.
         """
+
+class Timeout:
+    ...
 
 class Touch:
     @property
@@ -7610,7 +7622,7 @@ def download_file(url:builtins.str) -> FileData:
     Downloads a file and returning it's raw data.
     """
 
-def download_file_async(url:builtins.str) -> FileDataFuture: ...
+def download_file_future(url:builtins.str) -> FileDataFuture: ...
 
 def draw_affine_parallelepiped(offset:Vec3, e1:Vec3, e2:Vec3, e3:Vec3, texture:typing.Optional[Texture2D], color:Color) -> None: ...
 

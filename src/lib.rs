@@ -114,7 +114,7 @@ pub fn _pyroquad( m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<crate::py_abstractions::Loading::FileData::FileData>()?;
     m.add_function(wrap_pyfunction!(crate::py_abstractions::Loading::Loading::load_file, m)?)?;
     m.add_function(wrap_pyfunction!(crate::py_abstractions::Loading::Loading::download_file, m)?)?;
-    m.add_function(wrap_pyfunction!(crate::py_abstractions::Loading::Loading::download_file_async, m)?)?;
+    m.add_function(wrap_pyfunction!(crate::py_abstractions::Loading::Loading::download_file_future, m)?)?;
     m.add_function(wrap_pyfunction!(crate::py_abstractions::Loading::Loading::write_to_file, m)?)?;
 
     m.add_class::<crate::py_abstractions::GL::Vertex>()?;
@@ -175,7 +175,8 @@ pub fn _pyroquad( m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<crate::py_abstractions::PFuture::ImageFuture>()?;
     m.add_class::<crate::py_abstractions::PFuture::FileDataFuture>()?;
     m.add_class::<crate::py_abstractions::PFuture::Future>()?;
-    m.add_class::<crate::py_abstractions::PFuture::FutureResult>()?;
+    m.add_class::<crate::py_abstractions::PFuture::Timeout>()?;
+    m.add_class::<crate::py_abstractions::PFuture::EmptyFuture>()?;
     
     Ok(())
 }
