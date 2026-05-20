@@ -13,7 +13,7 @@ use crate::py_abstractions::structs::GLAM::Vec2::Vec2;
 use crate::py_abstractions::RenderTarget::*;
 
 #[gen_stub_pyclass]
-#[pyclass]
+#[pyclass(from_py_object)]
 #[derive(Debug, Clone)]
 pub struct Camera2D {
 
@@ -197,7 +197,7 @@ pub fn camera_font_scale(world_font_size: f32)-> PyResult<(u16, f32, f32)>{
 
 /// TODO: make it easy to 'target' a specific location in space.
 #[gen_stub_pyclass]
-#[pyclass]
+#[pyclass(from_py_object)]
 #[derive(Debug, Clone)]
 pub struct Camera3D {
 
@@ -256,7 +256,7 @@ pub struct Camera3D {
 
 
 #[gen_stub_pyclass_enum]
-#[pyclass]
+#[pyclass(from_py_object)]
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub enum Projection {
     Perspective,

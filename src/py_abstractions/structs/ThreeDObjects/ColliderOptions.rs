@@ -16,8 +16,8 @@ use pyo3_stub_gen::derive::* ;
 /// >>>ColliderOptions.DYNAMIC(...)
 /// ```
 #[gen_stub_pyclass]
-#[cfg_attr(feature = "abi_314", pyclass(frozen, immutable_type))]
-#[cfg_attr(not(feature = "abi_314"), pyclass(frozen))]
+#[cfg_attr(feature = "abi_314", pyclass(frozen, immutable_type, from_py_object))]
+#[cfg_attr(not(feature = "abi_314"), pyclass(frozen, from_py_object))]
 #[derive(Clone, Copy)]
 pub struct ColliderOptions(pub InnerColliderOptions);
 

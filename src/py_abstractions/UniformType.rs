@@ -13,7 +13,7 @@ use crate::engine::CoreLoop::Command;
 
 
 #[gen_stub_pyclass_enum]
-#[pyclass]
+#[pyclass(from_py_object)]
 #[derive(Debug, Clone, Copy)]
 pub enum UniformType {
     /// One 32-bit wide float (equivalent to `f32`)
@@ -78,7 +78,7 @@ impl From<mq::UniformType> for UniformType {
 ///
 /// YXZ can be used for yaw (y-axis), pitch (x-axis), roll (z-axis).
 #[gen_stub_pyclass_enum]
-#[pyclass]
+#[pyclass(from_py_object)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum EulerRot {
     /// Intrinsic three-axis rotation ZYX
@@ -131,7 +131,7 @@ impl Default for EulerRot {
 
 /// A pixel-wise comparison function.
 #[gen_stub_pyclass_enum]
-#[pyclass]
+#[pyclass(from_py_object)]
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
 pub enum Comparison {
     Never,

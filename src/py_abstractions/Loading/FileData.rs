@@ -18,7 +18,7 @@ use crate::py_abstractions::Textures_and_Images;
 /// ```
 /// or 'Loading'.
 #[gen_stub_pyclass]
-#[pyclass]
+#[pyclass(from_py_object)]
 #[derive(Clone)]
 pub struct FileData{
 

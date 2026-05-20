@@ -42,6 +42,39 @@ pub fn load_file(path: &str)-> PyResult<FileData>{
 }
 
 
+#[gen_stub_pyfunction]
+#[pyfunction]
+pub fn load_file_future(path: &str) -> PyResult<FileDataFuture> {
+    let (tx, rx) = PChannel::sync_channel(1);
+    let path_str = path.to_string();
+
+    #[cfg(not(any(target_arch = "wasm32", target_os = "ios")))]
+    {
+        // On Desktop: Spawn a thread to perform the blocking disk I/O
+
+        use crate::limited_thread;
+        limited_thread!(20_000, move || {
+            let result = load_file(&path_str);
+            let _ = tx.send(result);
+        });
+        // std::thread::spawn(move || {
+        //     let result = load_file(&path_str);
+        //     let _ = tx.send(result);
+        // });
+    }
+
+    #[cfg(any(target_arch = "wasm32", target_os = "ios"))]
+    {
+        std::thread::spawn(move || {
+            let result = load_file(&path_str);
+            let _ = tx.send(result);
+        });
+    }
+
+    Ok(FileDataFuture {
+        future: std::sync::Mutex::new(Some(rx)),
+    })
+}
 
 /// Loads a file.
 #[cfg(any(target_arch = "wasm32", target_os = "ios"))]

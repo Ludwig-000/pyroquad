@@ -13,8 +13,8 @@ use pyo3_stub_gen::derive::*;
 // This file implements all functionality from Glam, replacing uses of BVec2 and Vec2 with the pyabstracted versions.
 //
 #[gen_stub_pyclass]
-#[cfg_attr(feature = "abi_314", pyclass(eq,str,frozen, immutable_type))]
-#[cfg_attr(not(feature = "abi_314"), pyclass(eq,str,frozen))]
+#[cfg_attr(feature = "abi_314", pyclass(eq,str,frozen, immutable_type, from_py_object))]
+#[cfg_attr(not(feature = "abi_314"), pyclass(eq,str,frozen, from_py_object))]
 #[repr(C)]
 #[derive(Clone, Copy, PartialEq,Debug)]
 pub struct Vec2 {

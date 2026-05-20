@@ -1,6 +1,8 @@
 // alot of Python Constants are defined via function, so this prevents compiler spam.
 #![allow(non_snake_case)]
 
+#![allow(unused)] // temp
+
 #![warn(clippy::large_enum_variant)]
 
 #![deny(clippy::disallowed_methods)]
@@ -21,7 +23,8 @@ mod py_abstractions;
 #[pymodule]
 #[pyo3(gil_used = false)]
 pub fn _pyroquad( m: &Bound<'_, PyModule>) -> PyResult<()> {
-    
+
+
     m.add_function(wrap_pyfunction!(crate::py_abstractions::py_functions::activate_engine, m)?)?;
     
     m.add_function(wrap_pyfunction!(crate::py_abstractions::py_functions::draw_all_objects, m)?)?;
@@ -113,6 +116,7 @@ pub fn _pyroquad( m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<crate::py_abstractions::Loading::ThreadedLoading::Loading>()?;
     m.add_class::<crate::py_abstractions::Loading::FileData::FileData>()?;
     m.add_function(wrap_pyfunction!(crate::py_abstractions::Loading::Loading::load_file, m)?)?;
+    m.add_function(wrap_pyfunction!(crate::py_abstractions::Loading::Loading::load_file_future, m)?)?;
     m.add_function(wrap_pyfunction!(crate::py_abstractions::Loading::Loading::download_file, m)?)?;
     m.add_function(wrap_pyfunction!(crate::py_abstractions::Loading::Loading::download_file_future, m)?)?;
     m.add_function(wrap_pyfunction!(crate::py_abstractions::Loading::Loading::write_to_file, m)?)?;
@@ -175,9 +179,8 @@ pub fn _pyroquad( m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<crate::py_abstractions::PFuture::ImageFuture>()?;
     m.add_class::<crate::py_abstractions::PFuture::FileDataFuture>()?;
     m.add_class::<crate::py_abstractions::PFuture::Future>()?;
-    m.add_class::<crate::py_abstractions::PFuture::Timeout>()?;
-    m.add_class::<crate::py_abstractions::PFuture::EmptyFuture>()?;
-    
+    //m.add_class::<crate::py_abstractions::PFuture::Timeout>()?;
+    //m.add_class::<crate::py_abstractions::PFuture::EmptyFuture>()?;
     
     Ok(())
 }

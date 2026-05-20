@@ -21,7 +21,7 @@ use std::io::Cursor;
 
 /// Image, data stored in CPU memory
 #[gen_stub_pyclass]
-#[pyclass]
+#[pyclass(from_py_object)]
 #[derive(Debug, Clone, PartialEq, Eq,)]
 pub struct Image {
     #[pyo3(get, set)]
@@ -243,7 +243,7 @@ impl From<Image> for mq::Image {
 
 /// Texture, data stored in GPU memory
 #[gen_stub_pyclass]
-#[pyclass]
+#[pyclass(from_py_object)]
 #[derive(Clone, Debug, PartialEq)]
 pub struct Texture2D {
    pub texture: PArc<mq::Texture2D>,
@@ -384,7 +384,7 @@ impl Texture2D {
 }
 
 #[gen_stub_pyclass_enum]
-#[pyclass]
+#[pyclass(from_py_object)]
 #[derive(Clone, Copy)]
 pub enum FilterMode{
     Nearest,

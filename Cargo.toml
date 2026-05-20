@@ -19,6 +19,7 @@ overflow-checks = false
 panic = "unwind"
 
 
+
 # #Max Optimization for final release.
 # opt-level = 3
 # lto = "fat"
@@ -31,7 +32,7 @@ panic = "unwind"
 macroquad = { version = "0.4.14", features = ["audio"] }
 
 #used to build the python library
-pyo3 = { version = "0.26", features = ["extension-module", "multiple-pymethods"] }
+pyo3 = { version = "0.28.3", features = ["extension-module", "multiple-pymethods"] }
 
 # a VERY slightly modified version of pyo3 stub gen, which allows it to compile to python 3.9
 # modification was only one line, so feel free to drop support for python 3.9 if any cool new features release

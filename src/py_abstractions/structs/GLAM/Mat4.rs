@@ -6,8 +6,8 @@ use crate::py_abstractions::structs::GLAM::Vec4::Vec4;
 /// Barebones Mat4 type, in order to implement Viewport stuff.
 /// TODO: complete with full functionality
 #[gen_stub_pyclass]
-#[cfg_attr(feature = "abi_314", pyclass(eq,str,frozen, immutable_type))]
-#[cfg_attr(not(feature = "abi_314"), pyclass(eq,str,frozen))]
+#[cfg_attr(feature = "abi_314", pyclass(eq,str,frozen, immutable_type, from_py_object))]
+#[cfg_attr(not(feature = "abi_314"), pyclass(eq,str,frozen, from_py_object))]
 #[repr(C)]
 #[derive(Clone,Copy,PartialEq,Debug)]
 pub struct Mat4 {

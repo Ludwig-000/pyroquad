@@ -19,7 +19,7 @@ use crate::py_abstractions::structs::GLAM::Mat4::Mat4;
 use crate::py_abstractions::{Color::Color, Textures_and_Images::Texture2D, structs::GLAM::{Vec2::Vec2, Vec3::Vec3}};
 
 #[gen_stub_pyclass]
-#[pyclass(frozen)]
+#[pyclass(frozen, from_py_object)]
 #[repr(C)]
 #[derive(Clone, Debug, Copy)]
 pub struct Vertex {
@@ -59,7 +59,7 @@ impl From<Vertex> for mq::Vertex{
 
 
 #[gen_stub_pyclass_enum]
-#[pyclass]
+#[pyclass(from_py_object)]
 #[derive(Clone, Copy)]
 pub enum DrawMode{
     Triangles,
@@ -69,14 +69,14 @@ pub enum DrawMode{
 
 /// A Pipeline, created via 'create_gl_pipeline'
 #[gen_stub_pyclass]
-#[pyclass]
+#[pyclass(from_py_object)]
 #[derive(Clone, Copy)]
 pub struct  GlPipeline(mq::GlPipeline);
 
 /// A simple datatype that holds a Vector of Vertices and a Vector of indices.
 /// using this Wrapper in conjunction with 'geometry()' avoids cloning any data.
 #[gen_stub_pyclass]
-#[pyclass]
+#[pyclass(from_py_object)]
 #[derive(Clone)]
 pub struct Geometry{
     vertices: Arc<[mq::Vertex]>,
@@ -86,7 +86,8 @@ pub struct Geometry{
 /// NOT YET IMPLEMENTED
 /// try to convince Stub gen this is a module.
 #[gen_stub_pyclass(module = "pyroquad.internal_gl")] // module = .. does not seem to do anything but does not err?
-#[pyclass]
+#[pyclass(from_py_object)]
+#[derive(Clone, Copy)]
 pub struct InternalGL();
 
 

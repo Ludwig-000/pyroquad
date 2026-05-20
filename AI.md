@@ -72,7 +72,7 @@ prevent_quit()
 while not is_quit_requested():
     ...
     next_frame()
-run_cleanup()
+# run manual cleanup
 ```
 Importantly, `is_quit_requested()` does nothing, unless `prevent_quit()` is also called, which prevents the window from being closed.
 

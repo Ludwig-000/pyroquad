@@ -8,7 +8,7 @@ use pyo3::prelude::*;
 use crate::engine::PArc::PArc;
 
 #[gen_stub_pyclass]
-#[pyclass]
+#[pyclass(from_py_object)]
 #[derive(Clone, Debug)]
 pub struct Sound {
    audio: PArc<au::Sound>,
@@ -101,7 +101,7 @@ impl From<&Sound> for au::Sound {
 
 
 #[gen_stub_pyclass]
-#[pyclass]
+#[pyclass(from_py_object)]
 #[derive(Clone, Copy)]
 pub struct PlaySoundParams {
 

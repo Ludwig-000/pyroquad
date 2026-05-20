@@ -7,7 +7,7 @@ use pyo3_stub_gen::{derive::*};
 /// A Shader is a program, compiled at runtime, that operates on the GPU.
 /// Typically, shaders modify how objects are drawn.
 #[gen_stub_pyclass]
-#[pyclass]
+#[pyclass(from_py_object)]
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Shader {
     #[pyo3(get)]

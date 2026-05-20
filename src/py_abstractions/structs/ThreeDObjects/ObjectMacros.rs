@@ -41,7 +41,7 @@ macro_rules! implement_basic_magic_methods3D {
 
                 #[doc = "Equality for " $name " is based on unique ID."]
                 fn __eq__(&self, other: &pyo3::Bound<'_, pyo3::PyAny>) -> bool {
-                    if let Ok(other_val) = other.downcast::<$name>() {
+                    if let Ok(other_val) = other.cast::<$name>() {
                         let other_borrow = other_val.borrow();
                         self.key == other_borrow.key
                     } else {

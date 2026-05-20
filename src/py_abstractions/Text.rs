@@ -10,7 +10,7 @@ use crate::{engine::{PArc::PArc, PChannel::PChannel}, py_abstractions::{Loading:
 use crate::engine::CoreLoop::COMMAND_QUEUE;
 use crate::engine::CoreLoop::Command;
 #[gen_stub_pyclass]
-#[pyclass]
+#[pyclass(from_py_object)]
 #[derive(Clone)]
 pub struct Font {
     font: PArc<mq::Font>,
@@ -81,7 +81,7 @@ impl From<Font> for mq::Font{
 
 /// World space dimensions of the text, measured by 'measure_text' function
 #[gen_stub_pyclass]
-#[pyclass]
+#[pyclass(from_py_object)]
 #[derive(Debug, Default, Clone, Copy)]
 pub struct TextDimensions {
     /// Distance from very left to very right of the rasterized text

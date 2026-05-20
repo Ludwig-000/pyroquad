@@ -66,14 +66,14 @@ impl<T> PReceiver<T> {
     }
 
     /// timeout in seconds
-    pub fn recv_timeout(&self, timeout: f32) -> Option<Result<T, PChannelError>> {
+    pub fn recv_timeout(&self, timeout: Duration) -> Option<Result<T, PChannelError>> {
         use std::sync::mpsc::RecvTimeoutError;
 
         if !crate::py_abstractions::py_functions::ENGINE_CURRENTLY_ACTIVE.load(Ordering::Relaxed) {
             return Some(Err(PChannelError::DeadlockError));
         }
         
-        match self.inner.recv_timeout( Duration::from_secs_f32(timeout) ) {
+        match self.inner.recv_timeout( timeout ) {
             Ok(val) => return Some(val),
             Err(RecvTimeoutError::Timeout) => None,
             Err(RecvTimeoutError::Disconnected) => {

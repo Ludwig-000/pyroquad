@@ -12,7 +12,7 @@ use crate::engine::PArc::PArc;
 
 
 #[gen_stub_pyclass]
-#[pyclass]
+#[pyclass(from_py_object)]
 #[derive(Clone, Debug)]
 pub struct RenderTarget {
    render_target:  PArc<mq::RenderTarget>,
@@ -71,7 +71,7 @@ pub fn render_target(width: u32, height: u32, params: Option<RenderTargetParams>
 
 
 #[gen_stub_pyclass]
-#[pyclass]
+#[pyclass(from_py_object)]
 #[derive(Clone,Copy, PartialEq, Debug)]
 pub struct RenderTargetParams {
     /// 1 means no multi sampling.

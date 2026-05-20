@@ -149,7 +149,7 @@ pub fn touches_local() -> PyResult<Vec<Touch>> {
 
 
 #[gen_stub_pyclass_enum]
-#[pyclass]
+#[pyclass(from_py_object)]
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum TouchPhase{
     Started,
@@ -183,7 +183,7 @@ impl From<TouchPhase> for macroquad::prelude::TouchPhase{
 
 
 #[gen_stub_pyclass]
-#[pyclass]
+#[pyclass(from_py_object)]
 #[derive(Debug, Clone, Copy)]
 pub struct Touch{
     #[pyo3(get,set)]

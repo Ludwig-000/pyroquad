@@ -141,7 +141,7 @@ pub fn draw_affine_parallelepiped(offset: Vec3, e1: Vec3,e2: Vec3,e3: Vec3,textu
 
 #[gen_stub_pyfunction]
 #[pyfunction]
-pub fn draw_affine_parallelogram(offset: Vec3, e1: Vec3,e2: Vec3,e3: Vec3,texture: Option<Texture2D>,color: Color) {
+pub fn draw_affine_parallelogram(offset: Vec3, e1: Vec3,e2: Vec3,texture: Option<Texture2D>,color: Color) {
     
     COMMAND_QUEUE.push(Command::DrawAfflineParallogram { offset: offset.into(), e1: e1.into(), 
         e2: e2.into(), texture: texture.map(Into::into), color: color.into() });
