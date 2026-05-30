@@ -16,7 +16,7 @@ use crate::py_abstractions::Textures_and_Images;
 /// >>>download_file(...)
 /// ...
 /// ```
-/// or 'Loading'.
+/// or use the `Loading` class.
 #[gen_stub_pyclass]
 #[pyclass(from_py_object)]
 #[derive(Clone)]
@@ -56,7 +56,7 @@ impl FileData{
     /// Attempts to parse the file data as a texture.
     /// FileData -> Image -> Texture2D
     /// 
-    pub fn to_2DTexture(&self)-> PyResult<Texture2D>{
+    pub fn to_Texture2D(&self)-> PyResult<Texture2D>{
         let image = Textures_and_Images::image_from_bytes(&self.bytes)?;
         Texture2D::new(image)
     }
@@ -77,5 +77,4 @@ impl FileData{
     pub fn to_font(&self)-> PyResult<Font>{
         Font::load_ttf_font_from_bytes(self.clone())
     }
-    
 }

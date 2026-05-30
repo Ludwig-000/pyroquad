@@ -76,7 +76,7 @@ pub fn activate_engine( conf: Option<Config>) -> PyResult<()>{
             ENGINE_CURRENTLY_ACTIVE.store(false, Ordering::SeqCst);
     
             if conf.stop_python_when_closing_window{
-                println!("Pyquad window closed. Exiting process.");
+                println!("Pyroquad window closed. Exiting process.");
                 process::exit(0);
             }
             
@@ -350,8 +350,13 @@ pub fn get_text_center(text: String, font: Option<Font>, font_size: u16, font_sc
 
 #[gen_stub_pyfunction]
 #[pyfunction]
-pub fn draw_multiline_text(text: String, x: f32, y: f32, font_size: f32, line_distance_factor: Option<f32>, color: Color) {
-    COMMAND_QUEUE.push(Command::DrawMultilineText { text, x, y, font_size, line_distance_factor, color: color.into() });
+#[pyo3(signature = (text, x,y,font_size = 20, color = Color::WHITE(), font = None, rotation=0.0, line_distance_factor=None, font_scale=1.0, font_scale_aspect=1.0))]
+pub fn draw_multiline_text(text: String, x: f32, y: f32, font_size: u16, color: Color, font: Option<Font>, rotation: f32, line_distance_factor: Option<f32>, 
+    font_scale: f32, font_scale_aspect: f32) {
+
+    COMMAND_QUEUE.push(Command::DrawMultilineText { text, x, y, 
+        font_size, line_distance_factor, color: color.into(), font_scale, 
+        font_scale_aspect, rotation, font: font.map(Into::into) });
 }
 
 /// draws very basic circle in 2d space.
@@ -429,7 +434,6 @@ pub fn get_delta_time() -> f32 {
     use crate::engine::FrameInfo as fi;
     *fi::DELTA_TIME.lock().unwrap()
 }
-
 
 
 
@@ -658,3 +662,4 @@ pub fn set_pc_assets_folder(path: String){
 
     COMMAND_QUEUE.push(Command::SetPcAssetFolder(path));
 }
+

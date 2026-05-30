@@ -683,6 +683,17 @@ impl Vec2 {
         a.move_towards(b, d).into()
     }
 
+    /// Returns the angle (in radians) of this vector in the range `[-π, +π]`.
+    ///
+    /// The input does not need to be a unit vector however it must be non-zero.
+    #[inline]
+    pub fn to_angle(&self) -> f32 {
+        let a: gl = (*self).into();
+        a.to_angle()
+    }
+
+
+
     /// Calculates the midpoint between `self` and `rhs`.
     ///
     /// The midpoint is the average of, or halfway point between, two vectors.
@@ -970,6 +981,13 @@ impl Vec2 {
         let a: gl = (*self).into();
         (lhs % a).into()
     }
+
+
+
+
+
+
+
 }
 
 impl std::fmt::Display for Vec2 {

@@ -14,9 +14,6 @@ use mq::Vec2;
 pub static DELTA_TIME: Mutex<f32>  = Mutex::new(0.0);
 pub static FPS: AtomicI32 =  AtomicI32::new(0);
 
-pub static LASK_KEY_PRESSED: Mutex<Option<KeyCode>> = Mutex::new(None);
-pub static CHAR_PRESSED: Mutex<Option<char>> = Mutex::new(None);
-
 pub static MOUSE_POSITION: Mutex<(f32,f32)> = Mutex::new((0.,0.));
 pub static MOUSE_DELTA_POSITION: Mutex<Vec2> = Mutex::new( Vec2::new(0.,0.) );
 pub static MOUSE_POSITION_LOCAL: Mutex<Vec2> = Mutex::new( Vec2::new(0.,0.) );
@@ -24,6 +21,13 @@ pub static MOUSE_WHEEL: Mutex<(f32,f32)> = Mutex::new((0.,0.));
 
 pub static SCREEN_HEIGHT: Mutex<f32> = Mutex::new(0.0);
 pub static SCREEN_WIDTH: Mutex<f32> = Mutex::new(0.0);
+
+
+
+pub static LASK_KEY_PRESSED: Mutex<Option<KeyCode>> = Mutex::new(None);
+pub static CHAR_PRESSED: Mutex<Option<char>> = Mutex::new(None);
+
+
 lazy_static! {
     pub static ref KEYS_PRESSED: Mutex<HashSet<KeyCode>> = Mutex::new(HashSet::new());
     pub static ref KEYS_DOWN: Mutex<HashSet<KeyCode>> = Mutex::new(HashSet::new());
@@ -112,5 +116,23 @@ pub fn update_frame_info(){
             *MOUSE_BUTTON_RELEASED.lock().unwrap() = active_buttons;
         }
         
+    }
+}
+
+pub fn clear_keys_pressed() {
+    if let Ok(mut last_key) = LASK_KEY_PRESSED.lock() {
+        *last_key = None;
+    }
+    
+    if let Ok(mut char_pressed) = CHAR_PRESSED.lock() {
+        *char_pressed = None;
+    }
+
+    if let Ok(mut keys_pressed) = KEYS_PRESSED.lock() {
+        keys_pressed.clear();
+    }
+
+    if let Ok(mut mouse_pressed) = MOUSE_BUTTON_PRESSED.lock() {
+        mouse_pressed.clear();
     }
 }

@@ -25,6 +25,8 @@ use pyo3::types::PyDict;
 pub struct Circle{
     #[pyo3(get,set)]
     pub position: Vec2,
+
+    /// rotation is in radians.
     #[pyo3(get,set)]
     pub rotation: f32,
     #[pyo3(get,set)]

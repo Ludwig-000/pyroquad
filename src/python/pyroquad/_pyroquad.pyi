@@ -330,9 +330,15 @@ class Circle:
     @position.setter
     def position(self, value: Vec2) -> None: ...
     @property
-    def rotation(self) -> builtins.float: ...
+    def rotation(self) -> builtins.float:
+        r"""
+        rotation is in radians.
+        """
     @rotation.setter
-    def rotation(self, value: builtins.float) -> None: ...
+    def rotation(self, value: builtins.float) -> None:
+        r"""
+        rotation is in radians.
+        """
     @property
     def radius(self) -> builtins.float: ...
     @radius.setter
@@ -350,21 +356,6 @@ class Circle:
     @texture.setter
     def texture(self, value: typing.Optional[Texture2D]) -> None: ...
     def __eq__(self, other:builtins.object) -> builtins.bool: ...
-    def __new__(cls, position:Vec2, rotation:builtins.float, radius:builtins.float, color:Color, texture:typing.Optional[Texture2D]=None) -> Circle: ...
-    def draw(self) -> None: ...
-    def collides_with(self, rhs:Rectangle | Circle) -> builtins.bool:
-        r"""
-        Check collision between two 2D Objects.
-        A Circle's collider assumes a perfect Circle.
-        """
-    def collides_with_list(self, rhs:typing.Sequence[Rectangle | Circle]) -> builtins.list[Rectangle | Circle]:
-        r"""
-        takes a list of 2D shapes, and returns every element that Collides with self.
-        """
-    def max_x(self) -> builtins.float: ...
-    def min_x(self) -> builtins.float: ...
-    def max_y(self) -> builtins.float: ...
-    def min_y(self) -> builtins.float: ...
     def tick(self, function:typing.Any) -> None:
         r"""
         Add a function to this object, which will automatically be executed each frame.
@@ -396,6 +387,21 @@ class Circle:
         Removes any assigned tick-function from this object.
         If the object does not have a tick function, this will do nothing.
         """
+    def __new__(cls, position:Vec2, rotation:builtins.float, radius:builtins.float, color:Color, texture:typing.Optional[Texture2D]=None) -> Circle: ...
+    def draw(self) -> None: ...
+    def collides_with(self, rhs:Rectangle | Circle) -> builtins.bool:
+        r"""
+        Check collision between two 2D Objects.
+        A Circle's collider assumes a perfect Circle.
+        """
+    def collides_with_list(self, rhs:typing.Sequence[Rectangle | Circle]) -> builtins.list[Rectangle | Circle]:
+        r"""
+        takes a list of 2D shapes, and returns every element that Collides with self.
+        """
+    def max_x(self) -> builtins.float: ...
+    def min_x(self) -> builtins.float: ...
+    def max_y(self) -> builtins.float: ...
+    def min_y(self) -> builtins.float: ...
 
 class ColliderOptions:
     r"""
@@ -4901,6 +4907,21 @@ class Cube:
         'physics' will be set to Some() if the object is innitialized as a dynamic object.
         """
     @property
+    def scale(self) -> Vec3:
+        r"""
+        Accesses the scale of the given object.
+        Note that individual values of an object can NOT be changed via:
+        ```
+        >>>Cube.scale.x += 1
+        ```
+        since Cube.scale returns a copy of its scale, one has to write:
+        ```
+        >>>Cube.scale += Vec3(1, 0, 0)
+        ```
+        """
+    @scale.setter
+    def scale(self, value: Vec3) -> None: ...
+    @property
     def pos(self) -> Vec3:
         r"""
         Accesses the position of the given object.
@@ -4930,21 +4951,7 @@ class Cube:
         """
     @rot.setter
     def rot(self, value: Vec3) -> None: ...
-    @property
-    def scale(self) -> Vec3:
-        r"""
-        Accesses the scale of the given object.
-        Note that individual values of an object can NOT be changed via:
-        ```
-        >>>Cube.scale.x += 1
-        ```
-        since Cube.scale returns a copy of its scale, one has to write:
-        ```
-        >>>Cube.scale += Vec3(1, 0, 0)
-        ```
-        """
-    @scale.setter
-    def scale(self, value: Vec3) -> None: ...
+    def __new__(cls, position:Vec3=..., rotation:Vec3=..., scale:Vec3=..., color:Color=..., texture:typing.Optional[Texture2D]=None, collider_type:ColliderOptions=...) -> Cube: ...
     def __eq__(self, other:typing.Any) -> builtins.bool:
         r"""
         Equality for Cube is based on unique ID.
@@ -4960,27 +4967,33 @@ class Cube:
         Removes any assigned tick-function from this object.
         If the object does not have a tick function, this will do nothing.
         """
-    def __new__(cls, position:Vec3=..., rotation:Vec3=..., scale:Vec3=..., color:Color=..., texture:typing.Optional[Texture2D]=None, collider_type:ColliderOptions=...) -> Cube: ...
-    def check_collision(self) -> builtins.list[Cube | Cylinder | Mesh | Pill | Sphere]:
+    def set_collider(self, collider_type:ColliderOptions) -> None:
         r"""
-        Returns any object, with active collision, that is either
-        intersected or inserted in the current object.
+        overwrites the current collider with the input option.
+        """
+    def tick(self, function:typing.Any) -> None:
+        r"""
+        Add a function to this object, which will automatically be executed each frame.
+        The function must take the object it is attatched to as an argument.
          
         Example:
          
         ```
-        >>>bigCube: Cube = Cube(pos=Vec3.splat(50))
-        >>>intersected: list[Cube] = bigCube.check_collision()
+        ...# arguments from outside the scope may be included.
+        >>>delta_time = 0
+        >>>def updateCube(obj: Cube):
+        ...    obj.rot += Vec3.splat(0.2*delta_time)
         ...
-        ...# since the returned objects are references, we can edit them directly
-        ...# without creating duplicates.
-        >>>for i in intersected:
-        ...   i.pos = Vec3.ZERO()
+        >>>myCube = Cube()
+        >>>myCube.tick(updateCube)
+        ...
+        >>>while True:
+        ...    # dt would have to get updated each frame.
+        ...    delta_time = get_delta_time()
+        ...
+        ...    #'next_frame' runs the update function for every object.
+        ...    next_frame()
         ```
-        """
-    def does_collide(self) -> builtins.bool:
-        r"""
-        Checks if the object collides with any other 3D object.
         """
     def set_draw_each_frame(self, drawing:builtins.bool) -> None:
         r"""
@@ -5019,33 +5032,26 @@ class Cube:
         >>>         enemy.manually_draw_now()
         ```
         """
-    def set_collider(self, collider_type:ColliderOptions) -> None:
+    def check_collision(self) -> builtins.list[Cube | Cylinder | Mesh | Pill | Sphere]:
         r"""
-        overwrites the current collider with the input option.
-        """
-    def tick(self, function:typing.Any) -> None:
-        r"""
-        Add a function to this object, which will automatically be executed each frame.
-        The function must take the object it is attatched to as an argument.
+        Returns any object, with active collision, that is either
+        intersected or inserted in the current object.
          
         Example:
          
         ```
-        ...# arguments from outside the scope may be included.
-        >>>delta_time = 0
-        >>>def updateCube(obj: Cube):
-        ...    obj.rot += Vec3.splat(0.2*delta_time)
+        >>>bigCube: Cube = Cube(pos=Vec3.splat(50))
+        >>>intersected: list[Cube] = bigCube.check_collision()
         ...
-        >>>myCube = Cube()
-        >>>myCube.tick(updateCube)
-        ...
-        >>>while True:
-        ...    # dt would have to get updated each frame.
-        ...    delta_time = get_delta_time()
-        ...
-        ...    #'next_frame' runs the update function for every object.
-        ...    next_frame()
+        ...# since the returned objects are references, we can edit them directly
+        ...# without creating duplicates.
+        >>>for i in intersected:
+        ...   i.pos = Vec3.ZERO()
         ```
+        """
+    def does_collide(self) -> builtins.bool:
+        r"""
+        Checks if the object collides with any other 3D object.
         """
 
 class Cylinder:
@@ -5100,6 +5106,42 @@ class Cylinder:
         """
     @rot.setter
     def rot(self, value: Vec3) -> None: ...
+    def __eq__(self, other:typing.Any) -> builtins.bool:
+        r"""
+        Equality for Cylinder is based on unique ID.
+        """
+    def __hash__(self) -> builtins.int:
+        r"""
+        Hash for Cylinder is based on unique ID, not it's fields.
+        """
+    def __repr__(self) -> builtins.str: ...
+    def __str__(self) -> builtins.str: ...
+    def __new__(cls, position:Vec3=..., rotation:Vec3=..., scale:Vec3=..., color:Color=..., texture:typing.Optional[Texture2D]=None, collider_type:ColliderOptions=...) -> Cylinder: ...
+    def set_collider(self, collider_type:ColliderOptions) -> None:
+        r"""
+        overwrites the current collider with the input option.
+        """
+    def check_collision(self) -> builtins.list[Cube | Cylinder | Mesh | Pill | Sphere]:
+        r"""
+        Returns any object, with active collision, that is either
+        intersected or inserted in the current object.
+         
+        Example:
+         
+        ```
+        >>>bigCylinder: Cylinder = Cylinder(pos=Vec3.splat(50))
+        >>>intersected: list[Cylinder] = bigCylinder.check_collision()
+        ...
+        ...# since the returned objects are references, we can edit them directly
+        ...# without creating duplicates.
+        >>>for i in intersected:
+        ...   i.pos = Vec3.ZERO()
+        ```
+        """
+    def does_collide(self) -> builtins.bool:
+        r"""
+        Checks if the object collides with any other 3D object.
+        """
     def set_draw_each_frame(self, drawing:builtins.bool) -> None:
         r"""
         Decides wether to draw the Cylinder during all subsequent 'draw_all_objects()'.
@@ -5137,27 +5179,6 @@ class Cylinder:
         >>>         enemy.manually_draw_now()
         ```
         """
-    def check_collision(self) -> builtins.list[Cube | Cylinder | Mesh | Pill | Sphere]:
-        r"""
-        Returns any object, with active collision, that is either
-        intersected or inserted in the current object.
-         
-        Example:
-         
-        ```
-        >>>bigCylinder: Cylinder = Cylinder(pos=Vec3.splat(50))
-        >>>intersected: list[Cylinder] = bigCylinder.check_collision()
-        ...
-        ...# since the returned objects are references, we can edit them directly
-        ...# without creating duplicates.
-        >>>for i in intersected:
-        ...   i.pos = Vec3.ZERO()
-        ```
-        """
-    def does_collide(self) -> builtins.bool:
-        r"""
-        Checks if the object collides with any other 3D object.
-        """
     def remove_tick(self) -> None:
         r"""
         Removes any assigned tick-function from this object.
@@ -5187,21 +5208,6 @@ class Cylinder:
         ...    next_frame()
         ```
         """
-    def __eq__(self, other:typing.Any) -> builtins.bool:
-        r"""
-        Equality for Cylinder is based on unique ID.
-        """
-    def __hash__(self) -> builtins.int:
-        r"""
-        Hash for Cylinder is based on unique ID, not it's fields.
-        """
-    def __repr__(self) -> builtins.str: ...
-    def __str__(self) -> builtins.str: ...
-    def __new__(cls, position:Vec3=..., rotation:Vec3=..., scale:Vec3=..., color:Color=..., texture:typing.Optional[Texture2D]=None, collider_type:ColliderOptions=...) -> Cylinder: ...
-    def set_collider(self, collider_type:ColliderOptions) -> None:
-        r"""
-        overwrites the current collider with the input option.
-        """
 
 class FileData:
     r"""
@@ -5214,7 +5220,7 @@ class FileData:
     >>>download_file(...)
     ...
     ```
-    or 'Loading'.
+    or use the `Loading` class.
     """
     @property
     def bytes(self) -> builtins.list[builtins.int]:
@@ -5245,7 +5251,7 @@ class FileData:
         r"""
         Attempts to parse the file data as an Image.
         """
-    def to_2DTexture(self) -> Texture2D:
+    def to_Texture2D(self) -> Texture2D:
         r"""
         Attempts to parse the file data as a texture.
         FileData -> Image -> Texture2D
@@ -5514,12 +5520,72 @@ class Mesh:
         """
     @scale.setter
     def scale(self, value: Vec3) -> None: ...
-    @staticmethod
-    def from_file_data(data:FileData, texture:typing.Optional[Texture2D], collider_type:ColliderOptions) -> Mesh: ...
     def set_collider(self, collider_type:ColliderOptions) -> None:
         r"""
         overwrites the current collider with the input option.
         """
+    @staticmethod
+    def from_file_data(data:FileData, texture:typing.Optional[Texture2D], collider_type:ColliderOptions) -> Mesh: ...
+    def tick(self, function:typing.Any) -> None:
+        r"""
+        Add a function to this object, which will automatically be executed each frame.
+        The function must take the object it is attatched to as an argument.
+         
+        Example:
+         
+        ```
+        ...# arguments from outside the scope may be included.
+        >>>delta_time = 0
+        >>>def updateMesh(obj: Mesh):
+        ...    obj.rot += Vec3.splat(0.2*delta_time)
+        ...
+        >>>myMesh = Mesh.from_file_data(...)
+        >>>myMesh.tick(updateMesh)
+        ...
+        >>>while True:
+        ...    # dt would have to get updated each frame.
+        ...    delta_time = get_delta_time()
+        ...
+        ...    #'next_frame' runs the update function for every object.
+        ...    next_frame()
+        ```
+        """
+    def check_collision(self) -> builtins.list[Cube | Cylinder | Mesh | Pill | Sphere]:
+        r"""
+        Returns any object, with active collision, that is either
+        intersected or inserted in the current object.
+         
+        Example:
+         
+        ```
+        >>>bigMesh: Mesh = Mesh(pos=Vec3.splat(50))
+        >>>intersected: list[Mesh] = bigMesh.check_collision()
+        ...
+        ...# since the returned objects are references, we can edit them directly
+        ...# without creating duplicates.
+        >>>for i in intersected:
+        ...   i.pos = Vec3.ZERO()
+        ```
+        """
+    def does_collide(self) -> builtins.bool:
+        r"""
+        Checks if the object collides with any other 3D object.
+        """
+    def remove_tick(self) -> None:
+        r"""
+        Removes any assigned tick-function from this object.
+        If the object does not have a tick function, this will do nothing.
+        """
+    def __eq__(self, other:typing.Any) -> builtins.bool:
+        r"""
+        Equality for Mesh is based on unique ID.
+        """
+    def __hash__(self) -> builtins.int:
+        r"""
+        Hash for Mesh is based on unique ID, not it's fields.
+        """
+    def __repr__(self) -> builtins.str: ...
+    def __str__(self) -> builtins.str: ...
     def set_draw_each_frame(self, drawing:builtins.bool) -> None:
         r"""
         Decides wether to draw the Mesh during all subsequent 'draw_all_objects()'.
@@ -5557,66 +5623,6 @@ class Mesh:
         >>>         enemy.manually_draw_now()
         ```
         """
-    def remove_tick(self) -> None:
-        r"""
-        Removes any assigned tick-function from this object.
-        If the object does not have a tick function, this will do nothing.
-        """
-    def check_collision(self) -> builtins.list[Cube | Cylinder | Mesh | Pill | Sphere]:
-        r"""
-        Returns any object, with active collision, that is either
-        intersected or inserted in the current object.
-         
-        Example:
-         
-        ```
-        >>>bigMesh: Mesh = Mesh(pos=Vec3.splat(50))
-        >>>intersected: list[Mesh] = bigMesh.check_collision()
-        ...
-        ...# since the returned objects are references, we can edit them directly
-        ...# without creating duplicates.
-        >>>for i in intersected:
-        ...   i.pos = Vec3.ZERO()
-        ```
-        """
-    def does_collide(self) -> builtins.bool:
-        r"""
-        Checks if the object collides with any other 3D object.
-        """
-    def tick(self, function:typing.Any) -> None:
-        r"""
-        Add a function to this object, which will automatically be executed each frame.
-        The function must take the object it is attatched to as an argument.
-         
-        Example:
-         
-        ```
-        ...# arguments from outside the scope may be included.
-        >>>delta_time = 0
-        >>>def updateMesh(obj: Mesh):
-        ...    obj.rot += Vec3.splat(0.2*delta_time)
-        ...
-        >>>myMesh = Mesh.from_file_data(...)
-        >>>myMesh.tick(updateMesh)
-        ...
-        >>>while True:
-        ...    # dt would have to get updated each frame.
-        ...    delta_time = get_delta_time()
-        ...
-        ...    #'next_frame' runs the update function for every object.
-        ...    next_frame()
-        ```
-        """
-    def __eq__(self, other:typing.Any) -> builtins.bool:
-        r"""
-        Equality for Mesh is based on unique ID.
-        """
-    def __hash__(self) -> builtins.int:
-        r"""
-        Hash for Mesh is based on unique ID, not it's fields.
-        """
-    def __repr__(self) -> builtins.str: ...
-    def __str__(self) -> builtins.str: ...
 
 class Physics:
     r"""
@@ -5706,42 +5712,35 @@ class Pill:
         """
     @scale.setter
     def scale(self, value: Vec3) -> None: ...
-    def __eq__(self, other:typing.Any) -> builtins.bool:
+    def tick(self, function:typing.Any) -> None:
         r"""
-        Equality for Pill is based on unique ID.
-        """
-    def __hash__(self) -> builtins.int:
-        r"""
-        Hash for Pill is based on unique ID, not it's fields.
-        """
-    def __repr__(self) -> builtins.str: ...
-    def __str__(self) -> builtins.str: ...
-    def set_collider(self, collider_type:ColliderOptions) -> None:
-        r"""
-        overwrites the current collider with the input option.
-        """
-    def check_collision(self) -> builtins.list[Cube | Cylinder | Mesh | Pill | Sphere]:
-        r"""
-        Returns any object, with active collision, that is either
-        intersected or inserted in the current object.
+        Add a function to this object, which will automatically be executed each frame.
+        The function must take the object it is attatched to as an argument.
          
         Example:
          
         ```
-        >>>bigPill: Pill = Pill(pos=Vec3.splat(50))
-        >>>intersected: list[Pill] = bigPill.check_collision()
+        ...# arguments from outside the scope may be included.
+        >>>delta_time = 0
+        >>>def updatePill(obj: Pill):
+        ...    obj.rot += Vec3.splat(0.2*delta_time)
         ...
-        ...# since the returned objects are references, we can edit them directly
-        ...# without creating duplicates.
-        >>>for i in intersected:
-        ...   i.pos = Vec3.ZERO()
+        >>>myPill = Pill()
+        >>>myPill.tick(updatePill)
+        ...
+        >>>while True:
+        ...    # dt would have to get updated each frame.
+        ...    delta_time = get_delta_time()
+        ...
+        ...    #'next_frame' runs the update function for every object.
+        ...    next_frame()
         ```
         """
-    def does_collide(self) -> builtins.bool:
+    def remove_tick(self) -> None:
         r"""
-        Checks if the object collides with any other 3D object.
+        Removes any assigned tick-function from this object.
+        If the object does not have a tick function, this will do nothing.
         """
-    def __new__(cls, position:Vec3=..., rotation:Vec3=..., scale:Vec3=..., color:Color=..., texture:typing.Optional[Texture2D]=None, collider_type:ColliderOptions=...) -> Pill: ...
     def set_draw_each_frame(self, drawing:builtins.bool) -> None:
         r"""
         Decides wether to draw the Pill during all subsequent 'draw_all_objects()'.
@@ -5779,34 +5778,41 @@ class Pill:
         >>>         enemy.manually_draw_now()
         ```
         """
-    def remove_tick(self) -> None:
+    def __new__(cls, position:Vec3=..., rotation:Vec3=..., scale:Vec3=..., color:Color=..., texture:typing.Optional[Texture2D]=None, collider_type:ColliderOptions=...) -> Pill: ...
+    def __eq__(self, other:typing.Any) -> builtins.bool:
         r"""
-        Removes any assigned tick-function from this object.
-        If the object does not have a tick function, this will do nothing.
+        Equality for Pill is based on unique ID.
         """
-    def tick(self, function:typing.Any) -> None:
+    def __hash__(self) -> builtins.int:
         r"""
-        Add a function to this object, which will automatically be executed each frame.
-        The function must take the object it is attatched to as an argument.
+        Hash for Pill is based on unique ID, not it's fields.
+        """
+    def __repr__(self) -> builtins.str: ...
+    def __str__(self) -> builtins.str: ...
+    def check_collision(self) -> builtins.list[Cube | Cylinder | Mesh | Pill | Sphere]:
+        r"""
+        Returns any object, with active collision, that is either
+        intersected or inserted in the current object.
          
         Example:
          
         ```
-        ...# arguments from outside the scope may be included.
-        >>>delta_time = 0
-        >>>def updatePill(obj: Pill):
-        ...    obj.rot += Vec3.splat(0.2*delta_time)
+        >>>bigPill: Pill = Pill(pos=Vec3.splat(50))
+        >>>intersected: list[Pill] = bigPill.check_collision()
         ...
-        >>>myPill = Pill()
-        >>>myPill.tick(updatePill)
-        ...
-        >>>while True:
-        ...    # dt would have to get updated each frame.
-        ...    delta_time = get_delta_time()
-        ...
-        ...    #'next_frame' runs the update function for every object.
-        ...    next_frame()
+        ...# since the returned objects are references, we can edit them directly
+        ...# without creating duplicates.
+        >>>for i in intersected:
+        ...   i.pos = Vec3.ZERO()
         ```
+        """
+    def does_collide(self) -> builtins.bool:
+        r"""
+        Checks if the object collides with any other 3D object.
+        """
+    def set_collider(self, collider_type:ColliderOptions) -> None:
+        r"""
+        overwrites the current collider with the input option.
         """
 
 class PlaySoundParams:
@@ -5826,9 +5832,15 @@ class Rectangle:
     @position.setter
     def position(self, value: Vec2) -> None: ...
     @property
-    def rotation(self) -> builtins.float: ...
+    def rotation(self) -> builtins.float:
+        r"""
+        rotation is in radians.
+        """
     @rotation.setter
-    def rotation(self, value: builtins.float) -> None: ...
+    def rotation(self, value: builtins.float) -> None:
+        r"""
+        rotation is in radians.
+        """
     @property
     def scale(self) -> Vec2: ...
     @scale.setter
@@ -5842,6 +5854,21 @@ class Rectangle:
     @texture.setter
     def texture(self, value: typing.Optional[Texture2D]) -> None: ...
     def __eq__(self, other:builtins.object) -> builtins.bool: ...
+    def __new__(cls, position:Vec2, rotation:builtins.float, scale:Vec2, color:Color, texture:typing.Optional[Texture2D]=None) -> Rectangle: ...
+    def draw(self) -> None: ...
+    def collides_with(self, rhs:Rectangle | Circle) -> builtins.bool:
+        r"""
+        Check collision between two 2D Objects.
+        A Circle's collider assumes a perfect Circle.
+        """
+    def collides_with_list(self, rhs:typing.Sequence[Rectangle | Circle]) -> builtins.list[Rectangle | Circle]:
+        r"""
+        takes a list of 2D shapes, and returns every element that Collides with self.
+        """
+    def max_x(self) -> builtins.float: ...
+    def min_x(self) -> builtins.float: ...
+    def max_y(self) -> builtins.float: ...
+    def min_y(self) -> builtins.float: ...
     def tick(self, function:typing.Any) -> None:
         r"""
         Add a function to this object, which will automatically be executed each frame.
@@ -5873,21 +5900,6 @@ class Rectangle:
         Removes any assigned tick-function from this object.
         If the object does not have a tick function, this will do nothing.
         """
-    def __new__(cls, position:Vec2, rotation:builtins.float, scale:Vec2, color:Color, texture:typing.Optional[Texture2D]=None) -> Rectangle: ...
-    def draw(self) -> None: ...
-    def collides_with(self, rhs:Rectangle | Circle) -> builtins.bool:
-        r"""
-        Check collision between two 2D Objects.
-        A Circle's collider assumes a perfect Circle.
-        """
-    def collides_with_list(self, rhs:typing.Sequence[Rectangle | Circle]) -> builtins.list[Rectangle | Circle]:
-        r"""
-        takes a list of 2D shapes, and returns every element that Collides with self.
-        """
-    def max_x(self) -> builtins.float: ...
-    def min_x(self) -> builtins.float: ...
-    def max_y(self) -> builtins.float: ...
-    def min_y(self) -> builtins.float: ...
 
 class RenderTarget:
     ...
@@ -6070,11 +6082,6 @@ class Sphere:
         """
     @scale.setter
     def scale(self, value: Vec3) -> None: ...
-    def remove_tick(self) -> None:
-        r"""
-        Removes any assigned tick-function from this object.
-        If the object does not have a tick function, this will do nothing.
-        """
     def __eq__(self, other:typing.Any) -> builtins.bool:
         r"""
         Equality for Sphere is based on unique ID.
@@ -6085,28 +6092,30 @@ class Sphere:
         """
     def __repr__(self) -> builtins.str: ...
     def __str__(self) -> builtins.str: ...
-    def check_collision(self) -> builtins.list[Cube | Cylinder | Mesh | Pill | Sphere]:
+    def tick(self, function:typing.Any) -> None:
         r"""
-        Returns any object, with active collision, that is either
-        intersected or inserted in the current object.
+        Add a function to this object, which will automatically be executed each frame.
+        The function must take the object it is attatched to as an argument.
          
         Example:
          
         ```
-        >>>bigSphere: Sphere = Sphere(pos=Vec3.splat(50))
-        >>>intersected: list[Sphere] = bigSphere.check_collision()
+        ...# arguments from outside the scope may be included.
+        >>>delta_time = 0
+        >>>def updateSphere(obj: Sphere):
+        ...    obj.rot += Vec3.splat(0.2*delta_time)
         ...
-        ...# since the returned objects are references, we can edit them directly
-        ...# without creating duplicates.
-        >>>for i in intersected:
-        ...   i.pos = Vec3.ZERO()
+        >>>mySphere = Sphere()
+        >>>mySphere.tick(updateSphere)
+        ...
+        >>>while True:
+        ...    # dt would have to get updated each frame.
+        ...    delta_time = get_delta_time()
+        ...
+        ...    #'next_frame' runs the update function for every object.
+        ...    next_frame()
         ```
         """
-    def does_collide(self) -> builtins.bool:
-        r"""
-        Checks if the object collides with any other 3D object.
-        """
-    def __new__(cls, position:Vec3=..., rotation:Vec3=..., scale:Vec3=..., color:Color=..., texture:typing.Optional[Texture2D]=None, collider_type:ColliderOptions=...) -> Sphere: ...
     def set_collider(self, collider_type:ColliderOptions) -> None:
         r"""
         overwrites the current collider with the input option.
@@ -6148,30 +6157,33 @@ class Sphere:
         >>>         enemy.manually_draw_now()
         ```
         """
-    def tick(self, function:typing.Any) -> None:
+    def check_collision(self) -> builtins.list[Cube | Cylinder | Mesh | Pill | Sphere]:
         r"""
-        Add a function to this object, which will automatically be executed each frame.
-        The function must take the object it is attatched to as an argument.
+        Returns any object, with active collision, that is either
+        intersected or inserted in the current object.
          
         Example:
          
         ```
-        ...# arguments from outside the scope may be included.
-        >>>delta_time = 0
-        >>>def updateSphere(obj: Sphere):
-        ...    obj.rot += Vec3.splat(0.2*delta_time)
+        >>>bigSphere: Sphere = Sphere(pos=Vec3.splat(50))
+        >>>intersected: list[Sphere] = bigSphere.check_collision()
         ...
-        >>>mySphere = Sphere()
-        >>>mySphere.tick(updateSphere)
-        ...
-        >>>while True:
-        ...    # dt would have to get updated each frame.
-        ...    delta_time = get_delta_time()
-        ...
-        ...    #'next_frame' runs the update function for every object.
-        ...    next_frame()
+        ...# since the returned objects are references, we can edit them directly
+        ...# without creating duplicates.
+        >>>for i in intersected:
+        ...   i.pos = Vec3.ZERO()
         ```
         """
+    def does_collide(self) -> builtins.bool:
+        r"""
+        Checks if the object collides with any other 3D object.
+        """
+    def remove_tick(self) -> None:
+        r"""
+        Removes any assigned tick-function from this object.
+        If the object does not have a tick function, this will do nothing.
+        """
+    def __new__(cls, position:Vec3=..., rotation:Vec3=..., scale:Vec3=..., color:Color=..., texture:typing.Optional[Texture2D]=None, collider_type:ColliderOptions=...) -> Sphere: ...
 
 class TextDimensions:
     r"""
@@ -6697,6 +6709,12 @@ class Vec2:
         
         When `d` is `0.0`, the result will be equal to `self`. When `d` is equal to
         `self.distance(rhs)`, the result will be equal to `rhs`. Will not go past `rhs`.
+        """
+    def to_angle(self) -> builtins.float:
+        r"""
+        Returns the angle (in radians) of this vector in the range `[-π, +π]`.
+        
+        The input does not need to be a unit vector however it must be non-zero.
         """
     def midpoint(self, rhs:Vec2) -> Vec2:
         r"""
@@ -7620,7 +7638,7 @@ def download_file_future(url:builtins.str) -> FileDataFuture: ...
 
 def draw_affine_parallelepiped(offset:Vec3, e1:Vec3, e2:Vec3, e3:Vec3, texture:typing.Optional[Texture2D], color:Color) -> None: ...
 
-def draw_affine_parallelogram(offset:Vec3, e1:Vec3, e2:Vec3, e3:Vec3, texture:typing.Optional[Texture2D], color:Color) -> None: ...
+def draw_affine_parallelogram(offset:Vec3, e1:Vec3, e2:Vec3, texture:typing.Optional[Texture2D], color:Color) -> None: ...
 
 def draw_all_objects() -> None: ...
 
@@ -7665,7 +7683,7 @@ def draw_line(x1:builtins.float, y1:builtins.float, x2:builtins.float, y2:builti
 
 def draw_line_3d(start:Vec3, end:Vec3, color:Color) -> None: ...
 
-def draw_multiline_text(text:builtins.str, x:builtins.float, y:builtins.float, font_size:builtins.float, line_distance_factor:typing.Optional[builtins.float], color:Color) -> None: ...
+def draw_multiline_text(text:builtins.str, x:builtins.float, y:builtins.float, font_size:builtins.int=20, color:Color=..., font:typing.Optional[Font]=None, rotation:builtins.float=0.0, line_distance_factor:typing.Optional[builtins.float]=None, font_scale:builtins.float=1.0, font_scale_aspect:builtins.float=1.0) -> None: ...
 
 def draw_plane(center:Vec3, size:Vec2, color:Color, texture:typing.Optional[Texture2D]) -> None:
     r"""

@@ -5,7 +5,7 @@ import random
 import time
 from pyinstrument import Profiler
 from utils import *
-
+import math
 
 profiler = Profiler()
 profiler.start()
@@ -22,12 +22,14 @@ def load_all_assets() -> tuple[dict, dict, dict]:
 
     asset_definitions = [
         # --- TEXTURES ---
+        # misc
         {"name": "W_Key", "url": "Inputs/Keyboard%20%26%20Mouse/Double/keyboard_w.png", "path": "keyboard_w.png", "type": "texture"},
         {"name": "A_Key", "url": "Inputs/Keyboard%20%26%20Mouse/Double/keyboard_a.png", "path": "keyboard_a.png", "type": "texture"},
         {"name": "S_Key", "url": "Inputs/Keyboard%20%26%20Mouse/Double/keyboard_s.png", "path": "keyboard_s.png", "type": "texture"},
         {"name": "D_Key", "url": "Inputs/Keyboard%20%26%20Mouse/Double/keyboard_d.png", "path": "keyboard_d.png", "type": "texture"},
         {"name": "ESC_Key", "url": "Inputs/Keyboard%20%26%20Mouse/Double/keyboard_escape.png", "path": "keyboard_escape.png", "type": "texture"},
         
+        # enviroment
         {"name": "grass_plain", "url": "TinyTown/Tiles/tile_0000.png", "path": "grass_plain.png", "type": "texture"},
         {"name": "grass_flower_1", "url": "TinyTown/Tiles/tile_0001.png", "path": "grass_flower_1.png", "type": "texture"},
         {"name": "grass_flower_2", "url": "TinyTown/Tiles/tile_0002.png", "path": "grass_flower_2.png", "type": "texture"},
@@ -37,7 +39,14 @@ def load_all_assets() -> tuple[dict, dict, dict]:
         {"name": "yellow_tree_1", "url": "TinyTown/Tiles/tile_0015.png", "path": "yellow_tree_1.png", "type": "texture"},
         {"name": "bush", "url": "TinyTown/Tiles/tile_0005.png", "path": "bush.png", "type": "texture"},
         {"name": "dirt", "url": "TinyTown/Tiles/tile_0025.png", "path": "dirt.png", "type": "texture"},
-        {"name": "door_frame", "url": "TinyTown/Tiles/tile_0074.png", "path": "door_frame.png", "type": "texture"},
+        
+        # attacks
+        {"name": "slash_1", "url": "Slashes/Sword Slashes/White Slash Wide/File1.png", "path": "slash_1.png", "type": "texture"},
+        {"name": "slash_2", "url": "Slashes/Sword Slashes/White Slash Wide/File2.png", "path": "slash_2.png", "type": "texture"},
+        {"name": "slash_3", "url": "Slashes/Sword Slashes/White Slash Wide/File3.png", "path": "slash_3.png", "type": "texture"},
+        {"name": "slash_4", "url": "Slashes/Sword Slashes/White Slash Wide/File4.png", "path": "slash_4.png", "type": "texture"},
+        {"name": "slash_5", "url": "Slashes/Sword Slashes/White Slash Wide/File5.png", "path": "slash_5.png", "type": "texture"},
+        {"name": "slash_6", "url": "Slashes/Sword Slashes/White Slash Wide/File6.png", "path": "slash_6.png", "type": "texture"},
 
         # house 
         {"name": "wall_center", "url": "TinyTown/Tiles/tile_0073.png", "path": "wall_center.png", "type": "texture"},
@@ -51,6 +60,7 @@ def load_all_assets() -> tuple[dict, dict, dict]:
         {"name": "roof_6", "url": "TinyTown/Tiles/tile_0062.png", "path": "roof_6.png", "type": "texture"},
         {"name": "arched_roof", "url": "TinyTown/Tiles/tile_0063.png", "path": "arched_roof.png", "type": "texture"},
         {"name": "door", "url": "TinyTown/Tiles/tile_0085.png", "path": "door.png", "type": "texture"},
+        {"name": "door_frame", "url": "TinyTown/Tiles/tile_0074.png", "path": "door_frame.png", "type": "texture"},
         
         # character
         {"name": "character_1", "url": "Characters/Tiles/tile_0355.png", "path": "tile_0355.png", "type": "texture"},
@@ -65,15 +75,24 @@ def load_all_assets() -> tuple[dict, dict, dict]:
         {"name": "grey_button", "url": "UiAssets/01_Flat_Theme/Sprites/UI_Flat_Frame.png", "path": "UI_Flat_Frame.png", "type": "texture"},
         {"name": "grey_button_selected", "url": "UiAssets/01_Flat_Theme/Sprites/UI_Flat_Frame_selected.png", "path": "UI_Flat_Frame_selected.png", "type": "texture"},
         {"name": "full_hp_bar", "url": "UiAssets/01_Flat_Theme/Sprites/full_hp_bar.png", "path": "full_hp_bar.png", "type": "texture"},
+
         # --- FONTS ---
         {"name": "bitcount", "url": "Fonts/BitCount/BitcountPropDoubleInk-VariableFont_CRSV,ELSH,ELXP,SZP1,SZP2,XPN1,XPN2,YPN1,YPN2,slnt,wght.ttf", "path": "bitcount.ttf", "type": "font"},
         {"name": "arimo", "url": "Fonts/Arimo/Arimo-VariableFont_wght.ttf", "path": "arimo.ttf", "type": "font"},
+        {"name": "dungeon_font", "url": "Fonts/DungeonFont.ttf", "path": "dungeon_font.ttf", "type": "font"},
 
         # --- SOUNDS ---
-        {"name": "birds", "url": "sounds/birds.mp3", "path": "birds.mp3", "type": "sound"},
+        # music
         {"name": "white_mist", "url": "sounds/white_mist.mp3", "path": "white_mist.mp3", "type": "sound"},
+        {"name": "birds", "url": "sounds/birds.mp3", "path": "birds.mp3", "type": "sound"},
+        
+        # sound effects
         {"name": "select_button", "url": "sounds/select_button.mp3", "path": "select_button.mp3", "type": "sound"},
         {"name": "page_turn", "url": "sounds/page_turn.mp3", "path": "page_turn.mp3", "type": "sound"},
+        {"name": "whoosh", "url": "SoundEffects/Other/whoosh_1.wav", "path": "whoosh_1.wav", "type": "sound"},
+        {"name": "door_open", "url": "SoundEffects/Environment/door_open.wav", "path": "door_open.wav", "type": "sound"},
+        {"name": "leaf", "url": "SoundEffects/leaf.mp3", "path": "leaf.mp3", "type": "sound"},
+        
     ]
 
     examples.loading_screen_future(
@@ -88,7 +107,7 @@ def load_all_assets() -> tuple[dict, dict, dict]:
     def convert_asset(item):
         raw_file, asset_type = item
         if asset_type == "texture":
-            tex = raw_file.to_2DTexture()
+            tex = raw_file.to_Texture2D()
             tex.set_filter(FilterMode.Nearest)
             return tex
         elif asset_type == "font":
@@ -298,14 +317,15 @@ class NoNavArea():
     def __init__(self, level) -> None:
         self.no_nav_area = []
         if level == 0:
-            self.no_nav_area = [
+            self.no_nav_area += [
                 Rectangle(Vec2(tileSize*31, tileSize*4.4),0,Vec2(2194.0,5),Color.INVISIBLE),
                 Rectangle(Vec2(tileSize*31, tileSize*33.5),0,Vec2(2194.0,5),Color.INVISIBLE),
                 Rectangle(Vec2(tileSize*9.5, tileSize*20),0,Vec2(5,1234.0),Color.INVISIBLE),
                 Rectangle(Vec2(tileSize*58.4, tileSize*20),0,Vec2(5,1234.0),Color.INVISIBLE),
             ]
         if level == 1:
-            self.no_nav_area.append(  Rectangle(Vec2(21*tileSize,13.4*tileSize),0,Vec2(tileSize*14,tileSize*3.2),Color.INVISIBLE)   )
+            self.no_nav_area += [ Rectangle(Vec2(21*tileSize,13.4*tileSize),0,Vec2(tileSize*14,tileSize*3.2),Color.INVISIBLE)   ]
+        
 
     def debug_draw(self):
         for nav in self.no_nav_area:
@@ -316,6 +336,8 @@ class NoNavArea():
     
     def check_move(self, hitbox: Rectangle, attempted_move: Vec2) -> Vec2:
         assert hitbox.rotation == 0, "for performance reasons, hitbox may not be rotated"
+
+        
         final_move_x = attempted_move.x
         final_move_y = attempted_move.y
         p_w = hitbox.scale.x / 2
@@ -323,6 +345,7 @@ class NoNavArea():
         p_x = hitbox.position.x
         p_y = hitbox.position.y
 
+        
         # X-axes
         if final_move_x != 0:
             for nav in self.no_nav_area:
@@ -347,6 +370,11 @@ class NoNavArea():
                             gap = (n_x + n_w) - (p_x - p_w)
                             if gap <= 0 and final_move_x < gap:
                                 final_move_x = gap
+
+        if final_move_x < 0:
+            final_move_x = max(final_move_x, 0.0 - (p_x - p_w)) if p_x - p_w >= 0.0 else 0.0
+        elif final_move_x > 0:
+            final_move_x = min(final_move_x, 2194.0 - (p_x + p_w)) if p_x + p_w <= 2194.0 else 0.0
 
         new_p_x = p_x + final_move_x
 
@@ -375,27 +403,45 @@ class NoNavArea():
                             if gap <= 0 and final_move_y < gap:
                                 final_move_y = gap
 
+        if final_move_y < 0:
+            final_move_y = max(final_move_y, 0.0 - (p_y - p_h)) if p_y - p_h >= 0.0 else 0.0
+        elif final_move_y > 0:
+            final_move_y = min(final_move_y, 1234.0 - (p_y + p_h)) if p_y + p_h <= 1234.0 else 0.0
+
         return Vec2(final_move_x, final_move_y)
 
 class Player():
+
     hitbox: Rectangle
     visual: Sprite
     sword_visual: Sprite = Sprite([])
     playerSize: float
     speed: float = tileSize*15.0
+    health: float = 1.0 # ranging from 1.0 to 0.0
+
     walking_animation_index = 0
     animation_frames: list[Texture2D] = []
     last_animation_switch  = time.time()
+
+
+    attack_sprite: Sprite | None =  None
+    attack_animation_index = 0
+    attack_frames: list[Texture2D] = []
+    last_attack_animation_switch  = time.time()
+
     hitbox_visual_offset = Vec2(0,tileSize/2)
     has_moved_once =  False
+
     def __init__(self) -> None:
         self.playerSize = tileSize*2
         starting_pos = Vec2(tileSize*20,tileSize*15)
         self.hitbox = Rectangle(starting_pos - self.hitbox_visual_offset, 0, Vec2(self.playerSize, 5), Color.INVISIBLE)
         vis = Rectangle(starting_pos, 0, Vec2.splat(self.playerSize), Color.WHITE)
         vis.texture = textures.get("character_3")
+
         self.visual = Sprite([vis])
         self.animation_frames = [textures.get("character_1"),textures.get("character_2"),textures.get("character_3")] # type: ignore
+        self.attack_frames = [textures.get("slash_1"),textures.get("slash_2"), textures.get("slash_3"),textures.get("slash_4"),textures.get("slash_5"),textures.get("slash_6")] # type: ignore
 
     def update(self, no_nav: NoNavArea):
         dt = get_delta_time()
@@ -411,21 +457,17 @@ class Player():
             Player.has_moved_once = True
         direction = dir.normalize_or_zero() *self.speed * dt
         
-        direction = no_nav_area.check_move(self.hitbox,direction)
+        direction = no_nav_area.check_move(self.hitbox, direction)
         
-        # Bounds Check
-        position = self.hitbox.position + direction
-        w = self.hitbox.scale.x/2
-        h = self.hitbox.scale.y/2
-        limit_x = 2194.0 - w
-        limit_y = 1234.0 - h
-        new_pos = position.clamp(Vec2(w, h), Vec2(limit_x, limit_y))
-        has_moved = not (new_pos == self.hitbox.position)
-        self.hitbox.position = position.clamp(Vec2(w, h), Vec2(limit_x, limit_y))
-        self.visual.move_to( self.hitbox.position - self.hitbox_visual_offset )
+        
 
         # updating the visuals.
-        self.hitbox.draw()
+        new_position = self.hitbox.position + direction
+        has_moved = not (new_position == self.hitbox.position)
+        self.hitbox.position = new_position
+        self.visual.move_to( self.hitbox.position - self.hitbox_visual_offset )
+
+
         if has_moved and self.last_animation_switch < time.time()-0.1:
             self.last_animation_switch = time.time()
             if self.walking_animation_index == 2:
@@ -434,12 +476,53 @@ class Player():
                 self.walking_animation_index += 1
             self.visual.parts[0].texture = self.animation_frames[self.walking_animation_index]
         
-        # attacks
-        self.sword_visual = Sprite([])
-        if KeyCode.Space in keys:
-            self.sword_visual  = Sprite([Rectangle(self.hitbox.position+ Vec2(self.playerSize - 10, -10), 0, Vec2(self.playerSize*1.7,self.playerSize*1.4), Color.RED, None)])
+        # update slash visual
+        def update_slash_visual():
 
-class Enemy():
+            lhs: Vec2 = self.hitbox.position
+            rhs = camera.screen_to_world(get_mouse_position())
+            direction = (rhs - lhs).normalize_or_zero() * 100
+            
+            rot = direction.to_angle()
+
+            if MouseButton.Left in get_mouse_buttons_pressed(): # start a new attack
+                if self.attack_sprite is None: # we are not currently attacking
+                    AudioManager.push_sound(sounds.get("whoosh"), relative_volume=2) #type: ignore
+                    self.attack_animation_index = 0
+                    self.attack_sprite = Sprite([Rectangle( self.hitbox.position + direction, rot, Vec2.splat(150), Color.WHITE, self.attack_frames[self.attack_animation_index] )])
+                    self.last_attack_animation_switch = time.time()
+            
+            if self.attack_sprite is not None: # check if we step the attack animation
+                if self.last_attack_animation_switch < time.time() - 0.05:
+                    self.last_attack_animation_switch = time.time()
+                    if self.attack_animation_index == self.attack_frames.__len__() -1 : # we completed an attack animation
+                        self.attack_sprite = None
+                        return
+                    else: # step animation
+                        self.attack_animation_index +=1
+                        self.attack_sprite = Sprite([Rectangle( self.hitbox.position + direction, rot, Vec2.splat(150), Color.WHITE, self.attack_frames[self.attack_animation_index] )])
+        update_slash_visual()
+
+        # draw directional arrow
+        self.sword_visual = Sprite([])
+        if KeyCode.Q in keys:
+            lhs: Vec2 = self.hitbox.position
+            rhs = camera.screen_to_world(get_mouse_position())
+            direction = rhs - lhs
+
+
+            rotation = direction.to_angle()
+            self.sword_visual = Sprite([
+                Rectangle(
+                    self.hitbox.position + direction.normalize_or_zero()*100,
+                    rotation, 
+                    Vec2(self.playerSize * 1.7, self.playerSize * 1.4), 
+                    Color.RED, 
+                    None
+                )
+            ])
+
+class BasicEnemy():
     disabled: bool
     hitbox: Rectangle
     visual: Sprite
@@ -448,6 +531,9 @@ class Enemy():
     active_scene: int #all enemies are only active in the scene they are spawned in.
     last_animation_switch  = time.time()
     walking_animation_index: int
+
+    health: float = 1.0
+    invulnerable_til: None | float = None
 
     def __init__(self, pos: Vec2, scene: int) -> None:
         self.hitbox = Rectangle(pos, 0, Vec2.splat(100), Color.INVISIBLE)
@@ -479,7 +565,94 @@ class Enemy():
                 self.walking_animation_index = 0
             else:
                 self.walking_animation_index += 1
-            self.visual.parts[0].texture = self.animation_frames[self.walking_animation_index]
+            self.visual.parts[0].texture = self.animation_frames[self.walking_animation_index] #type: ignore
+
+class ProjectileEnemy():
+    disabled: bool
+    hitbox: Rectangle
+    visual: Sprite
+    animation_frames = list[Texture2D]
+    
+    base_speed: float = tileSize * 5.0
+    base_target_distance: float = tileSize * 15.0
+    
+    active_scene: int 
+    last_animation_switch: float
+    walking_animation_index: int
+
+    health: float = 1.0
+    invulnerable_til: None | float = None
+    
+    speed: float
+    target_distance: float
+    orbit_direction: float 
+    last_orbit_switch: float
+    orbit_switch_interval: float
+    drift_seed: float  # Unique offset so their breathing patterns aren't synced
+
+    def __init__(self, pos: Vec2, scene: int) -> None:
+        self.hitbox = Rectangle(pos, 0, Vec2.splat(100), Color.INVISIBLE)
+        
+        self.active_scene = scene
+
+        self.animation_frames = [textures.get("character_1"), textures.get("character_2"), textures.get("character_3")] # type: ignore
+        self.visual = Sprite([
+            Rectangle(pos, 0, Vec2.splat(100), Color.YELLOW, self.animation_frames[0])
+        ])
+        self.walking_animation_index = 0
+        
+        self.speed = self.base_speed * random.uniform(0.9, 1.1)
+        self.target_distance = self.base_target_distance + random.uniform(-tileSize * 1.0, tileSize * 1.0)
+        
+        self.orbit_direction = random.choice([-1.0, 1.0])
+        self.last_orbit_switch = time.time()
+        self.orbit_switch_interval = random.uniform(1.5, 3.5)
+        
+        self.drift_seed = random.uniform(0.0, 100.0)
+        
+        self.last_animation_switch = time.time() - random.uniform(0.0, 0.1)
+
+    def update(self, player: Player, no_nav: NoNavArea):
+        if not SceneManager.current_active_scene == self.active_scene:
+            return
+        dt = get_delta_time()
+        
+        diff = player.hitbox.position - self.hitbox.position
+        current_distance = diff.length() 
+        direction = diff.normalize_or_zero()
+        
+        tangent = Vec2(-direction.y, direction.x)
+        
+        radius_drift = math.sin(time.time() * 1.5 + self.drift_seed) * (tileSize * 0.5)
+        flexible_target_distance = self.target_distance + radius_drift
+        
+        if time.time() - self.last_orbit_switch > self.orbit_switch_interval:
+            self.orbit_direction *= -1
+            self.last_orbit_switch = time.time()
+            self.orbit_switch_interval = random.uniform(1.5, 4.0)
+            
+        buffer = 12.0
+        if abs(current_distance - flexible_target_distance) <= buffer:
+            radial_factor = 0.0   
+        elif current_distance > flexible_target_distance:
+            radial_factor = 1.0   # Move inward
+        else:
+            radial_factor = -1.2  # Move outward (slightly aggressive fallback weight)
+            
+        move_dir = (direction * radial_factor) + (tangent * self.orbit_direction)
+        move_step = move_dir.normalize_or_zero() * self.speed * dt
+        
+        move_vec_validated = no_nav.check_move(self.hitbox, move_step)
+        self.hitbox.position += move_vec_validated
+        self.visual.move_to(self.hitbox.position)
+        
+        if self.last_animation_switch < time.time() - 0.1:
+            self.last_animation_switch = time.time()
+            if self.walking_animation_index == 2:
+                self.walking_animation_index = 0
+            else:
+                self.walking_animation_index += 1
+            self.visual.parts[0].texture = self.animation_frames[self.walking_animation_index] #type: ignore
 
 class KeyHints():
     key_size: Vec2 = Vec2.splat(0.06*2194.0)
@@ -527,6 +700,7 @@ class Tree(Sprite):
             super().__init__(sprites)
         else:
             Exception()
+
 
 class House(Sprite):
     def __init__(self, size: Vec2, pos: Vec2, type: int = 1) -> None:
@@ -635,14 +809,15 @@ class MiddleLayer():
             self.sp.append(Sprite([bush_rect])) # type: ignore
 
     def draw(self, other_sprites: list[Sprite], player: Player):
-        tmp_all_sprites = [] + self.sp + other_sprites + [player.visual] + [player.sword_visual]
+        tmp_all_sprites = [] + self.sp + other_sprites + [player.visual] + [player.sword_visual] + [player.attack_sprite]
 
         sp_sorted = sorted(
             tmp_all_sprites,
-            key=lambda sp: max(rec.max_y() for rec in sp.parts) if sp.parts else 0.0, 
+            key=lambda sp: max(rec.max_y() for rec in sp.parts) if sp and sp.parts else 0.0, 
         )
         for sp in sp_sorted:
-            sp.draw_indiscriminate()
+            if sp:
+                sp.draw_indiscriminate()
 
 class LevelTriggers():
     triggers: list[Trigger]
@@ -660,7 +835,7 @@ class LevelTriggers():
                     SceneManager.switch_scene(trigger.transition_to)
                     self.load_new_triggers_for_area(trigger.transition_to)
                 if trigger.audio is not None:
-                    trigger.audio.play_sound_once()
+                    AudioManager.push_sound(trigger.audio[0], trigger.audio[1])
                 if trigger.player_pos is not None:
                     player.hitbox.position = trigger.player_pos
     def debug_draw(self):
@@ -673,13 +848,13 @@ class LevelTriggers():
         if area == 0:
             r = Rectangle(Vec2(tileSize*47, tileSize*33),0,Vec2(tileSize*4,tileSize*1), Color.INVISIBLE)
             self.triggers = [
-                Trigger(r,1, player_pos=Vec2(tileSize*22,tileSize*17))
+                Trigger(r,1, player_pos=Vec2(tileSize*22,tileSize*17), audio= (sounds.get("door_open"), 1.0)) #type: ignore
             ]
         if area == 1:
             house = Rectangle(Vec2(tileSize*22.5,tileSize*15),0,Vec2(tileSize*3,tileSize*0.5), Color.INVISIBLE)
             forest= Rectangle(Vec2(tileSize*69,tileSize*16),0,Vec2(tileSize*3,tileSize*10), Color.INVISIBLE)
             self.triggers = [
-                Trigger(house,transition_to=0, player_pos=Vec2(tileSize*47,tileSize*30)),
+                Trigger(house,transition_to=0, player_pos=Vec2(tileSize*47,tileSize*30), audio= (sounds.get("door_open"), 1.0)), #type: ignore
                 Trigger(forest,transition_to=2, player_pos=Vec2(tileSize*5,tileSize*16))
             ]
         if area == 2:
@@ -690,11 +865,11 @@ class LevelTriggers():
 
 class Trigger():
     hitbox: Rectangle
-    audio: None | Sound
+    audio: None | tuple[Sound, float]
     transition_to: None | int
     player_pos: None | Vec2
     def __init__(self, hitbox: Rectangle, transition_to: None | int = None, 
-                 audio: None | Sound = None, player_pos: None | Vec2 = None) -> None:
+                 audio: None | tuple[Sound, float] = None, player_pos: None | Vec2 = None) -> None:
         self.hitbox = hitbox
         self.audio = audio
         self.transition_to = transition_to
@@ -738,7 +913,7 @@ class Hud():
             )
 
     def draw(self, player: Player):
-        self._draw_hp_bar(0.3, player.hitbox.position)
+        self._draw_hp_bar(player.health, player.hitbox.position)
 
 class SceneManager():
     current_active_scene: int = 0
@@ -754,6 +929,123 @@ class SceneManager():
         no_nav_area = NoNavArea(level)
         middle_layer = MiddleLayer(level)
         level_triggers = LevelTriggers(level)
+
+class DamageSystem(): # combined class handling all Damage related events.
+    __last_damage_tick = time.time()
+    __player_invulnerability_between_attacks = 0.5
+    __enemy_invulnerability_between_attacks = 0.1
+
+    @staticmethod
+    def tick(enemies: list[BasicEnemy | ProjectileEnemy], player: Player):
+        DamageSystem.__player_damage_enemy(enemies, player)
+        DamageSystem.__enemy_damage_player(enemies, player)
+    
+    
+    @staticmethod
+    def __enemy_damage_player(enemies: list[BasicEnemy | ProjectileEnemy], player: Player):
+        colission = player.hitbox.collides_with_list([enemy.hitbox for enemy in enemies])
+        if not colission == []:
+            if DamageSystem.__last_damage_tick < (time.time() - DamageSystem.__player_invulnerability_between_attacks):
+                
+                player.health -= 0.1
+                if player.health < 0.0:
+                    player.health = 0.0
+                DamageSystem.__last_damage_tick = time.time()
+
+    @staticmethod
+    def __player_damage_enemy(enemies: list[BasicEnemy | ProjectileEnemy], player: Player):
+        if player.attack_sprite and player.attack_animation_index == 0:
+            colissions = [enemy for enemy in enemies if enemy.hitbox.collides_with(player.attack_sprite.parts[0])]
+            now = time.time()
+            for col in colissions:
+
+                if col.invulnerable_til is None or col.invulnerable_til < now:
+                    col.health -= 0.51
+                    TwoDPhysics.add_shove(
+                        col, 
+                        ((col.hitbox.position - player.hitbox.position).normalize_or_zero() * 50) + enemy.hitbox.position
+                    )
+                    col.invulnerable_til = now + DamageSystem.__enemy_invulnerability_between_attacks
+                    if col.health <= 0:
+                        enemies.remove(col)
+
+
+
+class TwoDPhysics():
+    # Think of this as speed/snappiness scale now. 
+    # Lower = slower shove, Higher = faster shove.
+    __shove_speed_scale = 15.0
+
+    class Shove_Event(): 
+        def __init__(self, entity: Player | BasicEnemy | ProjectileEnemy, shove_location: Vec2, speed_scale: float) -> None:
+            self.entity = entity
+            self.shove_location = shove_location
+            
+            # Keep track of where we started and where we are going
+            self.start_position = Vec2(entity.hitbox.position.x, entity.hitbox.position.y)
+            to_target = shove_location - self.start_position
+            
+            self.total_distance = to_target.length()
+            self.direction = to_target.normalize_or_zero()
+            
+            # Linear interpolation progress tracker (0.0 to 1.0)
+            self.progress = 0.0
+            self.speed_scale = speed_scale
+
+        def update(self, speed_scale: float, delta_time: float, no_nav_area: NoNavArea) -> bool:
+            """
+            Updates the entity's position using time-based progression, 
+            guaranteeing they stop precisely at the target distance.
+            """
+            if self.progress >= 1.0 or self.total_distance <= 0:
+                return True 
+            
+            # 1. Advance progress based on time and speed scale.
+            # Using an easing function inside gives you a natural "slow down" feel.
+            self.progress += delta_time * self.speed_scale
+            if self.progress > 1.0:
+                self.progress = 1.0
+                
+            # 2. Calculate target position for this frame using an ease-out curve.
+            # (1 - (1 - x)^2) creates a smooth deceleration as progress nears 1.0
+            eased_progress = 1.0 - (1.0 - self.progress) ** 2
+            intended_target_dist = self.total_distance * eased_progress
+            
+            # 3. Find out how far we actually want to move *this specific frame*
+            current_relative_pos = self.entity.hitbox.position - self.start_position
+            current_dist_moved = current_relative_pos.length()
+            
+            move_step = intended_target_dist - current_dist_moved
+            if move_step <= 0:
+                return self.progress >= 1.0
+
+            # 4. Formulate displacement and run navmesh collision checks
+            intended_displacement = self.direction * move_step
+            actual_displacement = no_nav_area.check_move(self.entity.hitbox, intended_displacement)
+            
+            # 5. Apply movement
+            self.entity.hitbox.position += actual_displacement
+            
+            # 6. If we hit a hard wall head-on, stop the event early to prevent sliding artifacts
+            if actual_displacement.length() == 0 and move_step > 0:
+                return True
+
+            return self.progress >= 1.0
+
+    events: list[Shove_Event] = []
+
+    @staticmethod
+    def tick(delta_time: float, no_nav_area: NoNavArea):
+        TwoDPhysics.events = [
+            event for event in TwoDPhysics.events 
+            if not event.update(TwoDPhysics.__shove_speed_scale, delta_time, no_nav_area)
+        ]
+
+    @staticmethod
+    def add_shove(entity: Player | BasicEnemy | ProjectileEnemy, target_location: Vec2):
+        event = TwoDPhysics.Shove_Event(entity, target_location, TwoDPhysics.__shove_speed_scale)
+        TwoDPhysics.events.append(event)
+
 
 class Menue():
     main_background: list[Rectangle | Button]
@@ -788,21 +1080,23 @@ class Menue():
             Button(Vec2(300, tileSize*34), Vec2(tileSize*10,tileSize*2), button_color=Color(0.7,0.7,0.7,1),label="Toggle Mute Audio"),
             ]
 
+
     def start(self, screen: int) -> bool:
         global camera
         global audio_manager
+        ffp =  False # first frame passed.
         if screen == 0:
             AudioManager.set_background_sound(sounds.get("birds"))
-            clear_background(Color.GREY)
-            next_frame()
             while True:
                 camera.set_camera(camera)
                 for item in self.main_background:
                     if isinstance(item, Button):
                         if item.check():
                             if item.button_label == "Play":
+                                clear_input_queue()
                                 return False
                             elif item.button_label == "Quit":
+                                clear_input_queue()
                                 return True
                             elif item.button_label == "Toggle Fullscreen":
                                 Menue.static_fullscreen_toggle = not Menue.static_fullscreen_toggle
@@ -818,20 +1112,19 @@ class Menue():
                 draw_text("Game or something",
                           (2194.0/2)-tileSize*15 +2 , 
                           1234.0/2 - tileSize*3 +2, Color.ORANGE_RED,
-                          tileSize*2, None, font_scale=2)
+                          tileSize*20, fonts.get("dungeon_font"), font_scale=.2, font_scale_aspect=1)
                 draw_text("Game or something",
                           (2194.0/2)-tileSize*15, 
                           1234.0/2 - tileSize*3, Color.BLOOD_RED,
-                          tileSize*2, None, font_scale=2)
+                          tileSize*20, fonts.get("dungeon_font"), font_scale=.2)
                 next_frame()
                 examples.limit_fps(60)
                 
         elif screen == 1:
             AudioManager.push_sound( sounds.get("page_turn"), 2 ) #type: ignore
-            clear_background(Color.GREY_PURPLE)
-            next_frame()
+
             while True:
-                if KeyCode.Escape in get_keys_pressed():
+                if KeyCode.Escape in get_keys_pressed() and ffp:
                     next_frame()
                     return False
                 if is_quit_requested():
@@ -841,8 +1134,10 @@ class Menue():
                     if isinstance(item, Button):
                         if item.check():
                             if item.button_label == "Continue":
+                                clear_input_queue()
                                 return False
                             elif item.button_label == "Quit":
+                                clear_input_queue()
                                 return True
                             elif item.button_label == "Toggle Fullscreen":
                                 Menue.static_fullscreen_toggle = not Menue.static_fullscreen_toggle
@@ -855,17 +1150,16 @@ class Menue():
                 for item in self.pause_background:
                     item.draw()
                 draw_multiline_text("Game Paused.\nPress 'Escape' to return.",
-                          (2194.0/2)-tileSize*15, 1234.0/2 - tileSize*5,tileSize*2,None, Color.BLUE_VIOLET,
+                          (2194.0/2)-tileSize*15, 1234.0/2 - tileSize*5,tileSize*20,Color.BLUE_VIOLET, fonts.get("dungeon_font"),0, None, .1
                           )
                 next_frame()
+                ffp = True
                 examples.limit_fps(60)
         elif screen == 2:
             AudioManager.set_background_sound(sounds.get("white_mist"), 0.3)
             bg_col = Color(0.03,0.03,0.03,1)
-            clear_background(bg_col)
-            next_frame()
             while True:
-                if KeyCode.Escape in get_keys_pressed():
+                if KeyCode.Escape in get_keys_pressed() and ffp:
                     next_frame()
                     return False
                 if is_quit_requested():
@@ -875,6 +1169,7 @@ class Menue():
                     if isinstance(item, Button):
                         if item.check():
                             if item.button_label == "Perservere":
+                                clear_input_queue()
                                 return False
                             elif item.button_label == "Give up":
                                 return True
@@ -889,9 +1184,10 @@ class Menue():
                 for item in self.death_background:
                     item.draw()
                 draw_multiline_text("You Have Died.\nWhat will you do?",
-                          (150), 1234.0/2 - tileSize*5,tileSize*2,None, Color.BLUE_VIOLET,
+                          (150), 1234.0/2 - tileSize*5,tileSize*20,Color.BLUE_VIOLET, fonts.get("dungeon_font"), 0, None, .1
                           )
                 next_frame()
+                ffp = True
                 examples.limit_fps(60)
         else :
             RuntimeError("invalid screen value")
@@ -917,7 +1213,7 @@ last_fps_update = time.time()
 
 should_quit = menue.start(0)
 
-enemies: list[Enemy] = []
+enemies: list[BasicEnemy | ProjectileEnemy] = []
 
 prevent_quit()
 while True:
@@ -941,15 +1237,18 @@ while True:
             print("Bye")
             break
     if KeyCode.O in get_keys_pressed():
+        # enemies.append(
+        #     BasicEnemy(Vec2.splat(500), SceneManager.current_active_scene)
+        # )
         enemies.append(
-            Enemy(Vec2.splat(500), SceneManager.current_active_scene)
+            ProjectileEnemy(Vec2.splat(500), SceneManager.current_active_scene)
         )
     if KeyCode.K in get_keys_pressed():
         enemies.clear()
     if KeyCode.O in get_keys_pressed() and KeyCode.LeftShift in get_keys_down():
         for i in range(10):
             enemies.append(
-            Enemy(Vec2.splat(500), SceneManager.current_active_scene)
+            BasicEnemy(Vec2.splat(500), SceneManager.current_active_scene)
             )
 
     # logic 
@@ -957,8 +1256,11 @@ while True:
     level_triggers.check(player)
     for enemy in enemies:
         enemy.update(player, no_nav_area)
-    # drawing
+    DamageSystem.tick(enemies, player)
 
+    TwoDPhysics.tick(get_delta_time(), no_nav_area)
+    
+    # drawing
     camera.set_camera(camera)
     background.draw()
     middle_layer.draw([enemy.visual for enemy in enemies if enemy.active_scene == SceneManager.current_active_scene], player)
@@ -982,4 +1284,3 @@ while True:
 
 profiler.stop()
 profiler.print()
-

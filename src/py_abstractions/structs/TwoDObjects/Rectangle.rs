@@ -1,4 +1,5 @@
 use pyo3::prelude::*;
+use pyo3::types::PyList;
 use pyo3_stub_gen::derive::* ;
 use pyo3::exceptions::*;
 
@@ -25,6 +26,8 @@ pub struct Rectangle{
 
     #[pyo3(get,set)]
     pub position: Vec2,
+    
+    /// rotation is in radians.
     #[pyo3(get,set)]
     pub rotation: f32,
     #[pyo3(get,set)]
@@ -70,7 +73,6 @@ impl Rectangle{
             }
         }
     }
-
 
     /// takes a list of 2D shapes, and returns every element that Collides with self.
     pub fn collides_with_list<'py>(&self, rhs: Vec<Shape<'py>>)-> Vec<Shape<'py>>{

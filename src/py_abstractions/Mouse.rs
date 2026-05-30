@@ -6,6 +6,7 @@ use pyo3_stub_gen::derive::gen_stub_pymethods;
 
 use crate::engine::CoreLoop::COMMAND_QUEUE;
 use crate::engine::CoreLoop::Command;
+use crate::engine::FrameInfo::clear_keys_pressed;
 use crate::engine::PChannel::PChannel;
 use crate::py_abstractions::structs::GLAM::Vec2::Vec2;
 use std::collections::HashSet;
@@ -99,7 +100,9 @@ pub fn get_mouse_delta_position() -> Vec2 {
 #[gen_stub_pyfunction]
 #[pyfunction]
 pub fn clear_input_queue() {
-    COMMAND_QUEUE.push(  Command::ClearInputQueue );
+    // TOOD: make sure the internal macroquad buffer stays synced with our custom buffer!!!!!!
+    clear_keys_pressed();
+    COMMAND_QUEUE.push(  Command::ClearInputQueue ); // THIS DOES NOT PROPERLY CLEAR THE INPUT QUEUE!!!
 }
 
 

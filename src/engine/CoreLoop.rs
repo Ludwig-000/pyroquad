@@ -8,6 +8,7 @@ use lazy_static::*;
 use crossbeam::queue::SegQueue;
 
 use macroquad::input::Touch;
+use macroquad::miniquad;
 use macroquad::models::DrawSphereParams;
 use macroquad::prelude as mq;
 use macroquad::audio as au;
@@ -263,9 +264,13 @@ pub enum Command {
     DrawMultilineText{text: String,
         x: f32,
         y: f32,
-        font_size: f32,
+        font_size: u16,
         line_distance_factor: Option<f32>,
-        color: mq::Color
+        color: mq::Color,
+        font_scale:  f32,
+        font_scale_aspect: f32,
+        rotation: f32,
+        font: Option<mq::Font>,
     },
 
     DrawTexture{ texture: mq::Texture2D, x: f32, y: f32, color: mq::Color   },
@@ -379,9 +384,15 @@ pub async fn proccess_commands_loop() {
                     => {
                         sm::switch_to_desired_shader(sm::ShaderKind::None, &None);
                         mq::draw_affine_parallelogram(offset, e1, e2, texture.as_ref(), color)}
-                Command::DrawMultilineText { text, x, y, font_size, line_distance_factor, color } => {
+                Command::DrawMultilineText { text, 
+                    x, y, font_size, line_distance_factor, color, 
+                    font_scale, font_scale_aspect, rotation, font } => {
+
                         sm::switch_to_desired_shader(sm::ShaderKind::None, &None);
-                        mq::draw_multiline_text(&text, x, y, font_size, line_distance_factor, color)}
+                        let params =  mq::TextParams{font: font.as_ref(), font_size, font_scale, font_scale_aspect, rotation, color};
+                        mq::draw_multiline_text_ex(&text, x, y,line_distance_factor, params )
+                    }
+
                 Command::ClearInputQueue => mq::clear_input_queue(),
                 Command::IsSimulatingMouseWithTouch(sender)=>{
                     let _ = sender.send(mq::is_simulating_mouse_with_touch());
@@ -615,7 +626,10 @@ pub async fn proccess_commands_loop() {
                         
                 }
                 Command::DrawRectLines { x, y, w, h, thickness, color }
-                    => mq::draw_rectangle_lines(x, y, w, h, thickness, color),
+                    => {
+                        sm::switch_to_desired_shader(sm::ShaderKind::None, &None);
+                        mq::draw_rectangle_lines(x, y, w, h, thickness, color)
+                    },
                 Command::DrawRect { x, y, w, h, color} => {
                     sm::switch_to_desired_shader(sm::ShaderKind::None, &None);
                     mq::draw_rectangle(
@@ -627,9 +641,15 @@ pub async fn proccess_commands_loop() {
                     );
                 }
                 Command::DrawTriangle { v1, v2, v3, color }
-                    => mq::draw_triangle(v1, v2, v3, color),
+                    => {
+                        sm::switch_to_desired_shader(sm::ShaderKind::None, &None);
+                        mq::draw_triangle(v1, v2, v3, color)
+                    }
                 Command::DrawTriangleLines { v1, v2, v3, thickness, color }
-                    => mq::draw_triangle_lines(v1, v2, v3, thickness, color),
+                    => {
+                        sm::switch_to_desired_shader(sm::ShaderKind::None, &None);
+                        mq::draw_triangle_lines(v1, v2, v3, thickness, color)
+                    }
                 Command::DrawPlane { center, size, color, texture } => {
                     sm::switch_to_desired_shader(sm::ShaderKind::None, &None);
                     let tex_ref = texture.as_ref();
@@ -644,46 +664,54 @@ pub async fn proccess_commands_loop() {
                     mq::draw_cube(pos,size,texture.as_ref(),color)
                 }
                 Command::DrawSkyBox {texture, tint} => {
+                    
                     let cam  =match &cam_memory.current_cam{
                         Camera::Camera2D(_)=> panic!("should be 3d cam"),
                         Camera::Camera3D(_cam)=> clone_camera3d(_cam)
                     };
                     sm::switch_to_desired_shader(sm::ShaderKind::SkyBox, &Some(cam));
-                    //mq::draw_cube(mq::Vec3::ZERO, mq::vec3(10.0, 10.0, 10.0), texture.as_ref(), mq::WHITE);
                     mq::draw_sphere_ex(mq::Vec3::ZERO, 10.0, texture.as_ref(), tint,DrawSphereParams { rings: 100, slices: 100, draw_mode: mq::DrawMode::Triangles });
-                    //sky_box_internal(texture, &cam);
                 }
                 Command::DrawAfflineParallelpiped { offset, e1, e2, e3, texture, color } => {
+                    sm::switch_to_desired_shader(sm::ShaderKind::None, &None);
                     mq::draw_affine_parallelepiped(offset, e1, e2, e3, texture.as_ref(), color);
                 }
                 Command::DrawArc { x, y, sides, radius, rotation, thickness, arc, color } => {
+                    sm::switch_to_desired_shader(sm::ShaderKind::None, &None);
                     mq::draw_arc(x, y, sides, radius, rotation, thickness, arc, color);
                 }
         
                 Command::DrawCubeWires { position, size, color } => {
+                    sm::switch_to_desired_shader(sm::ShaderKind::None, &None);
                     mq::draw_cube_wires(position, size, color);
                 }
                 Command::DrawCylinder { position, radius_top, radius_bottom, height, texture, color } => {
+                    sm::switch_to_desired_shader(sm::ShaderKind::Basic, &None);
                     mq::draw_cylinder(position, radius_top, radius_bottom, height, texture.as_ref(), color);
                 }
         
                 Command::DrawCylinderWires { position, radius_top, radius_bottom, height, texture, color } => {
+                    sm::switch_to_desired_shader(sm::ShaderKind::None, &None);
                     mq::draw_cylinder_wires(position, radius_top, radius_bottom, height, texture.as_ref(), color);
                 }
         
                 Command::DrawEllipse { x, y, w, h, rotation, color }    => {
-                    mq::draw_ellipse(x, y, w, h, rotation, color);  
+                    sm::switch_to_desired_shader(sm::ShaderKind::None, &None);
+                    mq::draw_ellipse(x, y, w, h, rotation, color);
                 }
                 
                 Command::DrawEllipseLines { x, y, w, h, rotation, thickness, color }    => {
+                    sm::switch_to_desired_shader(sm::ShaderKind::None, &None);
                     mq::draw_ellipse_lines(x, y, w, h, rotation, thickness, color);
                 }
         
                 Command::DrawHexagon { x, y, size, border, vertical, border_color, fill_color } => {
+                    sm::switch_to_desired_shader(sm::ShaderKind::None, &None);
                     mq::draw_hexagon(x, y, size, border, vertical, border_color, fill_color);
                 }
         
                 Command::DrawLine3D { start, end, color } =>{
+                    sm::switch_to_desired_shader(sm::ShaderKind::None, &None);
                     mq::draw_line_3d(start, end, color);    
                 }
                 
@@ -719,7 +747,7 @@ pub async fn proccess_commands_loop() {
                 }
                 
                 Command::ClearBackground {color } => {
-                    macroquad::prelude::clear_background(color);
+                    mq::clear_background(color);
                 }
                 Command::ScreenDpiScale(sender)=> {
                     let _ = sender.send(  mq::screen_dpi_scale() );
@@ -735,8 +763,6 @@ pub async fn proccess_commands_loop() {
                     if let Some(physics_step)  = physics_step{
                         object_storage.step_physics(physics_step);
                     }
-
-
                     mq::clear_background(BLACK); // 3d rendering is bugged if we don't clear.
                 }
             
@@ -751,6 +777,7 @@ pub async fn proccess_commands_loop() {
                     font_scale_aspect, 
                     rotation, 
                     sender } =>{
+                        sm::switch_to_desired_shader(sm::ShaderKind::None, &None);
                         let font_options = mq::TextParams{
                             font: font.as_ref(),
                             font_size,

@@ -93,7 +93,7 @@ def loading_screen_future(
     message: str = "Loading: "
 ) -> list[Any]:
     """
-    Launches all pyroquad futures, then periodically checks every input until it 
+    Launches all pyroquad futures, then periodically checks every input until all are resolved.
     """
     futures = [func(arg) for arg in args_list]
     total = len(futures)

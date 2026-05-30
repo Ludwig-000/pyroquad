@@ -15,7 +15,7 @@ doc = false
 
 
 [profile.release]
-overflow-checks = false
+overflow-checks = true
 panic = "unwind"
 
 

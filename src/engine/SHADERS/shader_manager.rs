@@ -81,7 +81,7 @@ pub fn new_frame_shader_update() {
     average_switches /= frameCount;
 
     if average_switches >= 100 { 
-        warn!("We detected an average of {} shader switches! This may impace performance. Try batching draw calls with the same shader.",average_switches);
+        warn!("We detected an average of {} shader switches! This may impact performance. Try batching draw calls with the same shader.",average_switches);
     }
 
     history.clear();

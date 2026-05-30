@@ -4,7 +4,7 @@ import math
 import time
 activate_engine(Config("Physics test",2000,2000,True, None,10,True,True))
 
-cam  =examples.PlayerCamera(Vec3.splat(500))
+cam  = examples.PlayerCamera(Vec3.splat(500))
 
 def cube_gen()-> list[Cube]:
     lis = []
@@ -58,12 +58,18 @@ show_mouse(False)
 
 
 while True:
+    
     if KeyCode.Escape in get_keys_pressed():
         break
+    
     cam.update()
     draw_grid(100,10,Color.YELLOW,Color.CYAN)
     draw_cube(Vec3.ZERO,Vec3.ONE,Color.PURE_BLUE, None)
     draw_all_objects()
+    
     set_default_camera()
-    draw_text(f"{get_fps()}",20,20,40,Color.GREEN)
+    draw_text(f"{get_fps()}",240,40,Color.GREEN)
+    
+    draw_text(f"YIPPIE",600.0, 300.0, Color.VOMIT_YELLOW,)
+    draw_text(f"{int(round(5))} FPS (10s Avg)", 10.0, 30.0, Color.GREEN, 40)
     next_frame(get_delta_time())
