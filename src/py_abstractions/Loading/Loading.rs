@@ -11,7 +11,7 @@ use crate::py_abstractions::Loading::FileData::FileData;
 use crate::py_abstractions::PFuture::{FileDataFuture};
 
 lazy_static!{
-    pub static ref PcAssetFolder: Mutex<String> = Mutex::new("".to_string());
+    pub static ref PC_ASSET_FOLDER: Mutex<String> = Mutex::new("".to_string());
 }
 
 /// Loads a file.
@@ -21,7 +21,7 @@ lazy_static!{
 pub fn load_file(path: &str)-> PyResult<FileData>{
 
     let path = {
-        let folder = PcAssetFolder.lock().unwrap();
+        let folder = PC_ASSET_FOLDER.lock().unwrap();
         if folder.is_empty() {
             path.to_string()
         } else {
@@ -157,7 +157,7 @@ pub fn write_to_file(contents: &FileData, path: String) -> PyResult<()> {
 
 
     let path = {
-        let folder = PcAssetFolder.lock().unwrap();
+        let folder = PC_ASSET_FOLDER.lock().unwrap();
         if folder.is_empty() {
             path.to_string()
         } else {
@@ -185,7 +185,7 @@ pub fn write_to_file(contents: &FileData, path: String) -> PyResult<()> {
 pub fn does_file_exist(path: &str) -> bool{
 
     let path = {
-        let folder = PcAssetFolder.lock().unwrap();
+        let folder = PC_ASSET_FOLDER.lock().unwrap();
         if folder.is_empty() {
             path.to_string()
         } else {

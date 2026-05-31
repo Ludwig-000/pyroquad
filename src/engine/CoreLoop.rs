@@ -390,7 +390,7 @@ pub async fn proccess_commands_loop() {
 
                         sm::switch_to_desired_shader(sm::ShaderKind::None, &None);
                         let params =  mq::TextParams{font: font.as_ref(), font_size, font_scale, font_scale_aspect, rotation, color};
-                        mq::draw_multiline_text_ex(&text, x, y,line_distance_factor, params )
+                        let res = mq::draw_multiline_text_ex(&text, x, y,line_distance_factor, params );
                     }
 
                 Command::ClearInputQueue => mq::clear_input_queue(),

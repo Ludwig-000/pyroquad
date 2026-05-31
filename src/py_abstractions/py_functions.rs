@@ -6,7 +6,7 @@
 // also, any conversion between my abstracted pyclasses and the structs used in macroquad is being done here.
 // ( example:  Color -> mq::Color )
 
-use crate::py_abstractions::Loading::Loading::PcAssetFolder;
+use crate::py_abstractions::Loading::Loading::PC_ASSET_FOLDER;
 use crate::py_abstractions::Text::Font;
 use crate::py_abstractions::Text::TextDimensions;
 use crate::py_abstractions::structs::ThreeDObjects::ObjectFunctionStorage;
@@ -658,7 +658,7 @@ pub fn cartesian_to_polar(cartesian: Vec2) -> Vec2{
 #[pyfunction]
 pub fn set_pc_assets_folder(path: String){
 
-    *PcAssetFolder.lock().unwrap() = path.clone();
+    *PC_ASSET_FOLDER.lock().unwrap() = path.clone();
 
     COMMAND_QUEUE.push(Command::SetPcAssetFolder(path));
 }
