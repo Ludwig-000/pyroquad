@@ -13,7 +13,6 @@ crate-type = ["cdylib", "rlib"]
 name = "stub_gen"
 doc = false
 
-
 [profile.release]
 overflow-checks = true
 panic = "unwind"
@@ -37,8 +36,8 @@ pyo3 = { version = "=0.28.3", features = ["extension-module", "multiple-pymethod
 # a VERY slightly modified version of pyo3 stub gen, which allows it to compile to python 3.9
 # modification was only one line, so feel free to drop support for python 3.9 if any cool new features release
 # the alternative to this would be:   #pyo3-stub-gen = "0.14.0"
-# pyo3-stub-gen = {git = "https://github.com/Ludwig-000/pyo3-stub-gen", branch = "patch-1"}
-pyo3-stub-gen = "0.22.3"
+pyo3-stub-gen = {git = "https://github.com/Ludwig-000/pyo3-stub-gen", branch = "patch-1"}
+# pyo3-stub-gen = { version = "=0.22.3", optional = true }
 
 crossbeam = "=0.8.4" # used for the main Command Queue inside lib.rs
 
@@ -68,6 +67,7 @@ features = ["png", "jpeg", "webp"]
 # compile using:
 # maturin build --release --features abi_314 --no-default-features
 [features]
+
 abi_314 = ["pyo3/abi3", "pyo3/abi3-py314"] # python 3.14 and up
 abi_310 = ["pyo3/abi3", "pyo3/abi3-py310"] # python 3.10 and up
 abi_39 = ["pyo3/abi3", "pyo3/abi3-py39"] # python 3.9 and up

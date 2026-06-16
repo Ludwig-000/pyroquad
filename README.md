@@ -5,6 +5,9 @@ This is a Python game engine based on [macroquad](https://github.com/not-fl3/mac
 The project is in early development and the repository exists for documentation purposes.
 
 ---
+> [!NOTE]
+>
+> `python = 3.9` will not compile at the moment. This is being adressed.
 
 >## Featuring 2D:  
 ![2D Screenshot](https://raw.githubusercontent.com/Ludwig-000/pyquad/refs/heads/main/docs/2d_screenshot.png)
