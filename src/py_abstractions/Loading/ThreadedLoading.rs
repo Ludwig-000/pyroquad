@@ -100,7 +100,7 @@ impl Loading {
 
         let result_dict = PyDict::new(py);
 
-        for (var_name, file) in var_names.into_iter().zip(res.into_iter()) {
+        for (var_name, file) in var_names.into_iter().zip(res) {
             result_dict.set_item(var_name, file)?;
         }
         Ok(result_dict)

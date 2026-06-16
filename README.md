@@ -26,18 +26,40 @@ while True:
 ```
 
 >**How to build:**
+>    1) Prerequesites:
+>       - Python >= 3.9 ( python >= 3.14 is recommended)
+>       - Rust Compiler >= 1.85.0 (Required for the Rust 2024 Edition)
 >
->    1) Create and activate a python virtual environment.
+>    2) Create and activate a Python virtual environment:
 >
->    2) (**optional**) Run `cargo run --bin stub_gen` to update [_pyroquad.pyi](src/python/pyroquad/_pyroquad.pyi) and gennerate up-to-date python stubs.
+>        - macOS / Linux:
 >
->    3) (**if not already installed**) install the maturin build tool using `pip install maturin`
+>          `python3 -m venv .venv`
 >
->    4) Run `maturin build --release`
+>          `source .venv/bin/activate`
 >
->    5) The .whl file can be found at `/target/wheels/`
+>       - Windows:
 >
->    6) The .whl file can be added to pip via `pip install \path\to\your\file.whl --force-reinstall`
+>         `python -m venv .venv`
+>
+>         `.venv\Scripts\activate`
+>
+>    3) Install the [maturin build tool](https://github.com/PyO3/maturin) using `pip install maturin`
+>    4) (**optional**) Run `cargo run --bin stub_gen` to update [_pyroquad.pyi](src/python/pyroquad/_pyroquad.pyi) and gennerate up-to-date python stubs.
+>
+>    5) To compile:
+>
+>       run  `maturin build --release --features abi_39` for python >= 3.9
+>
+>       run  `maturin build --release` for python >= 3.10
+>
+>       run  `maturin build --release --features abi_14` for python >= 3.14
+>
+>       (Note: Older ABIs offer better backward compatibility, but newer versions yield performance improvements)
+>
+>    6) The generated package can be found at: `/target/wheels/`
+>
+>    7) Install the package: `pip install \path\to\your\file.whl --force-reinstall`
 
 
 

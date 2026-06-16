@@ -1,5 +1,5 @@
 // alot of Python Constants are defined via function, so this prevents compiler spam.
-#![allow(non_snake_case)]
+#![allow(non_camel_case_types, non_snake_case, non_upper_case_globals)]
 
 #![allow(unused)] // temp
 
@@ -12,6 +12,7 @@
 #![allow(clippy::too_many_arguments)]
 #![allow(clippy::needless_range_loop)]
 #![allow(clippy::enum_variant_names)]
+#![allow(clippy::style)]
 
 use pyo3::prelude::*;
 use pyo3_stub_gen::define_stub_info_gatherer;

@@ -86,10 +86,10 @@ pub fn activate_engine( conf: Option<Config>) -> PyResult<()>{
     });
 
     
-    Ok(rx.recv().map_err(|_| {
+    rx.recv().map_err(|_| {
         ENGINE_CURRENTLY_ACTIVE.store(false, Ordering::SeqCst);
         pyo3::exceptions::PyRuntimeError::new_err("Engine failed to initialize")
-    })?)
+    })
 }
 
 
@@ -266,9 +266,9 @@ pub fn draw_plane(center: Vec3, size: Vec2, color: Color, texture: Option<Textur
     let siz = mq::vec2(size.x,size.y);
     let tex = texture.map(|t| t.into());
 
-    let c =Command::DrawPlane { center:cen,size:siz,color: color.into(),texture: tex};
+    let c = Command::DrawPlane { center:cen,size:siz,color: color.into(),texture: tex};
 
-    COMMAND_QUEUE.push(c );
+    COMMAND_QUEUE.push(c);
 }
 
 /// draws a basic 3d cube.

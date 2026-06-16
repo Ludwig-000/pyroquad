@@ -131,7 +131,7 @@ macro_rules! generate_pfuture {
                     
                     let res = rx.recv();
                     let _ = guard.take();
-                    Ok(res??)
+                    res?
                 }
 
                 /// waits for the result, with timeout in seconds.

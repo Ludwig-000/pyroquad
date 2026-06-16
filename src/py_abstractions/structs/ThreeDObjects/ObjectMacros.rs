@@ -229,7 +229,7 @@ macro_rules! implement_basic_setter_methods3D {
 macro_rules! implement_check_collision3D {
     ($name:ident) => {
         paste::paste! {
-            use crate::py_abstractions::structs::ThreeDObjects::ObjectMacros::Objct;
+            use $crate::py_abstractions::structs::ThreeDObjects::ObjectMacros::Objct;
             #[gen_stub_pymethods]
             #[pymethods]
             impl $name {

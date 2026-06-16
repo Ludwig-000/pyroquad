@@ -7,7 +7,10 @@ from pyinstrument import Profiler
 from utils import *
 import math
 
-profiler = Profiler()
+from custom_assets import load_all_assets
+
+
+profiler = Profiler(interval=0.001)
 profiler.start()
 
 activate_engine(Config("2D Game",fullscreen=True,swap_interval=0, sample_count=10))
@@ -16,129 +19,6 @@ camera = Camera2D(rotation=0,zoom=Vec2(0.0009115, 0.0009115*16/9),target=Vec2.ZE
 
 tileSize = 32
 
-
-def load_all_assets() -> tuple[dict, dict, dict]:
-    prefix = "https://raw.githubusercontent.com/Ludwig-000/Pyroquad_example_game_assets/main/TwoDGame/"
-
-    asset_definitions = [
-        # --- TEXTURES ---
-        # misc
-        {"name": "W_Key", "url": "Inputs/Keyboard%20%26%20Mouse/Double/keyboard_w.png", "path": "keyboard_w.png", "type": "texture"},
-        {"name": "A_Key", "url": "Inputs/Keyboard%20%26%20Mouse/Double/keyboard_a.png", "path": "keyboard_a.png", "type": "texture"},
-        {"name": "S_Key", "url": "Inputs/Keyboard%20%26%20Mouse/Double/keyboard_s.png", "path": "keyboard_s.png", "type": "texture"},
-        {"name": "D_Key", "url": "Inputs/Keyboard%20%26%20Mouse/Double/keyboard_d.png", "path": "keyboard_d.png", "type": "texture"},
-        {"name": "ESC_Key", "url": "Inputs/Keyboard%20%26%20Mouse/Double/keyboard_escape.png", "path": "keyboard_escape.png", "type": "texture"},
-        
-        # enviroment
-        {"name": "grass_plain", "url": "TinyTown/Tiles/tile_0000.png", "path": "grass_plain.png", "type": "texture"},
-        {"name": "grass_flower_1", "url": "TinyTown/Tiles/tile_0001.png", "path": "grass_flower_1.png", "type": "texture"},
-        {"name": "grass_flower_2", "url": "TinyTown/Tiles/tile_0002.png", "path": "grass_flower_2.png", "type": "texture"},
-        {"name": "tree_2", "url": "TinyTown/Tiles/tile_0004.png", "path": "tree_2.png", "type": "texture"},
-        {"name": "tree_1", "url": "TinyTown/Tiles/tile_0016.png", "path": "tree_1.png", "type": "texture"},
-        {"name": "yellow_tree_2", "url": "TinyTown/Tiles/tile_0003.png", "path": "yellow_tree_2.png", "type": "texture"},
-        {"name": "yellow_tree_1", "url": "TinyTown/Tiles/tile_0015.png", "path": "yellow_tree_1.png", "type": "texture"},
-        {"name": "bush", "url": "TinyTown/Tiles/tile_0005.png", "path": "bush.png", "type": "texture"},
-        {"name": "dirt", "url": "TinyTown/Tiles/tile_0025.png", "path": "dirt.png", "type": "texture"},
-        
-        # attacks
-        {"name": "slash_1", "url": "Slashes/Sword Slashes/White Slash Wide/File1.png", "path": "slash_1.png", "type": "texture"},
-        {"name": "slash_2", "url": "Slashes/Sword Slashes/White Slash Wide/File2.png", "path": "slash_2.png", "type": "texture"},
-        {"name": "slash_3", "url": "Slashes/Sword Slashes/White Slash Wide/File3.png", "path": "slash_3.png", "type": "texture"},
-        {"name": "slash_4", "url": "Slashes/Sword Slashes/White Slash Wide/File4.png", "path": "slash_4.png", "type": "texture"},
-        {"name": "slash_5", "url": "Slashes/Sword Slashes/White Slash Wide/File5.png", "path": "slash_5.png", "type": "texture"},
-        {"name": "slash_6", "url": "Slashes/Sword Slashes/White Slash Wide/File6.png", "path": "slash_6.png", "type": "texture"},
-
-        # house 
-        {"name": "wall_center", "url": "TinyTown/Tiles/tile_0073.png", "path": "wall_center.png", "type": "texture"},
-        {"name": "wall_right", "url": "TinyTown/Tiles/tile_0075.png", "path": "wall_right.png", "type": "texture"},
-        {"name": "wall_left", "url": "TinyTown/Tiles/tile_0072.png", "path": "wall_left.png", "type": "texture"},
-        {"name": "roof_1", "url": "TinyTown/Tiles/tile_0048.png", "path": "roof_1.png", "type": "texture"},
-        {"name": "roof_2", "url": "TinyTown/Tiles/tile_0049.png", "path": "roof_2.png", "type": "texture"},
-        {"name": "roof_3", "url": "TinyTown/Tiles/tile_0050.png", "path": "roof_3.png", "type": "texture"},
-        {"name": "roof_4", "url": "TinyTown/Tiles/tile_0060.png", "path": "roof_4.png", "type": "texture"},
-        {"name": "roof_5", "url": "TinyTown/Tiles/tile_0061.png", "path": "roof_5.png", "type": "texture"},
-        {"name": "roof_6", "url": "TinyTown/Tiles/tile_0062.png", "path": "roof_6.png", "type": "texture"},
-        {"name": "arched_roof", "url": "TinyTown/Tiles/tile_0063.png", "path": "arched_roof.png", "type": "texture"},
-        {"name": "door", "url": "TinyTown/Tiles/tile_0085.png", "path": "door.png", "type": "texture"},
-        {"name": "door_frame", "url": "TinyTown/Tiles/tile_0074.png", "path": "door_frame.png", "type": "texture"},
-        
-        # character
-        {"name": "character_1", "url": "Characters/Tiles/tile_0355.png", "path": "tile_0355.png", "type": "texture"},
-        {"name": "character_2", "url": "Characters/Tiles/tile_0356.png", "path": "tile_0356.png", "type": "texture"},
-        {"name": "character_3", "url": "Characters/Tiles/tile_0357.png", "path": "tile_0357.png", "type": "texture"},
-
-        # screens
-        {"name": "skull_screen", "url": "screens/skull.png", "path": "skull.png", "type": "texture"},
-        {"name": "tree_screen", "url": "screens/Tree_wallapaper.png", "path": "Tree_wallapaper.png", "type": "texture"},
-
-        # UI
-        {"name": "grey_button", "url": "UiAssets/01_Flat_Theme/Sprites/UI_Flat_Frame.png", "path": "UI_Flat_Frame.png", "type": "texture"},
-        {"name": "grey_button_selected", "url": "UiAssets/01_Flat_Theme/Sprites/UI_Flat_Frame_selected.png", "path": "UI_Flat_Frame_selected.png", "type": "texture"},
-        {"name": "full_hp_bar", "url": "UiAssets/01_Flat_Theme/Sprites/full_hp_bar.png", "path": "full_hp_bar.png", "type": "texture"},
-
-        # --- FONTS ---
-        {"name": "bitcount", "url": "Fonts/BitCount/BitcountPropDoubleInk-VariableFont_CRSV,ELSH,ELXP,SZP1,SZP2,XPN1,XPN2,YPN1,YPN2,slnt,wght.ttf", "path": "bitcount.ttf", "type": "font"},
-        {"name": "arimo", "url": "Fonts/Arimo/Arimo-VariableFont_wght.ttf", "path": "arimo.ttf", "type": "font"},
-        {"name": "dungeon_font", "url": "Fonts/DungeonFont.ttf", "path": "dungeon_font.ttf", "type": "font"},
-
-        # --- SOUNDS ---
-        # music
-        {"name": "white_mist", "url": "sounds/white_mist.mp3", "path": "white_mist.mp3", "type": "sound"},
-        {"name": "birds", "url": "sounds/birds.mp3", "path": "birds.mp3", "type": "sound"},
-        
-        # sound effects
-        {"name": "select_button", "url": "sounds/select_button.mp3", "path": "select_button.mp3", "type": "sound"},
-        {"name": "page_turn", "url": "sounds/page_turn.mp3", "path": "page_turn.mp3", "type": "sound"},
-        {"name": "whoosh", "url": "SoundEffects/Other/whoosh_1.wav", "path": "whoosh_1.wav", "type": "sound"},
-        {"name": "door_open", "url": "SoundEffects/Environment/door_open.wav", "path": "door_open.wav", "type": "sound"},
-        {"name": "leaf", "url": "SoundEffects/leaf.mp3", "path": "leaf.mp3", "type": "sound"},
-        
-    ]
-
-    examples.loading_screen_future(
-        lambda a: Loading.download_file_and_save_future(prefix + a["url"], a["path"]),
-        asset_definitions,
-        "Downloading All Assets"
-    )
-
-    paths = [a["path"] for a in asset_definitions]
-    raw_files = examples.loading_screen(load_file, paths, "Reading Files")
-
-    def convert_asset(item):
-        raw_file, asset_type = item
-        if asset_type == "texture":
-            tex = raw_file.to_Texture2D()
-            tex.set_filter(FilterMode.Nearest)
-            return tex
-        elif asset_type == "font":
-            return raw_file.to_font()
-        elif asset_type == "sound":
-            return raw_file.to_Sound()
-    conversion_inputs = list(zip(raw_files, [a["type"] for a in asset_definitions]))
-    
-    converted_assets = examples.loading_screen(
-        convert_asset, 
-        conversion_inputs, 
-        "Loading Assets"
-    )
-
-    textures = {}
-    fonts = {}
-    sounds = {}
-
-    for i, asset_def in enumerate(asset_definitions):
-        name = asset_def["name"]
-        asset_type = asset_def["type"]
-        final_asset = converted_assets[i]
-
-        if asset_type == "texture":
-            textures[name] = final_asset
-        elif asset_type == "font":
-            fonts[name] = final_asset
-        elif asset_type == "sound":
-            sounds[name] = final_asset
-
-    return textures, fonts, sounds
 
 def quit_program():
     examples.loading_screen(lambda a: a, range(0), "Bye Bye")
@@ -234,7 +114,6 @@ class Background():
 
 
             self.level += gf2 + gf1 + gp + dirt_path_var
-        build_texture_atlas()
 
         if level == 2:
             gf2= []
@@ -260,7 +139,6 @@ class Background():
 
 
             self.level += gf2 + gf1 + gp + dirt_path_var
-        build_texture_atlas()
 
     @staticmethod
     def dirt_path(scale: Vec2, offset: Vec2, seed: int, density: float = .5, min_transparency: float = 0.9, min_size: float = .7) -> list[Rectangle]:
@@ -299,6 +177,120 @@ class Background():
     def draw(self):
         for rec in self.level:
             rec.draw()
+
+
+class Player():
+
+    hitbox: Rectangle
+    visual: Sprite
+    sword_visual: Sprite
+    playerSize: float
+    speed: float = tileSize*15.0
+    health: float = 1.0 # ranging from 1.0 to 0.0
+
+    walking_animation_index = 0
+    animation_frames: list[Texture2D] = []
+    last_animation_switch  = time.time()
+
+
+    attack_sprite: Sprite | None =  None
+    attack_animation_index = 0
+    attack_frames: list[Texture2D] = []
+    last_attack_animation_switch  = time.time()
+
+    hitbox_visual_offset = Vec2(0,tileSize/2)
+    has_moved_once =  False
+
+    def __init__(self) -> None:
+        self.sword_visual = Sprite([])
+        self.playerSize = tileSize*2
+        starting_pos = Vec2(tileSize*20,tileSize*15)
+        self.hitbox = Rectangle(starting_pos - self.hitbox_visual_offset, 0, Vec2(self.playerSize, 5), Color.INVISIBLE)
+        vis = Rectangle(starting_pos, 0, Vec2.splat(self.playerSize), Color.WHITE)
+        vis.texture = textures.get("character_3")
+
+        self.visual = Sprite([vis])
+        self.animation_frames = [textures.get("character_1"),textures.get("character_2"),textures.get("character_3")] # type: ignore
+        self.attack_frames = [textures.get("slash_1"),textures.get("slash_2"), textures.get("slash_3"),textures.get("slash_4"),textures.get("slash_5"),textures.get("slash_6")] # type: ignore
+
+    def update(self, no_nav: NoNavArea):
+        dt = get_delta_time()
+        keys = get_keys_down()
+
+        dir = Vec2.ZERO
+        if KeyCode.W in keys: dir -= Vec2(0,1)
+        if KeyCode.S in keys: dir += Vec2(0,1)
+        if KeyCode.A in keys: dir -= Vec2(1,0)
+        if KeyCode.D in keys: dir += Vec2(1,0)
+
+        if not dir == Vec2.ZERO:
+            Player.has_moved_once = True
+        direction = dir.normalize_or_zero() *self.speed * dt
+        
+        direction = no_nav_area.check_move(self.hitbox, direction)
+        
+        
+
+        # updating the visuals.
+        new_position = self.hitbox.position + direction
+        has_moved = not (new_position == self.hitbox.position)
+        self.hitbox.position = new_position
+        self.visual.move_to( self.hitbox.position - self.hitbox_visual_offset )
+
+
+        if has_moved and self.last_animation_switch < time.time()-0.1:
+            self.last_animation_switch = time.time()
+            if self.walking_animation_index == 2:
+                self.walking_animation_index = 0
+            else:
+                self.walking_animation_index += 1
+            self.visual.parts[0].texture = self.animation_frames[self.walking_animation_index]
+        
+        # update slash visual
+        def update_slash_visual():
+
+            lhs: Vec2 = self.hitbox.position
+            rhs = camera.screen_to_world(get_mouse_position())
+            direction = (rhs - lhs).normalize_or_zero() * 100
+            
+            rot = direction.to_angle()
+
+            if MouseButton.Left in get_mouse_buttons_pressed(): # start a new attack
+                if self.attack_sprite is None: # we are not currently attacking
+                    AudioManager.push_sound(sounds.get("whoosh"), relative_volume=2) #type: ignore
+                    self.attack_animation_index = 0
+                    self.attack_sprite = Sprite([Rectangle( self.hitbox.position + direction, rot, Vec2.splat(150), Color.WHITE, self.attack_frames[self.attack_animation_index] )])
+                    self.last_attack_animation_switch = time.time()
+            
+            if self.attack_sprite is not None: # check if we step the attack animation
+                if self.last_attack_animation_switch < time.time() - 0.05:
+                    self.last_attack_animation_switch = time.time()
+                    if self.attack_animation_index == self.attack_frames.__len__() -1 : # we completed an attack animation
+                        self.attack_sprite = None
+                        return
+                    else: # step animation
+                        self.attack_animation_index +=1
+                        self.attack_sprite = Sprite([Rectangle( self.hitbox.position + direction, rot, Vec2.splat(150), Color.WHITE, self.attack_frames[self.attack_animation_index] )])
+        update_slash_visual()
+
+        # draw directional arrow
+        self.sword_visual = Sprite([])
+        if KeyCode.Q in keys:
+            lhs: Vec2 = self.hitbox.position
+            rhs = camera.screen_to_world(get_mouse_position())
+            direction = rhs - lhs
+
+
+            rotation = direction.to_angle()
+            self.sword_visual = Sprite([
+                Rectangle(
+                    self.hitbox.position + direction.normalize_or_zero()*100,
+                    rotation, 
+                    Vec2(self.playerSize * 1.7, self.playerSize * 1.4), 
+                    Color.RED, 
+                    None
+                )
+            ])
 
 class Sprite():
     parts: list[Rectangle] = []
@@ -410,117 +402,8 @@ class NoNavArea():
 
         return Vec2(final_move_x, final_move_y)
 
-class Player():
-
-    hitbox: Rectangle
-    visual: Sprite
-    sword_visual: Sprite = Sprite([])
-    playerSize: float
-    speed: float = tileSize*15.0
-    health: float = 1.0 # ranging from 1.0 to 0.0
-
-    walking_animation_index = 0
-    animation_frames: list[Texture2D] = []
-    last_animation_switch  = time.time()
 
 
-    attack_sprite: Sprite | None =  None
-    attack_animation_index = 0
-    attack_frames: list[Texture2D] = []
-    last_attack_animation_switch  = time.time()
-
-    hitbox_visual_offset = Vec2(0,tileSize/2)
-    has_moved_once =  False
-
-    def __init__(self) -> None:
-        self.playerSize = tileSize*2
-        starting_pos = Vec2(tileSize*20,tileSize*15)
-        self.hitbox = Rectangle(starting_pos - self.hitbox_visual_offset, 0, Vec2(self.playerSize, 5), Color.INVISIBLE)
-        vis = Rectangle(starting_pos, 0, Vec2.splat(self.playerSize), Color.WHITE)
-        vis.texture = textures.get("character_3")
-
-        self.visual = Sprite([vis])
-        self.animation_frames = [textures.get("character_1"),textures.get("character_2"),textures.get("character_3")] # type: ignore
-        self.attack_frames = [textures.get("slash_1"),textures.get("slash_2"), textures.get("slash_3"),textures.get("slash_4"),textures.get("slash_5"),textures.get("slash_6")] # type: ignore
-
-    def update(self, no_nav: NoNavArea):
-        dt = get_delta_time()
-        keys = get_keys_down()
-
-        dir = Vec2.ZERO
-        if KeyCode.W in keys: dir -= Vec2(0,1)
-        if KeyCode.S in keys: dir += Vec2(0,1)
-        if KeyCode.A in keys: dir -= Vec2(1,0)
-        if KeyCode.D in keys: dir += Vec2(1,0)
-
-        if not dir == Vec2.ZERO:
-            Player.has_moved_once = True
-        direction = dir.normalize_or_zero() *self.speed * dt
-        
-        direction = no_nav_area.check_move(self.hitbox, direction)
-        
-        
-
-        # updating the visuals.
-        new_position = self.hitbox.position + direction
-        has_moved = not (new_position == self.hitbox.position)
-        self.hitbox.position = new_position
-        self.visual.move_to( self.hitbox.position - self.hitbox_visual_offset )
-
-
-        if has_moved and self.last_animation_switch < time.time()-0.1:
-            self.last_animation_switch = time.time()
-            if self.walking_animation_index == 2:
-                self.walking_animation_index = 0
-            else:
-                self.walking_animation_index += 1
-            self.visual.parts[0].texture = self.animation_frames[self.walking_animation_index]
-        
-        # update slash visual
-        def update_slash_visual():
-
-            lhs: Vec2 = self.hitbox.position
-            rhs = camera.screen_to_world(get_mouse_position())
-            direction = (rhs - lhs).normalize_or_zero() * 100
-            
-            rot = direction.to_angle()
-
-            if MouseButton.Left in get_mouse_buttons_pressed(): # start a new attack
-                if self.attack_sprite is None: # we are not currently attacking
-                    AudioManager.push_sound(sounds.get("whoosh"), relative_volume=2) #type: ignore
-                    self.attack_animation_index = 0
-                    self.attack_sprite = Sprite([Rectangle( self.hitbox.position + direction, rot, Vec2.splat(150), Color.WHITE, self.attack_frames[self.attack_animation_index] )])
-                    self.last_attack_animation_switch = time.time()
-            
-            if self.attack_sprite is not None: # check if we step the attack animation
-                if self.last_attack_animation_switch < time.time() - 0.05:
-                    self.last_attack_animation_switch = time.time()
-                    if self.attack_animation_index == self.attack_frames.__len__() -1 : # we completed an attack animation
-                        self.attack_sprite = None
-                        return
-                    else: # step animation
-                        self.attack_animation_index +=1
-                        self.attack_sprite = Sprite([Rectangle( self.hitbox.position + direction, rot, Vec2.splat(150), Color.WHITE, self.attack_frames[self.attack_animation_index] )])
-        update_slash_visual()
-
-        # draw directional arrow
-        self.sword_visual = Sprite([])
-        if KeyCode.Q in keys:
-            lhs: Vec2 = self.hitbox.position
-            rhs = camera.screen_to_world(get_mouse_position())
-            direction = rhs - lhs
-
-
-            rotation = direction.to_angle()
-            self.sword_visual = Sprite([
-                Rectangle(
-                    self.hitbox.position + direction.normalize_or_zero()*100,
-                    rotation, 
-                    Vec2(self.playerSize * 1.7, self.playerSize * 1.4), 
-                    Color.RED, 
-                    None
-                )
-            ])
 
 class BasicEnemy():
     disabled: bool
@@ -590,9 +473,12 @@ class ProjectileEnemy():
     orbit_switch_interval: float
     drift_seed: float  # Unique offset so their breathing patterns aren't synced
 
-    def __init__(self, pos: Vec2, scene: int) -> None:
+    last_fire_time: float
+    fire_cooldown: float
+    projectiles_ref: list[EnemyProjectile]
+
+    def __init__(self, pos: Vec2, scene: int, projectiles_ref: list[EnemyProjectile]) -> None:
         self.hitbox = Rectangle(pos, 0, Vec2.splat(100), Color.INVISIBLE)
-        
         self.active_scene = scene
 
         self.animation_frames = [textures.get("character_1"), textures.get("character_2"), textures.get("character_3")] # type: ignore
@@ -607,22 +493,25 @@ class ProjectileEnemy():
         self.orbit_direction = random.choice([-1.0, 1.0])
         self.last_orbit_switch = time.time()
         self.orbit_switch_interval = random.uniform(1.5, 3.5)
-        
         self.drift_seed = random.uniform(0.0, 100.0)
-        
         self.last_animation_switch = time.time() - random.uniform(0.0, 0.1)
+        
+        # --- NEW: Firing Logic Setup ---
+        self.projectiles_ref = projectiles_ref
+        self.last_fire_time = time.time()
+        self.fire_cooldown = random.uniform(2.0, 4.0)
 
     def update(self, player: Player, no_nav: NoNavArea):
         if not SceneManager.current_active_scene == self.active_scene:
             return
         dt = get_delta_time()
         
+        # --- EXISTING: Movement code ---
         diff = player.hitbox.position - self.hitbox.position
         current_distance = diff.length() 
         direction = diff.normalize_or_zero()
         
         tangent = Vec2(-direction.y, direction.x)
-        
         radius_drift = math.sin(time.time() * 1.5 + self.drift_seed) * (tileSize * 0.5)
         flexible_target_distance = self.target_distance + radius_drift
         
@@ -635,9 +524,9 @@ class ProjectileEnemy():
         if abs(current_distance - flexible_target_distance) <= buffer:
             radial_factor = 0.0   
         elif current_distance > flexible_target_distance:
-            radial_factor = 1.0   # Move inward
+            radial_factor = 1.0   
         else:
-            radial_factor = -1.2  # Move outward (slightly aggressive fallback weight)
+            radial_factor = -1.2  
             
         move_dir = (direction * radial_factor) + (tangent * self.orbit_direction)
         move_step = move_dir.normalize_or_zero() * self.speed * dt
@@ -653,6 +542,100 @@ class ProjectileEnemy():
             else:
                 self.walking_animation_index += 1
             self.visual.parts[0].texture = self.animation_frames[self.walking_animation_index] #type: ignore
+
+        # --- NEW: Firing execution ---
+        if time.time() - self.last_fire_time > self.fire_cooldown:
+            self.last_fire_time = time.time()
+            self.fire_cooldown = random.uniform(2.0, 4.0) # randomize next shot
+            
+            proj_hitbox = Rectangle(self.hitbox.position, 0, Vec2.splat(tileSize * 0.6), Color.INVISIBLE)
+            projectile = EnemyProjectile(
+                homing=False, 
+                damage=0.08, 
+                hitbox=proj_hitbox, 
+                player=player,
+                active_scene=self.active_scene
+            )
+            self.projectiles_ref.append(projectile)
+
+class EnemyProjectile():
+    max_lifetime: float # in seconds
+    spawn_time: float
+
+    homing: bool
+    velocity: Vec2
+    damage: float
+    hitbox: Rectangle
+    visual: Sprite 
+    animation_frames: list[Texture2D]
+
+    current_animation_index: int
+    last_animation_switch: float
+    active_scene: int
+
+    def __init__(self, homing: bool, damage: float, hitbox: Rectangle, player: Player, active_scene: int) -> None:
+        self.max_lifetime = 5.0
+        self.spawn_time = time.time()
+        self.homing = homing
+        self.hitbox = hitbox
+        self.damage = damage
+        self.active_scene = active_scene
+        
+        # Default velocity aimed directly at the player
+        self.velocity = (player.hitbox.position - hitbox.position).normalize_or_zero() * tileSize * 15.0
+        
+        self.last_animation_switch = time.time()
+        self.current_animation_index = 0
+
+        self.animation_frames = [
+            Texture2D.from_rgba8(1,1, [255,100,100,255]), 
+            Texture2D.from_rgba8(1,1, [255,255,100,255])
+        ]
+        
+        vis_rect = Rectangle(self.hitbox.position, self.velocity.to_angle(), self.hitbox.scale, Color.WHITE, self.animation_frames[0])
+        self.visual = Sprite([vis_rect])
+
+    def update(self, player: Player, no_nav: NoNavArea) -> bool:
+        """Returns True if the projectile should be destroyed."""
+        if not SceneManager.current_active_scene == self.active_scene:
+            return False
+
+        dt = get_delta_time()
+        
+        # Optional homing interpolation towards the player
+        if self.homing:
+            target_dir = (player.hitbox.position - self.hitbox.position).normalize_or_zero()
+            self.velocity = (self.velocity * 0.95 + target_dir * (self.velocity.length() * 0.05))
+            
+        move_step = self.velocity * dt
+        
+        # Move the projectile and check bounds/walls
+        move_vec_validated = no_nav.check_move(self.hitbox, move_step)
+        
+        # If the validated vector is smaller than the intended move step, we hit a wall
+        if move_vec_validated.length() < move_step.length() * 0.99:
+            return True 
+
+        # Apply movement
+        self.hitbox.position += move_vec_validated
+        self.update_visual()
+
+        # Check age
+        if time.time() - self.spawn_time > self.max_lifetime:
+            return True
+            
+        return False
+
+    def update_visual(self):
+        # Update position and rotation
+        self.visual.parts[0].position = self.hitbox.position
+        self.visual.parts[0].rotation = self.velocity.to_angle()
+        
+        # Step the animation
+        if time.time() - self.last_animation_switch > 0.1:
+            self.last_animation_switch = time.time()
+            self.current_animation_index = (self.current_animation_index + 1) % len(self.animation_frames)
+            self.visual.parts[0].texture = self.animation_frames[self.current_animation_index]
 
 class KeyHints():
     key_size: Vec2 = Vec2.splat(0.06*2194.0)
@@ -936,14 +919,15 @@ class DamageSystem(): # combined class handling all Damage related events.
     __enemy_invulnerability_between_attacks = 0.1
 
     @staticmethod
-    def tick(enemies: list[BasicEnemy | ProjectileEnemy], player: Player):
+    def tick(enemies: list[BasicEnemy | ProjectileEnemy], projectiles: list[EnemyProjectile], player: Player):
         DamageSystem.__player_damage_enemy(enemies, player)
         DamageSystem.__enemy_damage_player(enemies, player)
-    
+        DamageSystem.__player_damage_projectile(projectiles, player)
+        DamageSystem.__projectile_damage_player(projectiles, player)
     
     @staticmethod
     def __enemy_damage_player(enemies: list[BasicEnemy | ProjectileEnemy], player: Player):
-        colission = player.hitbox.collides_with_list([enemy.hitbox for enemy in enemies])
+        colission = player.hitbox.collides_with_list([enemy.hitbox for enemy in enemies if enemy.active_scene == SceneManager.current_active_scene])
         if not colission == []:
             if DamageSystem.__last_damage_tick < (time.time() - DamageSystem.__player_invulnerability_between_attacks):
                 
@@ -955,7 +939,7 @@ class DamageSystem(): # combined class handling all Damage related events.
     @staticmethod
     def __player_damage_enemy(enemies: list[BasicEnemy | ProjectileEnemy], player: Player):
         if player.attack_sprite and player.attack_animation_index == 0:
-            colissions = [enemy for enemy in enemies if enemy.hitbox.collides_with(player.attack_sprite.parts[0])]
+            colissions = [enemy for enemy in enemies if enemy.active_scene == SceneManager.current_active_scene and enemy.hitbox.collides_with(player.attack_sprite.parts[0])]
             now = time.time()
             for col in colissions:
 
@@ -963,12 +947,43 @@ class DamageSystem(): # combined class handling all Damage related events.
                     col.health -= 0.51
                     TwoDPhysics.add_shove(
                         col, 
-                        ((col.hitbox.position - player.hitbox.position).normalize_or_zero() * 50) + enemy.hitbox.position
+                        ((col.hitbox.position - player.hitbox.position).normalize_or_zero() * 50) + col.hitbox.position
                     )
                     col.invulnerable_til = now + DamageSystem.__enemy_invulnerability_between_attacks
                     if col.health <= 0:
                         enemies.remove(col)
+    @staticmethod
+    def __projectile_damage_player(projectiles: list[EnemyProjectile], player: Player):
+        now = time.time()
+        projectiles_to_remove = []
+        for proj in projectiles:
+            if proj.active_scene == SceneManager.current_active_scene:
+                if player.hitbox.collides_with(proj.hitbox):
+                    
+                    if DamageSystem.__last_damage_tick < (now - DamageSystem.__player_invulnerability_between_attacks):
+                        player.health -= proj.damage
+                        if player.health < 0.0:
+                            player.health = 0.0
+                        DamageSystem.__last_damage_tick = now
+                        
+                    projectiles_to_remove.append(proj)
+                    
+        for proj in projectiles_to_remove:
+            if proj in projectiles:
+                projectiles.remove(proj)
 
+    @staticmethod
+    def __player_damage_projectile(projectiles: list[EnemyProjectile], player: Player):
+        if player.attack_sprite and player.attack_animation_index == 0:
+            projectiles_to_remove = []
+            for proj in projectiles:
+                if proj.active_scene == SceneManager.current_active_scene:
+                    if proj.hitbox.collides_with(player.attack_sprite.parts[0]):
+                        projectiles_to_remove.append(proj)
+                        
+            for proj in projectiles_to_remove:
+                if proj in projectiles:
+                    projectiles.remove(proj)
 
 
 class TwoDPhysics():
@@ -1202,6 +1217,7 @@ examples.loading_screen(lambda a: a, [],"Initializing Scene")
 menue = Menue()
 player = Player()
 hud = Hud()
+SceneManager.current_active_scene = 2
 background  = Background(2)
 key_hints = KeyHints()
 no_nav_area = NoNavArea(2)
@@ -1214,6 +1230,7 @@ last_fps_update = time.time()
 should_quit = menue.start(0)
 
 enemies: list[BasicEnemy | ProjectileEnemy] = []
+enemy_projectiles: list[EnemyProjectile] = []
 
 prevent_quit()
 while True:
@@ -1241,7 +1258,7 @@ while True:
         #     BasicEnemy(Vec2.splat(500), SceneManager.current_active_scene)
         # )
         enemies.append(
-            ProjectileEnemy(Vec2.splat(500), SceneManager.current_active_scene)
+            ProjectileEnemy(Vec2.splat(500), SceneManager.current_active_scene, enemy_projectiles)
         )
     if KeyCode.K in get_keys_pressed():
         enemies.clear()
@@ -1256,14 +1273,27 @@ while True:
     level_triggers.check(player)
     for enemy in enemies:
         enemy.update(player, no_nav_area)
-    DamageSystem.tick(enemies, player)
+
+    active_projectiles = []
+    for proj in enemy_projectiles:
+        should_destroy = proj.update(player, no_nav_area)
+        if not should_destroy:
+            active_projectiles.append(proj)
+    enemy_projectiles[:] = active_projectiles
+
+
+    DamageSystem.tick(enemies,enemy_projectiles, player)
 
     TwoDPhysics.tick(get_delta_time(), no_nav_area)
     
     # drawing
     camera.set_camera(camera)
     background.draw()
-    middle_layer.draw([enemy.visual for enemy in enemies if enemy.active_scene == SceneManager.current_active_scene], player)
+    middle_layer.draw(
+        [enemy.visual for enemy in enemies if enemy.active_scene == SceneManager.current_active_scene] +
+        [proj.visual for proj in enemy_projectiles if proj.active_scene == SceneManager.current_active_scene], 
+        player
+    )
     hud.draw(player)
     no_nav_area.debug_draw()
     
