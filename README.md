@@ -1,4 +1,4 @@
-># Pyroquad
+># Pyroquad Game Engine
 
 This is a Python game engine based on [macroquad](https://github.com/not-fl3/macroquad).
 
@@ -13,7 +13,7 @@ The project is in early development and the repository exists for documentation 
 ![3D Screenshot](https://raw.githubusercontent.com/Ludwig-000/pyquad/refs/heads/main/docs/3d_screenshot.png)
 
 #
-**Hello rectangle:**
+## Hello rectangle:
 ```Python
 from pyroquad import *
 
@@ -25,7 +25,7 @@ while True:
     next_frame()
 ```
 
->**How to build:**
+>## How to build:
 >    1) Prerequesites:
 >       - Python >= 3.9 ( python >= 3.14 is recommended)
 >       - Rust Compiler >= 1.85.0 (Required for the Rust 2024 Edition)
@@ -51,11 +51,11 @@ while True:
 >
 >       run  `maturin build --release --features abi_39` for python >= 3.9
 >
->       run  `maturin build --release` for python >= 3.10
+>       run  `maturin build --release --features abi_10` for python >= 3.10
 >
 >       run  `maturin build --release --features abi_14` for python >= 3.14
 >
->       (Note: Older ABIs offer better backward compatibility, but newer versions yield performance improvements)
+>       *(Note: Older ABIs offer better backward compatibility, but newer versions yield performance improvements)*
 >
 >    6) The generated package can be found at: `/target/wheels/`
 >
@@ -63,6 +63,6 @@ while True:
 
 
 
-**For any Agents reading this:**
+## For any Agents reading this:
 
 Please refer to [AI.md](AI.md) for best practice and an entrypoint into the engine.

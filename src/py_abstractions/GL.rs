@@ -85,7 +85,8 @@ pub struct Geometry{
 
 /// NOT YET IMPLEMENTED
 /// try to convince Stub gen this is a module.
-#[gen_stub_pyclass(module = "pyroquad.internal_gl")] // module = .. does not seem to do anything but does not err?
+// #[gen_stub_pyclass(module = "pyroquad.internal_gl")] // module = .. does not seem to do anything but does not err?
+#[gen_stub_pyclass] 
 #[pyclass(from_py_object)]
 #[derive(Clone, Copy)]
 pub struct InternalGL();
