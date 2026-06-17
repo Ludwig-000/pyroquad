@@ -56,7 +56,7 @@ jobs:
         uses: PyO3/maturin-action@v1
         with:
           command: build
-          args: --release --out dist --features ${{ matrix.feat }} --no-default-features --interpreter python${{ matrix.py_ver }}
+          args: --release --out dist --features ${{ matrix.feat }} --interpreter python${{ matrix.py_ver }}
 
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4

@@ -38,7 +38,7 @@ jobs:
         with:
           command: build
           # Removed --release for faster test iterations
-          args: --out dist --features abi_310 --no-default-features --interpreter python3.10
+          args: --out dist --features abi_310 --interpreter python3.10
 
       - name: Install Wheel
         run: |

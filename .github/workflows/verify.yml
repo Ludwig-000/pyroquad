@@ -42,4 +42,4 @@ jobs:
         uses: PyO3/maturin-action@v1
         with:
           command: build
-          args: --features abi_310 --no-default-features --interpreter python3.10
+          args: --features abi_310 --interpreter python3.10
