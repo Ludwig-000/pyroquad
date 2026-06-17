@@ -1,4 +1,4 @@
-use pyo3_stub_gen::Result;
+use _pyroquad::pyo3_stub_gen::Result;
 use std::path::PathBuf;
 use _pyroquad::stub_info;
 

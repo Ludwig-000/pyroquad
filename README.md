@@ -2,12 +2,7 @@
 
 This is a Python game engine based on [macroquad](https://github.com/not-fl3/macroquad).
 
-The project is in early development and the repository exists for documentation purposes.
-
 ---
-> [!NOTE]
->
-> `python = 3.9` will not compile at the moment. This is being adressed.
 
 >## Featuring 2D:  
 ![2D Screenshot](https://raw.githubusercontent.com/Ludwig-000/pyquad/refs/heads/main/docs/2d_screenshot.png)
@@ -48,7 +43,9 @@ while True:
 >         `.venv\Scripts\activate`
 >
 >    3) Install the [maturin build tool](https://github.com/PyO3/maturin) using `pip install maturin`
->    4) (**optional**) Run `cargo run --bin stub_gen` to update [_pyroquad.pyi](src/python/pyroquad/_pyroquad.pyi) and gennerate up-to-date python stubs.
+>    4) (**optional**) Run `cargo run --bin stub_gen --no-default-features --features use-real` to update [_pyroquad.pyi](src/python/pyroquad/_pyroquad.pyi) and gennerate up-to-date python stubs. 
+>
+>       Stub generation specifically requires python >= 3.10
 >
 >    5) To compile:
 >
