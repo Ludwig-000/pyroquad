@@ -67,6 +67,8 @@ pub fn _pyroquad( m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(crate::py_abstractions::py_functions::draw_multiline_text, m)?)?;
     m.add_function(wrap_pyfunction!(crate::py_abstractions::py_functions::draw_text, m)?)?;
     m.add_function(wrap_pyfunction!(crate::py_abstractions::py_functions::get_text_center, m)?)?;
+
+    m.add_function(wrap_pyfunction!(crate::py_abstractions::py_functions::batch_draw_shapes, m)?)?;
     
 
     m.add_function(wrap_pyfunction!(crate::py_abstractions::py_functions::get_fps, m)?)?;

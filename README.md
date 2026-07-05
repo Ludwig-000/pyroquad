@@ -1,4 +1,7 @@
-># Pyroquad Game Engine
+# <img src="https://raw.githubusercontent.com/Ludwig-000/pyquad/refs/heads/main/docs/PyroquadLogo.png" width="40" align="left" style="margin-right: 15px;"> Pyroquad Game Engine
+<br clear="left"/>
+
+
 
 This is a Python game engine based on [macroquad](https://github.com/not-fl3/macroquad).
 
@@ -51,9 +54,9 @@ while True:
 >
 >       run  `maturin build --release --features abi_39` for python >= 3.9
 >
->       run  `maturin build --release --features abi_10` for python >= 3.10
+>       run  `maturin build --release --features abi_310` for python >= 3.10
 >
->       run  `maturin build --release --features abi_14` for python >= 3.14
+>       run  `maturin build --release --features abi_314` for python >= 3.14
 >
 >       *(Note: Older ABIs offer better backward compatibility, but newer versions yield performance improvements)*
 >

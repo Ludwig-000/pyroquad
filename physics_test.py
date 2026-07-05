@@ -55,14 +55,22 @@ set_cursor_grab(True)
 show_mouse(False)
 
 
+hdr1 = Image("tests/HDR_blue_nebulae_2.png")
+hdr1.flip_vertical()
+
+hdr = hdr1.to_texture()
+
+hdr2 = hdr1.to_texture()
+
 
 
 while True:
-    
+
     if KeyCode.Escape in get_keys_pressed():
         break
     
     cam.update()
+    draw_skybox(hdr, Color.WHITE)
     draw_grid(100,10,Color.YELLOW,Color.CYAN)
     draw_cube(Vec3.ZERO,Vec3.ONE,Color.PURE_BLUE, None)
     draw_all_objects()

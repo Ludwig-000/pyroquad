@@ -2,7 +2,7 @@
 // we simply implement some helper functions here.
 //
 
-use crate::py_abstractions::structs::TwoDObjects::{Circle::Circle, Rectangle::Rectangle};
+use crate::py_abstractions::structs::{GLAM::Vec2::Vec2, TwoDObjects::{Circle::Circle, Rectangle::Rectangle}};
 use macroquad::prelude as mq;
 
 use pyo3::prelude::*;

@@ -19,6 +19,10 @@ impl<T: Send + Sync + 'static> PArc<T>{
         let item  =Arc::new(item);
         PArc {  item }
     }
+
+    pub fn ptr_address(&self) -> usize {
+        Arc::as_ptr(&self.item) as usize
+    }
 }
 
 impl<T: Send + Sync + 'static> Deref for PArc<T> {
@@ -70,3 +74,4 @@ impl<T: Send + Sync + 'static + PartialEq> PartialEq for PArc<T> {
         self.item == other.item
     }
 }
+

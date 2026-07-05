@@ -4,13 +4,13 @@ from pyroquad import *
 import random
 import time
 from pyinstrument import Profiler
-from utils import *
 import math
 
+from utils import *
 from custom_assets import load_all_assets
 
 
-profiler = Profiler(interval=0.001)
+profiler = Profiler(interval=0.1)
 profiler.start()
 
 activate_engine(Config("2D Game",fullscreen=True,swap_interval=0, sample_count=10))
@@ -18,6 +18,13 @@ activate_engine(Config("2D Game",fullscreen=True,swap_interval=0, sample_count=1
 camera = Camera2D(rotation=0,zoom=Vec2(0.0009115, 0.0009115*16/9),target=Vec2.ZERO,offset=Vec2(-1,1))
 
 tileSize = 32
+
+
+
+class DEBUG():
+    this_frame_draw_calls = 0
+
+
 
 
 def quit_program():
@@ -38,7 +45,8 @@ class Button():
         
     def draw(self):
         pos = camera.screen_to_world( get_mouse_position())
-        temp_rec = Rectangle(pos, 0, Vec2.ONE,Color.INVISIBLE)
+        temp_rec = Rectangle(pos, 0, Vec2.ONE,Color.INVISIBLE) # we create a tiny rectangle at the mouse position for convenience.
+
         if self.button_tex is None: # highlighting via color
             tmp_col = self.button.color
             if temp_rec.collides_with(self.button):
@@ -94,7 +102,7 @@ class Background():
             gf2= []
             gf1= []
             gp= []
-            dirt_path_var = []
+            dirt_path_var1 = []
             for w in range(0, (int(2194.0/tileSize)+1)):
                 for h in range(0, (int(1234.0/tileSize)+1)):
                     seed_value = (w * 73856093) ^ (h * 19349663) ^ (level * 83492791)
@@ -110,16 +118,18 @@ class Background():
                     else:
                         tile.texture = textures.get("grass_plain")
                         gp.append(tile)
-            dirt_path_var = self.dirt_path(Vec2(60, 8), Vec2(16, 13), 5, 0.7)
+            dirt_path_var1 = self.dirt_path(Vec2(60, 8), Vec2(16, 13), 5, 0.7)
 
 
-            self.level += gf2 + gf1 + gp + dirt_path_var
+            self.level += gf2 + gf1 + gp + dirt_path_var1
 
         if level == 2:
             gf2= []
             gf1= []
             gp= []
-            dirt_path_var = []
+            dirt_path_var1 = []
+            water = []
+            bridge = []
             for w in range(0, (int(2194.0/tileSize)+1)):
                 for h in range(0, (int(1234.0/tileSize)+1)):
                     seed_value = (w * 73856093) ^ (h * 19349663) ^ (level * 83492791)
@@ -135,10 +145,28 @@ class Background():
                     else:
                         tile.texture = textures.get("grass_plain")
                         gp.append(tile)
-            dirt_path_var = self.dirt_path(scale=Vec2(35, 8), offset=Vec2(0, 13), seed=4, density=0.6, min_transparency=0.5)
+            dirt_path_var1 = self.dirt_path(scale=Vec2(35, 8), offset=Vec2(0, 13), seed=4, density=0.6, min_transparency=0.5)
+            dirt_path_var2 = self.dirt_path(scale=Vec2(35, 8), offset=Vec2(39, 13), seed=53, density=0.3, min_transparency=0.5)
 
+            water = self.water_river(Vec2(5,40), Vec2(35,0))
+            
+            bridge = [
+                Rectangle(Vec2(800,1250), 0, Vec2(1050,1600), Color.WHITE, textures.get("bridge"))
+            ]
+            self.level += gf2 + gf1 + gp + dirt_path_var1 + dirt_path_var2 +  water + bridge
+        if level == 3:
+            self.level = Background.grass_back(5,5,2,5553)
 
-            self.level += gf2 + gf1 + gp + dirt_path_var
+    @staticmethod
+    def grass_back(g: float, f1: float, f2: float, seed: int) -> list[Rectangle]:
+        gps, texs = ([], [], []), ["grass_plain", "grass_flower_2", "grass_flower_1"]
+        rng = random.Random(seed)
+        for w in range(int(2194 / tileSize) + 1):
+            for h in range(int(1234 / tileSize) + 1):
+                i = rng.choices([0, 1, 2], weights=[g, f2, f1] if (g + f1 + f2) else [1, 0, 0])[0]
+                gps[i].append(Rectangle(Vec2(w * tileSize, h * tileSize), 0, Vec2.splat(tileSize), Color.WHITE, textures.get(texs[i])))
+        return gps[0] + gps[1] + gps[2]
+    
 
     @staticmethod
     def dirt_path(scale: Vec2, offset: Vec2, seed: int, density: float = .5, min_transparency: float = 0.9, min_size: float = .7) -> list[Rectangle]:
@@ -171,12 +199,33 @@ class Background():
                     tile = Rectangle(Vec2(pos_x, pos_y), 0, size, tile_color)
                     tile.texture = textures.get("dirt")
                     dirt_path.append(tile)
-                    
         return dirt_path
     
+
+    
+    
+    @staticmethod
+    def water_river(scale: Vec2, offset: Vec2) -> list[Rectangle]:
+        """Generates a solid rectangular block of water tiles."""
+        water_tiles = []
+        global tileSize
+        
+        for h in range(0, int(scale.y)):
+            for w in range(0, int(scale.x)):
+                pos_x = (w + offset.x) * tileSize
+                pos_y = (h + offset.y) * tileSize
+                
+                # Standard tile setup mapped directly to global tileSize grid
+                tile = Rectangle(Vec2(pos_x, pos_y), 0, Vec2.splat(tileSize), Color.BLUEY_GREEN)
+                water_tiles.append(tile)
+                
+        return water_tiles
+    
+
     def draw(self):
-        for rec in self.level:
-            rec.draw()
+        batch_draw_shapes(self.level)
+        DEBUG.this_frame_draw_calls += self.level.__len__()
+
 
 
 class Player():
@@ -227,7 +276,7 @@ class Player():
             Player.has_moved_once = True
         direction = dir.normalize_or_zero() *self.speed * dt
         
-        direction = no_nav_area.check_move(self.hitbox, direction)
+        direction = no_nav_area.check_move(self.hitbox, direction, False)
         
         
 
@@ -296,113 +345,194 @@ class Sprite():
     parts: list[Rectangle] = []
     def __init__(self, sprites: list[Rectangle]) -> None:
         self.parts = sprites
+        self.sort_y = max(rec.max_y() for rec in self.parts) if self.parts else 0.0
+
     def draw_indiscriminate(self):
         for part in self.parts:
             part.draw()
     def move_to(self, loc: Vec2):
         for part in self.parts:
             part.position = loc
+        self.sort_y = max(rec.max_y() for rec in self.parts) if self.parts else 0.0
 
-class NoNavArea():
-    no_nav_area: list[Rectangle]
+class NoNavArea:
+    def __init__(self, level: int) -> None:
+        # Pre-separated lists for fast native passing
+        self.all_rects: list[Rectangle] = []
+        self.projectile_rects: list[Rectangle] = []
 
-    def __init__(self, level) -> None:
-        self.no_nav_area = []
+        # Temporary list to build the level geometry easily
+        raw_nav_area: list[tuple[Rectangle, bool]] = []
+
         if level == 0:
-            self.no_nav_area += [
-                Rectangle(Vec2(tileSize*31, tileSize*4.4),0,Vec2(2194.0,5),Color.INVISIBLE),
-                Rectangle(Vec2(tileSize*31, tileSize*33.5),0,Vec2(2194.0,5),Color.INVISIBLE),
-                Rectangle(Vec2(tileSize*9.5, tileSize*20),0,Vec2(5,1234.0),Color.INVISIBLE),
-                Rectangle(Vec2(tileSize*58.4, tileSize*20),0,Vec2(5,1234.0),Color.INVISIBLE),
-            ]
-        if level == 1:
-            self.no_nav_area += [ Rectangle(Vec2(21*tileSize,13.4*tileSize),0,Vec2(tileSize*14,tileSize*3.2),Color.INVISIBLE)   ]
-        
+            raw_nav_area.extend([
+                (Rectangle(Vec2(tileSize * 31, tileSize * 4.4), 0, Vec2(2194.0, 5), Color.INVISIBLE), True),
+                (Rectangle(Vec2(tileSize * 31, tileSize * 33.5), 0, Vec2(2194.0, 5), Color.INVISIBLE), True),
+                (Rectangle(Vec2(tileSize * 9.5, tileSize * 20), 0, Vec2(5, 1234.0), Color.INVISIBLE), True),
+                (Rectangle(Vec2(tileSize * 58.4, tileSize * 20), 0, Vec2(5, 1234.0), Color.INVISIBLE), True),
+            ])
+        elif level == 1:
+            raw_nav_area.extend([
+                (Rectangle(Vec2(21 * tileSize, 13.4 * tileSize), 0, Vec2(tileSize * 14, tileSize * 3.2), Color.INVISIBLE), True)
+            ])
+        elif level == 2:
+            raw_nav_area.extend([
+                (Rectangle(Vec2(37, 0) * tileSize, 0, Vec2(5, 28.7) * tileSize, Color.INVISIBLE), False),
+                (Rectangle(Vec2(37, 31.1) * tileSize, 0, Vec2(5, 28.7) * tileSize, Color.INVISIBLE), False),
+            ])
 
-    def debug_draw(self):
-        for nav in self.no_nav_area:
-            nav.color = Color.BLUE_VIOLET
-            nav.draw()
-            nav.color = Color.INVISIBLE
-    
-    
-    def check_move(self, hitbox: Rectangle, attempted_move: Vec2) -> Vec2:
+        # Distribute into the final flat lists
+        for rect, collides_with_proj in raw_nav_area:
+            self.all_rects.append(rect)
+            if collides_with_proj:
+                self.projectile_rects.append(rect)
+
+    def debug_draw(self) -> None:
+        debug_color = Color(0.365, 0.024, 0.914, 0.5)
+        # Drawing from all_rects gives the same visual result
+        for rect in self.all_rects:
+            original_color = rect.color
+            rect.color = debug_color
+            rect.draw()
+            rect.color = original_color
+
+    def check_move(self, hitbox: Rectangle, attempted_move: Vec2, is_projectile: bool) -> Vec2:
         assert hitbox.rotation == 0, "for performance reasons, hitbox may not be rotated"
 
-        
-        final_move_x = attempted_move.x
-        final_move_y = attempted_move.y
-        p_w = hitbox.scale.x / 2
-        p_h = hitbox.scale.y / 2
-        p_x = hitbox.position.x
-        p_y = hitbox.position.y
+        move_x, move_y = attempted_move.x, attempted_move.y
+        p_w, p_h = hitbox.scale.x / 2, hitbox.scale.y / 2
+        p_x, p_y = hitbox.position.x, hitbox.position.y
 
-        
-        # X-axes
-        if final_move_x != 0:
-            for nav in self.no_nav_area:
-                n_w = nav.scale.x / 2
-                n_h = nav.scale.y / 2
-                n_x = nav.position.x
-                n_y = nav.position.y
+        # Select the correct target list instantly (no boolean checks in loops)
+        obstacles = self.projectile_rects if is_projectile else self.all_rects + [
+            hb.hitbox for hb in destructible_manager.get(SceneManager.current_active_scene)
+        ]
+
+        # --- X-Axis Resolution ---
+        if move_x != 0:
+            # Broadphase: Create a rectangle covering the entire movement path
+            sweep_x_pos = p_x + (move_x / 2.0)
+            sweep_x_scale = hitbox.scale.x + abs(move_x)
+            sweep_rect_x = Rectangle(Vec2(sweep_x_pos, p_y), 0, Vec2(sweep_x_scale, hitbox.scale.y), Color.INVISIBLE)
+            
+            # Fast native check: Only return shapes inside our movement path
+            x_candidates = sweep_rect_x.collides_with_list(obstacles)
+
+            for rect in x_candidates:
+                n_w, n_h = rect.scale.x / 2, rect.scale.y / 2 #type: ignore
+                n_x, n_y = rect.position.x, rect.position.y
+
                 if abs(p_y - n_y) < (p_h + n_h):
-                    # we are stuck inside the collider
-                    if abs(p_x - n_x) < (p_w + n_w):
-                        if final_move_x > 0 and p_x < n_x:
-                            final_move_x = 0
-                        elif final_move_x < 0 and p_x > n_x:
-                            final_move_x = 0
-                    # we are not stuck inside the collider
-                    else:
-                        if final_move_x > 0 and p_x < n_x:
+                    if abs(p_x - n_x) < (p_w + n_w):  # Stuck inside collider
+                        if (move_x > 0 and p_x < n_x) or (move_x < 0 and p_x > n_x):
+                            move_x = 0
+                    else:  # Approaching collider
+                        if move_x > 0 and p_x < n_x:
                             gap = (n_x - n_w) - (p_x + p_w)
-                            if gap >= 0 and final_move_x > gap:
-                                final_move_x = gap
-                        elif final_move_x < 0 and p_x > n_x:
+                            if gap >= 0 and move_x > gap:
+                                move_x = gap
+                        elif move_x < 0 and p_x > n_x:
                             gap = (n_x + n_w) - (p_x - p_w)
-                            if gap <= 0 and final_move_x < gap:
-                                final_move_x = gap
+                            if gap <= 0 and move_x < gap:
+                                move_x = gap
 
-        if final_move_x < 0:
-            final_move_x = max(final_move_x, 0.0 - (p_x - p_w)) if p_x - p_w >= 0.0 else 0.0
-        elif final_move_x > 0:
-            final_move_x = min(final_move_x, 2194.0 - (p_x + p_w)) if p_x + p_w <= 2194.0 else 0.0
+        # Screen Bounds X
+        if move_x < 0:
+            move_x = max(move_x, -(p_x - p_w)) if (p_x - p_w) >= 0.0 else 0.0
+        elif move_x > 0:
+            move_x = min(move_x, 2194.0 - (p_x + p_w)) if (p_x + p_w) <= 2194.0 else 0.0
 
-        new_p_x = p_x + final_move_x
+        new_p_x = p_x + move_x
 
-        # Y-axes
-        if final_move_y != 0:
-            for nav in self.no_nav_area:
-                n_w = nav.scale.x / 2
-                n_h = nav.scale.y / 2
-                n_x = nav.position.x
-                n_y = nav.position.y
+        # --- Y-Axis Resolution ---
+        if move_y != 0:
+            # Broadphase for Y, accounting for the newly resolved X position
+            sweep_y_pos = p_y + (move_y / 2.0)
+            sweep_y_scale = hitbox.scale.y + abs(move_y)
+            sweep_rect_y = Rectangle(Vec2(new_p_x, sweep_y_pos), 0, Vec2(hitbox.scale.x, sweep_y_scale), Color.INVISIBLE)
+            
+            # Fast native check
+            y_candidates = sweep_rect_y.collides_with_list(obstacles)
+
+            for rect in y_candidates:
+                n_w, n_h = rect.scale.x / 2, rect.scale.y / 2 #type: ignore
+                n_x, n_y = rect.position.x, rect.position.y
 
                 if abs(new_p_x - n_x) < (p_w + n_w):
-                    
                     if abs(p_y - n_y) < (p_h + n_h):
-                        if final_move_y > 0 and p_y < n_y:
-                            final_move_y = 0
-                        elif final_move_y < 0 and p_y > n_y:
-                            final_move_y = 0
+                        if (move_y > 0 and p_y < n_y) or (move_y < 0 and p_y > n_y):
+                            move_y = 0
                     else:
-                        if final_move_y > 0 and p_y < n_y:
+                        if move_y > 0 and p_y < n_y:
                             gap = (n_y - n_h) - (p_y + p_h)
-                            if gap >= 0 and final_move_y > gap:
-                                final_move_y = gap
-                        elif final_move_y < 0 and p_y > n_y:
+                            if gap >= 0 and move_y > gap:
+                                move_y = gap
+                        elif move_y < 0 and p_y > n_y:
                             gap = (n_y + n_h) - (p_y - p_h)
-                            if gap <= 0 and final_move_y < gap:
-                                final_move_y = gap
+                            if gap <= 0 and move_y < gap:
+                                move_y = gap
 
-        if final_move_y < 0:
-            final_move_y = max(final_move_y, 0.0 - (p_y - p_h)) if p_y - p_h >= 0.0 else 0.0
-        elif final_move_y > 0:
-            final_move_y = min(final_move_y, 1234.0 - (p_y + p_h)) if p_y + p_h <= 1234.0 else 0.0
+        if move_y < 0:
+            move_y = max(move_y, -(p_y - p_h)) if (p_y - p_h) >= 0.0 else 0.0
+        elif move_y > 0:
+            move_y = min(move_y, 1234.0 - (p_y + p_h)) if (p_y + p_h) <= 1234.0 else 0.0
 
-        return Vec2(final_move_x, final_move_y)
+        return Vec2(move_x, move_y)
 
+class DestructibleObject():
+    hitbox: Rectangle
+    visual: Sprite
+    health: float
+    def __init__(self, hitbox: Rectangle, visual: Sprite | None, health: float = 1.0) -> None:
+        self.hitbox = hitbox
+        if visual is None:
+            self.visual = Sprite([
+                hitbox
+            ])
+        else:
+            self.visual = visual
+        self.health = health
 
+class DestructibleManager():
+    destructibles_level_0: list[DestructibleObject]
+    destructibles_level_1: list[DestructibleObject]
+    destructibles_level_2: list[DestructibleObject]
+    destructibles_level_3: list[DestructibleObject]
+    def __init__(self) -> None:
+        self.restock_level(0)
+        self.restock_level(1)
+        self.restock_level(2)
+        self.restock_level(3)
+
+    def get(self, level: int)-> list[DestructibleObject]:
+        if level == 0:
+            return self.destructibles_level_0
+        elif level == 1:
+            return self.destructibles_level_1
+        elif level == 2:
+            return self.destructibles_level_2
+        elif level == 3:
+            return self.destructibles_level_3
+        else:
+            return []
+ 
+    def restock_level(self, level: int):
+        if level == 0:
+            self.destructibles_level_0 = []
+        elif level == 1:
+            self.destructibles_level_1 = []
+        elif level == 2:
+            self.destructibles_level_2 = [
+                DestructibleObject(
+                    Rectangle(Vec2(37*tileSize,15.6*tileSize), 0, Vec2.splat(75), Color.BROWN),
+                    None,
+                    1
+                )
+            ]
+        elif level == 3:
+            self.destructibles_level_3 = []
+        else:
+            raise BaseException("invalid level")
 
 
 class BasicEnemy():
@@ -437,7 +567,7 @@ class BasicEnemy():
         
         move_step = direction * self.speed * dt
         
-        move_vec_validated = no_nav.check_move(self.hitbox, move_step)
+        move_vec_validated = no_nav.check_move(self.hitbox, move_step, False)
         
         self.hitbox.position += move_vec_validated
         self.visual.move_to(self.hitbox.position)
@@ -531,7 +661,7 @@ class ProjectileEnemy():
         move_dir = (direction * radial_factor) + (tangent * self.orbit_direction)
         move_step = move_dir.normalize_or_zero() * self.speed * dt
         
-        move_vec_validated = no_nav.check_move(self.hitbox, move_step)
+        move_vec_validated = no_nav.check_move(self.hitbox, move_step, False)
         self.hitbox.position += move_vec_validated
         self.visual.move_to(self.hitbox.position)
         
@@ -572,6 +702,7 @@ class EnemyProjectile():
     current_animation_index: int
     last_animation_switch: float
     active_scene: int
+    is_deflected: bool # NEW: Tracks who owns the projectile
 
     def __init__(self, homing: bool, damage: float, hitbox: Rectangle, player: Player, active_scene: int) -> None:
         self.max_lifetime = 5.0
@@ -580,6 +711,7 @@ class EnemyProjectile():
         self.hitbox = hitbox
         self.damage = damage
         self.active_scene = active_scene
+        self.is_deflected = False 
         
         # Default velocity aimed directly at the player
         self.velocity = (player.hitbox.position - hitbox.position).normalize_or_zero() * tileSize * 15.0
@@ -587,13 +719,23 @@ class EnemyProjectile():
         self.last_animation_switch = time.time()
         self.current_animation_index = 0
 
-        self.animation_frames = [
-            Texture2D.from_rgba8(1,1, [255,100,100,255]), 
-            Texture2D.from_rgba8(1,1, [255,255,100,255])
+        self.animation_frames = [  # type: ignore
+            textures.get(f"fireball_{i}") for i in range(1, 31)
         ]
         
-        vis_rect = Rectangle(self.hitbox.position, self.velocity.to_angle(), self.hitbox.scale, Color.WHITE, self.animation_frames[0])
+        vis_rect = Rectangle(self.hitbox.position, self.velocity.to_angle(), self.hitbox.scale * 5, Color.WHITE, self.animation_frames[0])
         self.visual = Sprite([vis_rect])
+
+    def deflect(self, new_direction: Vec2):
+        self.is_deflected = True
+        self.homing = False
+        self.velocity = new_direction.normalize_or_zero() * tileSize * 40.0 
+
+        self.animation_frames = [  # type: ignore
+            textures.get(f"fireball_fast_blue_{i}") for i in range(1, 31)
+        ]
+        self.visual.parts[0].scale = self.hitbox.scale * 7
+        self.spawn_time = time.time() 
 
     def update(self, player: Player, no_nav: NoNavArea) -> bool:
         """Returns True if the projectile should be destroyed."""
@@ -602,15 +744,15 @@ class EnemyProjectile():
 
         dt = get_delta_time()
         
-        # Optional homing interpolation towards the player
-        if self.homing:
+        # Optional homing interpolation towards the player (only if not deflected)
+        if self.homing and not self.is_deflected:
             target_dir = (player.hitbox.position - self.hitbox.position).normalize_or_zero()
             self.velocity = (self.velocity * 0.95 + target_dir * (self.velocity.length() * 0.05))
             
         move_step = self.velocity * dt
         
         # Move the projectile and check bounds/walls
-        move_vec_validated = no_nav.check_move(self.hitbox, move_step)
+        move_vec_validated = no_nav.check_move(self.hitbox, move_step, True)
         
         # If the validated vector is smaller than the intended move step, we hit a wall
         if move_vec_validated.length() < move_step.length() * 0.99:
@@ -632,7 +774,7 @@ class EnemyProjectile():
         self.visual.parts[0].rotation = self.velocity.to_angle()
         
         # Step the animation
-        if time.time() - self.last_animation_switch > 0.1:
+        if time.time() - self.last_animation_switch > 0.015:
             self.last_animation_switch = time.time()
             self.current_animation_index = (self.current_animation_index + 1) % len(self.animation_frames)
             self.visual.parts[0].texture = self.animation_frames[self.current_animation_index]
@@ -697,7 +839,7 @@ class House(Sprite):
                 Rectangle(pos + Vec2(size.x*2, size.y*2),0,size,Color.WHITE, textures.get("door")),
                 Rectangle(pos + Vec2(size.x*3, size.y*2),0,size,Color.WHITE, textures.get("wall_right")),
 
-                Rectangle(pos + Vec2(0, size.y)                ,0,size,Color.WHITE, textures.get("roof_4")),
+                Rectangle(pos + Vec2(0, size.y),0,size,Color.WHITE, textures.get("roof_4")),
                 Rectangle(pos + Vec2(size.x, size.y),0,size,Color.WHITE, textures.get("roof_5")),
                 Rectangle(pos + Vec2(size.x*2, size.y),0,size,Color.WHITE, textures.get("roof_5")),
                 Rectangle(pos + Vec2(size.x*3, size.y),0,size,Color.WHITE, textures.get("arched_roof")),
@@ -756,9 +898,10 @@ class MiddleLayer():
             )
 
         if level == 2:
-            
-            self.trees()
-            self.trees(min_x=0,min_y=18,max_x=80,max_y=40,seed=333,count=60,min_size=3,max_size=7)
+            self.trees(min_x= 0, min_y= -2,max_x= 34,max_y= 5,seed= 473,count= 20,min_size= 3, max_size= 5)
+            self.trees(min_x= 40, min_y= -2,max_x= 70,max_y= 5,seed= 43427,count= 20,min_size= 3, max_size= 5)
+            self.trees(min_x=0,min_y=20,max_x=34,max_y=40,seed=5354,count=30,min_size=3,max_size=7)
+            self.trees(min_x=40,min_y=20,max_x=70,max_y=40,seed=535,count=30,min_size=3,max_size=7)
 
         sp = sorted(
             self.sp,
@@ -794,13 +937,20 @@ class MiddleLayer():
     def draw(self, other_sprites: list[Sprite], player: Player):
         tmp_all_sprites = [] + self.sp + other_sprites + [player.visual] + [player.sword_visual] + [player.attack_sprite]
 
-        sp_sorted = sorted(
+
+        sp_sorted: list[Sprite | None] = sorted(
             tmp_all_sprites,
-            key=lambda sp: max(rec.max_y() for rec in sp.parts) if sp and sp.parts else 0.0, 
+            key=lambda sp: sp.sort_y if sp is not None else 0.0,
         )
-        for sp in sp_sorted:
-            if sp:
-                sp.draw_indiscriminate()
+
+
+        tmp_array: list[Rectangle] = [
+            part 
+            for sprite in sp_sorted if sprite is not None
+            for part in sprite.parts
+        ]
+        batch_draw_shapes(tmp_array)
+        DEBUG.this_frame_draw_calls += tmp_array.__len__()
 
 class LevelTriggers():
     triggers: list[Trigger]
@@ -833,18 +983,24 @@ class LevelTriggers():
             self.triggers = [
                 Trigger(r,1, player_pos=Vec2(tileSize*22,tileSize*17), audio= (sounds.get("door_open"), 1.0)) #type: ignore
             ]
-        if area == 1:
+        elif area == 1:
             house = Rectangle(Vec2(tileSize*22.5,tileSize*15),0,Vec2(tileSize*3,tileSize*0.5), Color.INVISIBLE)
             forest= Rectangle(Vec2(tileSize*69,tileSize*16),0,Vec2(tileSize*3,tileSize*10), Color.INVISIBLE)
             self.triggers = [
                 Trigger(house,transition_to=0, player_pos=Vec2(tileSize*47,tileSize*30), audio= (sounds.get("door_open"), 1.0)), #type: ignore
                 Trigger(forest,transition_to=2, player_pos=Vec2(tileSize*5,tileSize*16))
             ]
-        if area == 2:
-            house= Rectangle(Vec2(0, tileSize*16),0,Vec2(tileSize*3,tileSize*10), Color.INVISIBLE)
+        elif area == 2:
+            woods_trigger= Rectangle(Vec2(0, tileSize*16),0,Vec2(tileSize*3,tileSize*10), Color.INVISIBLE)
+            woods_trigger2= Rectangle(Vec2(tileSize*68, tileSize*16),0,Vec2(tileSize*3,tileSize*10), Color.INVISIBLE)
             self.triggers = [
-                Trigger(house,transition_to=1, player_pos=Vec2(tileSize*66,tileSize*16))
+                Trigger(woods_trigger,transition_to=1, player_pos=Vec2(tileSize*65,tileSize*16)),
+                Trigger(woods_trigger2,transition_to=3, player_pos=Vec2(tileSize*1,tileSize*16))
             ]
+        elif area == 3:
+            self.triggers = []
+        else:
+            raise BaseException("invalid level")
 
 class Trigger():
     hitbox: Rectangle
@@ -919,11 +1075,13 @@ class DamageSystem(): # combined class handling all Damage related events.
     __enemy_invulnerability_between_attacks = 0.1
 
     @staticmethod
-    def tick(enemies: list[BasicEnemy | ProjectileEnemy], projectiles: list[EnemyProjectile], player: Player):
+    def tick(enemies: list[BasicEnemy | ProjectileEnemy], projectiles: list[EnemyProjectile], player: Player, destructible_manager: DestructibleManager):
         DamageSystem.__player_damage_enemy(enemies, player)
         DamageSystem.__enemy_damage_player(enemies, player)
         DamageSystem.__player_damage_projectile(projectiles, player)
         DamageSystem.__projectile_damage_player(projectiles, player)
+        DamageSystem.__projectile_damage_enemy(projectiles, enemies)
+        DamageSystem.__player_damage_destructible(destructible_manager, player)
     
     @staticmethod
     def __enemy_damage_player(enemies: list[BasicEnemy | ProjectileEnemy], player: Player):
@@ -946,7 +1104,7 @@ class DamageSystem(): # combined class handling all Damage related events.
                 if col.invulnerable_til is None or col.invulnerable_til < now:
                     col.health -= 0.51
                     TwoDPhysics.add_shove(
-                        col, 
+                        col,
                         ((col.hitbox.position - player.hitbox.position).normalize_or_zero() * 50) + col.hitbox.position
                     )
                     col.invulnerable_til = now + DamageSystem.__enemy_invulnerability_between_attacks
@@ -975,20 +1133,60 @@ class DamageSystem(): # combined class handling all Damage related events.
     @staticmethod
     def __player_damage_projectile(projectiles: list[EnemyProjectile], player: Player):
         if player.attack_sprite and player.attack_animation_index == 0:
-            projectiles_to_remove = []
             for proj in projectiles:
-                if proj.active_scene == SceneManager.current_active_scene:
+                if proj.active_scene == SceneManager.current_active_scene and not proj.is_deflected:
                     if proj.hitbox.collides_with(player.attack_sprite.parts[0]):
-                        projectiles_to_remove.append(proj)
+                        rot = player.attack_sprite.parts[0].rotation
+                        new_dir = Vec2(math.cos(rot), math.sin(rot))
+                        proj.deflect(new_dir)
+
+    @staticmethod
+    def __projectile_damage_enemy(projectiles: list[EnemyProjectile], enemies: list[BasicEnemy | ProjectileEnemy]):
+        projectiles_to_remove = []
+        now = time.time()
+        for proj in projectiles:
+            if proj.active_scene == SceneManager.current_active_scene and proj.is_deflected:
+                for enemy in enemies:
+                    if enemy.active_scene == SceneManager.current_active_scene and proj.hitbox.collides_with(enemy.hitbox):
+                        if enemy.invulnerable_til is None or enemy.invulnerable_til < now:
+                            enemy.health -= 1.00
+                            TwoDPhysics.add_shove(
+                                enemy, 
+                                ((enemy.hitbox.position - proj.hitbox.position).normalize_or_zero() * 50) + enemy.hitbox.position
+                            )
+                            enemy.invulnerable_til = now + DamageSystem.__enemy_invulnerability_between_attacks
+                            if enemy.health <= 0:
+                                enemies.remove(enemy)
                         
-            for proj in projectiles_to_remove:
-                if proj in projectiles:
-                    projectiles.remove(proj)
+                        if proj not in projectiles_to_remove:
+                            projectiles_to_remove.append(proj)
+                        break
+                        
+        for proj in projectiles_to_remove:
+            if proj in projectiles:
+                projectiles.remove(proj)
+
+    @staticmethod
+    def __player_damage_destructible(destructible_manager: DestructibleManager, player: Player):
+        # 1. Early return if the player isn't mid-swing
+        if not (player.attack_sprite and player.attack_animation_index == 0):
+            return
+
+        # 2. Get the specific objects for the current active level/scene
+        current_level = SceneManager.current_active_scene
+        level_objects = destructible_manager.get(current_level)
+        weapon_hitbox = player.attack_sprite.parts[0]
+
+        # 3. Check hits and damage things using a sliced copy [:] to safely remove items
+        for obj in level_objects[:]:
+            if obj.hitbox.collides_with(weapon_hitbox):
+                obj.health -= 0.50  # Hits do 0.5 damage
+                
+                if obj.health <= 0.0:
+                    level_objects.remove(obj)
 
 
 class TwoDPhysics():
-    # Think of this as speed/snappiness scale now. 
-    # Lower = slower shove, Higher = faster shove.
     __shove_speed_scale = 15.0
 
     class Shove_Event(): 
@@ -1036,7 +1234,7 @@ class TwoDPhysics():
 
             # 4. Formulate displacement and run navmesh collision checks
             intended_displacement = self.direction * move_step
-            actual_displacement = no_nav_area.check_move(self.entity.hitbox, intended_displacement)
+            actual_displacement = no_nav_area.check_move(self.entity.hitbox, intended_displacement, False)
             
             # 5. Apply movement
             self.entity.hitbox.position += actual_displacement
@@ -1208,7 +1406,10 @@ class Menue():
             RuntimeError("invalid screen value")
             return False
 
-set_pc_assets_folder("assets/TwoDGame")
+
+
+
+
 dt = get_delta_time()
 textures, fonts, sounds = load_all_assets()
 
@@ -1217,24 +1418,29 @@ examples.loading_screen(lambda a: a, [],"Initializing Scene")
 menue = Menue()
 player = Player()
 hud = Hud()
-SceneManager.current_active_scene = 2
-background  = Background(2)
+destructible_manager = DestructibleManager()
+background  = Background(0)
 key_hints = KeyHints()
-no_nav_area = NoNavArea(2)
-middle_layer = MiddleLayer(2)
-level_triggers = LevelTriggers(2)
+no_nav_area = NoNavArea(0)
+middle_layer = MiddleLayer(0)
+level_triggers = LevelTriggers(0)
 fps = get_fps()
 last_fps_update = time.time()
 
 
+SceneManager.switch_scene(3)
+
+
 should_quit = menue.start(0)
+
 
 enemies: list[BasicEnemy | ProjectileEnemy] = []
 enemy_projectiles: list[EnemyProjectile] = []
 
 prevent_quit()
 while True:
-    
+    DEBUG.this_frame_draw_calls = 0
+
     dt= get_delta_time()
     if is_quit_requested() or should_quit:
         quit_program()
@@ -1254,9 +1460,9 @@ while True:
             print("Bye")
             break
     if KeyCode.O in get_keys_pressed():
-        # enemies.append(
-        #     BasicEnemy(Vec2.splat(500), SceneManager.current_active_scene)
-        # )
+        enemies.append(
+            BasicEnemy(Vec2.splat(500), SceneManager.current_active_scene)
+        )
         enemies.append(
             ProjectileEnemy(Vec2.splat(500), SceneManager.current_active_scene, enemy_projectiles)
         )
@@ -1282,7 +1488,7 @@ while True:
     enemy_projectiles[:] = active_projectiles
 
 
-    DamageSystem.tick(enemies,enemy_projectiles, player)
+    DamageSystem.tick(enemies,enemy_projectiles, player, destructible_manager)
 
     TwoDPhysics.tick(get_delta_time(), no_nav_area)
     
@@ -1291,7 +1497,8 @@ while True:
     background.draw()
     middle_layer.draw(
         [enemy.visual for enemy in enemies if enemy.active_scene == SceneManager.current_active_scene] +
-        [proj.visual for proj in enemy_projectiles if proj.active_scene == SceneManager.current_active_scene], 
+        [proj.visual for proj in enemy_projectiles if proj.active_scene == SceneManager.current_active_scene] +
+        [obj.visual for obj in destructible_manager.get(SceneManager.current_active_scene)],
         player
     )
     hud.draw(player)
@@ -1305,12 +1512,12 @@ while True:
         fps  = get_fps()
     
     draw_text(f"{fps} fps",tileSize*2,tileSize*2,Color.WHITE,font_size=int(tileSize*1.3),font= fonts.get("bitcount_font"))
+    draw_text(f"{DEBUG.this_frame_draw_calls} draw calls",tileSize*2,tileSize*3,Color.WHITE,font_size=int(tileSize*0.8),font= fonts.get("bitcount_font"))
     draw_text(f"{((player.hitbox.position.x/tileSize),(player.hitbox.position.y / tileSize))} player pos",tileSize*2,tileSize*4,Color.WHITE,font_size=int(tileSize*0.8),font=fonts.get("bitcount_font"))
-    draw_text(f"{enemies.__len__()} enemies",tileSize*2,200,Color.WHITE,font_size=int(tileSize*1.3),font= fonts.get("bitcount_font"))
+    draw_text(f"{enemies.__len__()} enemies",tileSize*2,tileSize*5,Color.WHITE,font_size=int(tileSize*0.8),font= fonts.get("bitcount_font"))
 
     next_frame(None) #since this is a purely 2D game, we do not require 3d physics.
-
-
+    examples.limit_fps(300)
 
 profiler.stop()
 profiler.print()

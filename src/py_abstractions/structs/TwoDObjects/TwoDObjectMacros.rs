@@ -1,3 +1,7 @@
+use std::sync::Arc;
+
+use crate::py_abstractions::structs::TwoDObjects::{Circle::Circle, Rectangle::Rectangle};
+
 
 
 
@@ -77,7 +81,7 @@ Example:
                     Ok(())
                 }
 
-                // returns if the object has a registered tick function
+                /// returns if the object has a registered tick function
                 pub fn has_tick(&self)-> bool{
                     if let Some(key) = self.function_key{
                         let mut storage = ObjectFunctionStorage::get_fun_storage();
@@ -119,22 +123,44 @@ Example:
 macro_rules! implement_magic_methods2D {
     ($name:ident) => {
         paste::paste! {
-
+            use pyo3::types::{PyBytes, PyTuple};
             #[gen_stub_pymethods]
             #[pymethods]
             impl $name {
-                // TODO: Write proper clone.
 
-                // fn __copy__(&self) -> Self {
-                //     self.clone()
-                // }
+                fn __repr__(&self) -> String {
+                    use crate::py_abstractions::structs::TwoDObjects::TwoDObjectMacros::ShapeDebug;
+                    format!("{}({}, has_tick={})", 
+                        stringify!($name), 
+                        <Self as ShapeDebug>::fmt_fields(self), 
+                        self.function_key.is_some()
+                    )
+                }
 
-                // fn __deepcopy__(&self, _memo: &Bound<'_, PyDict>) -> Self {
-                //     self.clone()
-                // }
 
             }
         }
 
     };
+}
+
+
+
+pub trait ShapeDebug {
+    fn fmt_fields(&self) -> String;
+}
+impl ShapeDebug for Rectangle {
+    fn fmt_fields(&self) -> String {
+
+        let t = if let Some(tex) = &self.texture{ &format!("{}", tex.texture.ptr_address()) } else{ "None" };
+
+        format!("position={:?}, scale={:?}, color={:?}, texture={}", self.position, self.scale, self.color, t)
+    }
+}
+
+impl ShapeDebug for Circle {
+    fn fmt_fields(&self) -> String {
+        let t = if let Some(tex) = &self.texture{ &format!("{}", tex.texture.ptr_address()) } else{ "None" };
+        format!("position={:?}, radius={:?},  sides={:?}, color={:?}, texture={}", self.position, self.radius, self.sides, self.color, t)
+    }
 }

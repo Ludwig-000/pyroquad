@@ -2,7 +2,7 @@ use pyo3::prelude::*;
  
 //use pyo3::type_gen::generate_type;
 //use pyo3::type_gen::generate_type_as_function;
-use macroquad::prelude as mq;
+use macroquad::{miniquad::conf::Icon, prelude as mq};
 
 use pyo3_stub_gen::derive::* ;
 
@@ -92,6 +92,19 @@ impl Config {
 
 impl Config{
     pub fn to_window_config(config: Config) -> macroquad::conf::Conf {
+       const im16: [u8; 4 * 16 * 16] = *include_bytes!("../../PyroquadLogo16.raw");
+       const im32: [u8; 4 * 32 * 32] = *include_bytes!("../../PyroquadLogo32.raw");
+       const im64: [u8; 4 * 64 * 64] = *include_bytes!("../../PyroquadLogo64.raw");
+
+
+       let ic = Icon{
+        /// 16 * 16 image of RGBA pixels (each 4 * u8) in row-major order.
+        small: im16,
+        /// 32 x 32 image of RGBA pixels (each 4 * u8) in row-major order.
+        medium: im32,
+        /// 64 x 64 image of RGBA pixels (each 4 * u8) in row-maj5or order.
+        big: im64,
+       };
        let mut miniConf = mq::miniquad::conf::Conf {
                     window_title: config.window_title,
                     window_width: config.window_width,
@@ -99,6 +112,7 @@ impl Config{
                     fullscreen: config.fullscreen,
                     sample_count: config.sample_count,
                     window_resizable: config.window_resizable,
+                    icon: Some(ic),
                     ..Default::default()
        };
 

@@ -11,6 +11,7 @@ use crate::py_abstractions::Text::Font;
 use crate::py_abstractions::Text::TextDimensions;
 use crate::py_abstractions::structs::ThreeDObjects::ObjectFunctionStorage;
 use crate::py_abstractions::Textures_and_Images::*;
+use crate::py_abstractions::structs::TwoDObjects::collision::Shape;
 use macroquad::prelude as mq;
 
 use pyo3::prelude::*;
@@ -613,6 +614,7 @@ pub fn draw_skybox(texture: Texture2D, tint: Color) {
     let texture_unpacked = texture.into();
     COMMAND_QUEUE.push(  Command::DrawSkyBox{
         texture: Some(texture_unpacked), tint: tint.into()} );
+
 }
 
 
@@ -663,3 +665,39 @@ pub fn set_pc_assets_folder(path: String){
     COMMAND_QUEUE.push(Command::SetPcAssetFolder(path));
 }
 
+
+
+
+/// Batches the processing of many shape draw calls into a single native execution.
+/// The list will be drawn left to right.
+/// This is SIGNIFICANTLY faster than running a python for-loop. ( roughly a 2.3x performance improvement at 3000 ish elements. )
+/// 
+/// ```Python
+/// # example
+/// def draw(objects: list[Rectangle | Circle]):
+///     for o in objects:
+///         o.draw() # <- DO NOT DO THIS, if the list is large.
+/// ```
+/// 
+/// ```Python
+/// # example
+/// def draw(objects: list[Rectangle | Circle]):
+///     batch_draw_shapes(objects) <- do this instead.
+/// ```
+/// 
+#[gen_stub_pyfunction]
+#[pyfunction]
+pub fn batch_draw_shapes<'py>(input: Vec<Shape<'py>>){
+    for shape in input{
+        match shape{
+            Shape::Circ(c)=> {
+                let c = c.borrow();
+                c.draw();
+            },
+            Shape::Rect(r)=>{
+                let r = r.borrow(); 
+                r.draw();
+            }
+        }
+    }
+}

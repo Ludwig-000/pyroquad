@@ -201,6 +201,10 @@ impl Image {
         }
         Ok(())
     }
+
+    pub fn to_texture(&self)-> PyResult<Texture2D>{
+        Texture2D::new(self.clone())
+    }
 }
 pub fn image_from_bytes(bytes: &Vec<u8>)-> PyResult<Image>{
     let cursor = Cursor::new(bytes);

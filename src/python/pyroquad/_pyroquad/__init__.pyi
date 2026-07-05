@@ -54,6 +54,7 @@ __all__ = [
     "Vec4",
     "Vertex",
     "activate_engine",
+    "batch_draw_shapes",
     "build_texture_atlas",
     "camera_font_scale",
     "cartesian_to_polar",
@@ -513,7 +514,10 @@ class Circle:
         ...    next_frame()
         ```
         """
-    def has_tick(self) -> builtins.bool: ...
+    def has_tick(self) -> builtins.bool:
+        r"""
+        returns if the object has a registered tick function
+        """
     def remove_tick(self) -> None:
         r"""
         Removes any assigned tick-function from this object.
@@ -5519,6 +5523,7 @@ class Image:
         r"""
         Flip the image vertically (mirror top-bottom)
         """
+    def to_texture(self) -> Texture2D: ...
 
 @typing.final
 class ImageFuture:
@@ -6032,7 +6037,10 @@ class Rectangle:
         ...    next_frame()
         ```
         """
-    def has_tick(self) -> builtins.bool: ...
+    def has_tick(self) -> builtins.bool:
+        r"""
+        returns if the object has a registered tick function
+        """
     def remove_tick(self) -> None:
         r"""
         Removes any assigned tick-function from this object.
@@ -7771,6 +7779,12 @@ def activate_engine(conf: typing.Optional[Config] = None) -> None:
     but other functions may result in a deadlock.
     
     The engine is built, assuming none of it's library calls are ever executed without the engine being active.
+    """
+
+def batch_draw_shapes(input: typing.Sequence[Rectangle | Circle]) -> None:
+    r"""
+    Batches the draw calls of many shapes into one call.
+    This is faster than a simple for-loop
     """
 
 def build_texture_atlas() -> None:
