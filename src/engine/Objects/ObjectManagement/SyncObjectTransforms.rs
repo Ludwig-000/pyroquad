@@ -7,7 +7,7 @@ use macroquad::prelude as mq;
 pub fn sync_transforms_inner(storage : &mut ObjectStorage) {
     use crate::engine::Objects::PhysicsWorld::Rapier::*;
     let objects_ptr = storage as *mut ObjectStorage;
-
+    use rapier3d::glamx::EulerRot;
 
 
     for (_, rb) in storage.physics_world.rigidBS.iter() {
@@ -17,7 +17,7 @@ pub fn sync_transforms_inner(storage : &mut ObjectStorage) {
 
         let r_pos = rb.translation();
         let pos = mq::Vec3::new(r_pos.x, r_pos.y, r_pos.z);
-        let (rx, ry, rz) = rb.rotation().euler_angles();
+        let (rx, ry, rz) = rb.rotation().to_euler(EulerRot::XYZ);
         let rot = mq::Vec3::new(rx, ry, rz);
 
         unsafe {

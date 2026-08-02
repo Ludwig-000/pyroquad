@@ -41,7 +41,9 @@ pyo3-stub-gen-real = { package = "pyo3-stub-gen", version = "=0.22.3", optional 
 crossbeam = "=0.8.4" # used for the main Command Queue inside lib.rs
 
 glam = { version = "=0.27.0", features = ["scalar-math"] } # used for vector maths.
-rapier3d = { version = "=0.29.0", features = ["parallel", "simd-stable"] } # used for DBTV trees.
+
+
+rapier3d = { version = "=0.35.0-beta.0", features = ["parallel"] } # used for DBTV trees.
 lazy_static = "=1.5.0"
 reqwest = { version = "=0.13.4", features = ["blocking"] } # used for runtime-downloading assets.
 

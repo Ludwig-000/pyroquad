@@ -66,6 +66,7 @@ hdr2 = hdr1.to_texture()
 
 while True:
 
+
     if KeyCode.Escape in get_keys_pressed():
         break
     

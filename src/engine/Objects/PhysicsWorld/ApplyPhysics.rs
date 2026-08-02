@@ -21,14 +21,14 @@ pub fn apply_physics_enum(settings: PhysicsEnum, world: &mut RapierWorld, handle
         // Velocity Management
         // ------------------------------------------------------------------
         PhysicsEnum::SetLinearVelocity(v) => {
-            rb.set_linvel(vector![v.x, v.y, v.z], true);
+            rb.set_linvel(rapier3d::math::Vec3::new(v.x, v.y, v.z), true);
         }
         PhysicsEnum::GetLinearVelocity( sender) => {
             let v = rb.linvel();
             let _ = sender.send(Vec3 { x: v.x, y: v.y, z: v.z });
         }
         PhysicsEnum::SetAngularVelocity(v) => {
-            rb.set_angvel(vector![v.x, v.y, v.z], true);
+            rb.set_angvel(rapier3d::math::Vec3::new(v.x, v.y, v.z), true);
         }
         PhysicsEnum::GetAngularVelocity( sender) => {
             let v = rb.angvel();
@@ -39,17 +39,17 @@ pub fn apply_physics_enum(settings: PhysicsEnum, world: &mut RapierWorld, handle
         // External Influences
         // ------------------------------------------------------------------
         PhysicsEnum::ApplyImpulse(v) => {
-            rb.apply_impulse(vector![v.x, v.y, v.z], true);
+            rb.apply_impulse(rapier3d::math::Vec3::new(v.x,v.y,v.z), true);
         }
         PhysicsEnum::AddForce(v) => {
             
-            rb.add_force(vector![v.x, v.y, v.z], true);
+            rb.add_force(rapier3d::math::Vec3::new(v.x,v.y,v.z), true);
         }
         PhysicsEnum::AddTorque(v) => {
-            rb.add_torque(vector![v.x, v.y, v.z], true);
+            rb.add_torque(rapier3d::math::Vec3::new(v.x,v.y,v.z), true);
         }
         PhysicsEnum::AddTorqueImpulse(v) => {
-            rb.apply_torque_impulse(vector![v.x, v.y, v.z], true);
+            rb.apply_torque_impulse(rapier3d::math::Vec3::new(v.x,v.y,v.z), true);
         }
 
         // ------------------------------------------------------------------

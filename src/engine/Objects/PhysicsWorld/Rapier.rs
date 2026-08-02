@@ -56,16 +56,17 @@ impl RapierWorld{
 
     pub fn move_object(&mut self, handle: &RigidBodyHandle, pos: &Vec3) {
         let rb  = self.rigidBS.get_mut(*handle).expect("Missing Rigid body handle!!??");
-        rb.set_translation(vector![pos.x, pos.y, pos.z], true);
+        rb.set_translation(rapier3d::math::Vec3::new(pos.x,pos.y,pos.z), true);
     
 
     }
     pub fn rotate_object(&mut self, handle: &RigidBodyHandle, rot: &Vec3) {
         use rapier3d::na::UnitQuaternion;
-        let rb = self.rigidBS.get_mut(*handle).expect("Missing Rigid body handle!!??");
-        let rotation = UnitQuaternion::from_euler_angles(rot.x, rot.y, rot.z);
-        rb.set_rotation(rotation, true);
         
+        let rb: &mut RigidBody = self.rigidBS.get_mut(*handle).expect("Missing Rigid body handle!!??");
+        let rotation = UnitQuaternion::from_euler_angles(rot.x, rot.y, rot.z);
+        
+        rb.set_rotation(rotation.into(), true);
     }
     pub fn scale_object(&mut self, handle: &ColliderHandle, obj_type: &obj::Object, scale: &Vec3) {
         let collider = self.coll.get_mut(*handle).expect("Missing collider despite holding handle.");
@@ -89,13 +90,13 @@ impl RapierWorld{
             obj::Object::Mesh(mesh_wrapper) => {
                 // We must reconstruct the Trimesh with the new scale values applied 
                 // to the original vertex positions.
-                let vertices: Vec<rapier3d::na::Point3<f32>> = mesh_wrapper.mesh.vertices
+                let vertices: Vec<rapier3d::math::Vec3> = mesh_wrapper.mesh.vertices
                     .iter()
                     .map(|v| {
-                        rapier3d::na::Point3::new(
-                            v.position.x * scale.x,
-                            v.position.y * scale.y,
-                            v.position.z * scale.z,
+                        rapier3d::math::Vec3::new(
+                            v.position.x * mesh_wrapper.scale.x,
+                            v.position.y * mesh_wrapper.scale.y,
+                            v.position.z * mesh_wrapper.scale.z,
                         )
                     })
                     .collect();
@@ -120,11 +121,11 @@ impl RapierWorld{
     }
 
     pub fn step(&mut self, distance: f32) {
-        let gravity = vector![0.0, -9.81, 0.0];
+        let gravity = rapier3d::math::Vec3::new(0.0, -9.81, 0.0);
 
         self.integration_parameters.dt = distance;
         self.pipeline.step(
-            &gravity,
+            gravity,
             &self.integration_parameters,
             &mut self.islands,
             &mut self.bvh,
@@ -172,17 +173,16 @@ impl RapierWorld{
                     .build()
             },
             obj::Object::Mesh(mesh_wrapper) => {
-                 // ... (Mesh processing logic remains the same) ...
-                let vertices: Vec<rapier3d::na::Point3<f32>> = mesh_wrapper.mesh.vertices
-                    .iter()
-                    .map(|v| {
-                        rapier3d::na::Point3::new(
-                            v.position.x * mesh_wrapper.scale.x,
-                            v.position.y * mesh_wrapper.scale.y,
-                            v.position.z * mesh_wrapper.scale.z,
-                        )
-                    })
-                    .collect();
+                 let vertices: Vec<rapier3d::math::Vec3> = mesh_wrapper.mesh.vertices
+                 .iter()
+                 .map(|v| {
+                     rapier3d::math::Vec3::new(
+                         v.position.x * mesh_wrapper.scale.x,
+                         v.position.y * mesh_wrapper.scale.y,
+                         v.position.z * mesh_wrapper.scale.z,
+                     )
+                 })
+                 .collect();
 
                 let indices: Vec<[u32; 3]> = mesh_wrapper.mesh.indices
                     .chunks_exact(3)
@@ -225,8 +225,8 @@ impl RapierWorld{
         // 3. Build the RigidBody
         // CHANGE HERE: Added .user_data()
         let rigid_body = RigidBodyBuilder::dynamic()
-            .translation(vector![t.pos.x, t.pos.y, t.pos.z])
-            .rotation(rapier3d::na::Vector3::new(t.rot.x, t.rot.y, t.rot.z))
+            .translation(rapier3d::math::Vec3::new(t.pos.x,t.pos.y,t.pos.z))
+            .rotation(rapier3d::math::Vec3::new(t.rot.x,t.rot.y,t.rot.z))
             .gravity_scale(gravity_scale)
             .linear_damping(0.0) 
             .angular_damping(0.0)
@@ -271,10 +271,10 @@ impl RapierWorld{
             },
             obj::Object::Mesh(mesh_wrapper) => {
                 // ... (Mesh processing logic remains the same) ...
-                let vertices: Vec<rapier3d::na::Point3<f32>> = mesh_wrapper.mesh.vertices
+                let vertices: Vec<rapier3d::math::Vec3> = mesh_wrapper.mesh.vertices
                     .iter()
                     .map(|v| {
-                        rapier3d::na::Point3::new(
+                        rapier3d::math::Vec3::new(
                             v.position.x * mesh_wrapper.scale.x,
                             v.position.y * mesh_wrapper.scale.y,
                             v.position.z * mesh_wrapper.scale.z,
@@ -347,8 +347,8 @@ impl RapierWorld{
 
         // CHANGE HERE: Added .user_data()
         let rigid_body = RigidBodyBuilder::kinematic_position_based()
-            .translation(vector![t.pos.x,t.pos.y,t.pos.z])
-            .rotation(rapier3d::na::Vector3::new(t.rot.x, t.rot.y, t.rot.z))
+            .translation(rapier3d::math::Vec3::new(t.pos.x, t.pos.y, t.pos.z))
+            .rotation(rapier3d::math::Vec3::new(t.rot.x, t.rot.y, t.rot.z))
             .user_data(key_to_u128(key)) // <--- ADDED THIS
             .build();
         
@@ -402,7 +402,7 @@ impl RapierWorld{
     pub fn get_collided_keys(&self, handle: ColliderHandle) -> Vec<ObjectKey> {
     
         let pairs =  self.narrowP.contact_pairs_with(handle).filter_map(|collider|{
-            if collider.has_any_active_contact{
+            if collider.has_any_active_contact(){
                 let other_handle = if collider.collider1 == handle { collider.collider2 } else { collider.collider1 };
                 
                 let h = self.coll.get(other_handle).expect("Collider handle was found, but no matching collider.");

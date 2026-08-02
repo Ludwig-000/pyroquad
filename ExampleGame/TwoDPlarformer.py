@@ -1361,10 +1361,13 @@ class Hud():
         self._draw_hp_bar(player.health, player.hitbox.position)
 
         # draw the mouse overlay
-        show_mouse(False)
-        offset = Vec2(15 * (screen_width()/ 2194.0) ,15 * (screen_height()/ 1234.0))
-        self.mouse_visual.position = Camera2D.screen_to_world(camera, get_mouse_position() + offset)
-        self.mouse_visual.draw()
+        if mouse_inside_window():
+            show_mouse(False)
+            offset = Vec2(15 * (screen_width()/ 2194.0) ,15 * (screen_height()/ 1234.0))
+            self.mouse_visual.position = Camera2D.screen_to_world(camera, get_mouse_position() + offset)
+            self.mouse_visual.draw()
+        else:
+            show_mouse(True)
 
 class SceneManager():
     current_active_scene: int = 0
@@ -1742,9 +1745,7 @@ class Menue():
         global camera
         self.mouse_cursor.position = Camera2D.screen_to_world(camera, get_mouse_position() + offset)
         
-
-        print(mouse_inside_window())
-        if self.static_fullscreen_toggle or mouse_inside_window():
+        if mouse_inside_window():
             show_mouse(False)
             self.mouse_cursor.draw()
         else:

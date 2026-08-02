@@ -13,6 +13,7 @@ use std::collections::HashSet;
 use crate::py_abstractions::MouseButton::MouseButton;
 
 
+/// This feature is experimental.
 #[gen_stub_pyfunction]
 #[pyfunction]
 pub fn mouse_inside_window() -> PyResult<bool>  {

@@ -8046,7 +8046,10 @@ def load_file_future(path: builtins.str) -> FileDataFuture: ...
 
 def measure_text(text: builtins.str, font: typing.Optional[Font], font_size: builtins.int, font_scale: builtins.float) -> TextDimensions: ...
 
-def mouse_inside_window() -> builtins.bool: ...
+def mouse_inside_window() -> builtins.bool:
+    r"""
+    This feature is experimental.
+    """
 
 def next_frame(physics_step: typing.Optional[builtins.float] = 0.0) -> None:
     r"""
