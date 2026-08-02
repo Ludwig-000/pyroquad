@@ -12,6 +12,9 @@ def load_all_assets() -> tuple[dict, dict, dict]:
         {"name": "D_Key", "url": "Inputs/Keyboard%20%26%20Mouse/Double/keyboard_d.png", "path": "keyboard_d.png", "type": "texture"},
         {"name": "ESC_Key", "url": "Inputs/Keyboard%20%26%20Mouse/Double/keyboard_escape.png", "path": "keyboard_escape.png", "type": "texture"},
         
+        {"name": "Cursor", "url": "Cursor/StoneCursorWenrexa/PNG/01.png", "path": "Cursor.png", "type": "texture"},
+        {"name": "MenueCursor", "url": "Cursor/StoneCursorWenrexa/PNG/12.png", "path": "MenueCursor.png", "type": "texture"},
+
         # enviroment
         {"name": "grass_plain", "url": "TinyTown/Tiles/tile_0000.png", "path": "grass_plain.png", "type": "texture"},
         {"name": "grass_flower_1", "url": "TinyTown/Tiles/tile_0001.png", "path": "grass_flower_1.png", "type": "texture"},

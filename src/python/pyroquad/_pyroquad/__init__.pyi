@@ -110,6 +110,7 @@ __all__ = [
     "load_file",
     "load_file_future",
     "measure_text",
+    "mouse_inside_window",
     "next_frame",
     "polar_to_cartesian",
     "pop_camera_state",
@@ -523,6 +524,7 @@ class Circle:
         Removes any assigned tick-function from this object.
         If the object does not have a tick function, this will do nothing.
         """
+    def __repr__(self) -> builtins.str: ...
     def __new__(cls, position: Vec2, rotation: builtins.float, radius: builtins.float, color: Color, texture: typing.Optional[Texture2D] = None) -> Circle: ...
     def draw(self) -> None: ...
     def collides_with(self, rhs: Rectangle | Circle) -> builtins.bool:
@@ -6046,6 +6048,7 @@ class Rectangle:
         Removes any assigned tick-function from this object.
         If the object does not have a tick function, this will do nothing.
         """
+    def __repr__(self) -> builtins.str: ...
     def __new__(cls, position: Vec2, rotation: builtins.float, scale: Vec2, color: Color, texture: typing.Optional[Texture2D] = None) -> Rectangle: ...
     def draw(self) -> None: ...
     def collides_with(self, rhs: Rectangle | Circle) -> builtins.bool:
@@ -7783,8 +7786,22 @@ def activate_engine(conf: typing.Optional[Config] = None) -> None:
 
 def batch_draw_shapes(input: typing.Sequence[Rectangle | Circle]) -> None:
     r"""
-    Batches the draw calls of many shapes into one call.
-    This is faster than a simple for-loop
+    Batches the processing of many shape draw calls into a single native execution.
+    The list will be drawn left to right.
+    This is SIGNIFICANTLY faster than running a python for-loop. ( roughly a 2.3x performance improvement at 3000 ish elements. )
+    
+    ```Python
+    # example
+    def draw(objects: list[Rectangle | Circle]):
+        for o in objects:
+            o.draw() # <- DO NOT DO THIS, if the list is large.
+    ```
+    
+    ```Python
+    # example
+    def draw(objects: list[Rectangle | Circle]):
+        batch_draw_shapes(objects) <- do this instead.
+    ```
     """
 
 def build_texture_atlas() -> None:
@@ -8028,6 +8045,8 @@ def load_file(path: builtins.str) -> FileData:
 def load_file_future(path: builtins.str) -> FileDataFuture: ...
 
 def measure_text(text: builtins.str, font: typing.Optional[Font], font_size: builtins.int, font_scale: builtins.float) -> TextDimensions: ...
+
+def mouse_inside_window() -> builtins.bool: ...
 
 def next_frame(physics_step: typing.Optional[builtins.float] = 0.0) -> None:
     r"""

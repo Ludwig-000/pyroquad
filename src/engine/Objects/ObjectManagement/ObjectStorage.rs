@@ -151,7 +151,7 @@ impl ObjectStorage {
         self.storage.len()
     }
 
-    pub fn iter_mut(&mut self) -> std::slice::IterMut<'_, Object> {
+    pub unsafe fn iter_mut(&mut self) -> std::slice::IterMut<'_, Object> {
         self.storage.iter_mut()
     }
 

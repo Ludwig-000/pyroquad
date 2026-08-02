@@ -12,6 +12,15 @@ use crate::py_abstractions::structs::GLAM::Vec2::Vec2;
 use std::collections::HashSet;
 use crate::py_abstractions::MouseButton::MouseButton;
 
+
+#[gen_stub_pyfunction]
+#[pyfunction]
+pub fn mouse_inside_window() -> PyResult<bool>  {
+    let (sender, receiver) = PChannel::sync_channel(1);
+    COMMAND_QUEUE.push(  Command::GetCustomMouseState { sender });
+    Ok(receiver.recv()?.2)
+}
+
 #[gen_stub_pyfunction]
 #[pyfunction]
 pub fn set_cursor_grab(option: bool)  {
@@ -36,6 +45,8 @@ pub fn get_mouse_buttons_down() -> HashSet<MouseButton> {
         .map(|key| (*key).into())
         .collect()
 }
+
+
 #[gen_stub_pyfunction]
 #[pyfunction]
 pub fn get_mouse_buttons_pressed() -> HashSet<MouseButton> {

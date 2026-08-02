@@ -20,6 +20,7 @@ use crate::engine::CameraManager::Camera;
 use crate::engine::CameraManager::clone_camera3d;
 use crate::engine::CameraManager::set_camera;
 use crate::engine::CameraManager::set_default_camera;
+use crate::engine::MouseInsideScreen;
 use crate::engine::Objects::Cylinder::Cylinder;
 use crate::engine::Objects::ObjectManagement::ObjectStorage::ObjectKey;
 use crate::engine::Objects::Mesh::Mesh;
@@ -48,6 +49,9 @@ use crate::engine::Objects::ObjectManagement::ObjectManagement;
 
 
 pub enum Command {
+    GetCustomMouseState{
+        sender: PSyncSender<(f32,f32,bool)>,
+    },
     Camera2DWorldToScreen{cam: mq::Camera2D, point: mq::Vec2, sender: PSyncSender<mq::Vec2>},
     Camera2DScreenToWorld{cam: mq::Camera2D, point: mq::Vec2, sender: PSyncSender<mq::Vec2>},
     Camera2DToMatrix{cam: mq::Camera2D, sender: PSyncSender<mq::Mat4>},
@@ -320,6 +324,10 @@ pub async fn proccess_commands_loop() {
         while let Some(command) = COMMAND_QUEUE.pop() {
             
             match command {
+                Command::GetCustomMouseState { sender }=>{
+                    let (x,y,inside) = unsafe {MouseInsideScreen::get_mouse_state_info()};
+                    sender.send((x,y,inside));
+                }
                 Command::Camera2DToMatrix { cam, sender } =>{
                     use macroquad::camera::Camera as mqCam;
                     let _ = sender.send( cam.matrix() );

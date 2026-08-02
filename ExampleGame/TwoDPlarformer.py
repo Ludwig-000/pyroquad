@@ -5,26 +5,17 @@ import random
 import time
 from pyinstrument import Profiler
 import math
-
+import time
+from typing import Optional
 from utils import *
 from custom_assets import load_all_assets
-
-
-profiler = Profiler(interval=0.1)
-profiler.start()
-
-activate_engine(Config("2D Game",fullscreen=True,swap_interval=0, sample_count=10))
-
-camera = Camera2D(rotation=0,zoom=Vec2(0.0009115, 0.0009115*16/9),target=Vec2.ZERO,offset=Vec2(-1,1))
-
 tileSize = 32
+
 
 
 
 class DEBUG():
     this_frame_draw_calls = 0
-
-
 
 
 def quit_program():
@@ -156,6 +147,10 @@ class Background():
             self.level += gf2 + gf1 + gp + dirt_path_var1 + dirt_path_var2 +  water + bridge
         if level == 3:
             self.level = Background.grass_back(5,5,2,5553)
+        if level == 4:
+            self.level = Background.grass_back(5,1,1,13)
+        if level == 5:
+            self.level = Background.grass_back(5,1,1,11)
 
     @staticmethod
     def grass_back(g: float, f1: float, f2: float, seed: int) -> list[Rectangle]:
@@ -235,7 +230,7 @@ class Player():
     sword_visual: Sprite
     playerSize: float
     speed: float = tileSize*15.0
-    health: float = 1.0 # ranging from 1.0 to 0.0
+    health: float = 10**300 # ranging from 1.0 to 0.0
 
     walking_animation_index = 0
     animation_frames: list[Texture2D] = []
@@ -380,6 +375,15 @@ class NoNavArea:
                 (Rectangle(Vec2(37, 0) * tileSize, 0, Vec2(5, 28.7) * tileSize, Color.INVISIBLE), False),
                 (Rectangle(Vec2(37, 31.1) * tileSize, 0, Vec2(5, 28.7) * tileSize, Color.INVISIBLE), False),
             ])
+        elif level == 4:
+            raw_nav_area.extend([
+                (Rectangle(Vec2(30, 10) * tileSize, 0, Vec2(100, 6) * tileSize, Color.INVISIBLE), False),
+            ])
+        elif level == 5:
+            raw_nav_area.extend([
+                (Rectangle(Vec2(55, 5) * tileSize, 0, Vec2(10, 3) * tileSize, Color.INVISIBLE), False),
+                (Rectangle(Vec2(61, 10) * tileSize, 0, Vec2(3, 13) * tileSize, Color.INVISIBLE), False),
+            ])
 
         # Distribute into the final flat lists
         for rect, collides_with_proj in raw_nav_area:
@@ -404,7 +408,7 @@ class NoNavArea:
         p_x, p_y = hitbox.position.x, hitbox.position.y
 
         # Select the correct target list instantly (no boolean checks in loops)
-        obstacles = self.projectile_rects if is_projectile else self.all_rects + [
+        obstacles = (self.projectile_rects if is_projectile else self.all_rects) + [
             hb.hitbox for hb in destructible_manager.get(SceneManager.current_active_scene)
         ]
 
@@ -498,11 +502,15 @@ class DestructibleManager():
     destructibles_level_1: list[DestructibleObject]
     destructibles_level_2: list[DestructibleObject]
     destructibles_level_3: list[DestructibleObject]
+    destructibles_level_4: list[DestructibleObject]
+    destructibles_level_5: list[DestructibleObject]
     def __init__(self) -> None:
         self.restock_level(0)
         self.restock_level(1)
         self.restock_level(2)
         self.restock_level(3)
+        self.restock_level(4)
+        self.restock_level(5)
 
     def get(self, level: int)-> list[DestructibleObject]:
         if level == 0:
@@ -513,6 +521,10 @@ class DestructibleManager():
             return self.destructibles_level_2
         elif level == 3:
             return self.destructibles_level_3
+        elif level == 4:
+            return self.destructibles_level_4
+        elif level == 5:
+            return self.destructibles_level_5
         else:
             return []
  
@@ -531,6 +543,20 @@ class DestructibleManager():
             ]
         elif level == 3:
             self.destructibles_level_3 = []
+        elif level == 4:
+            self.destructibles_level_4 = []
+        elif level == 5:
+            self.destructibles_level_5 = [
+                DestructibleObject(
+                    Rectangle(Vec2(37*tileSize,10*tileSize), 0, Vec2.splat(100), Color.BROWN), 
+                None,4),
+                DestructibleObject(
+                    Rectangle(Vec2(37*tileSize,14*tileSize), 0, Vec2.splat(100), Color.BROWN), 
+                None,4),
+                DestructibleObject(
+                    Rectangle(Vec2(41*tileSize,18*tileSize), 0, Vec2.splat(100), Color.BROWN), 
+                None,4)
+            ]
         else:
             raise BaseException("invalid level")
 
@@ -548,7 +574,7 @@ class BasicEnemy():
     health: float = 1.0
     invulnerable_til: None | float = None
 
-    def __init__(self, pos: Vec2, scene: int) -> None:
+    def __init__(self, pos: Vec2, scene: int, speed: float | None = None) -> None:
         self.hitbox = Rectangle(pos, 0, Vec2.splat(100), Color.INVISIBLE)
         self.visual = Sprite([
             Rectangle(pos, 0, Vec2.splat(100),Color.GREEN)
@@ -557,6 +583,8 @@ class BasicEnemy():
 
         self.animation_frames = [textures.get("character_1"),textures.get("character_2"),textures.get("character_3")] # type: ignore
         self.walking_animation_index = 0
+        if speed:
+            self.speed =speed
     def update(self, player: Player, no_nav: NoNavArea):
         if not SceneManager.current_active_scene == self.active_scene:
             return
@@ -681,20 +709,19 @@ class ProjectileEnemy():
             proj_hitbox = Rectangle(self.hitbox.position, 0, Vec2.splat(tileSize * 0.6), Color.INVISIBLE)
             projectile = EnemyProjectile(
                 homing=False, 
-                damage=0.08, 
                 hitbox=proj_hitbox, 
-                player=player,
+                player_or_direction=player,
                 active_scene=self.active_scene
             )
             self.projectiles_ref.append(projectile)
 
 class EnemyProjectile():
+    proj_speed: float = tileSize * 15.0
     max_lifetime: float # in seconds
     spawn_time: float
 
     homing: bool
     velocity: Vec2
-    damage: float
     hitbox: Rectangle
     visual: Sprite 
     animation_frames: list[Texture2D]
@@ -702,19 +729,21 @@ class EnemyProjectile():
     current_animation_index: int
     last_animation_switch: float
     active_scene: int
-    is_deflected: bool # NEW: Tracks who owns the projectile
+    is_deflected: bool
 
-    def __init__(self, homing: bool, damage: float, hitbox: Rectangle, player: Player, active_scene: int) -> None:
+    def __init__(self, homing: bool, hitbox: Rectangle, player_or_direction: Player | Vec2, active_scene: int) -> None:
         self.max_lifetime = 5.0
         self.spawn_time = time.time()
         self.homing = homing
         self.hitbox = hitbox
-        self.damage = damage
         self.active_scene = active_scene
         self.is_deflected = False 
         
         # Default velocity aimed directly at the player
-        self.velocity = (player.hitbox.position - hitbox.position).normalize_or_zero() * tileSize * 15.0
+        if isinstance(player_or_direction, Player):
+            self.velocity = (player_or_direction.hitbox.position - hitbox.position).normalize_or_zero() * self.proj_speed
+        else:
+            self.velocity = player_or_direction.normalize_or_zero() * self.proj_speed
         
         self.last_animation_switch = time.time()
         self.current_animation_index = 0
@@ -779,6 +808,229 @@ class EnemyProjectile():
             self.current_animation_index = (self.current_animation_index + 1) % len(self.animation_frames)
             self.visual.parts[0].texture = self.animation_frames[self.current_animation_index]
 
+
+
+class EnemySpawner:
+
+    class Wave:
+        def __init__(self, enemies: list, max_enemies_remaining: int = 0, time_limit: float | None = None):
+            self.enemies = enemies
+            self.max_enemies_remaining = max_enemies_remaining
+            self.time_limit = time_limit
+
+    class Barrage:
+        def __init__(self, active_phases: list[int], spawn_interval: float = 0.5, predictable: bool = True):
+            self.active_phases = active_phases
+            self.spawn_interval = spawn_interval
+            self.timer = 0.0
+            self.predictable: bool = predictable
+            self.last_spawned_y: float = 0.0
+            self.descending: bool = True
+
+    class LevelConditions:
+        def __init__(self, level: int, battle_spawns: list[EnemySpawner.Wave], barrages: list[EnemySpawner.Barrage] = []) -> None:
+            self.level_number = level
+            self.player_already_visited = False
+            self.battle_phase = 0
+            self.current_phase_already_spawned = False
+            self.battle_spawns = battle_spawns
+            self.barrages = barrages or []  # New: list of barrages for this level
+            self.phase_start_time = 0.0 
+            
+            self.is_warning_phase = False
+            self.warning_start_time = 0.0
+            self.warning_duration = 1.0
+            self.warning_markers: list[Rectangle] = []
+
+    def __init__(self) -> None:
+        global enemy_projectiles
+        self.levels: dict[int, EnemySpawner.LevelConditions] = {
+            3: self.LevelConditions(3, [
+                self.Wave([BasicEnemy(Vec2(120*tileSize, 15*tileSize), 3, 100.0)]),
+                self.Wave(
+                    [BasicEnemy(Vec2(70*tileSize, 0), 3, 150.0), BasicEnemy(Vec2(70*tileSize, 40*tileSize), 3, 150.0), 
+                     BasicEnemy(Vec2(0, 0), 3, 150.0), BasicEnemy(Vec2(0, 40*tileSize), 3, 150.0)],
+                    max_enemies_remaining=1
+                ),
+                self.Wave(
+                    [BasicEnemy(Vec2(70*tileSize, 0), 3, 200.0), BasicEnemy(Vec2(70*tileSize, 40*tileSize), 3, 200.0), 
+                     BasicEnemy(Vec2(0, 0), 3, 200.0), BasicEnemy(Vec2(0, 40*tileSize), 3, 200.0),
+                     BasicEnemy(Vec2(10*tileSize, 0), 3, 200.0), BasicEnemy(Vec2(20*tileSize, 0), 3, 200.0),
+                     BasicEnemy(Vec2(30*tileSize, 0), 3, 200.0), BasicEnemy(Vec2(40*tileSize, 0), 3, 200.0),
+                     BasicEnemy(Vec2(50*tileSize, 0), 3, 200.0)],
+                ),
+            ]),
+
+            4: self.LevelConditions(4, [
+                self.Wave([ProjectileEnemy(Vec2(40*tileSize, 0), 4, enemy_projectiles)], time_limit=5.0),
+                self.Wave([ProjectileEnemy(Vec2(20*tileSize, 0), 4, enemy_projectiles), ProjectileEnemy(Vec2(50*tileSize, 0), 4, enemy_projectiles),
+                           BasicEnemy(Vec2(0, 40*tileSize), 4, 200.0), BasicEnemy(Vec2(0, 35*tileSize), 4, 200.0), 
+                           BasicEnemy(Vec2(70*tileSize, 40*tileSize), 4, 200.0), BasicEnemy(Vec2(70*tileSize, 35*tileSize), 4, 200.0)]),
+            ]),
+
+            5: self.LevelConditions(5, [
+                self.Wave([ProjectileEnemy(Vec2(60*tileSize, 0), 5, enemy_projectiles), BasicEnemy(Vec2(55*tileSize, 0), 5, 500), ProjectileEnemy(Vec2(65*tileSize, 10*tileSize), 5, enemy_projectiles)], max_enemies_remaining=1, time_limit= 1),
+                self.Wave([ProjectileEnemy(Vec2(60*tileSize, 0), 5, enemy_projectiles), ProjectileEnemy(Vec2(55*tileSize, 0), 5, enemy_projectiles), ProjectileEnemy(Vec2(65*tileSize, 10*tileSize), 5, enemy_projectiles),
+                           BasicEnemy(Vec2(0*tileSize, 40*tileSize), 5, 350), BasicEnemy(Vec2(10*tileSize, 40*tileSize), 5, 350), BasicEnemy(Vec2(20*tileSize, 40*tileSize), 5, 350), BasicEnemy(Vec2(30*tileSize, 40*tileSize), 5, 350), BasicEnemy(Vec2(40*tileSize, 40*tileSize), 5, 350), BasicEnemy(Vec2(50*tileSize, 40*tileSize), 5, 350), BasicEnemy(Vec2(60*tileSize, 40*tileSize), 5, 350),
+                           ProjectileEnemy(Vec2(60*tileSize, 40*tileSize), 5, enemy_projectiles), ProjectileEnemy(Vec2(60*tileSize, 30*tileSize), 5, enemy_projectiles), ProjectileEnemy(Vec2(60*tileSize, 20*tileSize), 5, enemy_projectiles)], max_enemies_remaining=8),
+                self.Wave([BasicEnemy(Vec2(0*tileSize, 40*tileSize), 5, 350), BasicEnemy(Vec2(10*tileSize, 40*tileSize), 5, 350), BasicEnemy(Vec2(20*tileSize, 40*tileSize), 5, 350),
+                           BasicEnemy(Vec2(30*tileSize, 40*tileSize), 5, 350), BasicEnemy(Vec2(40*tileSize, 40*tileSize), 5, 350), BasicEnemy(Vec2(50*tileSize, 40*tileSize), 5, 350), BasicEnemy(Vec2(50*tileSize, 40*tileSize), 5, 350)]),
+                self.Wave([ProjectileEnemy(Vec2(60*tileSize, 0), 5, enemy_projectiles),ProjectileEnemy(Vec2(0*tileSize, 0*tileSize), 5, enemy_projectiles),ProjectileEnemy(Vec2(10*tileSize, 0*tileSize), 5, enemy_projectiles),ProjectileEnemy(Vec2(20*tileSize, 0*tileSize), 5, enemy_projectiles),ProjectileEnemy(Vec2(30*tileSize, 0*tileSize), 5, enemy_projectiles),ProjectileEnemy(Vec2(40*tileSize, 0*tileSize), 5, enemy_projectiles),ProjectileEnemy(Vec2(50*tileSize, 0*tileSize), 5, enemy_projectiles),ProjectileEnemy(Vec2(60*tileSize, 0*tileSize), 5, enemy_projectiles),ProjectileEnemy(Vec2(70*tileSize, 0*tileSize), 5, enemy_projectiles),ProjectileEnemy(Vec2(70*tileSize, 10*tileSize), 5, enemy_projectiles),ProjectileEnemy(Vec2(70*tileSize, 20*tileSize), 5, enemy_projectiles),ProjectileEnemy(Vec2(70*tileSize, 30*tileSize), 5, enemy_projectiles),ProjectileEnemy(Vec2(70*tileSize, 40*tileSize), 5, enemy_projectiles)])
+            ], 
+            barrages=[
+                self.Barrage(active_phases=[1, 2], spawn_interval=0.05, predictable= True)
+            ]
+            ),
+        }
+        
+    def tick(self, enemies: list, delta_time: float):
+        current_scene = SceneManager.current_active_scene
+        level = self.levels.get(current_scene)
+        
+        if not level:
+            return
+            
+        self._process_barrages(level, delta_time, enemy_projectiles)
+
+        if level.current_phase_already_spawned and not level.is_warning_phase:
+            self._check_wave_advance(level, enemies)
+
+        if not level.current_phase_already_spawned and not level.is_warning_phase:
+            self._start_warning_phase(level)
+
+        if level.is_warning_phase:
+            self._update_warning_phase(level, enemies)
+
+
+    def _process_barrages(self, level: EnemySpawner.LevelConditions, delta_time: float, projectiles: list):
+        SCREEN_WIDTH = 2160
+        SCREEN_HEIGHT = 1231
+        CURSOR_SPEED = 30.0
+
+        for barrage in level.barrages:
+            if level.battle_phase in barrage.active_phases:
+                barrage.timer += delta_time
+                if barrage.timer >= barrage.spawn_interval:
+                    barrage.timer = 0.0
+                    
+                    start_y: float = 0.0
+                    if not barrage.predictable:
+                        start_y = random.uniform(0, SCREEN_HEIGHT)
+                    else:
+                        if barrage.last_spawned_y >= SCREEN_HEIGHT:
+                            start_y = SCREEN_HEIGHT - 1.0
+                            barrage.last_spawned_y = start_y
+                            barrage.descending = False
+                        elif barrage.last_spawned_y <= 0:
+                            start_y = 1.0
+                            barrage.last_spawned_y = start_y
+                            barrage.descending = True
+                        else:
+                            if barrage.descending:
+                                start_y = barrage.last_spawned_y + CURSOR_SPEED
+                            else:
+                                start_y = barrage.last_spawned_y - CURSOR_SPEED
+                            barrage.last_spawned_y = start_y
+
+
+                
+                    hitbox = Rectangle(
+                        position=Vec2(SCREEN_WIDTH, start_y), 
+                        rotation=0.0, 
+                        scale=Vec2.splat(16),
+                        color=Color(1, 0, 0, 1)
+                    )
+                    
+                    proj = EnemyProjectile(
+                        homing=False, 
+                        hitbox=hitbox, 
+                        player_or_direction=Vec2(-1, 0), 
+                        active_scene=level.level_number
+                    )
+                    projectiles.append(proj)
+
+    def _check_wave_advance(self, level: EnemySpawner.LevelConditions, enemies: list[BasicEnemy | ProjectileEnemy]):
+        if level.battle_phase >= len(level.battle_spawns):
+            return  # Level is fully complete
+
+        current_wave = level.battle_spawns[level.battle_phase]
+        threshold_met = len(enemies) <= current_wave.max_enemies_remaining
+        time_met = False
+        
+        if current_wave.time_limit is not None:
+            time_passed = time.time() - level.phase_start_time
+            if time_passed >= current_wave.time_limit:
+                time_met = True
+                
+        if threshold_met or time_met:
+            if level.battle_phase < len(level.battle_spawns) - 1:
+                level.battle_phase += 1
+                level.current_phase_already_spawned = False
+            elif len(enemies) == 0:
+                pass # Trigger level end/win condition here later
+
+    def _start_warning_phase(self, level: EnemySpawner.LevelConditions):
+        if level.battle_phase >= len(level.battle_spawns):
+            return
+
+        level.is_warning_phase = True
+        level.warning_start_time = time.time()
+        current_wave = level.battle_spawns[level.battle_phase]
+        
+        SCREEN_WIDTH = 2160
+        SCREEN_HEIGHT = 1231
+        PADDING = 10.0 
+        
+        for enemy in current_wave.enemies:
+            marker_pos = enemy.hitbox.position
+            marker_pos = marker_pos.clamp(Vec2.splat(PADDING), Vec2(SCREEN_WIDTH - PADDING, SCREEN_HEIGHT - PADDING))
+            
+            marker = Rectangle(
+                position=marker_pos, 
+                rotation=0.0, 
+                scale=Vec2.splat(32*3), 
+                color=Color(1, 0, 0, 1) 
+            )
+            
+            def spin_marker(obj: Rectangle):
+                obj.rotation += 10.0 * get_delta_time()
+                if obj.color.a >= 1.0:
+                    obj.color = Color(1,0,0,0.4)
+                else:
+                    obj.color = Color(1,0,0,obj.color.a + (3 * get_delta_time()))
+
+            marker.tick(spin_marker)
+            level.warning_markers.append(marker)
+
+    def _update_warning_phase(self, level: EnemySpawner.LevelConditions, enemies: list):
+        time_warning_active = time.time() - level.warning_start_time
+        
+        if time_warning_active >= level.warning_duration:
+            # Clean up markers
+            for marker in level.warning_markers:
+                marker.remove_tick() 
+            level.warning_markers.clear()
+            
+            # Spawn wave
+            if level.battle_phase < len(level.battle_spawns):
+                current_wave = level.battle_spawns[level.battle_phase]
+                enemies.extend(current_wave.enemies)
+            
+            # Reset phase states
+            level.is_warning_phase = False
+            level.current_phase_already_spawned = True
+            level.phase_start_time = time.time()
+
+    def draw_warnings(self) -> None:
+        current_scene = SceneManager.current_active_scene
+        level = self.levels.get(current_scene)
+        
+        if level and level.is_warning_phase:
+            for marker in level.warning_markers:
+                marker.draw()
+
+
+
 class KeyHints():
     key_size: Vec2 = Vec2.splat(0.06*2194.0)
     w: Rectangle
@@ -802,7 +1054,7 @@ class KeyHints():
         self.esc.texture = textures.get("ESC_Key")
 
     def draw(self):
-        if KeyHints.__should_display_key_hints and not (Player.has_moved_once == True):
+        if KeyHints.__should_display_key_hints and (Player.has_moved_once == False):
             self.w.draw()
             self.a.draw()
             self.s.draw()
@@ -952,20 +1204,45 @@ class MiddleLayer():
         batch_draw_shapes(tmp_array)
         DEBUG.this_frame_draw_calls += tmp_array.__len__()
 
+
+
+class Trigger():
+    hitbox: Rectangle
+    audio: None | tuple[Sound, float]
+    transition_to: None | int
+    player_pos: None | Vec2
+    active: bool
+    name: str
+    def __init__(self, hitbox: Rectangle, transition_to: None | int = None, 
+                 audio: None | tuple[Sound, float] = None, player_pos: None | Vec2 = None, name: str = "Trigger") -> None:
+        self.hitbox = hitbox
+        self.audio = audio
+        self.transition_to = transition_to
+        self.player_pos = player_pos
+        self.active = True
+        self.name = name
+
+
 class LevelTriggers():
     triggers: list[Trigger]
     current_level: int
     def __init__(self, level: int) -> None:
         self.load_new_triggers_for_area(level)
+
     def check(self, player: Player):
         global no_nav_area
         global middle_layer
+
+        self.conditional_activate_triggers()
+
         for trigger in self.triggers:
+            if not trigger.active:
+                continue
             if player.hitbox.collides_with(trigger.hitbox):
                 if trigger.transition_to is not None:
                     self.triggers = []
                     self.current_level = trigger.transition_to
-                    SceneManager.switch_scene(trigger.transition_to)
+                    SceneManager.switch_scene(trigger.transition_to, False)
                     self.load_new_triggers_for_area(trigger.transition_to)
                 if trigger.audio is not None:
                     AudioManager.push_sound(trigger.audio[0], trigger.audio[1])
@@ -973,10 +1250,14 @@ class LevelTriggers():
                     player.hitbox.position = trigger.player_pos
     def debug_draw(self):
         for trigger in self.triggers:
-            trigger.hitbox.color = Color.ORANGE
+            if trigger.active:
+                trigger.hitbox.color = Color.ORANGE
+            else:
+                trigger.hitbox.color = Color.RED_BROWN
             trigger.hitbox.draw()
             trigger.hitbox.color = Color.INVISIBLE
     def load_new_triggers_for_area(self, area: int):
+        self.current_level = area
         self.triggers =  []
         if area == 0:
             r = Rectangle(Vec2(tileSize*47, tileSize*33),0,Vec2(tileSize*4,tileSize*1), Color.INVISIBLE)
@@ -995,29 +1276,52 @@ class LevelTriggers():
             woods_trigger2= Rectangle(Vec2(tileSize*68, tileSize*16),0,Vec2(tileSize*3,tileSize*10), Color.INVISIBLE)
             self.triggers = [
                 Trigger(woods_trigger,transition_to=1, player_pos=Vec2(tileSize*65,tileSize*16)),
-                Trigger(woods_trigger2,transition_to=3, player_pos=Vec2(tileSize*1,tileSize*16))
+                Trigger(woods_trigger2,transition_to=3, player_pos=Vec2(tileSize*1,tileSize*16), name= "woods3")
             ]
         elif area == 3:
-            self.triggers = []
-        else:
-            raise BaseException("invalid level")
+            woods_trigger2= Rectangle(Vec2(tileSize*68, tileSize*16),0,Vec2(tileSize*3,tileSize*10), Color.INVISIBLE)
+            self.triggers = [
+                Trigger(woods_trigger2,transition_to=4, player_pos=Vec2(tileSize*1,tileSize*20), name= "woods4")
+            ]
+        elif area == 4:
+            woods_trigger2= Rectangle(Vec2(tileSize*68, tileSize*23),0,Vec2(tileSize*3,tileSize*10), Color.INVISIBLE)
+            self.triggers = [
+                Trigger(woods_trigger2,transition_to=5, player_pos=Vec2(tileSize*1,tileSize*20), name= "woods5")
+            ]
+    
+    def set_trigger(self, name: str, active: bool):
+        for trigger in self.triggers:
+            if trigger.name == name:
+                trigger.active = active
+                return
+        raise BaseException("Trigger not found")
 
-class Trigger():
-    hitbox: Rectangle
-    audio: None | tuple[Sound, float]
-    transition_to: None | int
-    player_pos: None | Vec2
-    def __init__(self, hitbox: Rectangle, transition_to: None | int = None, 
-                 audio: None | tuple[Sound, float] = None, player_pos: None | Vec2 = None) -> None:
-        self.hitbox = hitbox
-        self.audio = audio
-        self.transition_to = transition_to
-        self.player_pos = player_pos
+    def conditional_activate_triggers(self):
+        if self.current_level == 2:
+            if destructible_manager.destructibles_level_2.__len__() == 0:
+                self.set_trigger("woods3", True)
+            else:
+                self.set_trigger("woods3", False)
+        elif self.current_level == 3:
+            if enemies.__len__() == 0:
+                self.set_trigger("woods4", True)
+            else:
+                self.set_trigger("woods4", False)
+        elif self.current_level == 4:
+            if enemies.__len__() == 0:
+                self.set_trigger("woods5", True)
+            else:
+                self.set_trigger("woods5", False)
+        
+
+
 
 class Hud():
     health_bar_frame: Rectangle
     hp_width: float
     hp_height: float
+    mouse_visual: Rectangle
+
     def __init__(self) -> None:
         h_ratio = 17 / 145
         width_total = 100
@@ -1027,6 +1331,7 @@ class Hud():
         x = 1000
         y = 1000
         self.health_bar_frame = Rectangle(Vec2(x, y), 0, Vec2(self.hp_width*1.04, self.hp_height*1.30), Color.WHITE, textures.get("full_hp_bar"))
+        self.mouse_visual = Rectangle(Vec2(0,0), 0, Vec2.splat(30), Color.WHITE, textures.get("Cursor"))
     
     def _draw_hp_bar(self, percent: float, position: Vec2):
         self.health_bar_frame.position = position + Vec2(0, 50)
@@ -1052,27 +1357,52 @@ class Hud():
             )
 
     def draw(self, player: Player):
+        global camera
         self._draw_hp_bar(player.health, player.hitbox.position)
+
+        # draw the mouse overlay
+        show_mouse(False)
+        offset = Vec2(15 * (screen_width()/ 2194.0) ,15 * (screen_height()/ 1234.0))
+        self.mouse_visual.position = Camera2D.screen_to_world(camera, get_mouse_position() + offset)
+        self.mouse_visual.draw()
 
 class SceneManager():
     current_active_scene: int = 0
     @staticmethod
-    def switch_scene(level: int):
+    def switch_scene(level: int, by_death: bool):
         global background
         global key_hints
         global no_nav_area
         global middle_layer
         global level_triggers
+        global enemy_spawner
+        global enemy_projectiles
+        global enemies
+        global destructible_manager
+        global player
         SceneManager.current_active_scene = level
+
         background = Background(level)
         no_nav_area = NoNavArea(level)
         middle_layer = MiddleLayer(level)
         level_triggers = LevelTriggers(level)
+        enemy_spawner = EnemySpawner()
+        destructible_manager.restock_level(level)
+        enemy_projectiles.clear()
+        enemies.clear()
+        if by_death:
+            player.hitbox.position = Vec2(70.0, 500.0)
+
 
 class DamageSystem(): # combined class handling all Damage related events.
     __last_damage_tick = time.time()
-    __player_invulnerability_between_attacks = 0.5
-    __enemy_invulnerability_between_attacks = 0.1
+    __player_invulnerability_between_attacks = .5
+    __enemy_invulnerability_between_attacks = .1
+    enemy_dmg: float =  .5
+    player_dmg: float = .51
+    projectile_damage_player_: float = .5
+    projectile_damage_enemy: float = 1.
+    player_damage_to_destructible: float = .2
 
     @staticmethod
     def tick(enemies: list[BasicEnemy | ProjectileEnemy], projectiles: list[EnemyProjectile], player: Player, destructible_manager: DestructibleManager):
@@ -1089,7 +1419,7 @@ class DamageSystem(): # combined class handling all Damage related events.
         if not colission == []:
             if DamageSystem.__last_damage_tick < (time.time() - DamageSystem.__player_invulnerability_between_attacks):
                 
-                player.health -= 0.1
+                player.health -= DamageSystem.enemy_dmg
                 if player.health < 0.0:
                     player.health = 0.0
                 DamageSystem.__last_damage_tick = time.time()
@@ -1102,7 +1432,7 @@ class DamageSystem(): # combined class handling all Damage related events.
             for col in colissions:
 
                 if col.invulnerable_til is None or col.invulnerable_til < now:
-                    col.health -= 0.51
+                    col.health -= DamageSystem.player_dmg
                     TwoDPhysics.add_shove(
                         col,
                         ((col.hitbox.position - player.hitbox.position).normalize_or_zero() * 50) + col.hitbox.position
@@ -1119,7 +1449,7 @@ class DamageSystem(): # combined class handling all Damage related events.
                 if player.hitbox.collides_with(proj.hitbox):
                     
                     if DamageSystem.__last_damage_tick < (now - DamageSystem.__player_invulnerability_between_attacks):
-                        player.health -= proj.damage
+                        player.health -= DamageSystem.projectile_damage_player_
                         if player.health < 0.0:
                             player.health = 0.0
                         DamageSystem.__last_damage_tick = now
@@ -1137,6 +1467,7 @@ class DamageSystem(): # combined class handling all Damage related events.
                 if proj.active_scene == SceneManager.current_active_scene and not proj.is_deflected:
                     if proj.hitbox.collides_with(player.attack_sprite.parts[0]):
                         rot = player.attack_sprite.parts[0].rotation
+                        
                         new_dir = Vec2(math.cos(rot), math.sin(rot))
                         proj.deflect(new_dir)
 
@@ -1149,7 +1480,7 @@ class DamageSystem(): # combined class handling all Damage related events.
                 for enemy in enemies:
                     if enemy.active_scene == SceneManager.current_active_scene and proj.hitbox.collides_with(enemy.hitbox):
                         if enemy.invulnerable_til is None or enemy.invulnerable_til < now:
-                            enemy.health -= 1.00
+                            enemy.health -= DamageSystem.projectile_damage_enemy
                             TwoDPhysics.add_shove(
                                 enemy, 
                                 ((enemy.hitbox.position - proj.hitbox.position).normalize_or_zero() * 50) + enemy.hitbox.position
@@ -1168,19 +1499,16 @@ class DamageSystem(): # combined class handling all Damage related events.
 
     @staticmethod
     def __player_damage_destructible(destructible_manager: DestructibleManager, player: Player):
-        # 1. Early return if the player isn't mid-swing
         if not (player.attack_sprite and player.attack_animation_index == 0):
             return
 
-        # 2. Get the specific objects for the current active level/scene
         current_level = SceneManager.current_active_scene
         level_objects = destructible_manager.get(current_level)
         weapon_hitbox = player.attack_sprite.parts[0]
 
-        # 3. Check hits and damage things using a sliced copy [:] to safely remove items
         for obj in level_objects[:]:
             if obj.hitbox.collides_with(weapon_hitbox):
-                obj.health -= 0.50  # Hits do 0.5 damage
+                obj.health -= DamageSystem.player_damage_to_destructible
                 
                 if obj.health <= 0.0:
                     level_objects.remove(obj)
@@ -1213,18 +1541,13 @@ class TwoDPhysics():
             if self.progress >= 1.0 or self.total_distance <= 0:
                 return True 
             
-            # 1. Advance progress based on time and speed scale.
-            # Using an easing function inside gives you a natural "slow down" feel.
             self.progress += delta_time * self.speed_scale
             if self.progress > 1.0:
                 self.progress = 1.0
                 
-            # 2. Calculate target position for this frame using an ease-out curve.
-            # (1 - (1 - x)^2) creates a smooth deceleration as progress nears 1.0
             eased_progress = 1.0 - (1.0 - self.progress) ** 2
             intended_target_dist = self.total_distance * eased_progress
             
-            # 3. Find out how far we actually want to move *this specific frame*
             current_relative_pos = self.entity.hitbox.position - self.start_position
             current_dist_moved = current_relative_pos.length()
             
@@ -1232,14 +1555,11 @@ class TwoDPhysics():
             if move_step <= 0:
                 return self.progress >= 1.0
 
-            # 4. Formulate displacement and run navmesh collision checks
             intended_displacement = self.direction * move_step
             actual_displacement = no_nav_area.check_move(self.entity.hitbox, intended_displacement, False)
             
-            # 5. Apply movement
             self.entity.hitbox.position += actual_displacement
             
-            # 6. If we hit a hard wall head-on, stop the event early to prevent sliding artifacts
             if actual_displacement.length() == 0 and move_step > 0:
                 return True
 
@@ -1266,8 +1586,10 @@ class Menue():
     death_background: list[Rectangle | Button]
     
     static_fullscreen_toggle = True
+    mouse_cursor: Rectangle
     def __init__(self) -> None:
         
+        self.mouse_cursor = Rectangle(Vec2(0,0), 0, Vec2.splat(20), Color.WHITE, textures.get("MenueCursor"))
         self.main_background  = [
             Rectangle(position=Vec2(2194.0/2, 1234.0/2),rotation=0, scale=Vec2(2194.0, 1234.0), color=Color.WHITE, texture=textures.get("tree_screen")),
             Rectangle(position=Vec2(2194.0/2, tileSize*15),rotation=0, scale=Vec2(tileSize*30,tileSize*5), color=Color(1,1,1,0.5)),
@@ -1295,6 +1617,7 @@ class Menue():
 
 
     def start(self, screen: int) -> bool:
+        show_mouse(False)
         global camera
         global audio_manager
         ffp =  False # first frame passed.
@@ -1330,6 +1653,7 @@ class Menue():
                           (2194.0/2)-tileSize*15, 
                           1234.0/2 - tileSize*3, Color.BLOOD_RED,
                           tileSize*20, fonts.get("dungeon_font"), font_scale=.2)
+                self.draw_mouse()
                 next_frame()
                 examples.limit_fps(60)
                 
@@ -1365,6 +1689,7 @@ class Menue():
                 draw_multiline_text("Game Paused.\nPress 'Escape' to return.",
                           (2194.0/2)-tileSize*15, 1234.0/2 - tileSize*5,tileSize*20,Color.BLUE_VIOLET, fonts.get("dungeon_font"),0, None, .1
                           )
+                self.draw_mouse()
                 next_frame()
                 ffp = True
                 examples.limit_fps(60)
@@ -1374,17 +1699,21 @@ class Menue():
             while True:
                 if KeyCode.Escape in get_keys_pressed() and ffp:
                     next_frame()
+                    AudioManager.set_background_sound(sounds.get("birds"))
                     return False
                 if is_quit_requested():
                     next_frame()
+                    AudioManager.set_background_sound(sounds.get("birds"))
                     return True
                 for item in self.death_background:
                     if isinstance(item, Button):
                         if item.check():
                             if item.button_label == "Perservere":
                                 clear_input_queue()
+                                AudioManager.set_background_sound(sounds.get("birds"))
                                 return False
                             elif item.button_label == "Give up":
+                                AudioManager.set_background_sound(sounds.get("birds"))
                                 return True
                             elif item.button_label == "Toggle Fullscreen":
                                 Menue.static_fullscreen_toggle = not Menue.static_fullscreen_toggle
@@ -1399,21 +1728,45 @@ class Menue():
                 draw_multiline_text("You Have Died.\nWhat will you do?",
                           (150), 1234.0/2 - tileSize*5,tileSize*20,Color.BLUE_VIOLET, fonts.get("dungeon_font"), 0, None, .1
                           )
+                self.draw_mouse()
                 next_frame()
                 ffp = True
                 examples.limit_fps(60)
         else :
             RuntimeError("invalid screen value")
             return False
+        
+    def draw_mouse(self):
+
+        offset = Vec2(8 * (screen_width()/ 2194.0) ,10 * (screen_height()/ 1234.0))
+        global camera
+        self.mouse_cursor.position = Camera2D.screen_to_world(camera, get_mouse_position() + offset)
+        
+
+        print(mouse_inside_window())
+        if self.static_fullscreen_toggle or mouse_inside_window():
+            show_mouse(False)
+            self.mouse_cursor.draw()
+        else:
+            show_mouse(True)
 
 
+profiler = Profiler(interval=0.1)
+profiler.start()
 
-
+activate_engine(Config("2D Game",fullscreen=True,swap_interval=0, sample_count=10))
+camera = Camera2D(rotation=0,zoom=Vec2(0.0009115, 0.0009115*16/9),target=Vec2.ZERO,offset=Vec2(-1,1))
 
 dt = get_delta_time()
 textures, fonts, sounds = load_all_assets()
 
 examples.loading_screen(lambda a: a, [],"Initializing Scene")
+
+
+
+enemies: list[BasicEnemy | ProjectileEnemy] = []
+enemy_projectiles: list[EnemyProjectile] = []
+
 
 menue = Menue()
 player = Player()
@@ -1421,6 +1774,7 @@ hud = Hud()
 destructible_manager = DestructibleManager()
 background  = Background(0)
 key_hints = KeyHints()
+enemy_spawner = EnemySpawner()
 no_nav_area = NoNavArea(0)
 middle_layer = MiddleLayer(0)
 level_triggers = LevelTriggers(0)
@@ -1428,17 +1782,16 @@ fps = get_fps()
 last_fps_update = time.time()
 
 
-SceneManager.switch_scene(3)
+SceneManager.switch_scene(5, True)
 
 
-should_quit = menue.start(0)
+should_quit: bool = menue.start(0)
 
 
-enemies: list[BasicEnemy | ProjectileEnemy] = []
-enemy_projectiles: list[EnemyProjectile] = []
 
 prevent_quit()
 while True:
+
     DEBUG.this_frame_draw_calls = 0
 
     dt= get_delta_time()
@@ -1448,7 +1801,7 @@ while True:
         break
     
     if KeyCode.Escape in get_keys_pressed():
-        val  = menue.start(1)
+        val = menue.start(1)
         if val:
             quit_program()
             print("Bye")
@@ -1474,7 +1827,17 @@ while True:
             BasicEnemy(Vec2.splat(500), SceneManager.current_active_scene)
             )
 
-    # logic 
+    # logic
+    if player.health <= 0.0:
+        val = menue.start(2)
+        if val:
+            quit_program()
+            print("Bye")
+            break
+        else:
+            SceneManager.switch_scene(SceneManager.current_active_scene, True)
+            player.health =  1.0
+
     player.update(no_nav_area)
     level_triggers.check(player)
     for enemy in enemies:
@@ -1492,6 +1855,8 @@ while True:
 
     TwoDPhysics.tick(get_delta_time(), no_nav_area)
     
+    enemy_spawner.tick(enemies, get_delta_time())
+    
     # drawing
     camera.set_camera(camera)
     background.draw()
@@ -1501,6 +1866,7 @@ while True:
         [obj.visual for obj in destructible_manager.get(SceneManager.current_active_scene)],
         player
     )
+    enemy_spawner.draw_warnings()
     hud.draw(player)
     no_nav_area.debug_draw()
     
@@ -1513,8 +1879,8 @@ while True:
     
     draw_text(f"{fps} fps",tileSize*2,tileSize*2,Color.WHITE,font_size=int(tileSize*1.3),font= fonts.get("bitcount_font"))
     draw_text(f"{DEBUG.this_frame_draw_calls} draw calls",tileSize*2,tileSize*3,Color.WHITE,font_size=int(tileSize*0.8),font= fonts.get("bitcount_font"))
-    draw_text(f"{((player.hitbox.position.x/tileSize),(player.hitbox.position.y / tileSize))} player pos",tileSize*2,tileSize*4,Color.WHITE,font_size=int(tileSize*0.8),font=fonts.get("bitcount_font"))
-    draw_text(f"{enemies.__len__()} enemies",tileSize*2,tileSize*5,Color.WHITE,font_size=int(tileSize*0.8),font= fonts.get("bitcount_font"))
+    draw_text(f"player pos {player.hitbox.position.x:.1f}, {player.hitbox.position.y:.1f}", tileSize*2, tileSize*4, Color.WHITE, font_size=int(tileSize*0.8), font=fonts.get("bitcount_font"))
+    draw_text(f"{enemies.__len__()} entities",tileSize*2,tileSize*5,Color.WHITE,font_size=int(tileSize*0.8),font= fonts.get("bitcount_font"))
 
     next_frame(None) #since this is a purely 2D game, we do not require 3d physics.
     examples.limit_fps(300)

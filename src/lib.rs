@@ -34,7 +34,8 @@ mod py_abstractions;
 #[pymodule]
 #[pyo3(gil_used = false)]
 pub fn _pyroquad( m: &Bound<'_, PyModule>) -> PyResult<()> {
-
+    
+    
 
     m.add_function(wrap_pyfunction!(crate::py_abstractions::py_functions::activate_engine, m)?)?;
     
@@ -78,6 +79,7 @@ pub fn _pyroquad( m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(crate::py_abstractions::py_functions::get_keys_released, m)?)?;
     m.add_function(wrap_pyfunction!(crate::py_abstractions::py_functions::get_char_pressed, m)?)?;
     
+    m.add_function(wrap_pyfunction!(crate::py_abstractions::Mouse::mouse_inside_window, m)?)?;
     m.add_function(wrap_pyfunction!(crate::py_abstractions::Mouse::get_mouse_buttons_down, m)?)?;
     m.add_function(wrap_pyfunction!(crate::py_abstractions::Mouse::get_mouse_buttons_pressed, m)?)?;
     m.add_function(wrap_pyfunction!(crate::py_abstractions::Mouse::get_mouse_buttons_released, m)?)?;
