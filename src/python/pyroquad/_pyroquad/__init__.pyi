@@ -317,8 +317,7 @@ class Camera2D:
         Creates a camera based on a Retangle.
         Takes A 2D rectangle, defined by its top-left corner, width and height.
         """
-    @staticmethod
-    def set_camera(camera: Camera2D) -> None:
+    def set_camera(self) -> None:
         r"""
         Set active 2D camera.
         """
@@ -451,8 +450,7 @@ class Camera3D:
         Camera far plane
         """
     def __new__(cls, position: Vec3 = ..., target: Vec3 = ..., aspect: typing.Optional[builtins.float] = None, up: Vec3 = ..., fovy: builtins.float = 0.7853981852531433, projection: Projection = Projection.Perspective, render_target: typing.Optional[RenderTarget] = None, viewport: typing.Optional[tuple[builtins.int, builtins.int, builtins.int, builtins.int]] = None, z_near: builtins.float = 0.009999999776482582, z_far: builtins.float = 10000.0) -> Camera3D: ...
-    @staticmethod
-    def set_camera(camera: Camera3D) -> None:
+    def set_camera(self) -> None:
         r"""
         Set active 3D camera.
         """

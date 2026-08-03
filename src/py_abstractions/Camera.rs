@@ -2,6 +2,7 @@ use macroquad::camera::Camera;
 use pyo3::prelude::*;
  
 use macroquad::prelude as mq;
+use crate::engine::CameraManager::clone_camera2d;
 use crate::engine::CoreLoop::COMMAND_QUEUE;
 use crate::engine::CoreLoop::Command;
 use crate::engine::PChannel::PChannel;
@@ -110,13 +111,9 @@ impl Camera2D {
     }
 
     /// Set active 2D camera.
-    #[staticmethod]
-    pub fn set_camera(camera: Camera2D) {
-        
-        let cam: mq::Camera2D = camera.into();
+    pub fn set_camera(&self) {
+        let cam: mq::Camera2D = self.clone().into();
         COMMAND_QUEUE.push(Command::SetCamera { camera_2d: Some(cam), camera_3d: None });
-
-
     }
 }
 
@@ -323,10 +320,9 @@ impl Camera3D {
         }
     }
 
-    #[staticmethod]
     /// Set active 3D camera.
-    pub fn set_camera(camera: Camera3D) {
-        let cam: mq::Camera3D = camera.into();
+    pub fn set_camera(&self) {
+        let cam: mq::Camera3D = self.clone().into();
         COMMAND_QUEUE.push(Command::SetCamera { camera_2d: None, camera_3d: Some(cam) });
     }
 }

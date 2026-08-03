@@ -230,8 +230,8 @@ class Player():
     sword_visual: Sprite
     playerSize: float
     speed: float = tileSize*15.0
-    health: float = 10**300 # ranging from 1.0 to 0.0
-
+    max_hp: float = 1.0 # ranging from 1.0 to 0.0
+    health: float = max_hp
     walking_animation_index = 0
     animation_frames: list[Texture2D] = []
     last_animation_switch  = time.time()
@@ -874,11 +874,21 @@ class EnemySpawner:
                            BasicEnemy(Vec2(0*tileSize, 40*tileSize), 5, 350), BasicEnemy(Vec2(10*tileSize, 40*tileSize), 5, 350), BasicEnemy(Vec2(20*tileSize, 40*tileSize), 5, 350), BasicEnemy(Vec2(30*tileSize, 40*tileSize), 5, 350), BasicEnemy(Vec2(40*tileSize, 40*tileSize), 5, 350), BasicEnemy(Vec2(50*tileSize, 40*tileSize), 5, 350), BasicEnemy(Vec2(60*tileSize, 40*tileSize), 5, 350),
                            ProjectileEnemy(Vec2(60*tileSize, 40*tileSize), 5, enemy_projectiles), ProjectileEnemy(Vec2(60*tileSize, 30*tileSize), 5, enemy_projectiles), ProjectileEnemy(Vec2(60*tileSize, 20*tileSize), 5, enemy_projectiles)], max_enemies_remaining=8),
                 self.Wave([BasicEnemy(Vec2(0*tileSize, 40*tileSize), 5, 350), BasicEnemy(Vec2(10*tileSize, 40*tileSize), 5, 350), BasicEnemy(Vec2(20*tileSize, 40*tileSize), 5, 350),
-                           BasicEnemy(Vec2(30*tileSize, 40*tileSize), 5, 350), BasicEnemy(Vec2(40*tileSize, 40*tileSize), 5, 350), BasicEnemy(Vec2(50*tileSize, 40*tileSize), 5, 350), BasicEnemy(Vec2(50*tileSize, 40*tileSize), 5, 350)]),
-                self.Wave([ProjectileEnemy(Vec2(60*tileSize, 0), 5, enemy_projectiles),ProjectileEnemy(Vec2(0*tileSize, 0*tileSize), 5, enemy_projectiles),ProjectileEnemy(Vec2(10*tileSize, 0*tileSize), 5, enemy_projectiles),ProjectileEnemy(Vec2(20*tileSize, 0*tileSize), 5, enemy_projectiles),ProjectileEnemy(Vec2(30*tileSize, 0*tileSize), 5, enemy_projectiles),ProjectileEnemy(Vec2(40*tileSize, 0*tileSize), 5, enemy_projectiles),ProjectileEnemy(Vec2(50*tileSize, 0*tileSize), 5, enemy_projectiles),ProjectileEnemy(Vec2(60*tileSize, 0*tileSize), 5, enemy_projectiles),ProjectileEnemy(Vec2(70*tileSize, 0*tileSize), 5, enemy_projectiles),ProjectileEnemy(Vec2(70*tileSize, 10*tileSize), 5, enemy_projectiles),ProjectileEnemy(Vec2(70*tileSize, 20*tileSize), 5, enemy_projectiles),ProjectileEnemy(Vec2(70*tileSize, 30*tileSize), 5, enemy_projectiles),ProjectileEnemy(Vec2(70*tileSize, 40*tileSize), 5, enemy_projectiles)])
+                           BasicEnemy(Vec2(30*tileSize, 40*tileSize), 5, 350), BasicEnemy(Vec2(40*tileSize, 40*tileSize), 5, 350), BasicEnemy(Vec2(50*tileSize, 40*tileSize), 5, 350), BasicEnemy(Vec2(50*tileSize, 40*tileSize), 5, 350)], 5),
+                self.Wave([ProjectileEnemy(Vec2(60*tileSize, 0), 5, enemy_projectiles),ProjectileEnemy(Vec2(0*tileSize, 0*tileSize), 5, enemy_projectiles),ProjectileEnemy(Vec2(10*tileSize, 0*tileSize), 5, enemy_projectiles),ProjectileEnemy(Vec2(20*tileSize, 0*tileSize), 5, enemy_projectiles),ProjectileEnemy(Vec2(30*tileSize, 0*tileSize), 5, enemy_projectiles),ProjectileEnemy(Vec2(40*tileSize, 0*tileSize), 5, enemy_projectiles),ProjectileEnemy(Vec2(50*tileSize, 0*tileSize), 5, enemy_projectiles),ProjectileEnemy(Vec2(60*tileSize, 0*tileSize), 5, enemy_projectiles),ProjectileEnemy(Vec2(70*tileSize, 0*tileSize), 5, enemy_projectiles),ProjectileEnemy(Vec2(70*tileSize, 10*tileSize), 5, enemy_projectiles),ProjectileEnemy(Vec2(70*tileSize, 20*tileSize), 5, enemy_projectiles),ProjectileEnemy(Vec2(70*tileSize, 30*tileSize), 5, enemy_projectiles),ProjectileEnemy(Vec2(70*tileSize, 40*tileSize), 5, enemy_projectiles)], max_enemies_remaining=5),
+                self.Wave([BasicEnemy(Vec2(0*tileSize,40*tileSize), 5, 300),BasicEnemy(Vec2(5*tileSize,40*tileSize), 5, 300),BasicEnemy(Vec2(10*tileSize,40*tileSize), 5, 300),BasicEnemy(Vec2(15*tileSize,40*tileSize), 5, 300),BasicEnemy(Vec2(20*tileSize,40*tileSize), 5, 300),BasicEnemy(Vec2(25*tileSize,40*tileSize), 5, 300),BasicEnemy(Vec2(30*tileSize,40*tileSize), 5, 300),BasicEnemy(Vec2(35*tileSize,40*tileSize), 5, 300),BasicEnemy(Vec2(40*tileSize,40*tileSize), 5, 300),BasicEnemy(Vec2(45*tileSize,40*tileSize), 5, 300),BasicEnemy(Vec2(40*tileSize,50*tileSize), 5, 300),BasicEnemy(Vec2(55*tileSize,40*tileSize), 5, 300),BasicEnemy(Vec2(40*tileSize,60*tileSize), 5, 300),BasicEnemy(Vec2(65*tileSize,40*tileSize), 5, 300),BasicEnemy(Vec2(70*tileSize,40*tileSize), 5, 300),BasicEnemy(Vec2(75*tileSize,40*tileSize), 5, 300),BasicEnemy(Vec2(80*tileSize,40*tileSize), 5, 300),], max_enemies_remaining=20),
+                self.Wave([BasicEnemy(Vec2(0*tileSize,40*tileSize), 5, 300),BasicEnemy(Vec2(5*tileSize,40*tileSize), 5, 300),BasicEnemy(Vec2(10*tileSize,40*tileSize), 5, 300),BasicEnemy(Vec2(15*tileSize,40*tileSize), 5, 300),BasicEnemy(Vec2(20*tileSize,40*tileSize), 5, 300),BasicEnemy(Vec2(25*tileSize,40*tileSize), 5, 300),BasicEnemy(Vec2(30*tileSize,40*tileSize), 5, 300),BasicEnemy(Vec2(35*tileSize,40*tileSize), 5, 300),BasicEnemy(Vec2(40*tileSize,40*tileSize), 5, 300),BasicEnemy(Vec2(45*tileSize,40*tileSize), 5, 300),BasicEnemy(Vec2(40*tileSize,50*tileSize), 5, 300),BasicEnemy(Vec2(55*tileSize,40*tileSize), 5, 300),BasicEnemy(Vec2(40*tileSize,60*tileSize), 5, 300),BasicEnemy(Vec2(65*tileSize,40*tileSize), 5, 300),BasicEnemy(Vec2(70*tileSize,40*tileSize), 5, 300),BasicEnemy(Vec2(75*tileSize,40*tileSize), 5, 300),BasicEnemy(Vec2(80*tileSize,40*tileSize), 5, 300),], max_enemies_remaining=50),
+                self.Wave([BasicEnemy(Vec2(0*tileSize, 0*tileSize), 5, 350),BasicEnemy(Vec2(0*tileSize, 5*tileSize), 5, 350),BasicEnemy(Vec2(0*tileSize, 10*tileSize), 5, 350),BasicEnemy(Vec2(0*tileSize, 15*tileSize), 5, 350),BasicEnemy(Vec2(0*tileSize, 20*tileSize), 5, 350),BasicEnemy(Vec2(0*tileSize, 25*tileSize), 5, 350),BasicEnemy(Vec2(0*tileSize, 30*tileSize), 5, 350),BasicEnemy(Vec2(0*tileSize, 35*tileSize), 5, 350),BasicEnemy(Vec2(0*tileSize, 40*tileSize), 5, 350),BasicEnemy(Vec2(0*tileSize, 45*tileSize), 5, 350),], max_enemies_remaining=5),
+                
+                self.Wave([ProjectileEnemy(Vec2(60*tileSize, 0), 5, enemy_projectiles), ProjectileEnemy(Vec2(55*tileSize, 0), 5, enemy_projectiles), ProjectileEnemy(Vec2(65*tileSize, 10*tileSize), 5, enemy_projectiles),
+                           BasicEnemy(Vec2(0*tileSize, 40*tileSize), 5, 350), BasicEnemy(Vec2(10*tileSize, 40*tileSize), 5, 350), BasicEnemy(Vec2(20*tileSize, 40*tileSize), 5, 350), BasicEnemy(Vec2(30*tileSize, 40*tileSize), 5, 350), BasicEnemy(Vec2(40*tileSize, 40*tileSize), 5, 350), BasicEnemy(Vec2(50*tileSize, 40*tileSize), 5, 350), BasicEnemy(Vec2(60*tileSize, 40*tileSize), 5, 350),
+                
+                           ProjectileEnemy(Vec2(60*tileSize, 40*tileSize), 5, enemy_projectiles), ProjectileEnemy(Vec2(60*tileSize, 30*tileSize), 5, enemy_projectiles), ProjectileEnemy(Vec2(60*tileSize, 20*tileSize), 5, enemy_projectiles)]),
+                self.Wave([])
             ], 
             barrages=[
-                self.Barrage(active_phases=[1, 2], spawn_interval=0.05, predictable= True)
+                self.Barrage(active_phases=[1, 3], spawn_interval=0.05, predictable= True),
+                self.Barrage(active_phases=[7, 7], spawn_interval=0.05, predictable= False)
             ]
             ),
         }
@@ -1358,7 +1368,7 @@ class Hud():
 
     def draw(self, player: Player):
         global camera
-        self._draw_hp_bar(player.health, player.hitbox.position)
+        self._draw_hp_bar(player.health/player.max_hp, player.hitbox.position)
 
         # draw the mouse overlay
         if mouse_inside_window():
@@ -1395,6 +1405,7 @@ class SceneManager():
         enemies.clear()
         if by_death:
             player.hitbox.position = Vec2(70.0, 500.0)
+            player.health = player.max_hp
 
 
 class DamageSystem(): # combined class handling all Damage related events.
@@ -1616,6 +1627,7 @@ class Menue():
             Button(Vec2(300, tileSize*28), Vec2(tileSize*10,tileSize*2), button_color=Color(0.7,0.7,0.7,1),label="Give up"),
             Button(Vec2(300, tileSize*31), Vec2(tileSize*10,tileSize*2), button_color=Color(0.7,0.7,0.7,1),label="Toggle Fullscreen"),
             Button(Vec2(300, tileSize*34), Vec2(tileSize*10,tileSize*2), button_color=Color(0.7,0.7,0.7,1),label="Toggle Mute Audio"),
+            Button(Vec2(700, tileSize*34), Vec2(tileSize*13,tileSize*2), button_color=Color(0.7,0.7,0.7,1),label="Toggle Difficulty: Hard"),
             ]
 
 
@@ -1627,7 +1639,7 @@ class Menue():
         if screen == 0:
             AudioManager.set_background_sound(sounds.get("birds"))
             while True:
-                camera.set_camera(camera)
+                camera.set_camera()
                 for item in self.main_background:
                     if isinstance(item, Button):
                         if item.check():
@@ -1723,8 +1735,22 @@ class Menue():
                                 set_fullscreen(Menue.static_fullscreen_toggle)
                             elif item.button_label == "Toggle Mute Audio":
                                 AudioManager.toggle_mute()
-                            else:
-                                RuntimeError("Unknown label")
+                            
+                            elif item.button_label == "Toggle Difficulty: Hard":
+                                item.button_label = "Toggle Difficulty: Challenging"
+                                player.max_hp = 2.0
+                                item.button.position = Vec2(762, tileSize*34)
+                                item.button.scale = Vec2(tileSize*17,tileSize*2)
+                            elif item.button_label == "Toggle Difficulty: Challenging":
+                                item.button_label = "Toggle Difficulty: Easy"
+                                player.max_hp = 10.0
+                                item.button.position = Vec2(700, tileSize*34)
+                                item.button.scale = Vec2(tileSize*13,tileSize*2)
+                            elif item.button_label == "Toggle Difficulty: Easy":
+                                item.button_label = "Toggle Difficulty: Hard"
+                                player.max_hp = 1.0
+                            
+
                 clear_background(bg_col)
                 for item in self.death_background:
                     item.draw()
@@ -1837,7 +1863,6 @@ while True:
             break
         else:
             SceneManager.switch_scene(SceneManager.current_active_scene, True)
-            player.health =  1.0
 
     player.update(no_nav_area)
     level_triggers.check(player)
@@ -1859,7 +1884,7 @@ while True:
     enemy_spawner.tick(enemies, get_delta_time())
     
     # drawing
-    camera.set_camera(camera)
+    camera.set_camera()
     background.draw()
     middle_layer.draw(
         [enemy.visual for enemy in enemies if enemy.active_scene == SceneManager.current_active_scene] +

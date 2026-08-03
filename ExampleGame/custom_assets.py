@@ -161,7 +161,7 @@ def load_all_assets() -> tuple[dict, dict, dict]:
     examples.loading_screen_future(
         lambda a: Loading.download_file_and_save_future(prefix + a["url"], a["path"]),
         asset_definitions,
-        "Downloading All Assets"
+        "Downloading Assets"
     )
 
     paths = [a["path"] for a in asset_definitions]

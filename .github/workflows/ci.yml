@@ -10,6 +10,9 @@ on:
 
 permissions:
   contents: write
+  id-token: write
+
+
 
 jobs:
   build:
@@ -65,11 +68,12 @@ jobs:
           path: dist/*.whl
 
   publish:
-    name: Create GitHub Release
+    name: Publish to PyPI & GitHub Release
     needs: build
     runs-on: ubuntu-latest
     permissions:
-      contents: write 
+      contents: write
+      id-token: write
     steps:
       - name: Download all wheels
         uses: actions/download-artifact@v4
@@ -77,6 +81,12 @@ jobs:
           path: release_dist
           pattern: pyroquad-*
           merge-multiple: true
+
+      - name: Publish package to PyPI
+        uses: PyO3/maturin-action@v1
+        with:
+          command: upload
+          args: --non-interactive release_dist/*
 
       - name: Create Release
         uses: softprops/action-gh-release@v2
