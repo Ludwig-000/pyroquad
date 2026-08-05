@@ -1040,6 +1040,9 @@ impl Vec3 {
         (lhs % a).into()
     }
 
+
+
+
 }
 
 

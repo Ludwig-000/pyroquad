@@ -38,6 +38,8 @@ pub struct Image {
 #[pymethods]
 impl Image {
 
+    /// Creates an image from a given file path.
+    /// supported image formats are: ".png", ".jpeg", ".webp"
     #[new]
     pub fn new(path: String) -> PyResult<Image> {
         let data = crate::py_abstractions::Loading::Loading::load_file(&path)?;
@@ -125,7 +127,6 @@ impl Image {
         let b = (color.b * 255.0) as u8;
         let a = (color.a * 255.0) as u8;
 
-        // Set the individual byte values in the underlying 'bytes' vector.
         self.bytes[index] = r;
         self.bytes[index + 1] = g;
         self.bytes[index + 2] = b;
@@ -204,6 +205,30 @@ impl Image {
 
     pub fn to_texture(&self)-> PyResult<Texture2D>{
         Texture2D::new(self.clone())
+    }
+
+    /// Creates a slice from a an image.
+    /// The slice is top_left (x1, y1), bottom_right (x2, y2). (absolute coordinates in pixels)
+    /// This is very useful when working with tile maps
+    pub fn slice(&self, x1: u32, y1: u32, x2: u32, y2: u32) -> PyResult<Image>{
+        py_assert!( x1 < x2 && y1 < y2, "top_left must be smaller than bottom_right");
+        py_assert!( x2 <= self.width as u32 && y2 <= self.height as u32, "slice may not exceed image width or height");
+
+        let bpp = 4;
+        let bytes: Vec<u8> = (y1..y2)
+            .flat_map(|y| {
+                let start = ((y * self.width as u32 + x1) * bpp) as usize;
+                let end = ((y * self.width as u32 + x2) * bpp) as usize;
+                &self.bytes[start..end]
+            })
+            .copied()
+            .collect();
+        
+        Ok(Image{
+            width: (x2 - x1) as u16,
+            bytes: bytes,
+            height: (y2 - y1) as u16,
+        })
     }
 }
 pub fn image_from_bytes(bytes: &Vec<u8>)-> PyResult<Image>{

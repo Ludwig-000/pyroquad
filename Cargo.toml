@@ -1,6 +1,6 @@
 [package]
 name = "pyroquad"
-version = "0.0.3"
+version = "0.0.4"
 edition = "2024"
 
 
@@ -59,18 +59,16 @@ paste = "=1.0.15" # for better macro control, allowing the writing of generic co
 
 quad-snd = { git = "https://github.com/Ludwig-000/quad-snd " } # custom fork for quad-snd for a compatability fix for linux.
 
-
-
-
-
-
-
 [dependencies.image] # for image decoding
 version = "=0.25.8"
 default-features = false
 features = ["png", "jpeg", "webp"]
 
-# driver crap
+
+
+
+# this whole block soely exists to detect if the mouse is inside the window.
+# TODO: find a pre-built solution ASAP!
 [target.'cfg(target_arch = "windows")'.dependencies]
 [dependencies.windows-sys]
 version = "0.59"

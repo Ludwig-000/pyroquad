@@ -25,7 +25,6 @@ macro_rules! limited_thread {
             cvar: Condvar::new(),
         });
 
-        // LOCAL Gatekeeper (Wait until THIS call-site has a slot)
         let mut local_count = state.active_threads.lock().unwrap();
         while *local_count >= $limit {
             local_count = state.cvar.wait(local_count).unwrap();
@@ -33,8 +32,6 @@ macro_rules! limited_thread {
         *local_count += 1;
         drop(local_count); 
 
-        // GLOBAL Gatekeeper (Wait until the WHOLE SYSTEM has a slot)
-        // We use the full path to reach the statics defined above
         let mut global_count = $crate::engine::PThreading::ACTIVE_THREADS.lock().unwrap();
         while *global_count >= $crate::engine::PThreading::MAX_GLOBAL_THREADS {
             global_count = $crate::engine::PThreading::CVAR.wait(global_count).unwrap();
@@ -42,21 +39,18 @@ macro_rules! limited_thread {
         *global_count += 1;
         drop(global_count);
 
-        // Panic-Safe Guard (Releases both slots even if $func panics)
         struct SlotGuard<'a> {
             local_state: &'a ConcurrencyState,
         }
         
         impl<'a> Drop for SlotGuard<'a> {
             fn drop(&mut self) {
-                // Release Global Slot First
                 {
                     let mut g_count = $crate::engine::PThreading::ACTIVE_THREADS.lock().unwrap();
                     *g_count -= 1;
                     $crate::engine::PThreading::CVAR.notify_one(); 
                 }
                 
-                // Release Local Slot Second
                 {
                     let mut l_count = self.local_state.active_threads.lock().unwrap();
                     *l_count -= 1;
@@ -67,7 +61,6 @@ macro_rules! limited_thread {
 
         let _guard = SlotGuard { local_state: state };
 
-        // Execute the task
         ($func)()
     }};
 }

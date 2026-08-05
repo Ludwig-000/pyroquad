@@ -984,10 +984,6 @@ impl Vec2 {
 
 
 
-
-
-
-
 }
 
 impl std::fmt::Display for Vec2 {

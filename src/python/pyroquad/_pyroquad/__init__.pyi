@@ -5524,6 +5524,12 @@ class Image:
         Flip the image vertically (mirror top-bottom)
         """
     def to_texture(self) -> Texture2D: ...
+    def slice(self, x1: builtins.int, y1: builtins.int, x2: builtins.int, y2: builtins.int) -> Image:
+        r"""
+        Creates a slice from a an image.
+        The slice is top_left (x1, y1), bottom_right (x2, y2). (absolute coordinates in pixels)
+        This is very useful when working with tile maps
+        """
 
 @typing.final
 class ImageFuture:

@@ -146,9 +146,13 @@ class Background():
             ]
             self.level += gf2 + gf1 + gp + dirt_path_var1 + dirt_path_var2 +  water + bridge
         if level == 3:
-            self.level = Background.grass_back(5,5,2,5553)
+            self.level = Background.grass_back(5,5,2,5553) + self.dirt_path(scale=Vec2(65, 8), offset=Vec2(0, 13), seed=33, density=0.4, min_transparency=0.5)
+
         if level == 4:
-            self.level = Background.grass_back(5,1,1,13)
+            self.level = Background.grass_back(5,1,1,13) 
+            self.level += self.dirt_path(scale=Vec2(40, 8), offset=Vec2(0, 13), seed=4234, density=0.6, min_transparency=0.1) 
+            self.level += self.dirt_path(scale=Vec2(40, 8), offset=Vec2(40, 17), seed=4234, density=0.6, min_transparency=0.1)
+            self.level += self.water_river(Vec2(80,7), Vec2(0,7))
         if level == 5:
             self.level = Background.grass_back(5,1,1,11)
 
@@ -377,7 +381,7 @@ class NoNavArea:
             ])
         elif level == 4:
             raw_nav_area.extend([
-                (Rectangle(Vec2(30, 10) * tileSize, 0, Vec2(100, 6) * tileSize, Color.INVISIBLE), False),
+                (Rectangle(Vec2(30, 10) * tileSize, 0, Vec2(100, 7) * tileSize, Color.INVISIBLE), False),
             ])
         elif level == 5:
             raw_nav_area.extend([
@@ -529,6 +533,7 @@ class DestructibleManager():
             return []
  
     def restock_level(self, level: int):
+        crate_tex = textures.get("crate")
         if level == 0:
             self.destructibles_level_0 = []
         elif level == 1:
@@ -536,7 +541,7 @@ class DestructibleManager():
         elif level == 2:
             self.destructibles_level_2 = [
                 DestructibleObject(
-                    Rectangle(Vec2(37*tileSize,15.6*tileSize), 0, Vec2.splat(75), Color.BROWN),
+                    Rectangle(Vec2(37*tileSize,15.6*tileSize), 0, Vec2.splat(75), Color.WHITE,crate_tex),
                     None,
                     1
                 )
@@ -548,13 +553,13 @@ class DestructibleManager():
         elif level == 5:
             self.destructibles_level_5 = [
                 DestructibleObject(
-                    Rectangle(Vec2(37*tileSize,10*tileSize), 0, Vec2.splat(100), Color.BROWN), 
+                    Rectangle(Vec2(37*tileSize,10*tileSize), 0, Vec2.splat(100), Color.WHITE,crate_tex), 
                 None,4),
                 DestructibleObject(
-                    Rectangle(Vec2(37*tileSize,14*tileSize), 0, Vec2.splat(100), Color.BROWN), 
+                    Rectangle(Vec2(37*tileSize,14*tileSize), 0, Vec2.splat(100), Color.WHITE,crate_tex), 
                 None,4),
                 DestructibleObject(
-                    Rectangle(Vec2(41*tileSize,18*tileSize), 0, Vec2.splat(100), Color.BROWN), 
+                    Rectangle(Vec2(41*tileSize,18*tileSize), 0, Vec2.splat(100), Color.WHITE,crate_tex), 
                 None,4)
             ]
         else:
@@ -846,7 +851,7 @@ class EnemySpawner:
         global enemy_projectiles
         self.levels: dict[int, EnemySpawner.LevelConditions] = {
             3: self.LevelConditions(3, [
-                self.Wave([BasicEnemy(Vec2(120*tileSize, 15*tileSize), 3, 100.0)]),
+                self.Wave([BasicEnemy(Vec2(60*tileSize, 15*tileSize), 3, 100.0)]),
                 self.Wave(
                     [BasicEnemy(Vec2(70*tileSize, 0), 3, 150.0), BasicEnemy(Vec2(70*tileSize, 40*tileSize), 3, 150.0), 
                      BasicEnemy(Vec2(0, 0), 3, 150.0), BasicEnemy(Vec2(0, 40*tileSize), 3, 150.0)],
@@ -859,10 +864,13 @@ class EnemySpawner:
                      BasicEnemy(Vec2(30*tileSize, 0), 3, 200.0), BasicEnemy(Vec2(40*tileSize, 0), 3, 200.0),
                      BasicEnemy(Vec2(50*tileSize, 0), 3, 200.0)],
                 ),
+                self.Wave([BasicEnemy(Vec2(0*tileSize, 0*tileSize), 3, 400),BasicEnemy(Vec2(10*tileSize, 0*tileSize), 3, 400),BasicEnemy(Vec2(20*tileSize, 0*tileSize), 3, 400),BasicEnemy(Vec2(30*tileSize, 0*tileSize), 3, 400),BasicEnemy(Vec2(40*tileSize, 0*tileSize), 3, 400),BasicEnemy(Vec2(50*tileSize, 0*tileSize), 3, 400),BasicEnemy(Vec2(60*tileSize, 0*tileSize), 3, 400),], 5 ),
+                self.Wave([BasicEnemy(Vec2(0*tileSize, 50*tileSize), 3, 400),BasicEnemy(Vec2(10*tileSize, 50*tileSize), 3, 400),BasicEnemy(Vec2(20*tileSize, 50*tileSize), 3, 400),BasicEnemy(Vec2(30*tileSize, 50*tileSize), 3, 400),BasicEnemy(Vec2(40*tileSize, 50*tileSize), 3, 400),BasicEnemy(Vec2(50*tileSize, 50*tileSize), 3, 400),BasicEnemy(Vec2(60*tileSize, 50*tileSize), 3, 400)])
+
             ]),
 
             4: self.LevelConditions(4, [
-                self.Wave([ProjectileEnemy(Vec2(40*tileSize, 0), 4, enemy_projectiles)], time_limit=5.0),
+                self.Wave([ProjectileEnemy(Vec2(40*tileSize, 0), 4, enemy_projectiles)]),
                 self.Wave([ProjectileEnemy(Vec2(20*tileSize, 0), 4, enemy_projectiles), ProjectileEnemy(Vec2(50*tileSize, 0), 4, enemy_projectiles),
                            BasicEnemy(Vec2(0, 40*tileSize), 4, 200.0), BasicEnemy(Vec2(0, 35*tileSize), 4, 200.0), 
                            BasicEnemy(Vec2(70*tileSize, 40*tileSize), 4, 200.0), BasicEnemy(Vec2(70*tileSize, 35*tileSize), 4, 200.0)]),
@@ -883,12 +891,15 @@ class EnemySpawner:
                 self.Wave([ProjectileEnemy(Vec2(60*tileSize, 0), 5, enemy_projectiles), ProjectileEnemy(Vec2(55*tileSize, 0), 5, enemy_projectiles), ProjectileEnemy(Vec2(65*tileSize, 10*tileSize), 5, enemy_projectiles),
                            BasicEnemy(Vec2(0*tileSize, 40*tileSize), 5, 350), BasicEnemy(Vec2(10*tileSize, 40*tileSize), 5, 350), BasicEnemy(Vec2(20*tileSize, 40*tileSize), 5, 350), BasicEnemy(Vec2(30*tileSize, 40*tileSize), 5, 350), BasicEnemy(Vec2(40*tileSize, 40*tileSize), 5, 350), BasicEnemy(Vec2(50*tileSize, 40*tileSize), 5, 350), BasicEnemy(Vec2(60*tileSize, 40*tileSize), 5, 350),
                 
-                           ProjectileEnemy(Vec2(60*tileSize, 40*tileSize), 5, enemy_projectiles), ProjectileEnemy(Vec2(60*tileSize, 30*tileSize), 5, enemy_projectiles), ProjectileEnemy(Vec2(60*tileSize, 20*tileSize), 5, enemy_projectiles)]),
+                           ProjectileEnemy(Vec2(60*tileSize, 40*tileSize), 5, enemy_projectiles), ProjectileEnemy(Vec2(60*tileSize, 30*tileSize), 5, enemy_projectiles), ProjectileEnemy(Vec2(60*tileSize, 20*tileSize), 5, enemy_projectiles)], 50),
+                self.Wave([ProjectileEnemy(Vec2(0*tileSize, 0*tileSize), 5, enemy_projectiles),ProjectileEnemy(Vec2(10*tileSize, 0*tileSize), 5, enemy_projectiles),ProjectileEnemy(Vec2(20*tileSize, 0*tileSize), 5, enemy_projectiles),ProjectileEnemy(Vec2(30*tileSize, 0*tileSize), 5, enemy_projectiles),ProjectileEnemy(Vec2(40*tileSize, 0*tileSize), 5, enemy_projectiles),ProjectileEnemy(Vec2(50*tileSize, 0*tileSize), 5, enemy_projectiles),ProjectileEnemy(Vec2(60*tileSize, 0*tileSize), 5, enemy_projectiles),ProjectileEnemy(Vec2(70*tileSize, 0*tileSize), 5, enemy_projectiles)], 50),
+                self.Wave([ProjectileEnemy(Vec2(0*tileSize, 40*tileSize), 5, enemy_projectiles),ProjectileEnemy(Vec2(10*tileSize, 40*tileSize), 5, enemy_projectiles),ProjectileEnemy(Vec2(20*tileSize, 40*tileSize), 5, enemy_projectiles),ProjectileEnemy(Vec2(30*tileSize, 40*tileSize), 5, enemy_projectiles),ProjectileEnemy(Vec2(40*tileSize, 40*tileSize), 5, enemy_projectiles),ProjectileEnemy(Vec2(50*tileSize, 40*tileSize), 5, enemy_projectiles),ProjectileEnemy(Vec2(60*tileSize, 40*tileSize), 5, enemy_projectiles),ProjectileEnemy(Vec2(70*tileSize, 40*tileSize), 5, enemy_projectiles)], 10),
+                self.Wave([BasicEnemy(Vec2(0*tileSize, 0*tileSize), 5, 400),BasicEnemy(Vec2(0*tileSize, 10*tileSize), 5, 400),BasicEnemy(Vec2(0*tileSize, 20*tileSize), 5, 400),BasicEnemy(Vec2(0*tileSize, 30*tileSize), 5, 400),BasicEnemy(Vec2(0*tileSize, 40*tileSize), 5, 400),]),
                 self.Wave([])
-            ], 
+            ],
             barrages=[
-                self.Barrage(active_phases=[1, 3], spawn_interval=0.05, predictable= True),
-                self.Barrage(active_phases=[7, 7], spawn_interval=0.05, predictable= False)
+                self.Barrage(active_phases=[1,2,3], spawn_interval=0.05, predictable= True),
+                self.Barrage(active_phases=[7,8,9,10], spawn_interval=0.1, predictable= False)
             ]
             ),
         }
@@ -1048,6 +1059,8 @@ class KeyHints():
     s: Rectangle
     d: Rectangle
     esc: Rectangle
+
+    attack_hint: Rectangle
     __should_display_key_hints= True
     def __init__(self) -> None:
         sw = 2194.0
@@ -1063,13 +1076,19 @@ class KeyHints():
         self.esc = Rectangle(Vec2(sw*0.9,sh*0.1),0, self.key_size, Color.WHITE)
         self.esc.texture = textures.get("ESC_Key")
 
+        self.attack_hint = Rectangle(Vec2(sw*0.54,sh*0.3),0, self.key_size, Color.WHITE, textures.get("LMB"))
+
     def draw(self):
+        global player
+        
         if KeyHints.__should_display_key_hints and (Player.has_moved_once == False):
             self.w.draw()
             self.a.draw()
             self.s.draw()
             self.d.draw()
             self.esc.draw()
+        if SceneManager.current_active_scene == 2 and player.hitbox.position.x < 1300 and player.hitbox.position.x > 800:
+            self.attack_hint.draw()
 
 class Tree(Sprite):
     def __init__(self, size: Vec2, pos: Vec2, type: int = 1) -> None:
@@ -1165,6 +1184,13 @@ class MiddleLayer():
             self.trees(min_x=0,min_y=20,max_x=34,max_y=40,seed=5354,count=30,min_size=3,max_size=7)
             self.trees(min_x=40,min_y=20,max_x=70,max_y=40,seed=535,count=30,min_size=3,max_size=7)
 
+        if level == 3:
+            self.trees(min_x= 0, min_y= -2,max_x= 70,max_y= 5,seed= 43423,count= 40,min_size= 3, max_size= 4)
+            self.trees(min_x=0,min_y=25,max_x=70,max_y=40,seed=3242,count=35,min_size=3,max_size=5)
+        if level == 4:
+            self.trees(min_x=0,min_y=25,max_x=70,max_y=40,seed=34242,count=35,min_size=3,max_size=5)
+        if level == 5:
+            self.trees(min_x=0,min_y=25,max_x=70,max_y=40,seed=2231,count=10,min_size=3,max_size=5)
         sp = sorted(
             self.sp,
             key=lambda sp: max(rec.max_y() for rec in sp.parts), 
@@ -1660,14 +1686,14 @@ class Menue():
                 for item in self.main_background:
                     item.draw()
 
-                draw_text("Game or something",
+                draw_text("Haven't thought of a name yet",
                           (2194.0/2)-tileSize*15 +2 , 
                           1234.0/2 - tileSize*3 +2, Color.ORANGE_RED,
-                          tileSize*20, fonts.get("dungeon_font"), font_scale=.2, font_scale_aspect=1)
-                draw_text("Game or something",
+                          tileSize*20, fonts.get("dungeon_font"), font_scale=.1, font_scale_aspect=1)
+                draw_text("Haven't thought of a name yet",
                           (2194.0/2)-tileSize*15, 
                           1234.0/2 - tileSize*3, Color.BLOOD_RED,
-                          tileSize*20, fonts.get("dungeon_font"), font_scale=.2)
+                          tileSize*20, fonts.get("dungeon_font"), font_scale=.1)
                 self.draw_mouse()
                 next_frame()
                 examples.limit_fps(60)
@@ -1771,6 +1797,7 @@ class Menue():
         global camera
         self.mouse_cursor.position = Camera2D.screen_to_world(camera, get_mouse_position() + offset)
         
+
         if mouse_inside_window():
             show_mouse(False)
             self.mouse_cursor.draw()
@@ -1805,11 +1832,11 @@ enemy_spawner = EnemySpawner()
 no_nav_area = NoNavArea(0)
 middle_layer = MiddleLayer(0)
 level_triggers = LevelTriggers(0)
+
 fps = get_fps()
 last_fps_update = time.time()
 
 
-SceneManager.switch_scene(5, True)
 
 
 should_quit: bool = menue.start(0)
@@ -1854,6 +1881,20 @@ while True:
             BasicEnemy(Vec2.splat(500), SceneManager.current_active_scene)
             )
 
+    if KeyCode.Key0 in get_keys_pressed():
+        SceneManager.switch_scene(0, True)
+    if KeyCode.Key1 in get_keys_pressed():
+        SceneManager.switch_scene(1, True)
+    if KeyCode.Key2 in get_keys_pressed():
+        SceneManager.switch_scene(2, True)
+    if KeyCode.Key3 in get_keys_pressed():
+        SceneManager.switch_scene(3, True)
+    if KeyCode.Key4 in get_keys_pressed():
+        SceneManager.switch_scene(4, True)
+    if KeyCode.Key5 in get_keys_pressed():
+        SceneManager.switch_scene(5, True)
+
+
     # logic
     if player.health <= 0.0:
         val = menue.start(2)
@@ -1894,10 +1935,12 @@ while True:
     )
     enemy_spawner.draw_warnings()
     hud.draw(player)
-    no_nav_area.debug_draw()
+    
     
     key_hints.draw()
-    level_triggers.debug_draw()
+
+    # no_nav_area.debug_draw()
+    # level_triggers.debug_draw()
 
     if last_fps_update < time.time()-1:
         last_fps_update = time.time()

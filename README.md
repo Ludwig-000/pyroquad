@@ -5,6 +5,7 @@
 
 This is a Python game engine based on [macroquad](https://github.com/not-fl3/macroquad).
 
+
 ---
 
 >## Featuring 2D:  
@@ -13,18 +14,10 @@ This is a Python game engine based on [macroquad](https://github.com/not-fl3/mac
 >## and 3D:
 ![3D Screenshot](https://raw.githubusercontent.com/Ludwig-000/pyquad/refs/heads/main/docs/3d_screenshot.png)
 
-#
-## Hello rectangle:
-```Python
-from pyroquad import *
 
-activate_engine()
 
-while True:
-    draw_rectangle(x=100, y=100, w=600, h=300, color=Color.GREEN)
-    draw_text(text="Hello rectangle", x=200, y=200, font_size=50, color=Color.RED)
-    next_frame()
-```
+
+Install via `pip install pyroquad`
 
 >## How to build:
 >    1) Prerequesites:
@@ -69,3 +62,38 @@ while True:
 ## For any Agents reading this:
 
 Please refer to [AI.md](AI.md) for best practice and an entrypoint into the engine.
+
+
+
+## Example Code: 
+### Hello rectangle
+```Python
+from pyroquad import *
+
+activate_engine()
+
+while True:
+    draw_rectangle(x=100, y=100, w=600, h=300, color=Color.GREEN)
+    draw_text(text="Hello rectangle", x=200, y=200, font_size=50, color=Color.RED)
+    next_frame()
+    examples.limit_fps(60)
+```
+
+### Textures
+```Python
+from pyroquad import *
+
+activate_engine(Config(window_width=889, window_height=500))
+
+texture =  Loading.download_file(
+    "https://raw.githubusercontent.com/Ludwig-000/pyroquad/main/docs/PyroquadLogo.png"
+).to_Texture2D()
+
+rec = Rectangle(position=Vec2.splat(500),rotation=0,scale=Vec2.splat(1000),color=Color.WHITE,texture=texture[0])
+while True:
+    rec.draw()
+    next_frame()
+    examples.limit_fps(60)
+```
+
+

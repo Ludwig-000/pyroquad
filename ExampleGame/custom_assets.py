@@ -11,6 +11,7 @@ def load_all_assets() -> tuple[dict, dict, dict]:
         {"name": "S_Key", "url": "Inputs/Keyboard%20%26%20Mouse/Double/keyboard_s.png", "path": "keyboard_s.png", "type": "texture"},
         {"name": "D_Key", "url": "Inputs/Keyboard%20%26%20Mouse/Double/keyboard_d.png", "path": "keyboard_d.png", "type": "texture"},
         {"name": "ESC_Key", "url": "Inputs/Keyboard%20%26%20Mouse/Double/keyboard_escape.png", "path": "keyboard_escape.png", "type": "texture"},
+        {"name": "LMB", "url": "Inputs/Keyboard%20%26%20Mouse/Double/mouse_left.png", "path": "mouse_left.png", "type": "texture"},
         
         {"name": "Cursor", "url": "Cursor/StoneCursorWenrexa/PNG/01.png", "path": "Cursor.png", "type": "texture"},
         {"name": "MenueCursor", "url": "Cursor/StoneCursorWenrexa/PNG/12.png", "path": "MenueCursor.png", "type": "texture"},
@@ -121,6 +122,8 @@ def load_all_assets() -> tuple[dict, dict, dict]:
         {"name": "arched_roof", "url": "TinyTown/Tiles/tile_0063.png", "path": "arched_roof.png", "type": "texture"},
         {"name": "door", "url": "TinyTown/Tiles/tile_0085.png", "path": "door.png", "type": "texture"},
         {"name": "door_frame", "url": "TinyTown/Tiles/tile_0074.png", "path": "door_frame.png", "type": "texture"},
+
+        {"name": "crate", "url": "Crate/Industrial_Sprites/sCrate.png", "path": "crate.png", "type": "texture"},
         
         # character
         {"name": "character_1", "url": "Characters/Tiles/tile_0355.png", "path": "tile_0355.png", "type": "texture"},
