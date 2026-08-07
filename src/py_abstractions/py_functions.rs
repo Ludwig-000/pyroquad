@@ -400,10 +400,10 @@ pub fn draw_poly_lines(x: f32, y: f32, sides: u8, radius: f32, rotation: f32,thi
 ///
 #[gen_stub_pyfunction]
 #[pyfunction]
+#[pyo3(signature = (texture, x=0.0, y=0.0, color=Color::WHITE()))]
 pub fn draw_texture(texture: Texture2D,x: f32, y: f32, color: Color ) {
     let innerTexture: mq::Texture2D  = texture.into();
     COMMAND_QUEUE.push( Command::DrawTexture{ texture: innerTexture, x, y, color: color.into()   }  );
-   
 }
 
 /// returns the current frames per second

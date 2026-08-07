@@ -83,21 +83,14 @@ while True:
 ```Python
 from pyroquad import *
 
-activate_engine(Config(window_width=889, window_height=500))
+activate_engine()
 
 texture =  Loading.download_file(
     "https://raw.githubusercontent.com/Ludwig-000/pyroquad/main/docs/PyroquadLogo.png"
 ).to_Texture2D()
 
-rec = Rectangle(
-    position=Vec2.splat(500),
-    rotation=0,
-    scale=Vec2.splat(1000),
-    color=Color.WHITE,
-    texture=texture[0])
-
 while True:
-    rec.draw()
+    draw_texture(texture)
     next_frame()
     examples.limit_fps(60)
 ```

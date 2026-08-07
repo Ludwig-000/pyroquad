@@ -5484,7 +5484,11 @@ class Image:
     def height(self) -> builtins.int: ...
     @height.setter
     def height(self, value: builtins.int) -> None: ...
-    def __new__(cls, path: builtins.str) -> Image: ...
+    def __new__(cls, path: builtins.str) -> Image:
+        r"""
+        Creates an image from a given file path.
+        supported image formats are: ".png", ".jpeg", ".webp"
+        """
     @staticmethod
     def empty() -> Image: ...
     @staticmethod
@@ -7794,14 +7798,14 @@ def batch_draw_shapes(input: typing.Sequence[Rectangle | Circle]) -> None:
     The list will be drawn left to right.
     This is SIGNIFICANTLY faster than running a python for-loop. ( roughly a 2.3x performance improvement at 3000 ish elements. )
     
-    ```Python
+    ```
     # example
     def draw(objects: list[Rectangle | Circle]):
         for o in objects:
             o.draw() # <- DO NOT DO THIS, if the list is large.
     ```
     
-    ```Python
+    ```
     # example
     def draw(objects: list[Rectangle | Circle]):
         batch_draw_shapes(objects) <- do this instead.
@@ -7945,7 +7949,7 @@ def draw_text(text: builtins.str, x: builtins.float, y: builtins.float, color: C
     requires a 2d camera to be seen.
     """
 
-def draw_texture(texture: Texture2D, x: builtins.float, y: builtins.float, color: Color) -> None:
+def draw_texture(texture: Texture2D, x: builtins.float = 0.0, y: builtins.float = 0.0, color: Color = ...) -> None:
     r"""
     draws a texture in 2d space.
     requires a 2d-camera to be seen.
