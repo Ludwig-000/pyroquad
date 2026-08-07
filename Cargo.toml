@@ -17,11 +17,6 @@ doc = false
 overflow-checks = true
 panic = "unwind"
 
-# #Max Optimization for final release.
-# opt-level = 3
-# lto = "fat"
-# codegen-units = 1
-# incremental = false
 
 [dependencies]
 

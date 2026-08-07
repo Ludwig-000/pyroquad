@@ -123,12 +123,14 @@ from pyroquad import *
 
 activate_engine()
 
-player = examples.PlayerCamera(position=Vec3.ONE)
 
-skybox_tex = examples.loading_screen(
-    lambda a: download_file(a).to_Texture2D(),
-    ["https://raw.githubusercontent.com/Ludwig-000/pyroquad/main/tests/HDR_blue_nebulae_2.png"]
-)[0]
+skybox_tex = examples.loading_screen_future(
+    lambda a: download_file_future(a),
+    ["https://raw.githubusercontent.com/Ludwig-000/pyroquad/main/tests/HDR_blue_nebulae_2.png"],
+    show_rotating_square=True
+)[0].to_Texture2D()
+
+player = examples.PlayerCamera(position=Vec3.ONE)
 
 while True:
     if KeyCode.Escape in get_keys_pressed():
@@ -144,4 +146,32 @@ while True:
 
     next_frame()
     examples.limit_fps(60)
+```
+
+### Multiple windows
+```Python
+import multiprocessing
+from pyroquad import *
+
+def task(message, color_name):
+    activate_engine()
+    prevent_quit()
+    color = getattr(Color, color_name)
+    
+    while not is_quit_requested():
+        clear_background(color)
+        draw_text(message, 200, 200, Color.GREEN, 60)
+        next_frame()
+        examples.limit_fps(60)
+
+if __name__ == "__main__":
+    seq_data = [("multiple", "YELLOW"), ("windows", "BRICK"), ("using", "ORANGE")]
+    for msg, color in seq_data:
+        p = multiprocessing.Process(target=task, args=(msg, color))
+        p.start()
+        p.join()
+
+    procs = [multiprocessing.Process(target=task, args=("multiprocessing", "BLUE")) for _ in range(5)]
+    for p in procs: p.start()
+    for p in procs: p.join()
 ```
