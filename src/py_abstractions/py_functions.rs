@@ -672,14 +672,14 @@ pub fn set_pc_assets_folder(path: String){
 /// The list will be drawn left to right.
 /// This is SIGNIFICANTLY faster than running a python for-loop. ( roughly a 2.3x performance improvement at 3000 ish elements. )
 /// 
-/// ```Python
+/// ```
 /// # example
 /// def draw(objects: list[Rectangle | Circle]):
 ///     for o in objects:
 ///         o.draw() # <- DO NOT DO THIS, if the list is large.
 /// ```
 /// 
-/// ```Python
+/// ```
 /// # example
 /// def draw(objects: list[Rectangle | Circle]):
 ///     batch_draw_shapes(objects) <- do this instead.
@@ -691,11 +691,11 @@ pub fn batch_draw_shapes<'py>(input: Vec<Shape<'py>>){
     for shape in input{
         match shape{
             Shape::Circ(c)=> {
-                let c = c.borrow();
+                let c: PyRef<'_, super::structs::TwoDObjects::Circle::Circle> = c.borrow();
                 c.draw();
             },
             Shape::Rect(r)=>{
-                let r = r.borrow(); 
+                let r: PyRef<'_, super::structs::TwoDObjects::Rectangle::Rectangle> = r.borrow(); 
                 r.draw();
             }
         }

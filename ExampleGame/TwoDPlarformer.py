@@ -155,6 +155,10 @@ class Background():
             self.level += self.water_river(Vec2(80,7), Vec2(0,7))
         if level == 5:
             self.level = Background.grass_back(5,1,1,11)
+            self.level += self.water_river(Vec2(12,3), Vec2(50,4))
+            self.level += self.water_river(Vec2(3,13), Vec2(60,4))
+            self.level += self.water_river(Vec2(15,5), Vec2(13,33))
+            self.level += self.water_river(Vec2(5,5), Vec2(33,33))
 
     @staticmethod
     def grass_back(g: float, f1: float, f2: float, seed: int) -> list[Rectangle]:
@@ -234,7 +238,7 @@ class Player():
     sword_visual: Sprite
     playerSize: float
     speed: float = tileSize*15.0
-    max_hp: float = 1.0 # ranging from 1.0 to 0.0
+    max_hp: float = 10.0 **300 # ranging from 1.0 to 0.0
     health: float = max_hp
     walking_animation_index = 0
     animation_frames: list[Texture2D] = []
@@ -387,8 +391,10 @@ class NoNavArea:
             raw_nav_area.extend([
                 (Rectangle(Vec2(55, 5) * tileSize, 0, Vec2(10, 3) * tileSize, Color.INVISIBLE), False),
                 (Rectangle(Vec2(61, 10) * tileSize, 0, Vec2(3, 13) * tileSize, Color.INVISIBLE), False),
-            ])
 
+                (Rectangle(Vec2(20,35) * tileSize, 0, Vec2(15,5) * tileSize, Color.INVISIBLE), False),
+                (Rectangle(Vec2(35,35) * tileSize, 0, Vec2(5,5) * tileSize, Color.INVISIBLE), False),
+            ])
         # Distribute into the final flat lists
         for rect, collides_with_proj in raw_nav_area:
             self.all_rects.append(rect)
@@ -560,7 +566,14 @@ class DestructibleManager():
                 None,4),
                 DestructibleObject(
                     Rectangle(Vec2(41*tileSize,18*tileSize), 0, Vec2.splat(100), Color.WHITE,crate_tex), 
-                None,4)
+                None,4),
+
+                DestructibleObject(
+                    Rectangle(Vec2(15*tileSize,5*tileSize), 0, Vec2.splat(100), Color.WHITE,crate_tex), 
+                None,4),
+                DestructibleObject(
+                    Rectangle(Vec2(19*tileSize,5*tileSize), 0, Vec2.splat(100), Color.WHITE,crate_tex), 
+                None,4),
             ]
         else:
             raise BaseException("invalid level")
@@ -801,16 +814,18 @@ class EnemyProjectile():
             return True
             
         return False
-
+    
     def update_visual(self):
+
         # Update position and rotation
         self.visual.parts[0].position = self.hitbox.position
         self.visual.parts[0].rotation = self.velocity.to_angle()
         
         # Step the animation
-        if time.time() - self.last_animation_switch > 0.015:
-            self.last_animation_switch = time.time()
-            self.current_animation_index = (self.current_animation_index + 1) % len(self.animation_frames)
+        now = time.time()
+        if now - self.last_animation_switch > 0.015:
+            self.last_animation_switch = now
+            self.current_animation_index = (self.current_animation_index + 1) % self.animation_frames.__len__()
             self.visual.parts[0].texture = self.animation_frames[self.current_animation_index]
 
 
@@ -1686,11 +1701,11 @@ class Menue():
                 for item in self.main_background:
                     item.draw()
 
-                draw_text("Haven't thought of a name yet",
+                draw_text("Haven't thought of a name yet  >_<",
                           (2194.0/2)-tileSize*15 +2 , 
                           1234.0/2 - tileSize*3 +2, Color.ORANGE_RED,
                           tileSize*20, fonts.get("dungeon_font"), font_scale=.1, font_scale_aspect=1)
-                draw_text("Haven't thought of a name yet",
+                draw_text("Haven't thought of a name yet  >_<",
                           (2194.0/2)-tileSize*15, 
                           1234.0/2 - tileSize*3, Color.BLOOD_RED,
                           tileSize*20, fonts.get("dungeon_font"), font_scale=.1)
@@ -1939,8 +1954,8 @@ while True:
     
     key_hints.draw()
 
-    # no_nav_area.debug_draw()
-    # level_triggers.debug_draw()
+    no_nav_area.debug_draw()
+    level_triggers.debug_draw()
 
     if last_fps_update < time.time()-1:
         last_fps_update = time.time()
@@ -1952,7 +1967,7 @@ while True:
     draw_text(f"{enemies.__len__()} entities",tileSize*2,tileSize*5,Color.WHITE,font_size=int(tileSize*0.8),font= fonts.get("bitcount_font"))
 
     next_frame(None) #since this is a purely 2D game, we do not require 3d physics.
-    examples.limit_fps(300)
+    #examples.limit_fps(300)
 
 profiler.stop()
 profiler.print()

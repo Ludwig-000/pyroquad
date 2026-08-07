@@ -89,11 +89,66 @@ texture =  Loading.download_file(
     "https://raw.githubusercontent.com/Ludwig-000/pyroquad/main/docs/PyroquadLogo.png"
 ).to_Texture2D()
 
-rec = Rectangle(position=Vec2.splat(500),rotation=0,scale=Vec2.splat(1000),color=Color.WHITE,texture=texture[0])
+rec = Rectangle(
+    position=Vec2.splat(500),
+    rotation=0,
+    scale=Vec2.splat(1000),
+    color=Color.WHITE,
+    texture=texture[0])
+
 while True:
     rec.draw()
     next_frame()
     examples.limit_fps(60)
 ```
 
+### Cube
+```Python
+from pyroquad import *
 
+activate_engine()
+
+cube = Cube(
+    position=Vec3.ZERO,
+    rotation=Vec3.ZERO,
+    scale=Vec3.ONE,
+    color=Color.RED)
+
+cam = Camera3D(position=Vec3.splat(2), target=Vec3.ZERO)
+
+while True:
+    cam.set_camera()
+    cube.rot += get_delta_time()
+    draw_all_objects()
+    next_frame()
+    examples.limit_fps(60)
+```
+
+### Skybox
+```Python
+from pyroquad import *
+
+activate_engine()
+
+player = examples.PlayerCamera(position=Vec3.ONE)
+
+skybox_tex = examples.loading_screen(
+    lambda a: download_file(a).to_Texture2D(),
+    ["https://raw.githubusercontent.com/Ludwig-000/pyroquad/main/tests/HDR_blue_nebulae_2.png"]
+)[0]
+
+while True:
+    if KeyCode.Escape in get_keys_pressed():
+        break
+
+    player.update()
+    draw_skybox(skybox_tex)
+    draw_grid(
+        slices=1_000,
+        spacing=1.0,
+        axes_color=Color.YELLOW,
+        other_color=Color.GREEN)
+
+    next_frame()
+    examples.limit_fps(60)
+```
