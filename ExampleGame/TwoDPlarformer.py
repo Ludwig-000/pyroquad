@@ -1820,7 +1820,7 @@ class Menue():
             show_mouse(True)
 
 
-profiler = Profiler(interval=0.1)
+profiler = Profiler(interval=0.0001)
 profiler.start()
 
 activate_engine(Config("2D Game",fullscreen=True,swap_interval=0, sample_count=10))

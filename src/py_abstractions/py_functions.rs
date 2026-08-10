@@ -433,7 +433,7 @@ pub fn get_fps() -> i32 {
 #[pyfunction]
 pub fn get_delta_time() -> f32 {
     use crate::engine::FrameInfo as fi;
-    *fi::DELTA_TIME.lock().unwrap()
+    fi::DELTA_TIME.load(Ordering::Relaxed)
 }
 
 
@@ -565,7 +565,7 @@ pub fn get_char_pressed() -> Option<char> {
 pub fn screen_width() -> f32 {
 
     use crate::engine::FrameInfo as fi;
-    *fi::SCREEN_WIDTH.lock().unwrap()
+    fi::SCREEN_WIDTH.load(Ordering::Relaxed)
 }
 
 /// Request the window size to be the given value. 
@@ -583,9 +583,8 @@ pub fn request_new_screen_size(width: f32, height: f32) {
 #[gen_stub_pyfunction]
 #[pyfunction]
 pub fn screen_height() -> f32 {
-
     use crate::engine::FrameInfo as fi;
-    *fi::SCREEN_HEIGHT.lock().unwrap()
+    fi::SCREEN_HEIGHT.load(Ordering::Relaxed)
 }
 
 /**

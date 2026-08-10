@@ -8,10 +8,12 @@ use lazy_static::lazy_static;
 
 use mq::Vec2;
 
+use crate::engine::AtomicF32::AtomicF32;
+
 
 /// Some information about the state of the engine, that is only updates once a frame,
 /// meaning it can be stored safely inside statics.
-pub static DELTA_TIME: Mutex<f32>  = Mutex::new(0.);
+pub static DELTA_TIME: AtomicF32  = AtomicF32::new(0.);
 pub static FPS: AtomicI32 =  AtomicI32::new(0);
 
 pub static MOUSE_POSITION: Mutex<(f32,f32)> = Mutex::new((0.,0.));
@@ -19,8 +21,8 @@ pub static MOUSE_DELTA_POSITION: Mutex<Vec2> = Mutex::new(Vec2::new(0.,0.));
 pub static MOUSE_POSITION_LOCAL: Mutex<Vec2> = Mutex::new(Vec2::new(0.,0.));
 pub static MOUSE_WHEEL: Mutex<(f32,f32)> = Mutex::new((0.,0.));
 
-pub static SCREEN_HEIGHT: Mutex<f32> = Mutex::new(0.);
-pub static SCREEN_WIDTH: Mutex<f32> = Mutex::new(0.);
+pub static SCREEN_HEIGHT: AtomicF32 = AtomicF32::new(0.);
+pub static SCREEN_WIDTH: AtomicF32 = AtomicF32::new(0.);
 
 
 
@@ -43,7 +45,8 @@ lazy_static! {
 pub fn update_frame_info(){
     let fps =  mq::get_fps();
     FPS.store(fps, Ordering::Relaxed);
-    *DELTA_TIME.lock().unwrap() = mq::get_frame_time();
+
+    DELTA_TIME.store(mq::get_frame_time(), Ordering::Relaxed);
     {
         *KEYS_PRESSED.lock().unwrap() =   mq::get_keys_pressed();
         *KEYS_DOWN.lock().unwrap() = mq::get_keys_down();
@@ -56,8 +59,8 @@ pub fn update_frame_info(){
         *MOUSE_POSITION_LOCAL.lock().unwrap() = mq::mouse_position_local();
         *MOUSE_WHEEL.lock().unwrap() = mq::mouse_wheel();
 
-        *SCREEN_HEIGHT.lock().unwrap() = mq::screen_height();
-        *SCREEN_WIDTH.lock().unwrap() = mq::screen_width();
+        SCREEN_HEIGHT.store(mq::screen_height(), Ordering::Relaxed);
+        SCREEN_WIDTH.store(mq::screen_width(), Ordering::Relaxed);
         {
             let left = is_mouse_button_down(MouseButton::Left);
             let middle = is_mouse_button_down(MouseButton::Middle);
