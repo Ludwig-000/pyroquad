@@ -145,15 +145,14 @@ impl FunctionStorage {
     
         for (target_object, callback, _) in tasks.iter() {
             
-            let target_bound: &Bound<'_, PyAny> = &target_object.bind(py).upgrade().unwrap();
-            
-            let func_bound: &Bound<'_, PyAny> = callback.bind(py);
-            
-            if let Err(e) = func_bound.call1((target_bound,)) {
-                FunctionStorage::report_error(py, &e, func_bound);
-                return Err(e);
+            if let Some(target_bound) = &target_object.bind(py).upgrade(){
+                let func_bound: &Bound<'_, PyAny> = callback.bind(py);
+
+                if let Err(e) = func_bound.call1((target_bound,)) {
+                    FunctionStorage::report_error(py, &e, func_bound);
+                    return Err(e);
+                }
             }
-            
         }
     
         Ok(())
