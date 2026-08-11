@@ -1,7 +1,7 @@
 use macroquad::prelude as mq;
 use macroquad::material::{Material, MaterialParams};
 use macroquad::window::miniquad::{ShaderSource, PipelineParams, Comparison, UniformDesc, UniformType};
-use std::sync::Mutex;
+use std::sync::{LazyLock, Mutex};
 
 pub fn shader_load() {
     {
@@ -70,9 +70,8 @@ pub fn shader_load() {
 
 
 // "Material" is an Reference Counter, so we need to store a reference if we want to use it.
-lazy_static::lazy_static! {
-    pub static ref SHADERS: Mutex<Vec<Material>> = Mutex::new(Vec::new());
-}
+pub static SHADERS: LazyLock<Mutex<Vec<Material>>> = 
+    LazyLock::new(|| Mutex::new(Vec::new()));
 
 pub fn store_shader(material: Material) {
     SHADERS.lock().unwrap().push(material);

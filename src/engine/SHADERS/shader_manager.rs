@@ -1,6 +1,6 @@
 use macroquad::prelude::*;
 use std::sync::atomic::{AtomicU8, Ordering,AtomicUsize};
-use std::sync::Mutex;
+use std::sync::{LazyLock, Mutex};
 
 use crate::engine::CameraManager::clone_camera3d;
 
@@ -32,10 +32,8 @@ impl From<ShaderKind> for u8 {
 static CURRENT_SHADER: AtomicU8 = AtomicU8::new(ShaderKind::None as u8);
 static SWITCH_COUNT: AtomicUsize = AtomicUsize::new(0);
 
-lazy_static::lazy_static! {
-    static ref SWITCH_HISTORY: Mutex<Vec<usize>> = Mutex::new(Vec::new());
-}
-
+static SWITCH_HISTORY: LazyLock<Mutex<Vec<usize>>> = 
+    LazyLock::new(|| Mutex::new(Vec::new()));
 
 #[inline(always)]
 fn get_current_shader() -> ShaderKind {

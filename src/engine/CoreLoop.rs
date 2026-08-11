@@ -2,8 +2,8 @@ use std::panic;
 
 use std::sync::Arc;
 use std::any::Any;
+use std::sync::LazyLock;
 use macroquad::color::BLACK;
-use lazy_static::*;
 
 use crossbeam::queue::SegQueue;
 
@@ -307,10 +307,8 @@ pub enum Command {
     },
 }
 
-lazy_static! {
-    pub static ref COMMAND_QUEUE: Arc<SegQueue<Command>> = Arc::new(SegQueue::new());
-    
-}
+pub static COMMAND_QUEUE: LazyLock<SegQueue<Command>> = LazyLock::new(SegQueue::new);
+
 
 
 /// processes commands that rely on the macroquad engine

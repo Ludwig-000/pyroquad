@@ -1,7 +1,6 @@
 use std::path::Path;
-use std::sync::Mutex;
+use std::sync::{LazyLock, Mutex};
 
-use lazy_static::lazy_static;
 use pyo3::prelude::*;
 use pyo3_stub_gen::derive::* ;
 use crate::engine::PChannel::PChannel;
@@ -10,9 +9,8 @@ use crate::engine::PError::PError;
 use crate::py_abstractions::Loading::FileData::FileData;
 use crate::py_abstractions::PFuture::{FileDataFuture};
 
-lazy_static!{
-    pub static ref PC_ASSET_FOLDER: Mutex<String> = Mutex::new("".to_string());
-}
+pub static PC_ASSET_FOLDER: LazyLock<Mutex<String>> = 
+    LazyLock::new(|| Mutex::new(String::new()));
 
 /// Loads a file.
 #[cfg(not(any(target_arch = "wasm32", target_os = "ios")))]

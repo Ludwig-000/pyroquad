@@ -29,7 +29,6 @@ use pyo3::prelude::*;
 use pyo3::ffi;
 use std::sync::{OnceLock};
 use slotmap::{new_key_type};
-use lazy_static::*;
 use crossbeam::queue::SegQueue;
 
 use crate::engine::PChannel::PSyncSender;

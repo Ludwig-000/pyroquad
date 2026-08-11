@@ -1,10 +1,9 @@
 use std::collections::HashSet;
-use std::sync::Mutex;
+use std::sync::{LazyLock, Mutex};
 use std::sync::atomic::{AtomicI32,Ordering};
 use macroquad::input::{MouseButton, is_mouse_button_down, is_mouse_button_pressed, is_mouse_button_released};
 use macroquad::prelude as mq;
 use macroquad::prelude::KeyCode;
-use lazy_static::lazy_static;
 
 use mq::Vec2;
 
@@ -29,17 +28,23 @@ pub static SCREEN_WIDTH: AtomicF32 = AtomicF32::new(0.);
 pub static LASK_KEY_PRESSED: Mutex<Option<KeyCode>> = Mutex::new(None);
 pub static CHAR_PRESSED: Mutex<Option<char>> = Mutex::new(None);
 
+pub static KEYS_PRESSED: LazyLock<Mutex<HashSet<KeyCode>>> =
+    LazyLock::new(|| Mutex::new(HashSet::new()));
 
-lazy_static! {
-    pub static ref KEYS_PRESSED: Mutex<HashSet<KeyCode>> = Mutex::new(HashSet::new());
-    pub static ref KEYS_DOWN: Mutex<HashSet<KeyCode>> = Mutex::new(HashSet::new());
-    pub static ref KEYS_RELEASED: Mutex<HashSet<KeyCode>> = Mutex::new(HashSet::new());
+pub static KEYS_DOWN: LazyLock<Mutex<HashSet<KeyCode>>> =
+    LazyLock::new(|| Mutex::new(HashSet::new()));
 
-    pub static ref MOUSE_BUTTON_PRESSED: Mutex<HashSet<MouseButton>> = Mutex::new(HashSet::new());
-    pub static ref MOUSE_BUTTON_DOWN: Mutex<HashSet<MouseButton>> = Mutex::new(HashSet::new());
-    pub static ref MOUSE_BUTTON_RELEASED: Mutex<HashSet<MouseButton>> = Mutex::new(HashSet::new());
+pub static KEYS_RELEASED: LazyLock<Mutex<HashSet<KeyCode>>> =
+    LazyLock::new(|| Mutex::new(HashSet::new()));
 
-}
+pub static MOUSE_BUTTON_PRESSED: LazyLock<Mutex<HashSet<MouseButton>>> =
+    LazyLock::new(|| Mutex::new(HashSet::new()));
+
+pub static MOUSE_BUTTON_DOWN: LazyLock<Mutex<HashSet<MouseButton>>> =
+    LazyLock::new(|| Mutex::new(HashSet::new()));
+
+pub static MOUSE_BUTTON_RELEASED: LazyLock<Mutex<HashSet<MouseButton>>> =
+    LazyLock::new(|| Mutex::new(HashSet::new()));
 
 /// this function should be run by 'next_frame'
 pub fn update_frame_info(){
