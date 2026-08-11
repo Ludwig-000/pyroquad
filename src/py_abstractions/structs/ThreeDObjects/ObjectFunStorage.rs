@@ -57,6 +57,8 @@ pub fn remove_function(key: FunctionKey) {
 }
 
 pub fn execute_all_functions(py: Python<'_>) -> PyResult<()> {
+    let _guard = ReentrancyGuard::acquire()?; // prevents recursive calls
+
     { // flush built up commands.
         FunctionStorage::execute_command_storage();
     }
@@ -201,5 +203,34 @@ impl FunctionStorage {
 
         println!("Error:    {}", err.value(py));
         println!("-----------------------\n");
+    }
+}
+
+
+
+
+use std::sync::atomic::{AtomicBool, Ordering};
+use pyo3::exceptions::PyRuntimeError;
+use pyo3::prelude::*;
+
+static IS_EXECUTING: AtomicBool = AtomicBool::new(false);
+
+struct ReentrancyGuard;
+
+impl ReentrancyGuard {
+    fn acquire() -> PyResult<Self> {
+        if IS_EXECUTING.swap(true, Ordering::AcqRel) {
+            Err(PyRuntimeError::new_err(
+                "'next_frame' cannot be called inside a tick function, since this would deadlock the engine.",
+            ))
+        } else {
+            Ok(Self)
+        }
+    }
+}
+
+impl Drop for ReentrancyGuard {
+    fn drop(&mut self) {
+        IS_EXECUTING.store(false, Ordering::Release);
     }
 }
