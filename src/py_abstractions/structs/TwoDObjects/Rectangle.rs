@@ -20,7 +20,7 @@ use crate::py_abstractions::structs::TwoDObjects::collision::collides_with_rec_r
 use pyo3::types::PyDict;
 
 #[gen_stub_pyclass]
-#[pyclass(eq)]
+#[pyclass(eq, weakref)]
 #[derive(PartialEq)]
 pub struct Rectangle{
 

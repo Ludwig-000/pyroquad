@@ -2,7 +2,6 @@ use std::sync::atomic::{AtomicU32, Ordering};
 
 
 
-#[derive(Default)]
 pub struct AtomicF32(AtomicU32);
 
 impl AtomicF32 {
@@ -17,11 +16,5 @@ impl AtomicF32 {
     pub fn store(&self, v: f32, order: Ordering){
         let u: u32 = v.to_bits();
         self.0.store(u, order);
-    }
-}
-
-impl From<f32> for AtomicF32 {
-    fn from(v: f32) -> Self {
-        Self::new(v)
     }
 }

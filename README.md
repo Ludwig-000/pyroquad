@@ -6,6 +6,10 @@
 This is a Python game engine based on [macroquad](https://github.com/not-fl3/macroquad).
 
 
+* Install via `pip install pyroquad`
+* Requires Python >= 3.9
+* Supported Platforms: windows, linux, mac, (wasm eventually)
+
 ---
 
 >## Featuring 2D:  
@@ -17,7 +21,6 @@ This is a Python game engine based on [macroquad](https://github.com/not-fl3/mac
 
 
 
-Install via `pip install pyroquad`
 
 >## How to build:
 >    1) Prerequesites:
@@ -39,7 +42,7 @@ Install via `pip install pyroquad`
 >         `.venv\Scripts\activate`
 >
 >    3) Install the [maturin build tool](https://github.com/PyO3/maturin) using `pip install maturin`
->    4) (**optional**) Run `cargo run --bin stub_gen --no-default-features --features use-real` to update [_pyroquad.pyi](src/python/pyroquad/_pyroquad.pyi) and gennerate up-to-date python stubs. 
+>    4) (**optional**) Run `cargo run --bin stub_gen --no-default-features --features use-real` to gennerate up-to-date python stubs in [init.pyi](src/python/pyroquad/_pyroquad/__init__.pyi). 
 >
 >       Stub generation specifically requires python >= 3.10
 >
@@ -174,4 +177,27 @@ if __name__ == "__main__":
     procs = [multiprocessing.Process(target=task, args=("multiprocessing", "BLUE")) for _ in range(5)]
     for p in procs: p.start()
     for p in procs: p.join()
+```
+
+### Rectangle deletes itself (heartbreaking)
+```Python
+from pyroquad import *
+
+activate_engine()
+
+re = Rectangle(Vec2.splat(200), 0, Vec2.splat(100), Color.WHITE)
+
+timer  = 120
+def t(rec: Rectangle):
+    global timer, re
+    timer-= 1
+    if timer == 0:
+        del(re)
+    rec.draw()
+
+re.tick(t)
+
+while True:
+    next_frame()
+    examples.limit_fps(60)
 ```

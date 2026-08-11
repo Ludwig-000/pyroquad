@@ -308,10 +308,8 @@ pub fn screen_dpi_scale() -> PyResult<f32>{
 #[pyfunction]
 #[pyo3(signature = (physics_step = Some(0.0)))] 
 pub fn next_frame(py: Python<'_>, physics_step: Option<f32>) -> PyResult<()>{
-    {
-        let fn_storage = ObjectFunctionStorage::get_fun_storage();
-        fn_storage.execute_all(py)?;
-    }
+    ObjectFunctionStorage::FunctionStorage::execute_all(py)?;
+    
     let (sender, receiver) = PChannel::PChannel::sync_channel(1);
     COMMAND_QUEUE.push(Command::NextFrame { physics_step, sender });
 

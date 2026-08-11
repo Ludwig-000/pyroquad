@@ -1712,7 +1712,7 @@ class Menue():
                 self.draw_mouse()
                 next_frame()
                 examples.limit_fps(60)
-                
+        
         elif screen == 1:
             AudioManager.push_sound( sounds.get("page_turn"), 2 ) #type: ignore
 

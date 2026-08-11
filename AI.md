@@ -131,13 +131,4 @@ Importantly, `is_quit_requested()` does nothing, unless `prevent_quit()` is also
 3. **Stub Documentation:** Most function calls include usage information and parameter details directly in their stub types (accessible via hover in your IDE) or in the repository under `src/python/pyroquad/_pyroquad.pyi`
 4. **Local README:** If offline, the `.whl` file contains an internal `README.md` (extractable via zip tools).
 
-# Simple example
-```Python
-from pyroquad import *
-activate_engine()
-
-while True:
-    draw_rectangle(x=100, y=100, w=600, h=300, color=Color.GREEN)
-    draw_text(text="Hello rectangle", x=200, y=200, font_size=50, color=Color.RED)
-    next_frame()
-```
+# Example code can be found in README.md

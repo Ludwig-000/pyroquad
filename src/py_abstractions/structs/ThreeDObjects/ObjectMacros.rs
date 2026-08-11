@@ -337,7 +337,7 @@ Example:
                     let func_persistent = function.unbind();
                     let obj  = slf.into_any();
 
-                    self_.function_key = Some(storage.add(obj, func_persistent));
+                    self_.function_key = Some(storage.add(obj, func_persistent)?);
 
                     Ok(())
                 }

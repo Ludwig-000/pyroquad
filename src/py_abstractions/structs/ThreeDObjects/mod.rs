@@ -7,3 +7,4 @@ pub mod PhysicsHandle;
 pub mod ObjectMacros;
 pub mod Cylinder;
 pub mod Pill;
+pub mod ObjectFunStorage2;
