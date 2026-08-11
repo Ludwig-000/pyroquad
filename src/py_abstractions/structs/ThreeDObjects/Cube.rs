@@ -5,6 +5,7 @@ use pyo3::exceptions::*;
 
 use crate::py_abstractions::Textures_and_Images::Texture2D;
 use crate::engine::PChannel::PChannel;
+use crate::py_abstractions::structs::ThreeDObjects::ObjectFunStorage::FunctionKey;
 use crate::py_abstractions::structs::ThreeDObjects::PhysicsHandle::Physics;
 use std::hash::{Hash, Hasher};
 
@@ -16,9 +17,7 @@ use crate::engine::CoreLoop::Command;
 
 use crate::py_abstractions::structs::GLAM::Vec3::Vec3;
 use crate::py_abstractions::structs::ThreeDObjects::ColliderOptions::ColliderOptions;
-use crate::py_abstractions::structs::ThreeDObjects::ObjectFunctionStorage;
 use crate::py_abstractions::Color::Color;
-use crate::py_abstractions::structs::ThreeDObjects::ObjectFunctionStorage::FunctionKey;
 use crate::engine::Objects::ObjectManagement::ObjectStorage::ObjectKey;
 
 

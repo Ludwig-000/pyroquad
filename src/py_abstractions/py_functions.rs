@@ -9,7 +9,6 @@
 use crate::py_abstractions::Loading::Loading::PC_ASSET_FOLDER;
 use crate::py_abstractions::Text::Font;
 use crate::py_abstractions::Text::TextDimensions;
-use crate::py_abstractions::structs::ThreeDObjects::ObjectFunctionStorage;
 use crate::py_abstractions::Textures_and_Images::*;
 use crate::py_abstractions::structs::TwoDObjects::collision::Shape;
 use macroquad::prelude as mq;
@@ -308,7 +307,7 @@ pub fn screen_dpi_scale() -> PyResult<f32>{
 #[pyfunction]
 #[pyo3(signature = (physics_step = Some(0.0)))] 
 pub fn next_frame(py: Python<'_>, physics_step: Option<f32>) -> PyResult<()>{
-    ObjectFunctionStorage::FunctionStorage::execute_all(py)?;
+    crate::py_abstractions::structs::ThreeDObjects::ObjectFunStorage::execute_all_functions(py)?;
     
     let (sender, receiver) = PChannel::PChannel::sync_channel(1);
     COMMAND_QUEUE.push(Command::NextFrame { physics_step, sender });

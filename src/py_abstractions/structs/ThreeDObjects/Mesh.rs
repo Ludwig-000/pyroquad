@@ -6,6 +6,7 @@ use std::hash::{Hash, Hasher};
 
 use crate::engine::PError::PError;
 use crate::py_abstractions::structs::ThreeDObjects::ColliderOptions::{ColliderOptions, InnerColliderOptions};
+use crate::py_abstractions::structs::ThreeDObjects::ObjectFunStorage::FunctionKey;
 use crate::py_abstractions::structs::ThreeDObjects::PhysicsHandle::Physics;
 use crate::py_abstractions::{Loading::FileData::FileData, Textures_and_Images::Texture2D};
 use crate::py_abstractions::structs::GLAM::Vec3::Vec3;
@@ -17,7 +18,6 @@ use pyo3::prelude::*;
 use crate::engine::PChannel::PChannel;
 
 use pyo3::types::{PyWeakref, PyWeakrefReference};
-use crate::py_abstractions::structs::ThreeDObjects::ObjectFunctionStorage::FunctionKey;
 
 use pyo3::exceptions::*;
 
@@ -25,7 +25,6 @@ use pyo3::exceptions::*;
 
 use crate::engine::Objects::ObjectDataCache;
 
-use crate::py_abstractions::structs::ThreeDObjects::ObjectFunctionStorage;
 use crate::engine::Objects::ObjectManagement::ObjectStorage::ObjectKey;
 
 #[gen_stub_pyclass]

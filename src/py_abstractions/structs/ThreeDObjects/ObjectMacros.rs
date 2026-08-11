@@ -327,17 +327,18 @@ Example:
                         return Err(PyRuntimeError::new_err(format!("Attatched object {:?} is not callable.",function)));
                     }
 
-                    let mut storage = ObjectFunctionStorage::get_fun_storage();
                     let mut self_ = slf.borrow_mut();
                     
                     if let Some(key) = self_.function_key{
-                        storage.remove(key);
+                        crate::py_abstractions::structs::ThreeDObjects::ObjectFunStorage::remove_function(key);
                     }
 
                     let func_persistent = function.unbind();
                     let obj  = slf.into_any();
 
-                    self_.function_key = Some(storage.add(obj, func_persistent)?);
+                    self_.function_key = Some(
+                        crate::py_abstractions::structs::ThreeDObjects::ObjectFunStorage::add_function(&obj, func_persistent)?
+                    );
 
                     Ok(())
                 }
@@ -363,15 +364,13 @@ macro_rules! implement_remove_tick3D {
                 /// Removes any assigned tick-function from this object.
                 /// If the object does not have a tick function, this will do nothing.
                 pub fn remove_tick(&mut self)-> PyResult<()>{
-
-                    let mut storage = ObjectFunctionStorage::get_fun_storage();
                     let key = match self.function_key{
                         None => { 
                             return Ok(());
                         },
                         Some(key)=> { key },
                     };
-                    storage.remove(key);
+                    crate::py_abstractions::structs::ThreeDObjects::ObjectFunStorage::remove_function(key);
                     self.function_key  = None;
                     Ok(())
                 }
@@ -413,8 +412,7 @@ macro_rules! implement_Drop3D {
                 fn drop(&mut self) {
                     // function storage MUST be cleaned first, since a function inside fun-storage may rely on the object still living.
                     if let Some(key) = self.function_key{
-                        let mut storage = ObjectFunctionStorage::get_fun_storage();
-                        storage.remove(key);
+                        crate::py_abstractions::structs::ThreeDObjects::ObjectFunStorage::remove_function(key);
                     }
                     COMMAND_QUEUE.push( Command::DeleteObject { key: self.key });
                 }

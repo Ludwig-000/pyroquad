@@ -1820,8 +1820,8 @@ class Menue():
             show_mouse(True)
 
 
-profiler = Profiler(interval=0.0001)
-profiler.start()
+# profiler = Profiler(interval=0.1)
+# profiler.start()
 
 activate_engine(Config("2D Game",fullscreen=True,swap_interval=0, sample_count=10))
 camera = Camera2D(rotation=0,zoom=Vec2(0.0009115, 0.0009115*16/9),target=Vec2.ZERO,offset=Vec2(-1,1))
@@ -1969,5 +1969,5 @@ while True:
     next_frame(None) #since this is a purely 2D game, we do not require 3d physics.
     #examples.limit_fps(300)
 
-profiler.stop()
-profiler.print()
+# profiler.stop()
+# profiler.print()

@@ -10,9 +10,8 @@ use crate::engine::CoreLoop::COMMAND_QUEUE;
 use crate::engine::CoreLoop::Command;
 
 use crate::py_abstractions::structs::GLAM::Vec2::Vec2;
-use crate::py_abstractions::structs::ThreeDObjects::ObjectFunctionStorage;
 use crate::py_abstractions::Color::Color;
-use crate::py_abstractions::structs::ThreeDObjects::ObjectFunctionStorage::FunctionKey;
+use crate::py_abstractions::structs::ThreeDObjects::ObjectFunStorage::FunctionKey;
 use crate::py_abstractions::structs::TwoDObjects::Rectangle::Rectangle;
 use crate::py_abstractions::structs::TwoDObjects::collision::Shape;
 use crate::py_abstractions::structs::TwoDObjects::collision::collides_with_circl_circ;
@@ -20,7 +19,7 @@ use crate::py_abstractions::structs::TwoDObjects::collision::collides_with_rec_c
 use pyo3::types::PyDict;
 
 #[gen_stub_pyclass]
-#[pyclass(eq, weakref)]
+#[pyclass(eq)]
 #[derive(PartialEq)]
 pub struct Circle{
     #[pyo3(get,set)]

@@ -35,8 +35,7 @@ use crossbeam::queue::SegQueue;
 use crate::engine::PChannel::PSyncSender;
 
 
-pub fn add_function(target: &Bound<'_, PyAny>, func: Py<PyAny>) -> PyResult<FunctionKey2> {
-
+pub fn add_function(target: &Bound<'_, PyAny>, func: Py<PyAny>) -> PyResult<FunctionKey> {
     let weak_target: Bound<'_, PyWeakrefReference> = PyWeakrefReference::new(target)?;
     let weak_target: Bound<'_, PyWeakref> = weak_target.cast_into()?;
     let weak_target: Py<PyWeakref> = weak_target.unbind();
@@ -52,7 +51,7 @@ pub fn add_function(target: &Bound<'_, PyAny>, func: Py<PyAny>) -> PyResult<Func
     Ok(key)
 }
 
-pub fn remove_function(key: FunctionKey2) {
+pub fn remove_function(key: FunctionKey) {
     FUNCTION_COMMAND_STORAGE.push(
         StorageCommand2::Pop(key)
     );
@@ -67,11 +66,11 @@ pub fn execute_all_functions(py: Python<'_>) -> PyResult<()> {
     
 }
 
-new_key_type! { pub struct FunctionKey2; }
+new_key_type! { pub struct FunctionKey; }
 
 enum StorageCommand2{
-    Pop(FunctionKey2),
-    Push(Py<PyWeakref>, Py<PyAny>, FunctionKey2),
+    Pop(FunctionKey),
+    Push(Py<PyWeakref>, Py<PyAny>, FunctionKey),
 }
 
 
@@ -85,11 +84,11 @@ static FUN_STORAGE: LazyLock<FunctionStorage> =
 
 
 struct FunctionStorage{
-    map: Mutex<SlotMap<FunctionKey2, usize>>,
+    map: Mutex<SlotMap<FunctionKey, usize>>,
     values: Mutex<Vec<(
         Py<PyWeakref>, // object
         Py<PyAny>, // function
-        FunctionKey2 // reverse lookup
+        FunctionKey // reverse lookup
     )>>,
 }
 impl FunctionStorage {
@@ -145,7 +144,7 @@ impl FunctionStorage {
     
         for (target_object, callback, _) in tasks.iter() {
             
-            let target_bound: &Bound<'_, PyAny> = target_object.bind(py);
+            let target_bound: &Bound<'_, PyAny> = &target_object.bind(py).upgrade().unwrap();
             
             let func_bound: &Bound<'_, PyAny> = callback.bind(py);
             
