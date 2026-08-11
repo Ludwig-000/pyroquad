@@ -14,18 +14,13 @@ class PlayerCamera:
     pitch_speed: float= 2.0
     middleMousePos: Vec2
 
-    def __init__(self, position: Vec3 = Vec3.ZERO):
+    def __init__(self, position: Vec3 = Vec3(0,-10,0), target: Vec3 = Vec3.ZERO, aspect: float | None = None, up: Vec3 = Vec3(0,1,0), fovy: float = 0.7853, projection: Projection = Projection.Perspective, render_target: RenderTarget | None = None, viewport: tuple[int,int,int,int] | None = None, z_near: float = 0.01, z_far: float = 10_000):
         r"""run once at the start of the program after engine initialization."""
         show_mouse(False)
         set_cursor_grab(True)
-        self.cam =  Camera3D()
+        self.cam =  Camera3D(position, target, aspect, up, fovy,projection,render_target,viewport,z_near,z_far)
         self.middleMousePos =  get_mouse_position()
-        
-        self.cam.position = position
-        self.cam.target = Vec3(0.0, 0.0, 0.0)
-        self.cam.up = Vec3(0.0, 1.0, 0.0)
-        self.cam.fovy = 45.0
-        self.cam.z_far = 100000
+
 
 
     def update(self):

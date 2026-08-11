@@ -285,7 +285,7 @@ impl Camera3D {
         position = Vec3::new(0.0, -10.0, 0.0),
         target = Vec3::new(0.0, 0.0, 0.0),
         aspect = None,
-        up = Vec3::new(0.0, 0.0, 1.0),
+        up = Vec3::new(0., 1., 0.),
         fovy = 45.0_f32.to_radians(),
         projection = Projection::Perspective,
         render_target = None,

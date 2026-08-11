@@ -4,7 +4,7 @@ import math
 import time
 activate_engine(Config("Physics test",2000,2000,True, None,10,True,True))
 
-cam  = examples.PlayerCamera(Vec3.splat(500))
+cam  = examples.PlayerCamera(position=Vec3.splat(500))
 
 def cube_gen()-> list[Cube]:
     lis = []
