@@ -60,18 +60,24 @@ pub fn activate_engine( conf: Option<Config>) -> PyResult<()>{
     let (tx, rx) = std::sync::mpsc::sync_channel(1);
 
     ENGINE_CURRENTLY_ACTIVE.store(true, Ordering::SeqCst);
+
+    let _drop_guard = crate::PDropGuard!("'activate_engine' cannot be called multiple times");
+
     std::thread::spawn(move || {
+
         let panic_catcher = panic::catch_unwind(AssertUnwindSafe(|| {
 
             macroquad::Window::from_config(macroConf, async move  {
-                
+            
+                let _guard = _drop_guard;
+
                 crate::engine::EngineSetup::setup_engine();
                 crate::engine::FrameInfo::update_frame_info();
                 // we make sure frame info is updated, so that statics are initialized.
                 let _ = tx.send(());
                 
                 crate::engine::CoreLoop::proccess_commands_loop().await;
-                
+
             });
     
             ENGINE_CURRENTLY_ACTIVE.store(false, Ordering::SeqCst);

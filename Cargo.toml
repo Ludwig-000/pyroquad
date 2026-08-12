@@ -1,6 +1,6 @@
 [package]
 name = "pyroquad"
-version = "0.0.5"
+version = "420.69.0" # <- this version does not matter. the one in pyproject.toml matters.
 edition = "2024"
 
 

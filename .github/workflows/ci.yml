@@ -4,9 +4,9 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Release Version (e.g., v0.0.1)'
+        description: 'Release Version (e.g., v0.0.1) make sure the version inside PyProject.toml matches'
         required: true
-        default: 'v0.0.1'
+
 
 permissions:
   contents: write

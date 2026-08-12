@@ -57,7 +57,7 @@ pub fn remove_function(key: FunctionKey) {
 }
 
 pub fn execute_all_functions(py: Python<'_>) -> PyResult<()> {
-    let _guard = ReentrancyGuard::acquire()?; // prevents recursive calls
+    let _guard = crate::PDropGuard!("'next_frame' cannot be called inside a tick function, since this would deadlock the engine.");
 
     { // flush built up commands.
         FunctionStorage::execute_command_storage();

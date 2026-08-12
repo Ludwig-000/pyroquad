@@ -13,3 +13,4 @@ pub mod PAssert;
 pub mod PThreading;
 pub mod MouseInsideScreen;
 pub mod AtomicF32;
+pub mod PDropGuard;
