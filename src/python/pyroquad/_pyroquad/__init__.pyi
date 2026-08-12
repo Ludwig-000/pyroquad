@@ -37,6 +37,7 @@ __all__ = [
     "Pill",
     "PlaySoundParams",
     "Projection",
+    "Quat",
     "Rectangle",
     "RenderTarget",
     "RenderTargetParams",
@@ -5994,6 +5995,69 @@ class PlaySoundParams:
     def __new__(cls, looped: builtins.bool = False, volume: builtins.float = 1.0) -> PlaySoundParams: ...
 
 @typing.final
+class Quat:
+    r"""
+    A minimal pyclass for basic Quat usage.
+    """
+    ZERO: Quat
+    r"""
+    All zeros.
+    """
+    IDENTITY: Quat
+    r"""
+    The identity quaternion. Corresponds to no rotation.
+    """
+    NAN: Quat
+    r"""
+    All NANs.
+    """
+    @property
+    def x(self) -> builtins.float: ...
+    @property
+    def y(self) -> builtins.float: ...
+    @property
+    def z(self) -> builtins.float: ...
+    @property
+    def w(self) -> builtins.float: ...
+    def __eq__(self, other: builtins.object, /) -> builtins.bool: ...
+    def __str__(self) -> builtins.str: ...
+    @staticmethod
+    def from_xyzw(x: builtins.float, y: builtins.float, z: builtins.float, w: builtins.float) -> Quat:
+        r"""
+        Creates a new rotation quaternion.
+        
+        This should generally not be called manually unless you know what you are doing.
+        Use one of the other constructors instead such as `identity` or `from_axis_angle`.
+        
+        `from_xyzw` is mostly used by unit tests and `serde` deserialization.
+        
+        # Preconditions
+        
+        This function does not check if the input is normalized, it is up to the user to
+        provide normalized input or to normalized the resulting quaternion.
+        """
+    @staticmethod
+    def from_array(a: typing.Sequence[builtins.float]) -> Quat:
+        r"""
+        Creates a rotation quaternion from an array.
+        
+        # Preconditions
+        
+        This function does not check if the input is normalized, it is up to the user to
+        provide normalized input or to normalized the resulting quaternion.
+        """
+    @staticmethod
+    def from_vec4(v: Vec4) -> Quat:
+        r"""
+        Creates a new rotation quaternion from a 4D vector.
+        
+        # Preconditions
+        
+        This function does not check if the input is normalized, it is up to the user to
+        provide normalized input or to normalized the resulting quaternion.
+        """
+
+@typing.final
 class Rectangle:
     @property
     def position(self) -> Vec2: ...
@@ -7885,7 +7949,7 @@ def draw_ellipse(x: builtins.float, y: builtins.float, w: builtins.float, h: bui
 
 def draw_ellipse_lines(x: builtins.float, y: builtins.float, w: builtins.float, h: builtins.float, rotation: builtins.float, thickness: builtins.float, color: Color) -> None: ...
 
-def draw_grid(slices: builtins.int, spacing: builtins.float, axes_color: Color, other_color: Color) -> None:
+def draw_grid(slices: builtins.int, spacing: builtins.float, axes_color: Color, other_color: Color, center: Vec3 = ..., rotation: Quat = ...) -> None:
     r"""
     draws a basic grid in 3d space.
     requires a 3d camera to be seen.

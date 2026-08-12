@@ -168,6 +168,7 @@ pub fn _pyroquad( m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<crate::py_abstractions::structs::GLAM::Vec4::Vec4>()?;
     m.add_class::<crate::py_abstractions::structs::GLAM::Vec2::Vec2>()?;
     m.add_class::<crate::py_abstractions::structs::GLAM::Mat4::Mat4>()?;
+    m.add_class::<crate::py_abstractions::structs::GLAM::Quat::Quat>()?;
 
 
     m.add_class::<crate::py_abstractions::structs::ThreeDObjects::Cube::Cube>()?;

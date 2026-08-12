@@ -19,7 +19,7 @@ use crate::py_abstractions::structs::TwoDObjects::collision::collides_with_rec_c
 use pyo3::types::PyDict;
 
 #[gen_stub_pyclass]
-#[pyclass(eq)]
+#[pyclass(eq, weakref)]
 #[derive(PartialEq)]
 pub struct Circle{
     #[pyo3(get,set)]

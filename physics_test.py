@@ -72,6 +72,7 @@ while True:
     
     cam.update()
     draw_skybox(hdr, Color.WHITE)
+    
     draw_grid(100,10,Color.YELLOW,Color.CYAN)
     draw_cube(Vec3.ZERO,Vec3.ONE,Color.PURE_BLUE, None)
     draw_all_objects()

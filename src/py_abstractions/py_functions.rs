@@ -10,6 +10,7 @@ use crate::py_abstractions::Loading::Loading::PC_ASSET_FOLDER;
 use crate::py_abstractions::Text::Font;
 use crate::py_abstractions::Text::TextDimensions;
 use crate::py_abstractions::Textures_and_Images::*;
+use crate::py_abstractions::structs::GLAM::Quat::Quat;
 use crate::py_abstractions::structs::TwoDObjects::collision::Shape;
 use macroquad::prelude as mq;
 
@@ -251,8 +252,9 @@ pub fn draw_line(x1: f32, y1: f32, x2: f32, y2: f32, thickness: f32, color: Colo
 ///
 #[gen_stub_pyfunction]
 #[pyfunction]
-pub fn draw_grid(slices: u32, spacing: f32, axes_color: Color, other_color: Color) {
-    let c =Command::DrawGrid { slices, spacing, axes_color: axes_color.into(), other_color: other_color.into() };
+#[pyo3(signature = (slices, spacing, axes_color, other_color, center= Vec3::ZERO(), rotation=Quat::IDENTITY()))] 
+pub fn draw_grid(slices: u32, spacing: f32, axes_color: Color, other_color: Color, center: Vec3, rotation: Quat) {
+    let c =Command::DrawGrid { slices, spacing, axes_color: axes_color.into(), other_color: other_color.into(), center: center.into(), rotation: rotation.into() };
     COMMAND_QUEUE.push(c);
 }
 

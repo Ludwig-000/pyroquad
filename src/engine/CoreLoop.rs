@@ -238,7 +238,7 @@ pub enum Command {
 
     DrawPlane { center: mq::Vec3, size: mq::Vec2, color: mq::Color, texture: Option<mq::Texture2D> },
 
-    DrawGrid { slices: u32, spacing: f32, axes_color: mq::Color, other_color: mq::Color },
+    DrawGrid { slices: u32, spacing: f32, axes_color: mq::Color, other_color: mq::Color, center: mq::Vec3, rotation: mq::Quat },
 
     DrawCube { pos: mq::Vec3, size: mq::Vec3, texture: Option<mq::Texture2D>, color: mq::Color},
 
@@ -661,9 +661,9 @@ pub async fn proccess_commands_loop() {
                     let tex_ref = texture.as_ref();
                     mq::draw_plane(center,size,tex_ref,color);
                 }
-                Command::DrawGrid { slices, spacing, axes_color, other_color } => {
+                Command::DrawGrid { slices, spacing, axes_color, other_color, center, rotation } => {
                     sm::switch_to_desired_shader(sm::ShaderKind::None, &None);
-                    mq::draw_grid(slices, spacing, axes_color, other_color);
+                    mq::draw_grid_ex(slices, spacing, axes_color, other_color, center, rotation);
                 }
                 Command::DrawCube {pos,size,texture,color} => {
                     sm::switch_to_desired_shader(sm::ShaderKind::Basic, &None);
