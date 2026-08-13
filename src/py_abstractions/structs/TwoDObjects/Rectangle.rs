@@ -16,6 +16,7 @@ use crate::py_abstractions::structs::TwoDObjects::Circle::Circle;
 use crate::py_abstractions::structs::TwoDObjects::collision::Shape;
 use crate::py_abstractions::structs::TwoDObjects::collision::collides_with_rec_circ;
 use crate::py_abstractions::structs::TwoDObjects::collision::collides_with_rec_rec;
+use crate::py_assert;
 use pyo3::types::PyDict;
 
 #[gen_stub_pyclass]
@@ -49,9 +50,27 @@ crate::implement_magic_methods2D!(Rectangle);
 #[pymethods]
 impl Rectangle{
     #[new]
-    #[pyo3(signature = ( position, rotation, scale, color, texture = None))]
+    #[pyo3(signature = ( position=Vec2::new(100.,100.), rotation=0.0, scale= Vec2::new(100.,100.), color = Color::WHITE(), texture = None))]
     pub fn new(position: Vec2, rotation: f32, scale: Vec2, color: Color, texture: Option<Texture2D>)-> Self{
         Rectangle { position, rotation, scale, color, texture, function_key: None }
+    }
+
+    /// defining a rectangle by its pivot can be annoying, so this allows for an alternate constructor.
+    /// with x1,y1 being top left, x2,y2 being bottom right
+    #[staticmethod]
+    #[pyo3(signature = ( x1=0., y1=0., x2=100., y2=100., color= Color::WHITE(), texture=None))]
+    pub fn from_xy(x1: f32, y1: f32, x2: f32, y2: f32, color: Color, texture: Option<Texture2D>) -> PyResult<Rectangle>{
+        py_assert!(x2 > x1, "x2 must be greated than x1");
+        py_assert!(y2 > y1, "y2 must be greater than y1");
+
+        Ok(Rectangle{
+            position: Vec2::const_new((x2+x1)/2.0, (y2+y1)/2.0),
+            rotation: 0.,
+            scale: Vec2::const_new(x2-x1, y2-y1),
+            color,
+            texture,
+            function_key: None,
+        })
     }
 
     pub fn draw(&self){

@@ -20,7 +20,7 @@ macro_rules! py_assert {
 }
 
 #[inline(never)]
-#[cold]
+#[cold] // <- we prevent rustc from predicting this branch
 pub fn py_assert_fail(msg: String) -> pyo3::PyErr {
     pyo3::PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(msg)
 }

@@ -6121,7 +6121,13 @@ class Rectangle:
         If the object does not have a tick function, this will do nothing.
         """
     def __repr__(self) -> builtins.str: ...
-    def __new__(cls, position: Vec2, rotation: builtins.float, scale: Vec2, color: Color, texture: typing.Optional[Texture2D] = None) -> Rectangle: ...
+    def __new__(cls, position: Vec2 = ..., rotation: builtins.float = 0.0, scale: Vec2 = ..., color: Color = ..., texture: typing.Optional[Texture2D] = None) -> Rectangle: ...
+    @staticmethod
+    def from_xy(x1: builtins.float = 0.0, y1: builtins.float = 0.0, x2: builtins.float = 100.0, y2: builtins.float = 100.0, color: Color = ..., texture: typing.Optional[Texture2D] = None) -> Rectangle:
+        r"""
+        defining a rectangle by its pivot can be annoying, so this allows for an alternate constructor.
+        with x1,y1 being top left, x2,y2 being bottom right
+        """
     def draw(self) -> None: ...
     def collides_with(self, rhs: Rectangle | Circle) -> builtins.bool:
         r"""

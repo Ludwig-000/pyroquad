@@ -23,4 +23,5 @@ const _: () = {
     assert_layout!(GLAM::BVec2::BVec2, glam::BVec2);
     assert_layout!(GLAM::BVec3::BVec3, glam::BVec3);
     assert_layout!(GLAM::Mat4::Mat4, glam::Mat4);
+    assert_layout!(GLAM::Quat::Quat, glam::Quat);
 };

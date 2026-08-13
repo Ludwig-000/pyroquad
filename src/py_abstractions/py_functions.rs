@@ -61,7 +61,7 @@ pub fn activate_engine( conf: Option<Config>) -> PyResult<()>{
 
     ENGINE_CURRENTLY_ACTIVE.store(true, Ordering::SeqCst);
 
-    let _drop_guard = crate::PDropGuard!("'activate_engine' cannot be called multiple times");
+    let _guard = crate::PDropGuard!("'activate_engine' cannot be called multiple times in once process.\nIf your intention is to have multiple windows, I'd suggest using python's 'multiprocessing' library.");
 
     std::thread::spawn(move || {
 
@@ -69,7 +69,7 @@ pub fn activate_engine( conf: Option<Config>) -> PyResult<()>{
 
             macroquad::Window::from_config(macroConf, async move  {
             
-                let _guard = _drop_guard;
+                let _guard = _guard;
 
                 crate::engine::EngineSetup::setup_engine();
                 crate::engine::FrameInfo::update_frame_info();

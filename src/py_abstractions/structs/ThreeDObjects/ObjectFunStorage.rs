@@ -57,7 +57,7 @@ pub fn remove_function(key: FunctionKey) {
 }
 
 pub fn execute_all_functions(py: Python<'_>) -> PyResult<()> {
-    let _guard = crate::PDropGuard!("'next_frame' cannot be called inside a tick function, since this would deadlock the engine.");
+    let _guard = crate::PDropGuard!("'next_frame' cannot be called while 'next_frame' is already being executed.\nThis was likely caused by calling 'next_frame()' inside of a tick function.");
 
     { // flush built up commands.
         FunctionStorage::execute_command_storage();
