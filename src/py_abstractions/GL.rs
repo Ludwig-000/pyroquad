@@ -2,6 +2,8 @@ use std::sync::Arc;
 use crate::engine::CoreLoop::COMMAND_QUEUE;
 use crate::engine::PChannel::*;
 use crate::engine::CoreLoop::Command;
+use crate::py_abstractions::structs::GLAM::Vec2::Vec2;
+use crate::py_abstractions::structs::GLAM::Vec3::Vec3;
 //
 // 
 // 
@@ -16,7 +18,7 @@ use macroquad::prelude as mq;
 use pyo3::{PyResult, pyclass, pymethods};
 use pyo3_stub_gen::derive::{gen_stub_pyclass, gen_stub_pyclass_enum, gen_stub_pymethods};
 use crate::py_abstractions::structs::GLAM::Mat4::Mat4;
-use crate::py_abstractions::{Color::Color, Textures_and_Images::Texture2D, structs::GLAM::{Vec2::Vec2, Vec3::Vec3}};
+use crate::py_abstractions::{Color::Color, Textures_and_Images::Texture2D};
 
 #[gen_stub_pyclass]
 #[pyclass(frozen, from_py_object)]
@@ -33,11 +35,15 @@ pub struct Vertex {
     pub normal: mq::Vec4,
 }
 
+#[gen_stub_pymethods]
+#[pymethods]
 impl Vertex{
+
+    #[new]
     pub fn new(position: Vec3, uv: Vec2, color: Color)-> Vertex{
         Vertex{ 
             position: position.into(),
-             uv: uv.into(),
+            uv: uv.into(),
             color: [
                 (color.r * 255.)as u8,
                 (color.g * 255.)as u8,

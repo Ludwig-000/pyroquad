@@ -36,7 +36,6 @@ mod py_abstractions;
 pub fn _pyroquad( m: &Bound<'_, PyModule>) -> PyResult<()> {
     
     
-
     m.add_function(wrap_pyfunction!(crate::py_abstractions::py_functions::activate_engine, m)?)?;
     
     m.add_function(wrap_pyfunction!(crate::py_abstractions::py_functions::draw_all_objects, m)?)?;

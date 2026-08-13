@@ -80,10 +80,11 @@ Importantly, `is_quit_requested()` does nothing, unless `prevent_quit()` is also
 ## Objects:
 - pyroquad has types of powerful object types:
 - 2D Objects:
-    Rectangle
-    Circle
+    Rectangle, Circle
     - Rectangle especially is the recommended way of drawing almost ANY twoDObject.
     - Both Types support rotating, scaling on x,y axes, Transparency via Color, applying a Texture, collision and a `tick()` function.
+    - Rectangle alone has special alternate setters and getters: `x1`,`y1`,`x2`,`y2` that allow for the corner of the rectangle to be moved. this is an alternative to moving it via position + scale. As a suplement, Rectangle also comes with an alternate constructor:
+    def from_xy(x1, y1, x2, y2, color, texture) -> Rectangle:
 - 3D Objects:
     Cube
     Cylinder
@@ -111,7 +112,7 @@ Importantly, `is_quit_requested()` does nothing, unless `prevent_quit()` is also
 
     - And specifically for 3D objects, the same goes for their Physics and drawing. for this reason, it is recommended, in case of many objects, to keep them all in arrays, where they can be kept and deleted at will.
 
-- For mixed ThreeD - and TwoD scenes, it is recommended to FIRST draw all twoD objects, THEN all ThreeD objects, since TwoD objects do not have a depth buffer, while ThreeD objects do.
+- For mixed ThreeD - and TwoD scenes, it is recommended to FIRST draw all ThreeD objects, THEN all TwoD objects, since TwoD objects do not have a depth buffer, while ThreeD objects do.
 
 - Also, and this goes for TwoD objects aswell, the appropriate camera has to be set.
 - The Default Camera is a 2D camera, covering the entire window.
@@ -121,7 +122,7 @@ Importantly, `is_quit_requested()` does nothing, unless `prevent_quit()` is also
 
 
 ## Common Pitfalls
-- Draw Order: Draw 2D objects before 3D objects.
+- Draw Order: Draw 3D objects before 2D objects.
 - Cameras: 2D/3D cameras must be explicitly set for their respective objects to appear. Camera resets after next_frame().
 - Lifetimes: `tick()` and physics stop when the object is deleted. Manage via arrays.
 

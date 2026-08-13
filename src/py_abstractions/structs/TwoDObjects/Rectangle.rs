@@ -59,16 +59,16 @@ impl Rectangle{
     /// with x1,y1 being top left, x2,y2 being bottom right
     #[staticmethod]
     #[pyo3(signature = ( x1=0., y1=0., x2=100., y2=100., color= Color::WHITE(), texture=None))]
-    pub fn from_xy(x1: f32, y1: f32, x2: f32, y2: f32, color: Color, texture: Option<Texture2D>) -> PyResult<Rectangle>{
+    pub fn from_xy(x1: f32, y1: f32, x2: f32, y2: f32, color: Color, texture: Option<Texture2D>) -> Rectangle{
 
-        Ok(Rectangle{
+        Rectangle{
             position: Vec2::const_new((x2+x1)/2.0, (y2+y1)/2.0),
             rotation: 0.,
             scale: Vec2::const_new(x2-x1, y2-y1),
             color,
             texture,
             function_key: None,
-        })
+        }
     }
 
 
@@ -166,11 +166,10 @@ impl Rectangle{
     /// This property does not account for rotation.
     /// x1 represents the top left x-position
     #[setter]
-    pub fn set_x1(&mut self, x1: f32) -> PyResult<()> {
+    pub fn set_x1(&mut self, x1: f32) {
         let x2 = self.position.x + self.scale.x / 2.0;
         self.position.x = (x2 + x1) / 2.0;
         self.scale.x = x2 - x1;
-        Ok(())
     }
     /// This is an alternative way to edit the rectangle outside of position and scale.
     /// This property does not account for rotation.
@@ -182,11 +181,10 @@ impl Rectangle{
     /// This property does not account for rotation.
     /// y1 represents the top left y-position
     #[setter]
-    pub fn set_y1(&mut self, y1: f32) -> PyResult<()> {
+    pub fn set_y1(&mut self, y1: f32) {
         let y2 = self.position.y + self.scale.y / 2.0;
         self.position.y = (y2 + y1) / 2.0;
         self.scale.y = y2 - y1;
-        Ok(())
     }
 
     /// This is an alternative way to edit the rectangle outside of position and scale.
@@ -199,11 +197,10 @@ impl Rectangle{
     /// This property does not account for rotation.
     /// x2 represents the bottom right x-position
     #[setter]
-    pub fn set_x2(&mut self, x2: f32) -> PyResult<()> {
+    pub fn set_x2(&mut self, x2: f32) {
         let x1 = self.position.x - self.scale.x / 2.0;
         self.position.x = (x2 + x1) / 2.0;
         self.scale.x = x2 - x1;
-        Ok(())
     }
 
     /// This is an alternative way to edit the rectangle outside of position and scale.
@@ -216,11 +213,10 @@ impl Rectangle{
     /// This property does not account for rotation.
     /// y2 represents the bottom right y-position
     #[setter]
-    pub fn set_y2(&mut self, y2: f32) -> PyResult<()> {
+    pub fn set_y2(&mut self, y2: f32) {
         let y1 = self.position.y - self.scale.y / 2.0;
         self.position.y = (y2 + y1) / 2.0;
         self.scale.y = y2 - y1;
-        Ok(())
     }
 }
 
