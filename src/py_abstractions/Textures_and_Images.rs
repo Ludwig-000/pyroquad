@@ -41,8 +41,8 @@ impl Image {
     /// Creates an image from a given file path.
     /// supported image formats are: ".png", ".jpeg", ".webp"
     #[new]
-    pub fn new(path: String) -> PyResult<Image> {
-        let data = crate::py_abstractions::Loading::Loading::load_file(&path)?;
+    pub fn new(path: &str) -> PyResult<Image> {
+        let data = crate::py_abstractions::Loading::Loading::load_file(path)?;
 
         let cursor = Cursor::new(data.bytes);
         let reader = ImageReader::new(cursor)

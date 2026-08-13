@@ -60,8 +60,6 @@ impl Rectangle{
     #[staticmethod]
     #[pyo3(signature = ( x1=0., y1=0., x2=100., y2=100., color= Color::WHITE(), texture=None))]
     pub fn from_xy(x1: f32, y1: f32, x2: f32, y2: f32, color: Color, texture: Option<Texture2D>) -> PyResult<Rectangle>{
-        py_assert!(x2 > x1, "x2 must be greated than x1");
-        py_assert!(y2 > y1, "y2 must be greater than y1");
 
         Ok(Rectangle{
             position: Vec2::const_new((x2+x1)/2.0, (y2+y1)/2.0),
@@ -72,6 +70,9 @@ impl Rectangle{
             function_key: None,
         })
     }
+
+
+
 
     pub fn draw(&self){
         COMMAND_QUEUE.push(  Command::DrawRectangleFromPyClass(self.partial_clone()));
@@ -114,6 +115,7 @@ impl Rectangle{
     }
 
 
+    /// calculates the furthest right point that the rectangle reaches. this accounts for rotation
     pub fn max_x(&self) -> f32 {
         let (sin_r, cos_r) = self.rotation.sin_cos();
         let half_w = (self.scale.x / 2.0).abs();
@@ -122,6 +124,8 @@ impl Rectangle{
         self.position.x + (half_w * cos_r.abs() + half_h * sin_r.abs())
     }
 
+    
+    /// calculates the furthest left point that the rectangle reaches. this accounts for rotation
     pub fn min_x(&self) -> f32 {
         let (sin_r, cos_r) = self.rotation.sin_cos();
         let half_w = (self.scale.x / 2.0).abs();
@@ -130,6 +134,8 @@ impl Rectangle{
         self.position.x - (half_w * cos_r.abs() + half_h * sin_r.abs())
     }
 
+    
+    /// calculates the highest point that the rectangle reaches. this accounts for rotation
     pub fn max_y(&self) -> f32 {
         let (sin_r, cos_r) = self.rotation.sin_cos();
         let half_w = (self.scale.x / 2.0).abs();
@@ -137,12 +143,84 @@ impl Rectangle{
         self.position.y + (half_w * sin_r.abs() + half_h * cos_r.abs())
     }
 
+    /// calculates the lowest point that the rectangle reaches. this accounts for rotation
     pub fn min_y(&self) -> f32 {
         let (sin_r, cos_r) = self.rotation.sin_cos();
         let half_w = (self.scale.x / 2.0).abs();
         let half_h = (self.scale.y / 2.0).abs();
         
         self.position.y - (half_w * sin_r.abs() + half_h * cos_r.abs())
+    }
+
+
+
+
+    
+
+    /// This is an alternative way to edit the rectangle outside of position and scale.
+    /// This property does not account for rotation.
+    /// x1 represents the top left x-position
+    #[getter]
+    pub fn x1(&self) -> f32 { self.position.x - self.scale.x / 2.0 }
+    /// This is an alternative way to edit the rectangle outside of position and scale.
+    /// This property does not account for rotation.
+    /// x1 represents the top left x-position
+    #[setter]
+    pub fn set_x1(&mut self, x1: f32) -> PyResult<()> {
+        let x2 = self.position.x + self.scale.x / 2.0;
+        self.position.x = (x2 + x1) / 2.0;
+        self.scale.x = x2 - x1;
+        Ok(())
+    }
+    /// This is an alternative way to edit the rectangle outside of position and scale.
+    /// This property does not account for rotation.
+    /// y1 represents the top left y-position
+    #[getter]
+    pub fn y1(&self) -> f32 { self.position.y - self.scale.y / 2.0 }
+
+    /// This is an alternative way to edit the rectangle outside of position and scale.
+    /// This property does not account for rotation.
+    /// y1 represents the top left y-position
+    #[setter]
+    pub fn set_y1(&mut self, y1: f32) -> PyResult<()> {
+        let y2 = self.position.y + self.scale.y / 2.0;
+        self.position.y = (y2 + y1) / 2.0;
+        self.scale.y = y2 - y1;
+        Ok(())
+    }
+
+    /// This is an alternative way to edit the rectangle outside of position and scale.
+    /// This property does not account for rotation.
+    /// x2 represents the bottom right x-position
+    #[getter]
+    pub fn x2(&self) -> f32 { self.position.x + self.scale.x / 2.0 }
+
+    /// This is an alternative way to edit the rectangle outside of position and scale.
+    /// This property does not account for rotation.
+    /// x2 represents the bottom right x-position
+    #[setter]
+    pub fn set_x2(&mut self, x2: f32) -> PyResult<()> {
+        let x1 = self.position.x - self.scale.x / 2.0;
+        self.position.x = (x2 + x1) / 2.0;
+        self.scale.x = x2 - x1;
+        Ok(())
+    }
+
+    /// This is an alternative way to edit the rectangle outside of position and scale.
+    /// This property does not account for rotation.
+    /// y2 represents the bottom right y-position
+    #[getter]
+    pub fn y2(&self) -> f32 { self.position.y + self.scale.y / 2.0 }
+
+    /// This is an alternative way to edit the rectangle outside of position and scale.
+    /// This property does not account for rotation.
+    /// y2 represents the bottom right y-position
+    #[setter]
+    pub fn set_y2(&mut self, y2: f32) -> PyResult<()> {
+        let y1 = self.position.y - self.scale.y / 2.0;
+        self.position.y = (y2 + y1) / 2.0;
+        self.scale.y = y2 - y1;
+        Ok(())
     }
 }
 

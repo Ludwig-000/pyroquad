@@ -6085,6 +6085,62 @@ class Rectangle:
     def texture(self) -> typing.Optional[Texture2D]: ...
     @texture.setter
     def texture(self, value: typing.Optional[Texture2D]) -> None: ...
+    @property
+    def x1(self) -> builtins.float:
+        r"""
+        This is an alternative way to edit the rectangle outside of position and scale.
+        This property does not account for rotation.
+        x1 represents the top left x-position
+        """
+    @x1.setter
+    def x1(self, value: builtins.float) -> None:
+        r"""
+        This is an alternative way to edit the rectangle outside of position and scale.
+        This property does not account for rotation.
+        x1 represents the top left x-position
+        """
+    @property
+    def y1(self) -> builtins.float:
+        r"""
+        This is an alternative way to edit the rectangle outside of position and scale.
+        This property does not account for rotation.
+        y1 represents the top left y-position
+        """
+    @y1.setter
+    def y1(self, value: builtins.float) -> None:
+        r"""
+        This is an alternative way to edit the rectangle outside of position and scale.
+        This property does not account for rotation.
+        y1 represents the top left y-position
+        """
+    @property
+    def x2(self) -> builtins.float:
+        r"""
+        This is an alternative way to edit the rectangle outside of position and scale.
+        This property does not account for rotation.
+        x2 represents the bottom right x-position
+        """
+    @x2.setter
+    def x2(self, value: builtins.float) -> None:
+        r"""
+        This is an alternative way to edit the rectangle outside of position and scale.
+        This property does not account for rotation.
+        x2 represents the bottom right x-position
+        """
+    @property
+    def y2(self) -> builtins.float:
+        r"""
+        This is an alternative way to edit the rectangle outside of position and scale.
+        This property does not account for rotation.
+        y2 represents the bottom right y-position
+        """
+    @y2.setter
+    def y2(self, value: builtins.float) -> None:
+        r"""
+        This is an alternative way to edit the rectangle outside of position and scale.
+        This property does not account for rotation.
+        y2 represents the bottom right y-position
+        """
     def __eq__(self, other: builtins.object, /) -> builtins.bool: ...
     def tick(self, function: typing.Any) -> None:
         r"""
@@ -6138,10 +6194,22 @@ class Rectangle:
         r"""
         takes a list of 2D shapes, and returns every element that Collides with self.
         """
-    def max_x(self) -> builtins.float: ...
-    def min_x(self) -> builtins.float: ...
-    def max_y(self) -> builtins.float: ...
-    def min_y(self) -> builtins.float: ...
+    def max_x(self) -> builtins.float:
+        r"""
+        calculates the furthest right point that the rectangle reaches. this accounts for rotation
+        """
+    def min_x(self) -> builtins.float:
+        r"""
+        calculates the furthest left point that the rectangle reaches. this accounts for rotation
+        """
+    def max_y(self) -> builtins.float:
+        r"""
+        calculates the highest point that the rectangle reaches. this accounts for rotation
+        """
+    def min_y(self) -> builtins.float:
+        r"""
+        calculates the lowest point that the rectangle reaches. this accounts for rotation
+        """
 
 @typing.final
 class RenderTarget:
