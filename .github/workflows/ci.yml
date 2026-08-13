@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Release Version (e.g., v0.0.1) make sure the version inside PyProject.toml matches'
+        description: 'Release Version (e.g., v0.0.1) This will automatically edit the version inside pyproject.toml'
         required: true
 
 
@@ -15,8 +15,30 @@ permissions:
 
 
 jobs:
+  bump-version:
+    name: Bump Version in Repository
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Update pyproject.toml and Commit
+        run: |
+          VER="${{ github.event.inputs.version }}"
+          VER="${VER#v}" # Strip leading 'v' if present
+
+          # Single-line regex update using sed
+          sed -i -E 's/^(version = ").*"/\1'"$VER"'"/' pyproject.toml
+
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add pyproject.toml
+          git commit -m "chore: bump version to $VER" || echo "No version change to commit"
+          git push
+
+
   build:
     name: Build py${{ matrix.py_ver }} on ${{ matrix.os }}
+    needs: bump-version
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -34,6 +56,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref }}
 
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
@@ -98,6 +122,7 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ github.event.inputs.version }}
+          target_commitish: ${{ github.ref_name }}
           files: release_dist/*.whl
           body: "Pre-alpha release of Pyroquad Engine."
           generate_release_notes: true
