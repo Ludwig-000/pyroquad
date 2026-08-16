@@ -1639,20 +1639,63 @@ class Menue():
     main_background: list[Rectangle | Button]
     pause_background: list[Rectangle | Button]
     death_background: list[Rectangle | Button]
-    
+
     static_fullscreen_toggle = True
     mouse_cursor: Rectangle
     def __init__(self) -> None:
         
         self.mouse_cursor = Rectangle(Vec2(0,0), 0, Vec2.splat(20), Color.WHITE, textures.get("MenueCursor"))
-        self.main_background  = [
-            Rectangle(position=Vec2(2194.0/2, 1234.0/2),rotation=0, scale=Vec2(2194.0, 1234.0), color=Color.WHITE, texture=textures.get("tree_screen")),
-            Rectangle(position=Vec2(2194.0/2, tileSize*15),rotation=0, scale=Vec2(tileSize*30,tileSize*5), color=Color(1,1,1,0.5)),
-            Button(Vec2(2194.0/2+ tileSize*4, tileSize*25), Vec2(tileSize*6,tileSize*3), button_color=Color(0.7,0.7,0.7,1),label="Play"),
-            Button(Vec2(2194.0/2- tileSize*4, tileSize*25), Vec2(tileSize*6,tileSize*3), button_color=Color(0.7,0.7,0.7,1),label="Quit"),
-            Button(Vec2(2194.0/2- tileSize*15, tileSize*25), Vec2(tileSize*10,tileSize*2), button_color=Color(0.7,0.7,0.7,1),label="Toggle Fullscreen"),
-            Button(Vec2(2194.0/2- tileSize*15, tileSize*28), Vec2(tileSize*10,tileSize*2), button_color=Color(0.7,0.7,0.7,1),label="Toggle Mute"),
+
+        moving_rectangles_center = Vec2(800.0, 500.0)
+
+        moving_rectangles: list[Rectangle | Button] = [
+            Rectangle(Vec2(1420.0, 500.0), 0, Vec2(120, 180), color=Color(0.12, 0.82, 0.18, 0.65)),
+            Rectangle(Vec2(1335.0, 712.0), 0, Vec2(85, 140),  color=Color(0.06, 0.71, 0.24, 0.82)),
+            Rectangle(Vec2(1082.0, 834.0), 0, Vec2(160, 90),  color=Color(0.20, 0.94, 0.08, 0.54)),
+            Rectangle(Vec2(935.0,  922.0), 0, Vec2(110, 110), color=Color(0.10, 0.78, 0.29, 0.88)),
+            Rectangle(Vec2(780.0,  790.0), 0, Vec2(190, 75),  color=Color(0.16, 1.00, 0.12, 0.73)),
+            Rectangle(Vec2(800.0,  1080.0),0, Vec2(60, 130),  color=Color(0.04, 0.67, 0.20, 0.58)),
+            Rectangle(Vec2(560.0,  815.0), 0, Vec2(145, 105), color=Color(0.14, 0.88, 0.25, 0.79)),
+            Rectangle(Vec2(410.0,  882.0), 0, Vec2(80, 160),  color=Color(0.08, 0.76, 0.16, 0.61)),
+            Rectangle(Vec2(325.0,  638.0), 0, Vec2(175, 85),  color=Color(0.22, 0.90, 0.31, 0.85)),
+            Rectangle(Vec2(180.0,  500.0), 0, Vec2(95, 190),  color=Color(0.12, 0.69, 0.10, 0.52)),
+            Rectangle(Vec2(365.0,  285.0), 0, Vec2(130, 70),  color=Color(0.18, 0.84, 0.22, 0.76)),
+            Rectangle(Vec2(440.0,  190.0), 0, Vec2(115, 125), color=Color(0.07, 0.73, 0.14, 0.68)),
+            Rectangle(Vec2(680.0,  80.0),  0, Vec2(200, 60),  color=Color(0.15, 0.96, 0.27, 0.89)),
+            Rectangle(Vec2(710.0,  245.0), 0, Vec2(75, 150),  color=Color(0.09, 0.80, 0.06, 0.55)),
+            Rectangle(Vec2(800.0,  -80.0), 0, Vec2(155, 115), color=Color(0.24, 0.92, 0.18, 0.81)),
+            Rectangle(Vec2(980.0,  135.0), 0, Vec2(100, 100), color=Color(0.05, 0.75, 0.27, 0.63)),
+            Rectangle(Vec2(1140.0, 170.0), 0, Vec2(165, 80),  color=Color(0.11, 0.86, 0.20, 0.77)),
+            Rectangle(Vec2(1270.0, 220.0), 0, Vec2(90, 170),  color=Color(0.20, 0.65, 0.15, 0.50)),
+            Rectangle(Vec2(1330.0, 310.0), 0, Vec2(135, 125), color=Color(0.06, 0.82, 0.32, 0.84)),
+            Rectangle(Vec2(1190.0, 480.0), 0, Vec2(180, 95),  color=Color(0.16, 0.98, 0.24, 0.71)),
+        ]
+        def rec_movement(rec: Rectangle):
+            angle = 0.0005
+            v = rec.position - moving_rectangles_center
+            cos_a = math.cos(angle)
+            sin_a = math.sin(angle)
+            rotated_v = Vec2(
+                v.x * cos_a - v.y * sin_a,
+                v.x * sin_a + v.y * cos_a
+            )
+            rec.position =  moving_rectangles_center + rotated_v
+        for rectangle in moving_rectangles: rectangle.tick(rec_movement) # type: ignore
+
+
+        self.main_background = (
+            [
+                Rectangle(position=Vec2(2194.0/2, 1234.0/2), rotation=0, scale=Vec2(2194.0, 1234.0), color=Color.WHITE, texture=textures.get("tree_screen"))
+            ] 
+            + moving_rectangles 
+            + [
+                Rectangle(position=Vec2(2194.0/2, tileSize*15), rotation=0, scale=Vec2(tileSize*30, tileSize*5), color=Color(1,1,1,0.5)),
+                Button(Vec2(2194.0/2 + tileSize*4, tileSize*25), Vec2(tileSize*6, tileSize*3), button_color=Color(0.7, 0.7, 0.7, 1), label="Play"),
+                Button(Vec2(2194.0/2 - tileSize*4, tileSize*25), Vec2(tileSize*6, tileSize*3), button_color=Color(0.7, 0.7, 0.7, 1), label="Quit"),
+                Button(Vec2(2194.0/2 - tileSize*15, tileSize*25), Vec2(tileSize*10, tileSize*2), button_color=Color(0.7, 0.7, 0.7, 1), label="Toggle Fullscreen"),
+                Button(Vec2(2194.0/2 - tileSize*15, tileSize*28), Vec2(tileSize*10, tileSize*2), button_color=Color(0.7, 0.7, 0.7, 1), label="Toggle Mute"),
             ]
+        )
         self.pause_background  = [
             Rectangle(Vec2(2194.0/2, 1234.0/2),0, Vec2(2194.0, 1234.0), Color.WHITE, textures.get("tree_screen")),
             Rectangle(Vec2(2194.0/2, tileSize*15),0, Vec2(tileSize*30,tileSize*5), Color(1,1,1,0.5)),
@@ -1670,6 +1713,9 @@ class Menue():
             Button(Vec2(300, tileSize*34), Vec2(tileSize*10,tileSize*2), button_color=Color(0.7,0.7,0.7,1),label="Toggle Mute Audio"),
             Button(Vec2(700, tileSize*34), Vec2(tileSize*13,tileSize*2), button_color=Color(0.7,0.7,0.7,1),label="Toggle Difficulty: Hard"),
             ]
+
+
+
 
 
     def start(self, screen: int) -> bool:
@@ -1700,6 +1746,7 @@ class Menue():
                 clear_background(Color.WHITE)
                 for item in self.main_background:
                     item.draw()
+                
 
                 draw_text("Haven't thought of a name yet  >_<",
                           (2194.0/2)-tileSize*15 +2 , 
@@ -1780,13 +1827,11 @@ class Menue():
                             elif item.button_label == "Toggle Difficulty: Hard":
                                 item.button_label = "Toggle Difficulty: Challenging"
                                 player.max_hp = 2.0
-                                item.button.position = Vec2(762, tileSize*34)
-                                item.button.scale = Vec2(tileSize*17,tileSize*2)
+                                item.button.x2 += 120
                             elif item.button_label == "Toggle Difficulty: Challenging":
                                 item.button_label = "Toggle Difficulty: Easy"
                                 player.max_hp = 10.0
-                                item.button.position = Vec2(700, tileSize*34)
-                                item.button.scale = Vec2(tileSize*13,tileSize*2)
+                                item.button.x2 -= 120
                             elif item.button_label == "Toggle Difficulty: Easy":
                                 item.button_label = "Toggle Difficulty: Hard"
                                 player.max_hp = 1.0
@@ -1818,6 +1863,7 @@ class Menue():
             self.mouse_cursor.draw()
         else:
             show_mouse(True)
+
 
 
 # profiler = Profiler(interval=0.1)

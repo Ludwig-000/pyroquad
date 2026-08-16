@@ -46,19 +46,23 @@ impl<T> Drop for PSyncSender<T>{
 }
 impl<T> PReceiver<T> {
     pub fn recv(&self) -> Result<T, PChannelError> {
-        
-        loop{
-            let res  = self.inner.recv_timeout(Duration::from_millis(100));
-
-            match res {
-                Ok(val)=> return val,
-                Err(e)=> {
-                    if !crate::py_abstractions::py_functions::ENGINE_CURRENTLY_ACTIVE.load(Ordering::Relaxed){ 
-                        return Err(PChannelError::DeadlockError)  
-                    }
-                }
+        for _ in (0..500){
+            match self.inner.try_recv(){
+                Ok(result) => return result,
+                Err(_) => {}
             }
+        }
 
+        
+        if !crate::py_abstractions::py_functions::ENGINE_CURRENTLY_ACTIVE.load(Ordering::Relaxed){ 
+            return Err(PChannelError::DeadlockError)
+        }
+
+        loop {
+            match self.inner.try_recv(){
+                Ok(result) => return result,
+                Err(_) => {}
+            }
         }
     }
     pub fn try_recv(&self) -> Option<Result<T, PChannelError>>{
