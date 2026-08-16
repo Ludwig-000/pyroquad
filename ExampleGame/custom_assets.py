@@ -27,6 +27,14 @@ def load_all_assets() -> tuple[dict, dict, dict]:
         {"name": "bush", "url": "TinyTown/Tiles/tile_0005.png", "path": "bush.png", "type": "texture"},
         {"name": "dirt", "url": "TinyTown/Tiles/tile_0025.png", "path": "dirt.png", "type": "texture"},
         
+        {"name": "teleporter1", "url": "Teleporter/Teleporter1.png", "path": "teleporter1.png", "type": "texture"},
+        {"name": "teleporter2", "url": "Teleporter/Teleporter2.png", "path": "teleporter2.png", "type": "texture"},
+        {"name": "teleporter3", "url": "Teleporter/Teleporter3.png", "path": "teleporter3.png", "type": "texture"},
+        {"name": "teleporter4", "url": "Teleporter/Teleporter4.png", "path": "teleporter4.png", "type": "texture"},
+        {"name": "teleporter5", "url": "Teleporter/Teleporter5.png", "path": "teleporter5.png", "type": "texture"},
+        {"name": "teleporter6", "url": "Teleporter/Teleporter6.png", "path": "teleporter6.png", "type": "texture"},
+        {"name": "teleporter7", "url": "Teleporter/Teleporter7.png", "path": "teleporter7.png", "type": "texture"},
+
         # attacks
         {"name": "slash_1", "url": "Slashes/Sword Slashes/White Slash Wide/File1.png", "path": "slash_1.png", "type": "texture"},
         {"name": "slash_2", "url": "Slashes/Sword Slashes/White Slash Wide/File2.png", "path": "slash_2.png", "type": "texture"},

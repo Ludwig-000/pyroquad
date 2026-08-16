@@ -1264,14 +1264,42 @@ class Trigger():
     player_pos: None | Vec2
     active: bool
     name: str
+
+    visual_box: Rectangle | None
+
     def __init__(self, hitbox: Rectangle, transition_to: None | int = None, 
-                 audio: None | tuple[Sound, float] = None, player_pos: None | Vec2 = None, name: str = "Trigger") -> None:
+                 audio: None | tuple[Sound, float] = None, player_pos: None | Vec2 = None, name: str = "Trigger", visual_box: Rectangle | None  = None):
         self.hitbox = hitbox
         self.audio = audio
         self.transition_to = transition_to
         self.player_pos = player_pos
         self.active = True
         self.name = name
+
+        self.visual_box = visual_box
+        self.animation_index = 0
+        self.last_animation_switch = time.time()
+
+    def draw_visual(self): 
+        if not self.visual_box is None: self.visual_box.draw()
+
+
+    @staticmethod
+    def animate_transition(visual: Rectangle):
+        # Reference the function object via the Class name
+        fn = Trigger.animate_transition
+
+        if not hasattr(fn, "animation_index"):
+            fn.animation_index = 0 #type: ignore
+        if not hasattr(fn, "last_animation_switch"):
+            fn.last_animation_switch = time.time() #type: ignore
+
+        if fn.animation_index == 7: return #type: ignore
+        if fn.last_animation_switch > (time.time() - 0.2): return #type: ignore
+
+        fn.last_animation_switch = time.time() #type: ignore
+        fn.animation_index += 1 #type: ignore
+        visual.texture = textures.get(f"teleporter{fn.animation_index}") #type: ignore
 
 
 class LevelTriggers():
@@ -1331,8 +1359,9 @@ class LevelTriggers():
             ]
         elif area == 3:
             woods_trigger2= Rectangle(Vec2(tileSize*68, tileSize*16),0,Vec2(tileSize*3,tileSize*10), Color.INVISIBLE)
+            visual = Rectangle(Vec2(tileSize*68, tileSize*16),0,Vec2(tileSize*10,tileSize*10), Color.WHITE, textures.get("teleporter1"))
             self.triggers = [
-                Trigger(woods_trigger2,transition_to=4, player_pos=Vec2(tileSize*1,tileSize*20), name= "woods4")
+                Trigger(woods_trigger2,transition_to=4, player_pos=Vec2(tileSize*1,tileSize*20), name= "woods4", visual_box=visual)
             ]
         elif area == 4:
             woods_trigger2= Rectangle(Vec2(tileSize*68, tileSize*23),0,Vec2(tileSize*3,tileSize*10), Color.INVISIBLE)
@@ -1344,6 +1373,8 @@ class LevelTriggers():
         for trigger in self.triggers:
             if trigger.name == name:
                 trigger.active = active
+                if trigger.active == True and trigger.visual_box:
+                    trigger.visual_box.tick( Trigger.animate_transition )
                 return
         raise BaseException("Trigger not found")
 
@@ -1351,6 +1382,7 @@ class LevelTriggers():
         if self.current_level == 2:
             if destructible_manager.destructibles_level_2.__len__() == 0:
                 self.set_trigger("woods3", True)
+                
             else:
                 self.set_trigger("woods3", False)
         elif self.current_level == 3:
@@ -2011,8 +2043,9 @@ while True:
     draw_text(f"{DEBUG.this_frame_draw_calls} draw calls",tileSize*2,tileSize*3,Color.WHITE,font_size=int(tileSize*0.8),font= fonts.get("bitcount_font"))
     draw_text(f"player pos {player.hitbox.position.x:.1f}, {player.hitbox.position.y:.1f}", tileSize*2, tileSize*4, Color.WHITE, font_size=int(tileSize*0.8), font=fonts.get("bitcount_font"))
     draw_text(f"{enemies.__len__()} entities",tileSize*2,tileSize*5,Color.WHITE,font_size=int(tileSize*0.8),font= fonts.get("bitcount_font"))
-
-    next_frame(None) #since this is a purely 2D game, we do not require 3d physics.
+    
+    for t in level_triggers.triggers: t.draw_visual()
+    next_frame(None) #since this is a purely 2D game, we do not require 3d collision.
     #examples.limit_fps(300)
 
 # profiler.stop()

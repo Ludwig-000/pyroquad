@@ -20,7 +20,7 @@ use crate::py_assert;
 use pyo3::types::PyDict;
 
 #[gen_stub_pyclass]
-#[pyclass(eq, weakref)]
+#[pyclass(eq, weakref, dict)]
 #[derive(PartialEq)]
 pub struct Rectangle{
 

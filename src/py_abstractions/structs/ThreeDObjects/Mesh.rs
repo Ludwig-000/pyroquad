@@ -28,7 +28,7 @@ use crate::engine::Objects::ObjectDataCache;
 use crate::engine::Objects::ObjectManagement::ObjectStorage::ObjectKey;
 
 #[gen_stub_pyclass]
-#[pyclass(weakref)]
+#[pyclass(weakref, dict)]
 pub struct Mesh{
 	pub key: ObjectKey,
     pub function_key: Option<FunctionKey>,
