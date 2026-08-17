@@ -86,18 +86,35 @@ pub unsafe fn get_mouse_state_info() -> (f32, f32, bool) {
     use std::ptr;
     use x11::xlib;
 
+    // 1. Create a silent error handler. 
+    // By default, X11 errors exit the program. This forces them to be ignored.
+    unsafe extern "C" fn silent_error_handler(
+        _display: *mut xlib::Display,
+        _error_event: *mut xlib::XErrorEvent,
+    ) -> libc::c_int {
+        0 // Return 0 to safely ignore the error
+    }
+
     // Connect to X server. Will return null on pure Wayland.
     let display = xlib::XOpenDisplay(ptr::null());
     if display.is_null() {
         return (0.0, 0.0, false); 
     }
 
+    // 2. Install the silent error handler, saving the original one
+    let old_handler = xlib::XSetErrorHandler(Some(silent_error_handler));
+
     // Find the currently focused window
     let mut focus_window: xlib::Window = 0;
     let mut revert_to: libc::c_int = 0;
     xlib::XGetInputFocus(display, &mut focus_window, &mut revert_to);
 
-    if focus_window == 0 || focus_window == xlib::XDefaultRootWindow(display) {
+    // X11 PointerRoot is typically 1 (0x1). This is the exact resource ID that crashed your app.
+    let pointer_root = 1 as xlib::Window;
+
+    // Check for invalid, root, or pointer-root windows
+    if focus_window == 0 || focus_window == pointer_root || focus_window == xlib::XDefaultRootWindow(display) {
+        xlib::XSetErrorHandler(old_handler); // Restore before closing
         xlib::XCloseDisplay(display);
         return (0.0, 0.0, false);
     }
@@ -125,11 +142,14 @@ pub unsafe fn get_mouse_state_info() -> (f32, f32, bool) {
 
     // Get window dimensions to check bounds
     let mut attrs: xlib::XWindowAttributes = std::mem::zeroed();
-    xlib::XGetWindowAttributes(display, focus_window, &mut attrs);
+    let attr_result = xlib::XGetWindowAttributes(display, focus_window, &mut attrs);
 
+    // 3. Restore the original error handler and close the display
+    xlib::XSetErrorHandler(old_handler);
     xlib::XCloseDisplay(display);
 
-    if result == 0 {
+    // If either query failed (e.g., the window closed mid-query), fail gracefully
+    if result == 0 || attr_result == 0 {
         return (0.0, 0.0, false);
     }
 
