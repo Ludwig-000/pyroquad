@@ -37,12 +37,12 @@ fn regular_extract(value: PError, extra: Option<&str>) -> pyo3::PyErr {
     let extra = extra.unwrap_or_default();
 
     match value {
-        PError::MacroquadErr(e) => PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(format!("{e} || {extra}")),
+        PError::MacroquadErr(e) => PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(format!("{e} {extra}")),
         PError::Pyo3Err(e) => e,
         PError::SymphoniaError(e) => handle_Symphonia_error(e, extra),
-        PError::GLTFError(e) => PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(format!("{e} || {extra}")),
-        PError::BasicErr(e) => PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(format!("{e} || {extra}")),
-        PError::HoundError(e) => PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(format!("Hound Error: {e} || {extra}")),
+        PError::GLTFError(e) => PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(format!("{e} {extra}")),
+        PError::BasicErr(e) => PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(format!("{e} {extra}")),
+        PError::HoundError(e) => PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(format!("Hound Error: {e} {extra}")),
         PError::WithContext(err,context ) => {
             let (e,c) = recursively_extract_context(*err, context);
             let ee: pyo3::PyErr = regular_extract(e, Some(&c));
@@ -75,7 +75,7 @@ fn handle_Symphonia_error(e: symphonia::core::errors::Error, extra: &str ) -> py
         Error::LimitError(e) => PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(format!("Symphonia LimitError: {e} {extra}")),
         Error::ResetRequired => PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(format!("Symphonia Reset Required Error {extra}")),
         Error::SeekError(e) => {
-            PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(format!("Symphonia SeekError: {:?} || {extra}",e))
+            PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(format!("Symphonia SeekError: {:?} {extra}",e))
         },
         Error::Unsupported(e) => PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(format!("Symphonia UnsupportedError: {e} {extra}")),
 

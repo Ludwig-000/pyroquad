@@ -3,14 +3,12 @@
 from pyroquad import *
 import random
 import time
-from pyinstrument import Profiler
 import math
 import time
 from typing import Optional
-from utils import *
-from custom_assets import load_all_assets
+from .utils import *
+from .custom_assets import load_all_assets
 tileSize = 32
-
 
 
 
@@ -1689,48 +1687,12 @@ class Menue():
         
         self.mouse_cursor = Rectangle(Vec2(0,0), 0, Vec2.splat(20), Color.WHITE, textures.get("MenueCursor"))
 
-        moving_rectangles_center = Vec2(800.0, 500.0)
-
-        moving_rectangles: list[Rectangle | Button] = [
-            Rectangle(Vec2(1420.0, 500.0), 0, Vec2(120, 180), color=Color(0.12, 0.82, 0.18, 0.65)),
-            Rectangle(Vec2(1335.0, 712.0), 0, Vec2(85, 140),  color=Color(0.06, 0.71, 0.24, 0.82)),
-            Rectangle(Vec2(1082.0, 834.0), 0, Vec2(160, 90),  color=Color(0.20, 0.94, 0.08, 0.54)),
-            Rectangle(Vec2(935.0,  922.0), 0, Vec2(110, 110), color=Color(0.10, 0.78, 0.29, 0.88)),
-            Rectangle(Vec2(780.0,  790.0), 0, Vec2(190, 75),  color=Color(0.16, 1.00, 0.12, 0.73)),
-            Rectangle(Vec2(800.0,  1080.0),0, Vec2(60, 130),  color=Color(0.04, 0.67, 0.20, 0.58)),
-            Rectangle(Vec2(560.0,  815.0), 0, Vec2(145, 105), color=Color(0.14, 0.88, 0.25, 0.79)),
-            Rectangle(Vec2(410.0,  882.0), 0, Vec2(80, 160),  color=Color(0.08, 0.76, 0.16, 0.61)),
-            Rectangle(Vec2(325.0,  638.0), 0, Vec2(175, 85),  color=Color(0.22, 0.90, 0.31, 0.85)),
-            Rectangle(Vec2(180.0,  500.0), 0, Vec2(95, 190),  color=Color(0.12, 0.69, 0.10, 0.52)),
-            Rectangle(Vec2(365.0,  285.0), 0, Vec2(130, 70),  color=Color(0.18, 0.84, 0.22, 0.76)),
-            Rectangle(Vec2(440.0,  190.0), 0, Vec2(115, 125), color=Color(0.07, 0.73, 0.14, 0.68)),
-            Rectangle(Vec2(680.0,  80.0),  0, Vec2(200, 60),  color=Color(0.15, 0.96, 0.27, 0.89)),
-            Rectangle(Vec2(710.0,  245.0), 0, Vec2(75, 150),  color=Color(0.09, 0.80, 0.06, 0.55)),
-            Rectangle(Vec2(800.0,  -80.0), 0, Vec2(155, 115), color=Color(0.24, 0.92, 0.18, 0.81)),
-            Rectangle(Vec2(980.0,  135.0), 0, Vec2(100, 100), color=Color(0.05, 0.75, 0.27, 0.63)),
-            Rectangle(Vec2(1140.0, 170.0), 0, Vec2(165, 80),  color=Color(0.11, 0.86, 0.20, 0.77)),
-            Rectangle(Vec2(1270.0, 220.0), 0, Vec2(90, 170),  color=Color(0.20, 0.65, 0.15, 0.50)),
-            Rectangle(Vec2(1330.0, 310.0), 0, Vec2(135, 125), color=Color(0.06, 0.82, 0.32, 0.84)),
-            Rectangle(Vec2(1190.0, 480.0), 0, Vec2(180, 95),  color=Color(0.16, 0.98, 0.24, 0.71)),
-        ]
-        def rec_movement(rec: Rectangle):
-            angle = 0.0005
-            v = rec.position - moving_rectangles_center
-            cos_a = math.cos(angle)
-            sin_a = math.sin(angle)
-            rotated_v = Vec2(
-                v.x * cos_a - v.y * sin_a,
-                v.x * sin_a + v.y * cos_a
-            )
-            rec.position =  moving_rectangles_center + rotated_v
-        for rectangle in moving_rectangles: rectangle.tick(rec_movement) # type: ignore
-
+        
 
         self.main_background = (
             [
                 Rectangle(position=Vec2(2194.0/2, 1234.0/2), rotation=0, scale=Vec2(2194.0, 1234.0), color=Color.WHITE, texture=textures.get("tree_screen"))
             ] 
-            + moving_rectangles 
             + [
                 Rectangle(position=Vec2(2194.0/2, tileSize*15), rotation=0, scale=Vec2(tileSize*30, tileSize*5), color=Color(1,1,1,0.5)),
                 Button(Vec2(2194.0/2 + tileSize*4, tileSize*25), Vec2(tileSize*6, tileSize*3), button_color=Color(0.7, 0.7, 0.7, 1), label="Play"),
@@ -1937,127 +1899,128 @@ no_nav_area = NoNavArea(0)
 middle_layer = MiddleLayer(0)
 level_triggers = LevelTriggers(0)
 
-fps = get_fps()
-last_fps_update = time.time()
 
 
 
+def launch():
+    fps = get_fps()
+    last_fps_update = time.time()
+    should_quit: bool = menue.start(0)
 
-should_quit: bool = menue.start(0)
 
 
+    prevent_quit()
+    while True:
 
-prevent_quit()
-while True:
+        DEBUG.this_frame_draw_calls = 0
 
-    DEBUG.this_frame_draw_calls = 0
-
-    dt= get_delta_time()
-    if is_quit_requested() or should_quit:
-        quit_program()
-        print("Bye")
-        break
-    
-    if KeyCode.Escape in get_keys_pressed():
-        val = menue.start(1)
-        if val:
+        dt= get_delta_time()
+        if is_quit_requested() or should_quit:
             quit_program()
             print("Bye")
             break
-    if KeyCode.L in get_keys_pressed():
-        val  = menue.start(2)
-        if val:
-            quit_program()
-            print("Bye")
-            break
-    if KeyCode.O in get_keys_pressed():
-        enemies.append(
-            BasicEnemy(Vec2.splat(500), SceneManager.current_active_scene)
+        
+        if KeyCode.Escape in get_keys_pressed():
+            val = menue.start(1)
+            if val:
+                quit_program()
+                print("Bye")
+                break
+        # if KeyCode.L in get_keys_pressed():
+        #     val  = menue.start(2)
+        #     if val:
+        #         quit_program()
+        #         print("Bye")
+        #         break
+        # if KeyCode.O in get_keys_pressed():
+        #     enemies.append(
+        #         BasicEnemy(Vec2.splat(500), SceneManager.current_active_scene)
+        #     )
+        #     enemies.append(
+        #         ProjectileEnemy(Vec2.splat(500), SceneManager.current_active_scene, enemy_projectiles)
+        #     )
+        # if KeyCode.K in get_keys_pressed():
+        #     enemies.clear()
+        # if KeyCode.O in get_keys_pressed() and KeyCode.LeftShift in get_keys_down():
+        #     for i in range(10):
+        #         enemies.append(
+        #         BasicEnemy(Vec2.splat(500), SceneManager.current_active_scene)
+        #         )
+
+        # if KeyCode.Key0 in get_keys_pressed():
+        #     SceneManager.switch_scene(0, True)
+        # if KeyCode.Key1 in get_keys_pressed():
+        #     SceneManager.switch_scene(1, True)
+        # if KeyCode.Key2 in get_keys_pressed():
+        #     SceneManager.switch_scene(2, True)
+        # if KeyCode.Key3 in get_keys_pressed():
+        #     SceneManager.switch_scene(3, True)
+        # if KeyCode.Key4 in get_keys_pressed():
+        #     SceneManager.switch_scene(4, True)
+        # if KeyCode.Key5 in get_keys_pressed():
+        #     SceneManager.switch_scene(5, True)
+
+
+        # logic
+        if player.health <= 0.0:
+            val = menue.start(2)
+            if val:
+                quit_program()
+                print("Bye")
+                break
+            else:
+                SceneManager.switch_scene(SceneManager.current_active_scene, True)
+
+        player.update(no_nav_area)
+        level_triggers.check(player)
+        for enemy in enemies:
+            enemy.update(player, no_nav_area)
+
+        active_projectiles = []
+        for proj in enemy_projectiles:
+            should_destroy = proj.update(player, no_nav_area)
+            if not should_destroy:
+                active_projectiles.append(proj)
+        enemy_projectiles[:] = active_projectiles
+
+
+        DamageSystem.tick(enemies,enemy_projectiles, player, destructible_manager)
+
+        TwoDPhysics.tick(get_delta_time(), no_nav_area)
+        
+        enemy_spawner.tick(enemies, get_delta_time())
+        
+        # drawing
+        camera.set_camera()
+        background.draw()
+        for t in level_triggers.triggers: t.draw_visual()
+        middle_layer.draw(
+            [enemy.visual for enemy in enemies if enemy.active_scene == SceneManager.current_active_scene] +
+            [proj.visual for proj in enemy_projectiles if proj.active_scene == SceneManager.current_active_scene] +
+            [obj.visual for obj in destructible_manager.get(SceneManager.current_active_scene)],
+            player
         )
-        enemies.append(
-            ProjectileEnemy(Vec2.splat(500), SceneManager.current_active_scene, enemy_projectiles)
-        )
-    if KeyCode.K in get_keys_pressed():
-        enemies.clear()
-    if KeyCode.O in get_keys_pressed() and KeyCode.LeftShift in get_keys_down():
-        for i in range(10):
-            enemies.append(
-            BasicEnemy(Vec2.splat(500), SceneManager.current_active_scene)
-            )
+        enemy_spawner.draw_warnings()
+        hud.draw(player)
+        
+        
+        key_hints.draw()
 
-    if KeyCode.Key0 in get_keys_pressed():
-        SceneManager.switch_scene(0, True)
-    if KeyCode.Key1 in get_keys_pressed():
-        SceneManager.switch_scene(1, True)
-    if KeyCode.Key2 in get_keys_pressed():
-        SceneManager.switch_scene(2, True)
-    if KeyCode.Key3 in get_keys_pressed():
-        SceneManager.switch_scene(3, True)
-    if KeyCode.Key4 in get_keys_pressed():
-        SceneManager.switch_scene(4, True)
-    if KeyCode.Key5 in get_keys_pressed():
-        SceneManager.switch_scene(5, True)
+        #no_nav_area.debug_draw()
+        #level_triggers.debug_draw()
+
+        if last_fps_update < time.time()-1:
+            last_fps_update = time.time()
+            fps  = get_fps()
+        
+        draw_text(f"{fps} fps",tileSize*2,tileSize*2,Color.WHITE,font_size=int(tileSize*1.3),font= fonts.get("bitcount_font"))
+        draw_text(f"{DEBUG.this_frame_draw_calls} draw calls",tileSize*2,tileSize*3,Color.WHITE,font_size=int(tileSize*0.8),font= fonts.get("bitcount_font"))
+        draw_text(f"player pos {player.hitbox.position.x:.1f}, {player.hitbox.position.y:.1f}", tileSize*2, tileSize*4, Color.WHITE, font_size=int(tileSize*0.8), font=fonts.get("bitcount_font"))
+        draw_text(f"{enemies.__len__()} entities",tileSize*2,tileSize*5,Color.WHITE,font_size=int(tileSize*0.8),font= fonts.get("bitcount_font"))
+        
+        next_frame(None) #since this is a purely 2D game, we do not require 3d collision.
+        examples.limit_fps(300)
 
 
-    # logic
-    if player.health <= 0.0:
-        val = menue.start(2)
-        if val:
-            quit_program()
-            print("Bye")
-            break
-        else:
-            SceneManager.switch_scene(SceneManager.current_active_scene, True)
-
-    player.update(no_nav_area)
-    level_triggers.check(player)
-    for enemy in enemies:
-        enemy.update(player, no_nav_area)
-
-    active_projectiles = []
-    for proj in enemy_projectiles:
-        should_destroy = proj.update(player, no_nav_area)
-        if not should_destroy:
-            active_projectiles.append(proj)
-    enemy_projectiles[:] = active_projectiles
-
-
-    DamageSystem.tick(enemies,enemy_projectiles, player, destructible_manager)
-
-    TwoDPhysics.tick(get_delta_time(), no_nav_area)
-    
-    enemy_spawner.tick(enemies, get_delta_time())
-    
-    # drawing
-    camera.set_camera()
-    background.draw()
-    for t in level_triggers.triggers: t.draw_visual()
-    middle_layer.draw(
-        [enemy.visual for enemy in enemies if enemy.active_scene == SceneManager.current_active_scene] +
-        [proj.visual for proj in enemy_projectiles if proj.active_scene == SceneManager.current_active_scene] +
-        [obj.visual for obj in destructible_manager.get(SceneManager.current_active_scene)],
-        player
-    )
-    enemy_spawner.draw_warnings()
-    hud.draw(player)
-    
-    
-    key_hints.draw()
-
-    #no_nav_area.debug_draw()
-    #level_triggers.debug_draw()
-
-    if last_fps_update < time.time()-1:
-        last_fps_update = time.time()
-        fps  = get_fps()
-    
-    draw_text(f"{fps} fps",tileSize*2,tileSize*2,Color.WHITE,font_size=int(tileSize*1.3),font= fonts.get("bitcount_font"))
-    draw_text(f"{DEBUG.this_frame_draw_calls} draw calls",tileSize*2,tileSize*3,Color.WHITE,font_size=int(tileSize*0.8),font= fonts.get("bitcount_font"))
-    draw_text(f"player pos {player.hitbox.position.x:.1f}, {player.hitbox.position.y:.1f}", tileSize*2, tileSize*4, Color.WHITE, font_size=int(tileSize*0.8), font=fonts.get("bitcount_font"))
-    draw_text(f"{enemies.__len__()} entities",tileSize*2,tileSize*5,Color.WHITE,font_size=int(tileSize*0.8),font= fonts.get("bitcount_font"))
-    
-    next_frame(None) #since this is a purely 2D game, we do not require 3d collision.
-    examples.limit_fps(300)
-
-# profiler.stop()
-# profiler.print()
+if __name__ == "__main__":
+    launch()
