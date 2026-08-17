@@ -238,7 +238,7 @@ class Player():
     sword_visual: Sprite
     playerSize: float
     speed: float = tileSize*15.0
-    max_hp: float = 10.0 **300 # ranging from 1.0 to 0.0
+    max_hp: float = 1.0 # ranging from 1.0 to 0.0
     health: float = max_hp
     walking_animation_index = 0
     animation_frames: list[Texture2D] = []
@@ -1003,6 +1003,7 @@ class EnemySpawner:
                 level.battle_phase += 1
                 level.current_phase_already_spawned = False
             elif len(enemies) == 0:
+                level.battle_phase += 1
                 pass # Trigger level end/win condition here later
 
     def _start_warning_phase(self, level: EnemySpawner.LevelConditions):
@@ -1064,6 +1065,18 @@ class EnemySpawner:
         if level and level.is_warning_phase:
             for marker in level.warning_markers:
                 marker.draw()
+    
+    def current_level_complete(self) -> bool:
+        current_scene = SceneManager.current_active_scene
+        level = self.levels.get(current_scene)
+        
+        if not level:
+            return True  # No level data means nothing to complete
+        
+        if level.battle_phase >= len(level.battle_spawns):
+            return True  # All waves completed
+        
+        return False  # Still in progress
 
 
 
@@ -1286,20 +1299,16 @@ class Trigger():
 
     @staticmethod
     def animate_transition(visual: Rectangle):
-        # Reference the function object via the Class name
-        fn = Trigger.animate_transition
+        if not hasattr(visual, "animation_index"): visual.animation_index = 0 #type: ignore
+        if not hasattr(visual, "last_animation_switch"): visual.last_animation_switch = time.time() #type: ignore
 
-        if not hasattr(fn, "animation_index"):
-            fn.animation_index = 0 #type: ignore
-        if not hasattr(fn, "last_animation_switch"):
-            fn.last_animation_switch = time.time() #type: ignore
+        if visual.animation_index >= 7: return #type: ignore
+        now = time.time()
+        if now - visual.last_animation_switch < 0.2: return #type: ignore
 
-        if fn.animation_index == 7: return #type: ignore
-        if fn.last_animation_switch > (time.time() - 0.2): return #type: ignore
-
-        fn.last_animation_switch = time.time() #type: ignore
-        fn.animation_index += 1 #type: ignore
-        visual.texture = textures.get(f"teleporter{fn.animation_index}") #type: ignore
+        visual.last_animation_switch = now #type: ignore
+        visual.animation_index += 1 #type: ignore
+        visual.texture = textures.get(f"teleporter{visual.animation_index}") #type: ignore
 
 
 class LevelTriggers():
@@ -1358,27 +1367,29 @@ class LevelTriggers():
                 Trigger(woods_trigger2,transition_to=3, player_pos=Vec2(tileSize*1,tileSize*16), name= "woods3")
             ]
         elif area == 3:
-            woods_trigger2= Rectangle(Vec2(tileSize*68, tileSize*16),0,Vec2(tileSize*3,tileSize*10), Color.INVISIBLE)
-            visual = Rectangle(Vec2(tileSize*68, tileSize*16),0,Vec2(tileSize*10,tileSize*10), Color.WHITE, textures.get("teleporter1"))
+            woods_trigger2= Rectangle(Vec2(tileSize*67, tileSize*17),0,Vec2(tileSize*5,tileSize*5), Color.INVISIBLE)
+            visual = Rectangle(Vec2(tileSize*65, tileSize*16),0,Vec2(tileSize*7,tileSize*7), Color.WHITE, textures.get("teleporter1"))
             self.triggers = [
                 Trigger(woods_trigger2,transition_to=4, player_pos=Vec2(tileSize*1,tileSize*20), name= "woods4", visual_box=visual)
             ]
         elif area == 4:
-            woods_trigger2= Rectangle(Vec2(tileSize*68, tileSize*23),0,Vec2(tileSize*3,tileSize*10), Color.INVISIBLE)
+            woods_trigger2= Rectangle(Vec2(tileSize*67, tileSize*21),0,Vec2(tileSize*5,tileSize*5), Color.INVISIBLE)
+            visual = Rectangle(Vec2(tileSize*65, tileSize*20),0,Vec2(tileSize*7,tileSize*7), Color.WHITE, textures.get("teleporter1"))
             self.triggers = [
-                Trigger(woods_trigger2,transition_to=5, player_pos=Vec2(tileSize*1,tileSize*20), name= "woods5")
+                Trigger(woods_trigger2,transition_to=5, player_pos=Vec2(tileSize*1,tileSize*20), name= "woods5", visual_box=visual)
             ]
     
     def set_trigger(self, name: str, active: bool):
         for trigger in self.triggers:
             if trigger.name == name:
                 trigger.active = active
-                if trigger.active == True and trigger.visual_box:
+                if trigger.active == True and trigger.visual_box and not trigger.visual_box.has_tick():
                     trigger.visual_box.tick( Trigger.animate_transition )
                 return
         raise BaseException("Trigger not found")
 
     def conditional_activate_triggers(self):
+        global enemy_spawner
         if self.current_level == 2:
             if destructible_manager.destructibles_level_2.__len__() == 0:
                 self.set_trigger("woods3", True)
@@ -1386,12 +1397,12 @@ class LevelTriggers():
             else:
                 self.set_trigger("woods3", False)
         elif self.current_level == 3:
-            if enemies.__len__() == 0:
+            if enemy_spawner.current_level_complete():
                 self.set_trigger("woods4", True)
             else:
                 self.set_trigger("woods4", False)
         elif self.current_level == 4:
-            if enemies.__len__() == 0:
+            if enemy_spawner.current_level_complete():
                 self.set_trigger("woods5", True)
             else:
                 self.set_trigger("woods5", False)
@@ -2020,6 +2031,7 @@ while True:
     # drawing
     camera.set_camera()
     background.draw()
+    for t in level_triggers.triggers: t.draw_visual()
     middle_layer.draw(
         [enemy.visual for enemy in enemies if enemy.active_scene == SceneManager.current_active_scene] +
         [proj.visual for proj in enemy_projectiles if proj.active_scene == SceneManager.current_active_scene] +
@@ -2032,8 +2044,8 @@ while True:
     
     key_hints.draw()
 
-    no_nav_area.debug_draw()
-    level_triggers.debug_draw()
+    #no_nav_area.debug_draw()
+    #level_triggers.debug_draw()
 
     if last_fps_update < time.time()-1:
         last_fps_update = time.time()
@@ -2044,9 +2056,8 @@ while True:
     draw_text(f"player pos {player.hitbox.position.x:.1f}, {player.hitbox.position.y:.1f}", tileSize*2, tileSize*4, Color.WHITE, font_size=int(tileSize*0.8), font=fonts.get("bitcount_font"))
     draw_text(f"{enemies.__len__()} entities",tileSize*2,tileSize*5,Color.WHITE,font_size=int(tileSize*0.8),font= fonts.get("bitcount_font"))
     
-    for t in level_triggers.triggers: t.draw_visual()
     next_frame(None) #since this is a purely 2D game, we do not require 3d collision.
-    #examples.limit_fps(300)
+    examples.limit_fps(300)
 
 # profiler.stop()
 # profiler.print()

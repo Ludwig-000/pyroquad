@@ -94,25 +94,43 @@ pub fn load_file(path: &str)-> PyResult<FileData>{
 }
 
 
+use std::thread;
+use std::time::Duration;
+use reqwest::blocking::Client;
+use pyo3::prelude::*;
+
+static CLIENT: LazyLock<Client> = LazyLock::new(|| {
+    Client::builder()
+        .user_agent("PyroquadEngine/1.0")
+        .pool_max_idle_per_host(32)
+        .build()
+        .expect("Failed to initialize HTTP client")
+});
 
 
 /// Downloads a file and returning it's raw data.
 #[gen_stub_pyfunction]
 #[pyfunction]
 pub fn download_file(url: &str) -> PyResult<FileData> {
+    let max_retries = 4;
+    let mut retry_delay = Duration::from_millis(100);
 
-    let resp = reqwest::blocking::get(url)
-        .map_err(|e| PError::BasicErr(format!("Request failed for {url}: {e}")))?;
+    for attempt in 1..=max_retries {
+        let request = CLIENT.get(url).send();
 
-    let resp = resp.error_for_status()
-        .map_err(|e| PError::BasicErr(format!("HTTP error for {url}: {e}")))?;
-    
-    let bytes = resp.bytes()
-        .map_err(|e| PError::BasicErr(format!("Failed to read body for {url}: {e}")))?;
-    
-    Ok(
-        FileData { bytes: bytes.to_vec() }
-    )
+        match request.and_then(|r| r.error_for_status()).and_then(|r| r.bytes()) {
+            Ok(bytes) => return Ok(FileData { bytes: bytes.to_vec() }),
+            Err(err) => {
+                if attempt == max_retries {
+                    return Err(PError::BasicErr(format!("Failed to download {url}: {err}")).into());
+                }
+                thread::sleep(retry_delay);
+                retry_delay *= 2;
+            }
+        }
+    }
+
+    Err(PError::BasicErr(format!("Download timed out for {url}")).into())
 }
 
 
@@ -123,20 +141,7 @@ pub fn download_file_future(url: &str) -> PyResult<FileDataFuture> {
     let url = url.to_string();
 
     std::thread::spawn(move || {
-        let result: PyResult<FileData> = (|| {
-            let resp = reqwest::blocking::get(&url)
-                .map_err(|e| PError::BasicErr(format!("Request failed for {url}: {e}")))?;
-
-            let resp = resp.error_for_status()
-                .map_err(|e| PError::BasicErr(format!("HTTP error for {url}: {e}")))?;
-            
-            let bytes = resp.bytes()
-                .map_err(|e| PError::BasicErr(format!("Failed to read body for {url}: {e}")))?;
-            
-            Ok(
-                FileData { bytes: bytes.to_vec() }
-            )
-        })();
+        let result: PyResult<FileData> = download_file(&url);
         let _ = tx.send(result); 
     });
 

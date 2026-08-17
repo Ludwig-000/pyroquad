@@ -70,14 +70,14 @@ fn recursively_extract_context(err: PError, mut context: String) -> (PError, Str
 fn handle_Symphonia_error(e: symphonia::core::errors::Error, extra: &str ) -> pyo3::PyErr {
     use symphonia::core::errors::*;
     match e {
-        Error::DecodeError(e) => PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(format!("Symphonia Decode Error: {e} || {extra}")),
-        Error::IoError(e) => PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(format!("Symphonia IoError: {e} || {extra}")),
-        Error::LimitError(e) => PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(format!("Symphonia LimitError: {e} || {extra}")),
-        Error::ResetRequired => PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(format!("Symphonia Reset Required Error || {extra}")),
+        Error::DecodeError(e) => PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(format!("Symphonia Decode Error: {e} {extra}")),
+        Error::IoError(e) => PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(format!("Symphonia IoError: {e} {extra}")),
+        Error::LimitError(e) => PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(format!("Symphonia LimitError: {e} {extra}")),
+        Error::ResetRequired => PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(format!("Symphonia Reset Required Error {extra}")),
         Error::SeekError(e) => {
             PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(format!("Symphonia SeekError: {:?} || {extra}",e))
         },
-        Error::Unsupported(e) => PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(format!("Symphonia UnsupportedError: {e} || {extra}")),
+        Error::Unsupported(e) => PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(format!("Symphonia UnsupportedError: {e} {extra}")),
 
     }
 }
