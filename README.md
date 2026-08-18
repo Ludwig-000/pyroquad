@@ -26,6 +26,17 @@ This is a Python game engine based on [macroquad](https://github.com/not-fl3/mac
 >    1) Prerequesites:
 >       - Python >= 3.9 ( python >= 3.14 is recommended)
 >       - Rust Compiler >= 1.85.0 (Required for the Rust 2024 Edition)
+>       - **System libraries if using Linux** (required for X11, OpenGL, and audio bindings):
+>         
+>         *Ubuntu / Debian:*
+>         `sudo apt-get install -y libasound2-dev libx11-dev libxi-dev libgl1-mesa-dev libxcursor-dev libxinerama-dev libxrandr-dev`
+>         
+>         *Fedora:*
+>         `sudo dnf install alsa-lib-devel libX11-devel libXi-devel mesa-libGL-devel libXcursor-devel libXinerama-devel libXrandr-devel`
+>         
+>         *Arch Linux:*
+>         `sudo pacman -S alsa-lib libx11 libxi mesa libxcursor libxinerama libxrandr`
+>
 >
 >    2) Create and activate a Python virtual environment:
 >
@@ -46,7 +57,7 @@ This is a Python game engine based on [macroquad](https://github.com/not-fl3/mac
 >
 >       Stub generation specifically requires python >= 3.10
 >
->    5) To compile:
+>    5) Compilation:
 >
 >       run  `maturin build --release --features abi_39` for python >= 3.9
 >
@@ -56,9 +67,9 @@ This is a Python game engine based on [macroquad](https://github.com/not-fl3/mac
 >
 >       *(Note: Older ABIs offer better backward compatibility, but newer versions yield performance improvements)*
 >
->    6) The generated package can be found at: `/target/wheels/`
->
->    7) Install the package: `pip install \path\to\your\file.whl --force-reinstall`
+>    6) Installation:
+>       - The generated package can be found at: `/target/wheels/`
+>       - Install the package: `pip install \path\to\your\file.whl --force-reinstall`
 
 
 

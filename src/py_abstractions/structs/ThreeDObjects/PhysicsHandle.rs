@@ -352,15 +352,9 @@ impl Physics{
     /// The engine assumes any key that still exists is also valid.
     /// Since a Physics handle can outlive it's Object of origin while still holding it's key,
     /// we need this check.
-    pub fn is_alive<'py>(&self, _py: Python<'py>)-> PyResult<()>{
-        let alive=  unsafe {
-            let weak_ptr = self.identity.as_ptr();
-            let target_ptr = ffi::PyWeakref_GetObject(weak_ptr);
-            !target_ptr.is_null() && target_ptr != ffi::Py_None()
-        };
-        if !alive {
+    pub fn is_alive<'py>(&self, _py: Python<'py>)-> PyResult<()>{;
+        if self.identity.bind(_py).upgrade().is_none() {
             return Err(PyErr::new::<pyo3::exceptions::PyException, _>(
-                
                 "The object, which this physics class is attatched to, no longer exists.
                 A Physics handle may not outlive the Object it is linked to."
 
