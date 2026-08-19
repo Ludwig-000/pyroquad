@@ -323,7 +323,7 @@ pub async fn proccess_commands_loop() {
             
             match command {
                 Command::GetCustomMouseState { sender }=>{
-                    let (x,y,inside) = unsafe {MouseInsideScreen::get_mouse_state_info()};
+                    let (x,y,inside) = unsafe { MouseInsideScreen::get_mouse_state_info() };
                     sender.send((x,y,inside));
                 }
                 Command::Camera2DToMatrix { cam, sender } =>{

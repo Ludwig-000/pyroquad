@@ -1,7 +1,10 @@
 use std::time::Duration;
 
+use crate::engine::PChannel::PChannel;
+use crate::limited_thread;
 use crate::py_abstractions::Textures_and_Images::Image;
 use crate::py_abstractions::Loading::FileData::FileData;
+use crate::py_abstractions::Textures_and_Images::Texture2D;
 use pyo3::prelude::*;
 use crate::engine::PChannel::PReceiver;
 use pyo3_stub_gen::derive::* ;
@@ -9,16 +12,8 @@ use pyo3::PyErr;
 
 /// TODO: maybe add a trait for internal future handling
 
-crate::generate_pfuture!(Image);
-crate::generate_pfuture!(FileData);
 
-//#[gen_stub_pyclass]
-//#[pyclass]
-//pub struct Timeout();
 
-//#[gen_stub_pyclass]
-//#[pyclass]
-//pub struct EmptyFuture();
 
 
 use pyo3::prelude::*;
@@ -174,7 +169,7 @@ pub struct Future {
 #[gen_stub_pymethods]
 #[pymethods]
 impl Future {
-    // Correctly returns PyResult<Option<EmptyFuture>> -> Stubs: Literal['EmptyFuture'] | None
+
     pub fn result(&self) -> PyResult<Option<EmptyFuture>> {
         let mut guard = self.future.lock()
             .map_err(|_| pyo3::exceptions::PyRuntimeError::new_err("Mutex poisoned"))?;
@@ -193,7 +188,6 @@ impl Future {
         }
     }
 
-    // Correctly returns PyResult<EmptyFuture> -> Stubs: Literal['EmptyFuture']
     pub fn result_nowait(&self) -> PyResult<EmptyFuture> {
         let mut guard = self.future.lock()
             .map_err(|_| pyo3::exceptions::PyRuntimeError::new_err("Mutex poisoned"))?;
@@ -262,4 +256,36 @@ pub trait  FutureTrait<TPlusTimeout, T> {
     fn result_nowait(&self)-> T;
     fn result_timeout(&self, timeout: Duration)-> TPlusTimeout;
     fn result(&self)-> Option<T>;
+}
+
+
+
+
+
+
+
+
+crate::generate_pfuture!(Image);
+crate::generate_pfuture!(FileData);
+
+#[gen_stub_pymethods]
+#[pymethods]
+impl FileDataFuture {
+
+    /// Chains a FileData Future into a Image Future.
+    pub fn to_image_future(&self) -> PyResult<ImageFuture> {
+
+        let (tx, rx) = PChannel::sync_channel(1);
+        let fut = limited_thread!(64, || {
+            let result = (|| -> PyResult<Image> {
+                let res = self.result_nowait()?;
+                let im = res.to_Image()?;
+                Ok(im)
+            })();
+            let _ = tx.send(result);
+        });
+
+        Ok(ImageFuture { future: std::sync::Mutex::new(Some(rx)), })
+    }
+
 }

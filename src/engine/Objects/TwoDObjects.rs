@@ -117,7 +117,7 @@ pub fn draw_rect(rect: &Rectangle) {
 
 fn draw_2D_geomentry(vertices: &[mq::Vertex], indices: &[u16], texture: Option<&mq::Texture2D>){
 
-        let context = unsafe {mq::get_internal_gl().quad_gl};
+        let context = unsafe { mq::get_internal_gl().quad_gl };
 
         context.texture(texture);
         context.draw_mode(mq::DrawMode::Triangles);

@@ -57,6 +57,8 @@ crate::implement_Drop3D!(Mesh);
 #[pymethods]
 impl Mesh{
 
+
+    #[pyo3(signature = (data, texture=None, collider_type = ColliderOptions::NONE()))]
     #[staticmethod]
     pub fn from_file_data(py: Python<'_>,data: FileData, texture: Option<Texture2D>,collider_type: ColliderOptions)-> PyResult<Py<Mesh>>{
         

@@ -49,7 +49,7 @@ def cube_gen()-> list[Cube]:
 
     return lis
 
-cubes  =cube_gen()
+cubes  = cube_gen()
 
 set_cursor_grab(True)
 show_mouse(False)
@@ -62,6 +62,8 @@ hdr = hdr1.to_texture()
 
 hdr2 = hdr1.to_texture()
 
+tex = load_file("cool_sky.jpg").to_Texture2D()
+asteroid = Mesh.from_file_data(FileData("./little_forest/Asteroid.glb"), texture=tex, collider_type=ColliderOptions.NONE)
 
 
 while True:
@@ -75,7 +77,14 @@ while True:
     
     draw_grid(100,10,Color.YELLOW,Color.CYAN)
     draw_cube(Vec3.ZERO,Vec3.ONE,Color.PURE_BLUE, None)
-    draw_all_objects()
+    #draw_all_objects()
+    
+    for cube in cubes:
+        asteroid.scale = cube.scale
+        asteroid.pos = cube.pos
+        asteroid.rot = cube.rot
+        asteroid.manually_draw_now()
+
     
     set_default_camera()
     draw_text(f"{get_fps()}",240,40,Color.GREEN)

@@ -46,7 +46,7 @@ impl<T> Drop for PSyncSender<T>{
 }
 impl<T> PReceiver<T> {
     pub fn recv(&self) -> Result<T, PChannelError> {
-        for _ in (0..500){
+        for _ in 0..500 {
             match self.inner.try_recv(){
                 Ok(result) => return result,
                 Err(_) => {}
@@ -58,12 +58,9 @@ impl<T> PReceiver<T> {
             return Err(PChannelError::DeadlockError)
         }
 
-        loop {
-            match self.inner.try_recv(){
-                Ok(result) => return result,
-                Err(_) => {}
-            }
-        }
+        self.inner.recv().unwrap_or(
+            Err(PChannelError::SendError)
+        )
     }
     pub fn try_recv(&self) -> Option<Result<T, PChannelError>>{
         self.inner.try_recv().ok()

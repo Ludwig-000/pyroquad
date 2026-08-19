@@ -110,6 +110,7 @@ __all__ = [
     "is_simulating_mouse_with_touch",
     "load_file",
     "load_file_future",
+    "loop_over_range",
     "measure_text",
     "mouse_inside_window",
     "next_frame",
@@ -313,7 +314,7 @@ class Camera2D:
         """
     def matrix(self) -> Mat4: ...
     @staticmethod
-    def from_display_rect(top_left_x: builtins.float, top_left_y: builtins.float, width: builtins.float, height: builtins.float) -> Camera2D:
+    def from_display_rect(x1: builtins.float, y1: builtins.float, x2: builtins.float, y2: builtins.float) -> Camera2D:
         r"""
         Creates a camera based on a Retangle.
         Takes A 2D rectangle, defined by its top-left corner, width and height.
@@ -5419,6 +5420,14 @@ class FileDataFuture:
         r"""
         waits for the result, with timeout in seconds.
         """
+    def to_image_future(self) -> ImageFuture:
+        r"""
+        Chains a FileData Future into a Image Future.
+        """
+    def to_texture2D_future(self) -> Texture2D:
+        r"""
+        Chains a FileData Future into a Image Future.
+        """
 
 @typing.final
 class Font:
@@ -5611,6 +5620,8 @@ class Loading:
         """
     @staticmethod
     def download_file(url: builtins.str) -> FileData: ...
+    @staticmethod
+    def download_file_future(url: builtins.str) -> FileDataFuture: ...
     @staticmethod
     def load_multiple_files(paths: dict) -> dict: ...
 
@@ -7664,7 +7675,7 @@ class Vec4:
 
 @typing.final
 class Vertex:
-    ...
+    def __new__(cls, position: Vec3, uv: Vec2, color: Color) -> Vertex: ...
 
 @typing.final
 class Comparison(enum.Enum):
@@ -8189,6 +8200,20 @@ def load_file(path: builtins.str) -> FileData:
     """
 
 def load_file_future(path: builtins.str) -> FileDataFuture: ...
+
+def loop_over_range(range: range, fun: typing.Callable) -> None:
+    r"""
+    Calls a function over a range.
+    
+    The current range step is passed as an argument:
+    
+    ```python
+    def fun(step: int):
+        print(step)
+    
+    loop_over_range(range(100), fun)
+    ```
+    """
 
 def measure_text(text: builtins.str, font: typing.Optional[Font], font_size: builtins.int, font_scale: builtins.float) -> TextDimensions: ...
 

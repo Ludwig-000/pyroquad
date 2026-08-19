@@ -12,10 +12,13 @@ use crate::py_abstractions::Text::TextDimensions;
 use crate::py_abstractions::Textures_and_Images::*;
 use crate::py_abstractions::structs::GLAM::Quat::Quat;
 use crate::py_abstractions::structs::TwoDObjects::collision::Shape;
+use crate::py_assert;
 use macroquad::prelude as mq;
 
 use pyo3::prelude::*;
 
+use pyo3::types::PyRange;
+use pyo3::types::PyRangeMethods;
 use pyo3_stub_gen::{derive::gen_stub_pyfunction};
 
 use crate::engine::PChannel;
@@ -705,3 +708,4 @@ pub fn batch_draw_shapes<'py>(input: Vec<Shape<'py>>){
         }
     }
 }
+

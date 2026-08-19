@@ -1,6 +1,8 @@
 use macroquad::{prelude as mq};
 use glam::{Vec3A, Mat3A, Quat, EulerRot};
 use gltf::mesh::util::ReadIndices;
+use glam::{ Mat4, Mat3, Vec3};
+
 
 pub struct Mesh{
     
@@ -37,42 +39,57 @@ impl Mesh{
         gl.geometry(&self.mesh.vertices, &self.mesh.indices);
     }
 
+
     pub fn load_from_gltf(data: &[u8], texture: Option<mq::Texture2D>) -> Result<Self, gltf::Error> {
         let (document, buffers, _) = gltf::import_slice(data)?;
 
         let mut vertices = Vec::new();
         let mut indices = Vec::new();
-        
-        // Default transforms
-        let mut final_pos = mq::vec3(0.0, 0.0, 0.0);
-        let mut final_scale = mq::vec3(1.0, 1.0, 1.0);
-        let mut final_rot = mq::vec3(0.0, 0.0, 0.0);
 
-        // 1. ITERATE NODES (Not Meshes) to get Position/Rotation/Scale
+        // 1. RESOLVE GLOBAL TRANSFORMS FOR ALL NODES
+        // glTF nodes have hierarchies. We need to calculate the global transformation 
+        // matrix for each node by multiplying it by its parent's matrix.
+        let mut global_transforms = vec![Mat4::IDENTITY; document.nodes().count()];
+        let mut stack = Vec::new();
+
+        // Start with root nodes from the default scene
+        if let Some(scene) = document.default_scene().or_else(|| document.scenes().next()) {
+            for node in scene.nodes() {
+                stack.push((node, Mat4::IDENTITY));
+            }
+        }
+
+        // Traverse the tree iteratively
+        while let Some((node, parent_transform)) = stack.pop() {
+            // Get local transform (gltf matrix is column-major)
+            let local_transform = Mat4::from_cols_array_2d(&node.transform().matrix());
+            let global_transform = parent_transform * local_transform;
+            
+            global_transforms[node.index()] = global_transform;
+
+            for child in node.children() {
+                stack.push((child, global_transform));
+            }
+        }
+
+        // 2. ITERATE NODES AND READ MESHES
         for node in document.nodes() {
             if let Some(mesh) = node.mesh() {
                 
-                // Get the transform of this node (Location from Blender)
-                let (trans, rot, scale) = node.transform().decomposed();
+                // Get the baked global transform we calculated for this specific node
+                let transform = global_transforms[node.index()];
                 
-                // Convert to Macroquad/Glam types to store in your struct
-                final_pos = mq::vec3(trans[0], trans[1], trans[2]);
-                final_scale = mq::vec3(scale[0], scale[1], scale[2]);
-                
-                // Convert Quaternion to Euler (if you really need Euler for your struct)
-                // Note: It is often better to store the Quat, but here is the Euler conversion:
-                let q = Quat::from_array(rot);
-                let (x, y, z) = q.to_euler(glam::EulerRot::XYZ);
-                final_rot = mq::vec3(x, y, z);
+                // To rotate normals correctly (especially if non-uniform scaling is used), 
+                // we need the inverse-transpose of the 3x3 portion of the transform matrix.
+                let normal_matrix = Mat3::from_mat4(transform).inverse().transpose();
 
                 for primitive in mesh.primitives() {
                     let reader = primitive.reader(|buffer| Some(&buffers[buffer.index()]));
 
-                    // --- MATERIAL COLOR FIX ---
-                    // Get the base color from the material (The BSDF Color)
+                    // --- MATERIAL COLOR ---
                     let material = primitive.material();
                     let pbr = material.pbr_metallic_roughness();
-                    let base_color_factor = pbr.base_color_factor(); // [r, g, b, a]
+                    let base_color_factor = pbr.base_color_factor();
                     let material_color = mq::Color::from_vec(mq::vec4(
                         base_color_factor[0],
                         base_color_factor[1],
@@ -80,25 +97,25 @@ impl Mesh{
                         base_color_factor[3],
                     ));
 
+                    // --- READ RAW POSITIONS ---
                     let positions_reader = match reader.read_positions() {
                         Some(iter) => iter,
                         None => continue,
                     };
+                    // Keep as raw arrays initially to easily convert to Glam vectors
+                    let positions: Vec<[f32; 3]> = positions_reader.collect(); 
 
-                    let positions: Vec<_> = positions_reader.map(mq::Vec3::from).collect();
-
-                    let normals: Vec<_> = reader
+                    // --- READ RAW NORMALS ---
+                    let normals: Vec<[f32; 3]> = reader
                         .read_normals()
-                        .map(|n| n.map(mq::Vec3::from).collect())
-                        .unwrap_or_else(|| vec![mq::vec3(0.0, 1.0, 0.0); positions.len()]);
+                        .map(|n| n.collect())
+                        .unwrap_or_else(|| vec![[0.0, 1.0, 0.0]; positions.len()]);
 
                     let tex_coords: Vec<_> = reader
                         .read_tex_coords(0)
                         .map(|uv| uv.into_f32().map(|v| mq::vec2(v[0], v[1])).collect())
                         .unwrap_or_else(|| vec![mq::vec2(0.0, 0.0); positions.len()]);
 
-                    // --- COLOR LOGIC UPDATE ---
-                    // Try to read vertex colors. If they don't exist, fill with MATERIAL color.
                     let colors: Vec<_> = reader
                         .read_colors(0)
                         .map(|c| {
@@ -106,22 +123,29 @@ impl Mesh{
                                 .map(|rgba| mq::Color::from_vec(mq::vec4(rgba[0], rgba[1], rgba[2], rgba[3])))
                                 .collect()
                         })
-                        .unwrap_or_else(|| vec![material_color; positions.len()]); // <--- Use material_color here
+                        .unwrap_or_else(|| vec![material_color; positions.len()]);
 
-                    
-                    // We need to offset the indices based on vertices we've already loaded
-                    // (in case there are multiple primitives/meshes)
                     let vertex_start = vertices.len() as u16;
 
+                    // --- APPLY TRANSFORMS TO VERTICES ---
                     for i in 0..positions.len() {
+                        // Position: Multiply local position by the global transformation matrix
+                        let local_pos = Vec3::from_array(positions[i]);
+                        let world_pos = transform.transform_point3(local_pos);
+
+                        // Normal: Multiply local normal by the normal matrix
+                        let local_normal = Vec3::from_array(normals[i]);
+                        let world_normal = normal_matrix.mul_vec3(local_normal).normalize_or_zero();
+
                         vertices.push(mq::Vertex {
-                            position: positions[i],
+                            position: mq::vec3(world_pos.x, world_pos.y, world_pos.z),
                             uv: tex_coords[i],
                             color: colors[i].into(),
-                            normal: normals[i].extend(0.0),
+                            normal: mq::vec3(world_normal.x, world_normal.y, world_normal.z).extend(0.0),
                         });
                     }
 
+                    // --- INDICES ---
                     if let Some(read_indices) = reader.read_indices() {
                         match read_indices {
                             ReadIndices::U16(iter) => indices.extend(iter.map(|i| i + vertex_start)),
@@ -133,10 +157,12 @@ impl Mesh{
             }
         }
 
+        // We bake the nodes into the vertices, so the structural transform of the overall 
+        // Macroquad "Mesh" container starts perfectly clean at the origin (0,0,0) at scale 1.
         Ok(Self {
-            scale: final_scale,
-            position: final_pos,
-            rotation: final_rot,
+            scale: mq::vec3(1.0, 1.0, 1.0),
+            position: mq::vec3(0.0, 0.0, 0.0),
+            rotation: mq::vec3(0.0, 0.0, 0.0),
             color: mq::WHITE,
             mesh: mq::Mesh {
                 vertices,
