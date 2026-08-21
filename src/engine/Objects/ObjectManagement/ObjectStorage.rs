@@ -5,7 +5,7 @@ use slotmap::*;
 use std::{sync::Arc, time::Instant};
 use crate::engine::Objects::PhysicsWorld::Rapier::{ObjectHandle, RapierWorld};
 
-use crate::engine::PChannel::PSyncSender;
+use crate::engine::PChannel::PSender;
 use macroquad::prelude as mq;
 
 #[derive(Clone)]
@@ -62,7 +62,7 @@ impl ObjectStorage {
     /// Returns the Oject key through the Sender, before the object has been created.
     pub fn quick_push<F: FnOnce()-> Object>(&mut self,
         collider: ColliderOptions,
-        sender: PSyncSender<ObjectKey>,
+        sender: PSender<ObjectKey>,
         weak_ref_handle: Py<PyWeakref>,
         object_factory: F){
 

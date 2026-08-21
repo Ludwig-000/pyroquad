@@ -43,7 +43,7 @@ impl Loading {
         use crate::{engine::{PChannel::PChannel, PThreading::limited_thread}, py_abstractions::Loading::Loading::does_file_exist};
 
 
-        let (tx, rx) = PChannel::sync_channel(1);
+        let (tx, rx) = PChannel::channel();
 
         limited_thread(crate::engine::PThreading::TaskType::DOWNLOAD, move || {
             let result = (|| -> PyResult<()> {
@@ -78,7 +78,7 @@ impl Loading {
     #[staticmethod]
     fn download_file_future(url: &str) -> PyResult<FileDataFuture> {
         use crate::{engine::{PChannel::PChannel, PThreading::limited_thread}, py_abstractions::Loading::Loading::does_file_exist};
-        let (tx, rx) = PChannel::sync_channel(1);
+        let (tx, rx) = PChannel::channel();
 
         let url = url.to_string();
         limited_thread(crate::engine::PThreading::TaskType::DOWNLOAD, move || {

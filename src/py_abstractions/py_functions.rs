@@ -305,7 +305,7 @@ pub fn clear_background(color: Color) {
 #[gen_stub_pyfunction]
 #[pyfunction]
 pub fn screen_dpi_scale() -> PyResult<f32>{
-    let (sender, receiver) = PChannel::PChannel::sync_channel(1);
+    let (sender, receiver) = PChannel::PChannel::channel();
     COMMAND_QUEUE.push(Command::ScreenDpiScale(sender));
     Ok(receiver.recv()?)
 }
@@ -320,7 +320,7 @@ pub fn screen_dpi_scale() -> PyResult<f32>{
 pub fn next_frame(py: Python<'_>, physics_step: Option<f32>) -> PyResult<()>{
     crate::py_abstractions::structs::ThreeDObjects::ObjectFunStorage::execute_all_functions(py)?;
     
-    let (sender, receiver) = PChannel::PChannel::sync_channel(1);
+    let (sender, receiver) = PChannel::PChannel::channel();
     COMMAND_QUEUE.push(Command::NextFrame { physics_step, sender });
 
     receiver.recv()?;
@@ -337,7 +337,7 @@ pub fn next_frame(py: Python<'_>, physics_step: Option<f32>) -> PyResult<()>{
 pub fn draw_text(text: String, x: f32, y: f32, color: Color, font_size: u16,
     font: Option<Font>, font_scale: f32, font_scale_aspect: f32, rotation: f32) -> PyResult<TextDimensions>{
 
-    let (sender, receiver) = PChannel::PChannel::sync_channel(1);
+    let (sender, receiver) = PChannel::PChannel::channel();
     COMMAND_QUEUE.push(Command::DrawText { 
         text, 
         x, 
@@ -350,7 +350,7 @@ pub fn draw_text(text: String, x: f32, y: f32, color: Color, font_size: u16,
 #[gen_stub_pyfunction]
 #[pyfunction]
 pub fn get_text_center(text: String, font: Option<Font>, font_size: u16, font_scale: f32, rotation: f32) -> PyResult<Vec2>{
-    let (sender, receiver) = PChannel::PChannel::sync_channel(1);
+    let (sender, receiver) = PChannel::PChannel::channel();
     COMMAND_QUEUE.push(Command::GetTextCenter { text, font: font.map(Into::into), font_size, font_scale, rotation, sender });
 
     Ok(receiver.recv()?.into())
@@ -450,7 +450,7 @@ pub fn get_delta_time() -> f32 {
 #[gen_stub_pyfunction]
 #[pyfunction]
 pub fn get_screen_data() -> PyResult<Image> {
-    let (tx, rx) = PChannel::PChannel::sync_channel(1);
+    let (tx, rx) = PChannel::PChannel::channel();
     COMMAND_QUEUE.push( Command::GetScreenData { sender: tx } );
 
     let res = rx.recv()?;
@@ -522,7 +522,7 @@ pub fn get_keys_down() -> HashSet<KeyCode> {
 #[gen_stub_pyfunction]
 #[pyfunction]
 pub fn is_quit_requested() -> PyResult<bool> {
-    let (sender, receiver) = PChannel::PChannel::sync_channel(1);
+    let (sender, receiver) = PChannel::PChannel::channel();
     COMMAND_QUEUE.push( Command::IsQuitRequested(sender));
     Ok(receiver.recv()?)
 }

@@ -43,7 +43,7 @@ pub fn load_file(path: &str)-> PyResult<FileData>{
 #[gen_stub_pyfunction]
 #[pyfunction]
 pub fn load_file_future(path: &str) -> PyResult<FileDataFuture> {
-    let (tx, rx) = PChannel::sync_channel(1);
+    let (tx, rx) = PChannel::channel();
     let path_str = path.to_string();
 
     #[cfg(not(any(target_arch = "wasm32", target_os = "ios")))]
@@ -134,7 +134,7 @@ pub fn download_file(url: &str) -> PyResult<FileData> {
 #[gen_stub_pyfunction]
 #[pyfunction]
 pub fn download_file_future(url: &str) -> PyResult<FileDataFuture> {
-    let (tx, rx) = PChannel::sync_channel(1);
+    let (tx, rx) = PChannel::channel();
     let url = url.to_string();
 
     std::thread::spawn(move || {

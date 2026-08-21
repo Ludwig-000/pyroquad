@@ -82,7 +82,7 @@ impl Camera2D {
     /// Returns the world space position for a 2d camera screen space position.
     /// Point is a screen space position, often mouse x and y.
     pub fn screen_to_world(&self, point: Vec2) -> PyResult<Vec2>{
-        let (sender, receiver) = PChannel::sync_channel(1);
+        let (sender, receiver) = PChannel::channel();
         COMMAND_QUEUE.push( Command::Camera2DScreenToWorld { cam:  self.clone().into(), point: point.into(), sender } );
         Ok(receiver.recv()?.into())
     }
@@ -90,14 +90,14 @@ impl Camera2D {
     /// Returns the screen space position for a 2d camera world space position.
     /// Screen position in window space - from (0, 0) to (screen_width, screen_height()).
     pub fn world_to_screen(&self, point: Vec2) -> PyResult<Vec2>{
-        let (sender, receiver) = PChannel::sync_channel(1);
+        let (sender, receiver) = PChannel::channel();
         COMMAND_QUEUE.push( Command::Camera2DWorldToScreen { cam:  self.clone().into(), point: point.into(), sender } );
         Ok(receiver.recv()?.into())
     }
 
 
     pub fn matrix(&self) -> PyResult<Mat4>{
-        let (sender, receiver) = PChannel::sync_channel(1);
+        let (sender, receiver) = PChannel::channel();
         COMMAND_QUEUE.push( Command::Camera2DToMatrix { cam: self.clone().into() , sender });
         Ok(receiver.recv()?.into())
     }
@@ -171,7 +171,7 @@ pub fn pop_camera_state()  {
 #[gen_stub_pyfunction]
 #[pyfunction]
 pub fn camera_font_scale(world_font_size: f32)-> PyResult<(u16, f32, f32)>{
-    let (sender, reciever) =  PChannel::sync_channel(1);
+    let (sender, reciever) =  PChannel::channel();
     COMMAND_QUEUE.push(Command::CameraFontScale { world_font_size, sender });
     Ok(reciever.recv()?)
 }

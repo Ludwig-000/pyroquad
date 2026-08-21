@@ -42,7 +42,7 @@ impl Physics{
 
     pub fn get_linear_velocity(&self, py: Python<'_>) -> PyResult<Vec3> {
         self.is_alive(py)?;
-        let (tx, rx) = PChannel::PChannel::sync_channel(1);
+        let (tx, rx) = PChannel::PChannel::channel();
         COMMAND_QUEUE.push(
             Command::PhysicsEnum(
                 PhysicsEnum::GetLinearVelocity(tx), self.handle
@@ -65,7 +65,7 @@ impl Physics{
 
     pub fn get_angular_velocity(&self, py: Python<'_>) -> PyResult<Vec3>{
         self.is_alive(py)?;
-        let (tx, rx) = PChannel::PChannel::sync_channel(1);
+        let (tx, rx) = PChannel::PChannel::channel();
         COMMAND_QUEUE.push(
             Command::PhysicsEnum(
                 PhysicsEnum::GetAngularVelocity(tx), self.handle
@@ -221,7 +221,7 @@ impl Physics{
 
     pub fn is_ccd_enabled(&self, py: Python<'_>) -> PyResult<bool>{ 
         self.is_alive(py)?;
-        let (tx, rx) = PChannel::PChannel::sync_channel(1);
+        let (tx, rx) = PChannel::PChannel::channel();
         COMMAND_QUEUE.push(
             Command::PhysicsEnum(
                 PhysicsEnum::IsCcdEnabled(tx), self.handle
@@ -243,7 +243,7 @@ impl Physics{
 
     pub fn get_rotation_locks(&self, py: Python<'_>) -> PyResult<BVec3> {
         self.is_alive(py)?;
-        let (tx, rx) = PChannel::PChannel::sync_channel(1);
+        let (tx, rx) = PChannel::PChannel::channel();
         COMMAND_QUEUE.push(
             Command::PhysicsEnum(
                 PhysicsEnum::GetRotationLocks(tx),
@@ -256,7 +256,7 @@ impl Physics{
 
     pub fn get_gravity_scale(&self, py: Python<'_>) -> PyResult<f32> {
         self.is_alive(py)?;
-        let (tx, rx) = PChannel::PChannel::sync_channel(1);
+        let (tx, rx) = PChannel::PChannel::channel();
         COMMAND_QUEUE.push(
             Command::PhysicsEnum(
                 PhysicsEnum::GetGravityScale(tx),
@@ -269,7 +269,7 @@ impl Physics{
 
     pub fn get_mass(&self, py: Python<'_>) -> PyResult<f32> {
         self.is_alive(py)?;
-        let (tx, rx) = PChannel::PChannel::sync_channel(1);
+        let (tx, rx) = PChannel::PChannel::channel();
         COMMAND_QUEUE.push(
             Command::PhysicsEnum(
                 PhysicsEnum::GetMass(tx),
@@ -282,7 +282,7 @@ impl Physics{
 
     pub fn get_friction(&self, py: Python<'_>) -> PyResult<f32> {
         self.is_alive(py)?;
-        let (tx, rx) = PChannel::PChannel::sync_channel(1);
+        let (tx, rx) = PChannel::PChannel::channel();
         COMMAND_QUEUE.push(
             Command::PhysicsEnum(
                 PhysicsEnum::GetFriction(tx),
@@ -295,7 +295,7 @@ impl Physics{
 
     pub fn get_restitution(&self, py: Python<'_>) -> PyResult<f32> {
         self.is_alive(py)?;
-        let (tx, rx) = PChannel::PChannel::sync_channel(1);
+        let (tx, rx) = PChannel::PChannel::channel();
         COMMAND_QUEUE.push(
             Command::PhysicsEnum(
                 PhysicsEnum::GetRestitution(tx),
@@ -308,7 +308,7 @@ impl Physics{
 
     pub fn get_density(&self, py: Python<'_>) -> PyResult<f32> {
         self.is_alive(py)?;
-        let (tx, rx) = PChannel::PChannel::sync_channel(1);
+        let (tx, rx) = PChannel::PChannel::channel();
         COMMAND_QUEUE.push(
             Command::PhysicsEnum(
                 PhysicsEnum::GetDensity(tx),
@@ -321,7 +321,7 @@ impl Physics{
 
     pub fn get_linear_damping(&self, py: Python<'_>) -> PyResult<f32> {
         self.is_alive(py)?;
-        let (tx, rx) = PChannel::PChannel::sync_channel(1);
+        let (tx, rx) = PChannel::PChannel::channel();
         COMMAND_QUEUE.push(
             Command::PhysicsEnum(
                 PhysicsEnum::GetLinearDamping(tx),
@@ -334,7 +334,7 @@ impl Physics{
 
     pub fn get_angular_damping(&self, py: Python<'_>) -> PyResult<f32> {
         self.is_alive(py)?;
-        let (tx, rx) = PChannel::PChannel::sync_channel(1);
+        let (tx, rx) = PChannel::PChannel::channel();
         COMMAND_QUEUE.push(
             Command::PhysicsEnum(
                 PhysicsEnum::GetAngularDamping(tx),
@@ -371,11 +371,11 @@ pub enum PhysicsEnum {
     // --- Velocity Management ---
     SetLinearVelocity(Vec3),
     /// Returns current Vec3 velocity
-    GetLinearVelocity( PChannel::PSyncSender<Vec3>),
+    GetLinearVelocity( PChannel::PSender<Vec3>),
     
     SetAngularVelocity(Vec3),
     /// Returns current Vec3 angular velocity
-    GetAngularVelocity( PChannel::PSyncSender<Vec3>),
+    GetAngularVelocity( PChannel::PSender<Vec3>),
 
     // --- External Influences ---
     ApplyImpulse(Vec3),
@@ -389,29 +389,29 @@ pub enum PhysicsEnum {
     LockRotationYAxes(bool),
     LockRotationZAxes(bool),
     /// Returns (x, y, z) lock status as a tuple or BVec3 equivalent
-    GetRotationLocks( PChannel::PSyncSender<BVec3>),
+    GetRotationLocks( PChannel::PSender<BVec3>),
 
     // --- Mass & Material Properties ---
     SetGravityScale(f32),
-    GetGravityScale( PChannel::PSyncSender<f32>),
+    GetGravityScale( PChannel::PSender<f32>),
     
-    GetMass( PChannel::PSyncSender<f32>),
+    GetMass( PChannel::PSender<f32>),
     
     SetFriction(f32),
-    GetFriction( PChannel::PSyncSender<f32>),
+    GetFriction( PChannel::PSender<f32>),
     
     SetRestitution(f32),
-    GetRestitution( PChannel::PSyncSender<f32>),
+    GetRestitution( PChannel::PSender<f32>),
     
     SetDensity(f32, ),
-    GetDensity( PChannel::PSyncSender<f32>),
+    GetDensity( PChannel::PSender<f32>),
 
     SetLinearDamping(f32),
-    GetLinearDamping( PChannel::PSyncSender<f32>),
+    GetLinearDamping( PChannel::PSender<f32>),
     
     SetAngularDamping(f32),
-    GetAngularDamping( PChannel::PSyncSender<f32>),
+    GetAngularDamping( PChannel::PSender<f32>),
 
     EnableCcd(bool),
-    IsCcdEnabled( PChannel::PSyncSender<bool>),
+    IsCcdEnabled( PChannel::PSender<bool>),
 }

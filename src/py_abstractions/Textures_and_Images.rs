@@ -8,7 +8,7 @@ use std::sync::Arc;
 use crate::engine::PChannel::PChannel;
 use crate::engine::CoreLoop::COMMAND_QUEUE;
 use crate::engine::CoreLoop::Command;
-use crate::engine::PChannel::PSyncSender;
+use crate::engine::PChannel::PSender;
 use crate::py_abstractions::structs::GLAM::Vec2::Vec2;
 use crate::py_assert;
 use pyo3::exceptions::PyValueError;use pyo3_stub_gen::derive::*;
@@ -291,7 +291,7 @@ impl Texture2D {
         };
         let imagePointer = Arc::new(inner_im);
         
-        let (sender, receiver) = PChannel::sync_channel(1);
+        let (sender, receiver) = PChannel::channel();
         
         let command = 
             Command::TexImEnum(EngineTexImgEnum::TextureImageToTexture { im: imagePointer.clone(), sender});
@@ -309,7 +309,7 @@ impl Texture2D {
 
     #[staticmethod]
     pub fn empty()-> PyResult<Texture2D>{
-        let (sy,rx) = PChannel::sync_channel(1);
+        let (sy,rx) = PChannel::channel();
         let c = EngineTexImgEnum::TextureEmpty(sy);
         COMMAND_QUEUE.push(Command::TexImEnum(c));
         let res =rx.recv()?;
@@ -327,7 +327,7 @@ impl Texture2D {
     /// ```
     #[staticmethod]
     pub fn from_rgba8(width: u16, height: u16, bytes: Vec<u8>)-> PyResult<Texture2D>{
-        let (sy,rx) = PChannel::sync_channel(1);
+        let (sy,rx) = PChannel::channel();
         let c = EngineTexImgEnum::TextureFromRGBA { width, height, bytes, sender: sy };
         COMMAND_QUEUE.push(Command::TexImEnum(c));
         let res =rx.recv()?;
@@ -362,7 +362,7 @@ impl Texture2D {
 
     /// Returns the width of this texture.
     pub fn width(&self) -> PyResult<f32> {
-        let (sy,rx) = PChannel::sync_channel(1);
+        let (sy,rx) = PChannel::channel();
         let c = EngineTexImgEnum::TextureWidth { tex: (*self.texture).clone(), sender: sy };
         COMMAND_QUEUE.push(Command::TexImEnum(c));
         Ok(rx.recv()?)
@@ -370,14 +370,14 @@ impl Texture2D {
 
     /// Returns the height of this texture.
     pub fn height(&self) -> PyResult<f32> {
-        let (sy,rx) = PChannel::sync_channel(1);
+        let (sy,rx) = PChannel::channel();
         let c = EngineTexImgEnum::TextureHeight{ tex: (*self.texture).clone(), sender: sy };
         COMMAND_QUEUE.push(Command::TexImEnum(c));
         Ok(rx.recv()?)
     }
     /// Returns the size of this texture
     pub fn size(&self) -> PyResult<Vec2> {
-        let (sy,rx) = PChannel::sync_channel(1);
+        let (sy,rx) = PChannel::channel();
         let c = EngineTexImgEnum::TextureSize{ tex: (*self.texture).clone(), sender: sy };
         COMMAND_QUEUE.push(Command::TexImEnum(c));
         Ok(rx.recv()?.into())
@@ -403,7 +403,7 @@ impl Texture2D {
     ///
     /// This operation can be expensive.
     pub fn get_texture_data(&self) -> PyResult<Image> {
-        let (sy,rx) = PChannel::sync_channel(1);
+        let (sy,rx) = PChannel::channel();
         let c = EngineTexImgEnum::TextureGetTexData{ tex: (*self.texture).clone(), sender: sy };
         COMMAND_QUEUE.push(Command::TexImEnum(c));
         let res =rx.recv()?;
@@ -466,12 +466,12 @@ impl From<Texture2D> for mq::Texture2D {
 pub enum EngineTexImgEnum{
     TextureImageToTexture{
         im: Arc<mq::Image>,
-        sender: PSyncSender<mq::Texture2D>
+        sender: PSender<mq::Texture2D>
     },
-    TextureEmpty(PSyncSender<mq::Texture2D>),
+    TextureEmpty(PSender<mq::Texture2D>),
     TextureFromRGBA{
         width: u16, height: u16, bytes: Vec<u8>,
-        sender: PSyncSender<mq::Texture2D>
+        sender: PSender<mq::Texture2D>
     },
     TextureUpdate{
         tex: mq::Texture2D,
@@ -491,15 +491,15 @@ pub enum EngineTexImgEnum{
     },
     TextureWidth{
         tex: mq::Texture2D,
-        sender: PSyncSender<f32>,
+        sender: PSender<f32>,
     },
     TextureHeight{
         tex: mq::Texture2D,
-        sender: PSyncSender<f32>,
+        sender: PSender<f32>,
     },
     TextureSize{
         tex: mq::Texture2D,
-        sender: PSyncSender<mq::Vec2>,
+        sender: PSender<mq::Vec2>,
     },
     TextureSetFilter{
         filter: mq::FilterMode,
@@ -508,7 +508,7 @@ pub enum EngineTexImgEnum{
     TextureGrabScreen(mq::Texture2D),
     TextureGetTexData{
         tex: mq::Texture2D,
-        sender: PSyncSender<mq::Image>
+        sender: PSender<mq::Image>
     }
 
 }

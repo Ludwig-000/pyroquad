@@ -109,7 +109,7 @@ since object.pos returns a copy of its position, one has to write:
                         return Ok(cache.position.into())
                     }
             
-                    let (sender, receiver) = PChannel::sync_channel(1);
+                    let (sender, receiver) = PChannel::channel();
                     let command = Command::GetObjectPos { key: self.key, sender };
                     COMMAND_QUEUE.push(command);
                     Ok(receiver.recv()?.into())
@@ -134,7 +134,7 @@ since " $name ".rot returns a copy of its rotation, one has to write:
                         return Ok(cache.rotation.into())
                     }
             
-                    let (sender, receiver) = PChannel::sync_channel(1);
+                    let (sender, receiver) = PChannel::channel();
                     let command = Command::GetObjectRotation{ key: self.key, sender };
                     COMMAND_QUEUE.push(command);
                     Ok(receiver.recv()?.into())
@@ -159,7 +159,7 @@ since " $name ".scale returns a copy of its scale, one has to write:
                         return Ok(cache.scale.into())
                     }
             
-                    let (sender, receiver) = PChannel::sync_channel(1);
+                    let (sender, receiver) = PChannel::channel();
                     let command = Command::GetObjectScale { key: self.key, sender };
                     COMMAND_QUEUE.push(command);
                     Ok(receiver.recv()?.into())
@@ -254,7 +254,7 @@ Example:
 ]               
                 
                 pub fn check_collision<'py>(&self, py: Python<'py> )-> PyResult<Vec<Objct<'py>>>{
-                    let (sender, receiver) = PChannel::sync_channel(1);
+                    let (sender, receiver) = PChannel::channel();
                     let command = Command::GetColissionObjects { key: self.key, sender };
                     COMMAND_QUEUE.push(command);
                     let res: Vec<std::sync::Arc<Py<PyWeakref>>> = receiver.recv()?;
@@ -272,7 +272,7 @@ Example:
 
                 /// Checks if the object collides with any other 3D object.
                 pub fn does_collide(&self)-> PyResult<bool>{
-                    let (sender, receiver) = PChannel::sync_channel(1);
+                    let (sender, receiver) = PChannel::channel();
                     let command = Command::DoesObjectCollide { key: self.key, sender };
                     COMMAND_QUEUE.push(command);
                     Ok(receiver.recv()?)

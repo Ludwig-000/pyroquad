@@ -16,7 +16,7 @@ pub enum PChannelError{
 pub struct PChannel<T> {
     _marker: PhantomData<T>,
 }
-pub struct PSyncSender<T> {
+pub struct PSender<T> {
     inner: mpsc::Sender<Result<T, PChannelError>>,
 }
 pub struct PReceiver<T> {
@@ -24,22 +24,22 @@ pub struct PReceiver<T> {
 }
 
 impl<T> PChannel<T>{
-    pub fn sync_channel(bound: usize) -> (PSyncSender<T>, PReceiver<T>) {
+    pub fn channel() -> (PSender<T>, PReceiver<T>) {
         let (tx, rx) = mpsc::channel();
         (
-            PSyncSender { inner: tx },
+            PSender { inner: tx },
             PReceiver { inner: rx }
         )
     }
 }
 
 
-impl<T> PSyncSender<T> {
+impl<T> PSender<T> {
     pub fn send(&self, t: T) -> Result<(), SendError<Result<T, PChannelError>>> {
         self.inner.send(Ok(t))
     }
 }
-impl<T> Drop for PSyncSender<T>{
+impl<T> Drop for PSender<T>{
     fn drop(&mut self) {
         if std::thread::panicking() {
             let _ = self.inner.send(Err(PChannelError::PanicError));

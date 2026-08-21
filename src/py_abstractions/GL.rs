@@ -139,7 +139,7 @@ impl InternalGL{
     // }
     #[staticmethod]
     pub fn get_viewport_matrix()-> PyResult<Mat4>{
-        let (tx,rx) = PChannel::sync_channel(1);
+        let (tx,rx) = PChannel::channel();
         let c  = GlEnum::GetViewportMatrix(tx);
         COMMAND_QUEUE.push( Command::GlEnum(c));
 
@@ -147,7 +147,7 @@ impl InternalGL{
     }
     #[staticmethod]
     pub fn get_viewport()-> PyResult<(i32,i32,i32,i32)>{
-        let (tx,rx) = PChannel::sync_channel(1);
+        let (tx,rx) = PChannel::channel();
         let c  = GlEnum::GetViewport(tx);
         COMMAND_QUEUE.push( Command::GlEnum(c));
 
@@ -155,7 +155,7 @@ impl InternalGL{
     }
     #[staticmethod]
     pub fn is_depth_test_enabled()-> PyResult<bool>{
-        let (tx,rx) = PChannel::sync_channel(1);
+        let (tx,rx) = PChannel::channel();
         let c  = GlEnum::IsDephTestEnabled(tx);
         COMMAND_QUEUE.push( Command::GlEnum(c));
 
@@ -229,9 +229,9 @@ pub enum GlEnum{
     DepthTest(bool),
     DrawMode(DrawMode),
     Geometry(Geometry),
-    GetViewportMatrix(PSyncSender<Mat4>),
-    GetViewport(PSyncSender<(i32,i32,i32,i32)>),
-    IsDephTestEnabled(PSyncSender<bool>),
+    GetViewportMatrix(PSender<Mat4>),
+    GetViewport(PSender<(i32,i32,i32,i32)>),
+    IsDephTestEnabled(PSender<bool>),
     Pipeline(Option<GlPipeline>),
     PopModelMatrx,
     PushModelMatrix(Mat4),

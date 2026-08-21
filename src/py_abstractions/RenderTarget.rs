@@ -46,7 +46,7 @@ impl From<&RenderTarget> for mq::RenderTarget{
 #[gen_stub_pyfunction]
 #[pyfunction]
 pub fn render_target_msaa(width: u32, height: u32) -> PyResult<RenderTarget> {
-    let (tx, rx) = PChannel::sync_channel(1);
+    let (tx, rx) = PChannel::channel();
     COMMAND_QUEUE.push( Command::RenderTargetMsaa{width,height,sender: tx} );
 
     let render_target = rx.recv()?;
@@ -59,7 +59,7 @@ pub fn render_target_msaa(width: u32, height: u32) -> PyResult<RenderTarget> {
 #[pyo3(signature = (width, height, params = None))]
 pub fn render_target(width: u32, height: u32, params: Option<RenderTargetParams>) -> PyResult<RenderTarget> {
 
-    let (sender, receiver) = PChannel::sync_channel(1);
+    let (sender, receiver) = PChannel::channel();
 
     COMMAND_QUEUE.push( Command::RenderTargetEx { width, height, params: params.map(Into::into), sender});
 

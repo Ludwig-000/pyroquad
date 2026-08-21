@@ -28,7 +28,7 @@ use crate::engine::Objects::Pill::Pill;
 use crate::engine::Objects::Sphere::Sphere;
 use crate::engine::Objects::TwoDObjects::draw_circle;
 use crate::engine::Objects::TwoDObjects::draw_rect;
-use crate::engine::PChannel::PSyncSender;
+use crate::engine::PChannel::PSender;
 use crate::engine::SHADERS::shader_manager as sm;
 use crate::engine::PError::PError;
 use crate::engine::PArc::PArc;
@@ -50,20 +50,20 @@ use crate::engine::Objects::ObjectManagement::ObjectManagement;
 
 pub enum Command {
     GetCustomMouseState{
-        sender: PSyncSender<(f32,f32,bool)>,
+        sender: PSender<(f32,f32,bool)>,
     },
-    Camera2DWorldToScreen{cam: mq::Camera2D, point: mq::Vec2, sender: PSyncSender<mq::Vec2>},
-    Camera2DScreenToWorld{cam: mq::Camera2D, point: mq::Vec2, sender: PSyncSender<mq::Vec2>},
-    Camera2DToMatrix{cam: mq::Camera2D, sender: PSyncSender<mq::Mat4>},
-    MeasureText{text: String, font: Option<mq::Font>, font_size: u16, font_scale: f32, sender: PSyncSender<TextDimensions>},
+    Camera2DWorldToScreen{cam: mq::Camera2D, point: mq::Vec2, sender: PSender<mq::Vec2>},
+    Camera2DScreenToWorld{cam: mq::Camera2D, point: mq::Vec2, sender: PSender<mq::Vec2>},
+    Camera2DToMatrix{cam: mq::Camera2D, sender: PSender<mq::Mat4>},
+    MeasureText{text: String, font: Option<mq::Font>, font_size: u16, font_scale: f32, sender: PSender<TextDimensions>},
     BuildTextureAtlas,
     SetPcAssetFolder(String),
-    Touches(PSyncSender<Vec<Touch>>),
-    TouchesLocal(PSyncSender<Vec<Touch>>),
+    Touches(PSender<Vec<Touch>>),
+    TouchesLocal(PSender<Vec<Touch>>),
     SimulateMouseWithTouch(bool),
     LoadTTFFOnt{
         path: String,
-        sender: PSyncSender<Result<mq::Font, PError>>
+        sender: PSender<Result<mq::Font, PError>>
     },
     PopulateFontCache{
         font: mq::Font, characters: Vec<char>, size: u16
@@ -74,13 +74,13 @@ pub enum Command {
     },
     LoadTTFFontFromBytes{
         bytes: Vec<u8>,
-        sender: PSyncSender<Result<mq::Font, PError>>
+        sender: PSender<Result<mq::Font, PError>>
     },
     RequestNewScreenSize{
         width: f32,
         height: f32
     },
-    IsQuitRequested(PSyncSender<bool>),
+    IsQuitRequested(PSender<bool>),
     PreventQuit,
     SetFullscreen(bool),
 
@@ -92,13 +92,13 @@ pub enum Command {
     ManuallyStepPhysics(f32),
     SetCollisionForObject{key: ObjectKey, collider: ColliderOptions},
     GetColissionObjects{
-        key: ObjectKey, sender: PChannel::PSyncSender<Vec<Arc<Py<PyWeakref>>>>,
+        key: ObjectKey, sender: PChannel::PSender<Vec<Arc<Py<PyWeakref>>>>,
     },
     DrawAll3DObjects(),
     DrawObjectNow(ObjectKey),
     DoesObjectCollide{
         key: ObjectKey,
-        sender: PSyncSender<bool>,
+        sender: PSender<bool>,
     },
     SetDrawEachFrame{
         key: ObjectKey,
@@ -107,9 +107,9 @@ pub enum Command {
     DeleteObject{
         key: ObjectKey, 
     },
-    GetObjectScale{ key: ObjectKey, sender: PChannel::PSyncSender<mq::Vec3> },
-    GetObjectPos{ key: ObjectKey, sender: PChannel::PSyncSender<mq::Vec3> },
-    GetObjectRotation{ key: ObjectKey, sender: PChannel::PSyncSender<mq::Vec3> },
+    GetObjectScale{ key: ObjectKey, sender: PChannel::PSender<mq::Vec3> },
+    GetObjectPos{ key: ObjectKey, sender: PChannel::PSender<mq::Vec3> },
+    GetObjectRotation{ key: ObjectKey, sender: PChannel::PSender<mq::Vec3> },
 
     SetObjectScale{ key: ObjectKey, scale: mq::Vec3 },
     SetObjectPos{ key: ObjectKey, position: mq::Vec3 },
@@ -123,7 +123,7 @@ pub enum Command {
         texture: Option<mq::Texture2D>,
         collider: ColliderOptions,
         weak_ref: Py<PyWeakref>,
-        sender: PChannel::PSyncSender<ObjectKey>,
+        sender: PChannel::PSender<ObjectKey>,
     },
     CreateSphere{
         size: mq::Vec3,
@@ -133,7 +133,7 @@ pub enum Command {
         texture: Option<mq::Texture2D>,
         collider: ColliderOptions,
         weak_ref: Py<PyWeakref>,
-        sender: PChannel::PSyncSender<ObjectKey>,
+        sender: PChannel::PSender<ObjectKey>,
     },
     CreatePill{
         size: mq::Vec3,
@@ -143,7 +143,7 @@ pub enum Command {
         texture: Option<mq::Texture2D>,
         collider: ColliderOptions,
         weak_ref: Py<PyWeakref>,
-        sender: PChannel::PSyncSender<ObjectKey>,
+        sender: PChannel::PSender<ObjectKey>,
     },
     CreateCylinder{
         size: mq::Vec3,
@@ -153,22 +153,22 @@ pub enum Command {
         texture: Option<mq::Texture2D>,
         collider: ColliderOptions,
         weak_ref: Py<PyWeakref>,
-        sender: PChannel::PSyncSender<ObjectKey>,
+        sender: PChannel::PSender<ObjectKey>,
     },
 
     CreateMesh{
         mesh: Mesh,
         collider: ColliderOptions,
         weak_ref: Py<PyWeakref>,
-        sender: PChannel::PSyncSender<ObjectKey>,
+        sender: PChannel::PSender<ObjectKey>,
     },
 
     DropThisItem(Arc<dyn Any + Send + Sync>), // drops it's item.  >_<
 
-    LoadFile{ path: String, sender: PChannel::PSyncSender<Result<Vec<u8>, PError>> },
-    LoadSound{ path: String, sender: PChannel::PSyncSender<Result<PArc<au::Sound>, PError>> },
+    LoadFile{ path: String, sender: PChannel::PSender<Result<Vec<u8>, PError>> },
+    LoadSound{ path: String, sender: PChannel::PSender<Result<PArc<au::Sound>, PError>> },
     
-    LoadSoundFromBytes{data: Vec<u8>, sender: PChannel::PSyncSender<Result<PArc<au::Sound>, PError>> },
+    LoadSoundFromBytes{data: Vec<u8>, sender: PChannel::PSender<Result<PArc<au::Sound>, PError>> },
 
     PlaySound{ sound: au::Sound, params: au::PlaySoundParams },
 
@@ -178,8 +178,8 @@ pub enum Command {
 
     StopSound{ sound: au::Sound },
 
-    RenderTargetMsaa{ width: u32, height: u32, sender: PChannel::PSyncSender< PArc<mq::RenderTarget>  > },
-    RenderTargetEx{ width: u32, height: u32, params: Option<mq::RenderTargetParams>, sender: PChannel::PSyncSender<PArc<mq::RenderTarget> > },
+    RenderTargetMsaa{ width: u32, height: u32, sender: PChannel::PSender< PArc<mq::RenderTarget>  > },
+    RenderTargetEx{ width: u32, height: u32, params: Option<mq::RenderTargetParams>, sender: PChannel::PSender<PArc<mq::RenderTarget> > },
     DrawArc{ x: f32,
         y: f32,
         sides: u8,
@@ -257,13 +257,13 @@ pub enum Command {
         font_scale: f32,
         font_scale_aspect: f32,
         rotation: f32,
-        sender: PSyncSender<mq::TextDimensions>},
+        sender: PSender<mq::TextDimensions>},
     GetTextCenter{text: String,
         font: Option<mq::Font>,
         font_size: u16,
         font_scale: f32,
         rotation: f32,
-        sender: PSyncSender<mq::Vec2>
+        sender: PSender<mq::Vec2>
     },
     DrawMultilineText{text: String,
         x: f32,
@@ -280,16 +280,16 @@ pub enum Command {
     DrawTexture{ texture: mq::Texture2D, x: f32, y: f32, color: mq::Color   },
     
     ClearBackground { color: mq::Color },
-    ScreenDpiScale(PSyncSender<f32>),
+    ScreenDpiScale(PSender<f32>),
 
-    NextFrame{physics_step: Option<f32>, sender: PChannel::PSyncSender<()>},
+    NextFrame{physics_step: Option<f32>, sender: PChannel::PSender<()>},
 
     LoadImage {
         path: String,
-        sender: PChannel::PSyncSender<Result<mq::Image, PError>>,
+        sender: PChannel::PSender<Result<mq::Image, PError>>,
     },
     GetScreenData {
-        sender: PChannel::PSyncSender<mq::Image>,
+        sender: PChannel::PSender<mq::Image>,
     },
 
     SetCamera{camera_2d: Option<mq::Camera2D>, camera_3d: Option<mq::Camera3D>},
@@ -298,12 +298,12 @@ pub enum Command {
 
     ShowMouse(bool),
     ClearInputQueue,
-    IsSimulatingMouseWithTouch(PSyncSender<bool>),
+    IsSimulatingMouseWithTouch(PSender<bool>),
     PushCameraState,
     PopCameraState,
     CameraFontScale{
         world_font_size: f32,
-        sender: PSyncSender<(u16, f32, f32)>,
+        sender: PSender<(u16, f32, f32)>,
     },
 }
 

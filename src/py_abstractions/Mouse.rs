@@ -17,7 +17,7 @@ use crate::py_abstractions::MouseButton::MouseButton;
 #[gen_stub_pyfunction]
 #[pyfunction]
 pub fn mouse_inside_window() -> PyResult<bool>  {
-    let (sender, receiver) = PChannel::sync_channel(1);
+    let (sender, receiver) = PChannel::channel();
     COMMAND_QUEUE.push(  Command::GetCustomMouseState { sender });
     Ok(receiver.recv()?.2)
 }
@@ -123,7 +123,7 @@ pub fn clear_input_queue() {
 #[gen_stub_pyfunction]
 #[pyfunction]
 pub fn is_simulating_mouse_with_touch()-> PyResult<bool> {
-    let (sender, receiver) = PChannel::sync_channel(1);
+    let (sender, receiver) = PChannel::channel();
     COMMAND_QUEUE.push(  Command::IsSimulatingMouseWithTouch(sender));
     Ok(receiver.recv()?)
 }
@@ -143,7 +143,7 @@ pub fn simulate_mouse_with_touch(option: bool) {
 #[gen_stub_pyfunction]
 #[pyfunction]
 pub fn touches() -> PyResult<Vec<Touch>> {
-    let (sender, receiver) = PChannel::sync_channel(1);
+    let (sender, receiver) = PChannel::channel();
     COMMAND_QUEUE.push(  Command::Touches(sender));
     let touches = receiver.recv()?;
     Ok(touches.into_iter().map( Into::into ).collect())
@@ -154,7 +154,7 @@ pub fn touches() -> PyResult<Vec<Touch>> {
 #[gen_stub_pyfunction]
 #[pyfunction]
 pub fn touches_local() -> PyResult<Vec<Touch>> {
-    let (sender, receiver) = PChannel::sync_channel(1);
+    let (sender, receiver) = PChannel::channel();
     COMMAND_QUEUE.push(  Command::TouchesLocal(sender));
     let touches = receiver.recv()?;
     Ok(

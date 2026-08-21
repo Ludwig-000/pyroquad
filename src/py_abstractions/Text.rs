@@ -24,7 +24,7 @@ impl Font {
     /// Loads a font from file.
     #[new]
     pub fn new(path: String) -> PyResult<Font> {
-        let (sender, receiver) = PChannel::sync_channel(1);
+        let (sender, receiver) = PChannel::channel();
 
         COMMAND_QUEUE.push(  Command::LoadTTFFOnt { path, sender });
         Ok(receiver.recv()??.into())
@@ -46,7 +46,7 @@ impl Font {
 
     #[staticmethod]
     pub fn load_ttf_font_from_bytes(data: FileData)-> PyResult<Font>{
-        let (sender, receiver) = PChannel::sync_channel(1);
+        let (sender, receiver) = PChannel::channel();
 
         COMMAND_QUEUE.push(  Command::LoadTTFFontFromBytes { bytes: data.bytes, sender });
         
@@ -121,7 +121,7 @@ impl From<TextDimensions> for mq::TextDimensions{
 #[gen_stub_pyfunction]
 #[pyfunction]
 pub fn measure_text(text: String, font: Option<Font>, font_size: u16, font_scale: f32)-> PyResult<TextDimensions>{
-    let (sender, receiver) = PChannel::sync_channel(1);
+    let (sender, receiver) = PChannel::channel();
     COMMAND_QUEUE.push( Command::MeasureText { text, font: font.map(Into::into ), font_size, font_scale, sender });
     Ok(receiver.recv()?.into())
 }

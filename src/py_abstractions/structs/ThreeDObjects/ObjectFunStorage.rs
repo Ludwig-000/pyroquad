@@ -31,7 +31,7 @@ use std::sync::{OnceLock};
 use slotmap::{new_key_type};
 use crossbeam::queue::SegQueue;
 
-use crate::engine::PChannel::PSyncSender;
+use crate::engine::PChannel::PSender;
 
 
 pub fn add_function(target: &Bound<'_, PyAny>, func: Py<PyAny>) -> PyResult<FunctionKey> {

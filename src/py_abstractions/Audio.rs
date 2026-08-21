@@ -28,7 +28,7 @@ impl Sound {
     #[staticmethod]
     pub fn load_sound(path: String)-> PyResult<Sound>{
 
-        let (tx, rx) = PChannel::sync_channel(1);
+        let (tx, rx) = PChannel::channel();
 
         COMMAND_QUEUE.push( Command::LoadSound { path, sender: tx } );
 
@@ -46,7 +46,7 @@ impl Sound {
     #[staticmethod]
     pub fn load_sound_from_bytes(data: Vec<u8>)-> PyResult<Sound> {
 
-        let (sender, receiver) = PChannel::sync_channel(1);
+        let (sender, receiver) = PChannel::channel();
         
         COMMAND_QUEUE.push( Command::LoadSoundFromBytes { data, sender} );
 

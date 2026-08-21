@@ -1,6 +1,6 @@
 use std::{sync::{Condvar, LazyLock, Mutex, OnceLock, RwLock, atomic::{AtomicBool, AtomicUsize}}, thread::{self, Thread}, time::Duration};
 use std::panic::{catch_unwind, resume_unwind, AssertUnwindSafe};
-use crate::engine::PChannel::{PChannel, PReceiver, PSyncSender};
+use crate::engine::PChannel::{PChannel, PReceiver, PSender};
 use std::sync::atomic::Ordering;
 
 pub const MAX_GLOBAL_THREADS: usize = 20_000;

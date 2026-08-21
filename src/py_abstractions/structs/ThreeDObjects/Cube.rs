@@ -67,7 +67,7 @@ impl Cube {
         collider_type: ColliderOptions,
     ) -> PyResult<Py<Cube>> {
 
-        let (sender, receiver) = PChannel::sync_channel(1);
+        let (sender, receiver) = PChannel::channel();
 
         let cache = match collider_type.0{
             InnerColliderOptions::Dynamic { .. }=>{

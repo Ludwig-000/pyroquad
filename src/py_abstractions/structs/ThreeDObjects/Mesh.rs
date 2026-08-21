@@ -62,7 +62,7 @@ impl Mesh{
     #[staticmethod]
     pub fn from_file_data(py: Python<'_>,data: FileData, texture: Option<Texture2D>,collider_type: ColliderOptions)-> PyResult<Py<Mesh>>{
         
-        let (sender, receiver) = PChannel::sync_channel(1);
+        let (sender, receiver) = PChannel::channel();
 
         let placeholder_struct: Self = Self { key: ObjectKey::null(), 
             function_key: None, 
