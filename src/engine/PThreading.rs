@@ -1,66 +1,81 @@
-use std::sync::{Mutex, Condvar, OnceLock};
-
+use std::{sync::{Condvar, LazyLock, Mutex, OnceLock, RwLock, atomic::{AtomicBool, AtomicUsize}}, thread::{self, Thread}, time::Duration};
+use std::panic::{catch_unwind, resume_unwind, AssertUnwindSafe};
+use crate::engine::PChannel::{PChannel, PReceiver, PSyncSender};
+use std::sync::atomic::Ordering;
 
 pub const MAX_GLOBAL_THREADS: usize = 20_000;
-pub static ACTIVE_THREADS: Mutex<usize> = Mutex::new(0);
-pub static CVAR: Condvar = Condvar::new();
 
-
-
-/// Creates a thread with a local, aswell as a global thread-count limit
-#[macro_export]
-macro_rules! limited_thread {
-    ($limit:expr, $func:expr) => {{
-        use std::sync::{OnceLock, Mutex, Condvar};
-
-        struct ConcurrencyState {
-            active_threads: Mutex<usize>,
-            cvar: Condvar,
-        }
-
-        static STATE: OnceLock<ConcurrencyState> = OnceLock::new();
-        
-        let state = STATE.get_or_init(|| ConcurrencyState {
-            active_threads: Mutex::new(0),
-            cvar: Condvar::new(),
-        });
-
-        let mut local_count = state.active_threads.lock().unwrap();
-        while *local_count >= $limit {
-            local_count = state.cvar.wait(local_count).unwrap();
-        }
-        *local_count += 1;
-        drop(local_count); 
-
-        let mut global_count = $crate::engine::PThreading::ACTIVE_THREADS.lock().unwrap();
-        while *global_count >= $crate::engine::PThreading::MAX_GLOBAL_THREADS {
-            global_count = $crate::engine::PThreading::CVAR.wait(global_count).unwrap();
-        }
-        *global_count += 1;
-        drop(global_count);
-
-        struct SlotGuard<'a> {
-            local_state: &'a ConcurrencyState,
-        }
-        
-        impl<'a> Drop for SlotGuard<'a> {
-            fn drop(&mut self) {
-                {
-                    let mut g_count = $crate::engine::PThreading::ACTIVE_THREADS.lock().unwrap();
-                    *g_count -= 1;
-                    $crate::engine::PThreading::CVAR.notify_one(); 
-                }
-                
-                {
-                    let mut l_count = self.local_state.active_threads.lock().unwrap();
-                    *l_count -= 1;
-                    self.local_state.cvar.notify_one(); 
-                }
-            }
-        }
-
-        let _guard = SlotGuard { local_state: state };
-
-        ($func)()
-    }};
+/// types of operation and their corresponding thread limit
+#[derive(Clone, Copy)]
+#[repr(usize)]
+pub enum TaskType {
+    DOWNLOAD = 300,
+    LOAD = 50,
+    CPU_HEAVY_TASK = 64,
+    GPU_TASK = 1,
 }
+
+struct Semipor {
+    count: Mutex<usize>,
+    cvar: Condvar,
+}
+impl Semipor {
+    const fn new() -> Self {
+        Self {
+            count: Mutex::new(0),
+            cvar: Condvar::new(),
+        }
+    }
+
+    fn acquire(&self, limit: usize) {
+        let mut count = self.count.lock().unwrap();
+        while *count >= limit {
+            count = self.cvar.wait(count).unwrap();
+        }
+        *count += 1;
+    }
+
+    fn release(&self) {
+        let mut count = self.count.lock().unwrap();
+        *count -= 1;
+        self.cvar.notify_one();
+    }
+}
+
+pub fn limited_thread<F: FnOnce()->() + Send + 'static>(task: TaskType, fun: F) {
+
+    static GLOBAL_SEM: Semipor = Semipor::new();
+    static DOWNLOAD_SEM: Semipor = Semipor::new();
+    static LOAD_SEM: Semipor = Semipor::new();
+    static CPU_SEM: Semipor = Semipor::new();
+    static GPU_SEM: Semipor = Semipor::new();
+
+    let task_sem = match task {
+        TaskType::DOWNLOAD => &DOWNLOAD_SEM,
+        TaskType::LOAD => &LOAD_SEM,
+        TaskType::CPU_HEAVY_TASK => &CPU_SEM,
+        TaskType::GPU_TASK => &GPU_SEM,
+    };
+
+
+    GLOBAL_SEM.acquire(MAX_GLOBAL_THREADS);
+    task_sem.acquire(task as usize);
+
+    
+    std::thread::spawn( move || {
+
+        let result = catch_unwind(AssertUnwindSafe(|| {
+            fun();
+        }));
+
+        task_sem.release();
+        GLOBAL_SEM.release();
+
+        if let Err(err) = result {
+            resume_unwind(err);
+        }
+    });
+
+}
+
+

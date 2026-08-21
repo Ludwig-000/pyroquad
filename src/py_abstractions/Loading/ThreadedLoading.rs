@@ -40,12 +40,12 @@ impl Loading {
     #[cfg(not(any(target_arch = "wasm32", target_os = "ios")))]
     #[staticmethod]
     pub fn download_file_and_save_future(url: String, filepath: String) -> PyResult<FutureP> {
-        use crate::{engine::PChannel::PChannel, py_abstractions::Loading::Loading::does_file_exist};
+        use crate::{engine::{PChannel::PChannel, PThreading::limited_thread}, py_abstractions::Loading::Loading::does_file_exist};
+
 
         let (tx, rx) = PChannel::sync_channel(1);
 
-        use crate::limited_thread;
-        limited_thread!(500, move || {
+        limited_thread(crate::engine::PThreading::TaskType::DOWNLOAD, move || {
             let result = (|| -> PyResult<()> {
                 if !does_file_exist(&filepath) {
                     let data = download_file(&url)?;
@@ -77,13 +77,13 @@ impl Loading {
     #[cfg(not(any(target_arch = "wasm32", target_os = "ios")))]
     #[staticmethod]
     fn download_file_future(url: &str) -> PyResult<FileDataFuture> {
-        use crate::{engine::PChannel::PChannel, py_abstractions::Loading::Loading::does_file_exist};
-
+        use crate::{engine::{PChannel::PChannel, PThreading::limited_thread}, py_abstractions::Loading::Loading::does_file_exist};
         let (tx, rx) = PChannel::sync_channel(1);
-        use crate::limited_thread;
-        limited_thread!(500, move || {
-            let data = download_file(&url);
-            let _ = tx.send(data);
+
+        let url = url.to_string();
+        limited_thread(crate::engine::PThreading::TaskType::DOWNLOAD, move || {
+            let res = download_file(&url);
+            let _ = tx.send(res);
         });
 
         Ok(FileDataFuture {

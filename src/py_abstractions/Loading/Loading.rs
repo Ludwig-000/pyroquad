@@ -50,15 +50,12 @@ pub fn load_file_future(path: &str) -> PyResult<FileDataFuture> {
     {
         // On Desktop: Spawn a thread to perform the blocking disk I/O
 
-        use crate::limited_thread;
-        limited_thread!(20_000, move || {
+        use crate::engine::PThreading::limited_thread;
+
+        limited_thread(crate::engine::PThreading::TaskType::LOAD, move || {
             let result = load_file(&path_str);
             let _ = tx.send(result);
         });
-        // std::thread::spawn(move || {
-        //     let result = load_file(&path_str);
-        //     let _ = tx.send(result);
-        // });
     }
 
     #[cfg(any(target_arch = "wasm32", target_os = "ios"))]

@@ -1,7 +1,7 @@
 use std::time::Duration;
 
 use crate::engine::PChannel::PChannel;
-use crate::limited_thread;
+use crate::engine::PThreading::limited_thread;
 use crate::py_abstractions::Textures_and_Images::Image;
 use crate::py_abstractions::Loading::FileData::FileData;
 use crate::py_abstractions::Textures_and_Images::Texture2D;
@@ -268,24 +268,25 @@ pub trait  FutureTrait<TPlusTimeout, T> {
 crate::generate_pfuture!(Image);
 crate::generate_pfuture!(FileData);
 
-#[gen_stub_pymethods]
-#[pymethods]
-impl FileDataFuture {
+// #[gen_stub_pymethods]
+// #[pymethods]
+// impl FileDataFuture {
 
-    /// Chains a FileData Future into a Image Future.
-    pub fn to_image_future(&self) -> PyResult<ImageFuture> {
+//     /// Chains a FileData Future into a Image Future.
+//     pub fn to_image_future(&self) -> PyResult<ImageFuture> {
 
-        let (tx, rx) = PChannel::sync_channel(1);
-        let fut = limited_thread!(64, || {
-            let result = (|| -> PyResult<Image> {
-                let res = self.result_nowait()?;
-                let im = res.to_Image()?;
-                Ok(im)
-            })();
-            let _ = tx.send(result);
-        });
+//         let (tx, rx) = PChannel::sync_channel(1);
 
-        Ok(ImageFuture { future: std::sync::Mutex::new(Some(rx)), })
-    }
+//         limited_thread(crate::engine::PThreading::TaskType::CPU_HEAVY_TASK, move || {
+//             let result = (|| -> PyResult<Image> {
+//                 let res = self.result_nowait()?;
+//                 let im = res.to_Image()?;
+//                 Ok(im)
+//             })();
+//             let _ = tx.send(result);
+//         });
 
-}
+//         Ok(ImageFuture { future: std::sync::Mutex::new(Some(rx)), })
+//     }
+
+// }

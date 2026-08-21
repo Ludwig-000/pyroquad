@@ -2,7 +2,7 @@ use std::sync::atomic::Ordering;
 use std::sync::mpsc::{self};
 use std::marker::PhantomData;
 use std::sync::mpsc::SendError;
-use std::time::Duration;
+use std::time::{Duration, Instant};
 
 pub enum PChannelError{
     DeadlockError,
@@ -17,7 +17,7 @@ pub struct PChannel<T> {
     _marker: PhantomData<T>,
 }
 pub struct PSyncSender<T> {
-    inner: mpsc::SyncSender<Result<T, PChannelError>>,
+    inner: mpsc::Sender<Result<T, PChannelError>>,
 }
 pub struct PReceiver<T> {
     inner: mpsc::Receiver<Result<T, PChannelError>>,
@@ -25,7 +25,7 @@ pub struct PReceiver<T> {
 
 impl<T> PChannel<T>{
     pub fn sync_channel(bound: usize) -> (PSyncSender<T>, PReceiver<T>) {
-        let (tx, rx) = mpsc::sync_channel(bound);
+        let (tx, rx) = mpsc::channel();
         (
             PSyncSender { inner: tx },
             PReceiver { inner: rx }
@@ -41,18 +41,19 @@ impl<T> PSyncSender<T> {
 }
 impl<T> Drop for PSyncSender<T>{
     fn drop(&mut self) {
-        let _ = self.inner.send(Err(PChannelError::PanicError));
+        if std::thread::panicking() {
+            let _ = self.inner.send(Err(PChannelError::PanicError));
+        }
     }
 }
 impl<T> PReceiver<T> {
     pub fn recv(&self) -> Result<T, PChannelError> {
-        for _ in 0..500 {
+        for _ in 0..1_000 { // we busy wait for roughly the first 10 micro seconds.
             match self.inner.try_recv(){
                 Ok(result) => return result,
                 Err(_) => {}
             }
         }
-
         
         if !crate::py_abstractions::py_functions::ENGINE_CURRENTLY_ACTIVE.load(Ordering::Relaxed){ 
             return Err(PChannelError::DeadlockError)
