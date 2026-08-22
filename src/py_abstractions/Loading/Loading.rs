@@ -50,9 +50,9 @@ pub fn load_file_future(path: &str) -> PyResult<FileDataFuture> {
     {
         // On Desktop: Spawn a thread to perform the blocking disk I/O
 
-        use crate::engine::PThreading::limited_thread;
+        use crate::engine::PThreading::{limited_thread, thread_pool};
 
-        limited_thread(crate::engine::PThreading::TaskType::LOAD, move || {
+        thread_pool(crate::engine::PThreading::TaskType::LOAD, move || {
             let result = load_file(&path_str);
             let _ = tx.send(result);
         });
