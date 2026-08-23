@@ -2,7 +2,6 @@
 use pyo3::prelude::*;
  
 use macroquad::prelude as mq;
-use rayon::iter::Filter;
 use std::sync::Arc;
 
 use crate::engine::PChannel::PChannel;

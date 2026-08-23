@@ -37,10 +37,11 @@ crossbeam = "=0.8.4" # used for the main Command Queue inside lib.rs
 
 glam = { version = "=0.27.0", features = ["scalar-math"] } # used for vector maths.
 
-
 rapier3d = { version = "=0.35.0-beta.0", features = ["parallel"] } # used for DBTV trees.
 
 reqwest = { version = "=0.13.4", features = ["blocking"] } # used for runtime-downloading assets.
+
+
 
 slotmap = "=1.0.7" # fast hasher for object management. <3 slopmap >_<
 
@@ -49,7 +50,6 @@ symphonia = { version = "=0.5.5", features = ["mp3"] } #for converting audio for
 
 gltf = "=1.4.1" # for parsing 3DAssets
 
-rayon = "=1.11.0" # TODO: replace with custom threading solution
 paste = "=1.0.15" # for better macro control, allowing the writing of generic comments.
 
 quad-snd = { git = "https://github.com/Ludwig-000/quad-snd " } # custom fork for quad-snd for a compatability fix for linux.

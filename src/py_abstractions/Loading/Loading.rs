@@ -6,6 +6,7 @@ use pyo3_stub_gen::derive::* ;
 use crate::engine::PChannel::PChannel;
 use crate::engine::PError::PError;
 
+use crate::engine::PThreading::thread_pool;
 use crate::py_abstractions::Loading::FileData::FileData;
 use crate::py_abstractions::PFuture::{FileDataFuture};
 
@@ -60,7 +61,7 @@ pub fn load_file_future(path: &str) -> PyResult<FileDataFuture> {
 
     #[cfg(any(target_arch = "wasm32", target_os = "ios"))]
     {
-        std::thread::spawn(move || {
+        thread_pool( crate::engine::PThreading::TaskType::LOAD,move || {
             let result = load_file(&path_str);
             let _ = tx.send(result);
         });
@@ -137,7 +138,7 @@ pub fn download_file_future(url: &str) -> PyResult<FileDataFuture> {
     let (tx, rx) = PChannel::channel();
     let url = url.to_string();
 
-    std::thread::spawn(move || {
+    thread_pool(crate::engine::PThreading::TaskType::DOWNLOAD ,move || {
         let result: PyResult<FileData> = download_file(&url);
         let _ = tx.send(result); 
     });

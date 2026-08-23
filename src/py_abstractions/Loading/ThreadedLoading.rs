@@ -5,6 +5,7 @@ use pyo3::types::PyDict;
 use pyo3::PyResult;
 
 use std::thread;
+use crate::engine::PChannel::PChannel;
 use crate::py_abstractions::Loading::FileData::FileData;
 use crate::py_abstractions::Loading::Loading::{self as load, download_file, load_file, write_to_file};
 use crate::py_abstractions::PFuture::{FileDataFuture, Future as FutureP};
@@ -104,7 +105,7 @@ impl Loading {
             path_names.push(file_path);
         }
 
-        let res: Vec<FileData> = threaded_map(path_names, |s: String| {
+        let res: Vec<FileData> = threaded_map(path_names, &|s: String| {
             load_file(&s) 
         })?;
 
@@ -133,7 +134,7 @@ impl Loading {
 
 fn threaded_map<T, U, F>(
     items: Vec<T>, 
-    op: F
+    op: &F
 ) -> PyResult<Vec<U>> 
 where 
     T: Send + 'static,
@@ -142,18 +143,19 @@ where
 {
     let handles: Vec<_> = items.into_iter().map(|item| {
         let op_clone = op.clone();
+        let (sender, receiver) = PChannel::channel();
         thread::spawn(move || {
-            op_clone(item)
-        })
+            let _ = sender.send(op_clone(item));
+        });
+        receiver
     }).collect();
     
     handles.into_iter().map(|handle| {
         
-       handle.join().map_err(|panic_payload| {
-            PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(
-                format!("Worker thread panicked: {:?}", panic_payload)
-            )
-        })?
+        let res = ||-> PyResult<U> {
+            handle.recv()?
+        };
+        res()
 
     }).collect()
 }

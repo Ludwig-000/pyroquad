@@ -186,7 +186,8 @@ pub fn thread_pool<F: FnOnce()->() + Send + 'static>(task: TaskType, fun: F) {
         let mut pool = ThreadPool.lock().unwrap();
         pool.task_queue.push_back(boxed_function);
 
-        
+
+
         if pool.thread_count < THREAD_POOL_SIZE && pool.thread_count == pool.threads_currently_executing{
             pool.thread_count += 1;
             true
@@ -194,7 +195,6 @@ pub fn thread_pool<F: FnOnce()->() + Send + 'static>(task: TaskType, fun: F) {
             false
         }
     };
-
 
     // groom thread pool
     if dispatch {
