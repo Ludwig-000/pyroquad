@@ -1,3 +1,11 @@
+/// Pythonic threading tools, mostly intended for safety, and to avoid threding libraries like rayon.
+/// 
+/// 
+/// 
+/// 
+
+
+
 use core::panic;
 use std::{collections::VecDeque, sync::{Condvar, LazyLock, Mutex, OnceLock, RwLock, atomic::{AtomicBool, AtomicUsize}, mpsc}, thread::{self, Thread}, time::{Duration, Instant}};
 use std::panic::{catch_unwind, resume_unwind, AssertUnwindSafe};
@@ -49,7 +57,7 @@ impl Semipor {
 }
 
 
-/// 🔥🚀🧵
+/// I'll probably deprecate this, since its inferior to 'thread_pool' in almost every way.
 pub fn limited_thread<F: FnOnce()->() + Send + 'static>(task: TaskType, fun: F) {
     static CORE_COUNT: LazyLock<usize> = LazyLock::new(|| thread::available_parallelism().map(|a|a.get()).unwrap_or(4));
     static GLOBAL_SEM: Semipor = Semipor::new();
@@ -100,6 +108,9 @@ pub fn limited_thread<F: FnOnce()->() + Send + 'static>(task: TaskType, fun: F) 
 
 const THREAD_POOL_SIZE: usize = 500;
 
+
+static ThreadPool: LazyLock<Mutex<Pool>> = LazyLock::new( || Mutex::new(Pool::new()));
+
 /// Thread pool
 struct Pool{
     last_task_dispatch: Instant,
@@ -139,8 +150,10 @@ impl Pool{
                     let task  = pool.task_queue.pop_front();
                     if task.is_none(){ // no task found. groom thread pool.
                         
-                        if Instant::now().duration_since( pool.last_task_dispatch ).as_micros() > 10_000  
-                            && (pool.thread_count as f32 * 0.7) as usize > pool.threads_currently_executing {
+                        if Instant::now().duration_since( pool.last_task_dispatch ).as_micros() > 10_000  && 
+                                    ((pool.thread_count as f32 * 0.7) as usize > pool.threads_currently_executing // we slowly decay the pool
+                                    || pool.thread_count == 1) // final cleanup if only 1 thread lives. 
+                            {
                             pool.thread_count -= 1;
                             
                             break;
@@ -175,18 +188,13 @@ impl Pool{
 
 
 
-static ThreadPool: LazyLock<Mutex<Pool>> = LazyLock::new( || Mutex::new(Pool::new()));
-
-
+/// 🔥🚀🧵
 pub fn thread_pool<F: FnOnce()->() + Send + 'static>(task: TaskType, fun: F) {
 
 
     let dispatch = {
-        let boxed_function = Box::new(fun);
         let mut pool = ThreadPool.lock().unwrap();
-        pool.task_queue.push_back(boxed_function);
-
-
+        pool.task_queue.push_back( Box::new(fun) );
 
         if pool.thread_count < THREAD_POOL_SIZE && pool.thread_count == pool.threads_currently_executing{
             pool.thread_count += 1;

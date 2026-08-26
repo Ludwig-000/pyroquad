@@ -67,9 +67,8 @@ pub fn load_file_future(path: &str) -> PyResult<FileDataFuture> {
         });
     }
 
-    Ok(FileDataFuture {
-        future: std::sync::Mutex::new(Some(rx)),
-    })
+    Ok( FileDataFuture::new(rx) )
+
 }
 
 /// Loads a file.
@@ -78,8 +77,10 @@ pub fn load_file_future(path: &str) -> PyResult<FileDataFuture> {
 #[pyfunction]
 pub fn load_file(path: &str)-> PyResult<FileData>{
     use crate::engine::PChannel::PChannel;
+    use crate::engine::CoreLoop::COMMAND_QUEUE;
+    use crate::engine::CoreLoop::Command;
 
-    let (tx, rx) = PChannel::sync_channel(1);
+    let (tx, rx) = PChannel::channel();
     let p_str = path.to_string();
     COMMAND_QUEUE.push( Command::LoadFile { path: p_str, sender: tx } );
     let res = rx.recv()?;
@@ -99,7 +100,7 @@ use pyo3::prelude::*;
 
 static CLIENT: LazyLock<Client> = LazyLock::new(|| {
     Client::builder()
-        .user_agent("PyroquadEngine/1.0")
+        .user_agent("PyroquadEngine")
         .pool_max_idle_per_host(32)
         .build()
         .expect("Failed to initialize HTTP client")
@@ -110,7 +111,7 @@ static CLIENT: LazyLock<Client> = LazyLock::new(|| {
 #[gen_stub_pyfunction]
 #[pyfunction]
 pub fn download_file(url: &str) -> PyResult<FileData> {
-    let max_retries = 4;
+    let max_retries = 7;
     let mut retry_delay = Duration::from_millis(100);
 
     for attempt in 1..=max_retries {
@@ -143,13 +144,12 @@ pub fn download_file_future(url: &str) -> PyResult<FileDataFuture> {
         let _ = tx.send(result); 
     });
 
-    Ok(FileDataFuture {
-        future: std::sync::Mutex::new(Some(rx)),
-    })
+    Ok( FileDataFuture::new(rx) )
 }
 
 
 /// Writes raw data to file.
+/// On WASM, this function does nothing.
 #[cfg(not(any(target_arch = "wasm32", target_os = "ios")))]
 #[gen_stub_pyfunction]
 #[pyfunction]
@@ -180,7 +180,14 @@ pub fn write_to_file(contents: &FileData, path: String) -> PyResult<()> {
     Ok(())
 }
 
-
+/// Writes raw data to file.
+/// On WASM, this function does nothing.
+#[cfg(any(target_arch = "wasm32", target_os = "ios"))]
+#[gen_stub_pyfunction]
+#[pyfunction]
+pub fn write_to_file(contents: &FileData, path: String) -> PyResult<()> {
+    Ok(())
+}
 
 #[cfg(not(any(target_arch = "wasm32", target_os = "ios")))]
 pub fn does_file_exist(path: &str) -> bool{

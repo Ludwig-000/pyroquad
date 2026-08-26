@@ -1,10 +1,13 @@
+use std::thread;
 use std::time::Duration;
 
 use crate::engine::PChannel::PChannel;
 use crate::engine::PThreading::limited_thread;
+use crate::engine::PThreading::thread_pool;
 use crate::py_abstractions::Textures_and_Images::Image;
 use crate::py_abstractions::Loading::FileData::FileData;
 use crate::py_abstractions::Textures_and_Images::Texture2D;
+use pyo3::exceptions::PyRuntimeError;
 use pyo3::prelude::*;
 use crate::engine::PChannel::PReceiver;
 use pyo3_stub_gen::derive::* ;
@@ -90,12 +93,19 @@ impl PyStubType for FutureWaitResult {
 macro_rules! generate_pfuture {
     ($res_type:ty) => {
         paste::paste! {
+            #[doc = "A future to " $res_type ". All pyroquad Futures are eagerly evaluated,\nmeaning thex execute as soon as they are created."]
             #[gen_stub_pyclass]
             #[pyclass]
             pub struct [<$res_type Future>] {
                 pub future: std::sync::Mutex<Option<PReceiver<PyResult<$res_type>>>>,
             }
-
+            impl [<$res_type Future>] {
+                pub fn new(rec: PReceiver<PyResult<$res_type>>) -> [<$res_type Future>] {
+                    [<$res_type Future>] {
+                        future: std::sync::Mutex::new(Some(rec)),
+                    }
+                }
+            }
             #[gen_stub_pymethods]
             #[pymethods]
             impl [<$res_type Future>] {
@@ -275,18 +285,38 @@ crate::generate_pfuture!(FileData);
 //     /// Chains a FileData Future into a Image Future.
 //     pub fn to_image_future(&self) -> PyResult<ImageFuture> {
 
-//         let (tx, rx) = PChannel::sync_channel(1);
+//         let (tx, rx) = PChannel::channel();
 
-//         limited_thread(crate::engine::PThreading::TaskType::CPU_HEAVY_TASK, move || {
-//             let result = (|| -> PyResult<Image> {
-//                 let res = self.result_nowait()?;
-//                 let im = res.to_Image()?;
-//                 Ok(im)
-//             })();
-//             let _ = tx.send(result);
+//         thread_pool(crate::engine::PThreading::TaskType::CPU_TASK, move ||{
+//             loop {
+//                 if let Ok(lock) = self.future.try_lock(){
+//                     if lock.is_some(){
+//                         let  rec =lock.unwrap();
+//                         match rec.try_recv(){
+//                             Some(r) => {
+//                                 let final_result = || -> PyResult<Image>{
+//                                     let file = r??;
+//                                     file.to_Image()
+//                                 };
+
+//                                 let _ = tx.send(final_result());
+//                             },
+//                             None => thread::sleep(Duration::from_millis(1)), // receiver not yet done
+//                         }
+//                     } else {
+//                         /// receiver has already been received?
+//                         let _ = tx.send(
+//                             Err(pyo3::exceptions::PyRuntimeError::new_err("Send error: receiver has already been recieved.\nA future cannot be received twize."))
+//                         );
+//                     }
+//                 } else {
+//                     /// lock is currently occupied. try again later
+//                     thread::sleep(Duration::from_millis(1));
+//                 }
+//             }
 //         });
 
-//         Ok(ImageFuture { future: std::sync::Mutex::new(Some(rx)), })
+//         Ok( ImageFuture::new(rx) )
 //     }
 
 // }

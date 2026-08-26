@@ -110,7 +110,6 @@ __all__ = [
     "is_simulating_mouse_with_touch",
     "load_file",
     "load_file_future",
-    "loop_over_range",
     "measure_text",
     "mouse_inside_window",
     "next_frame",
@@ -5414,19 +5413,15 @@ class FileData:
 
 @typing.final
 class FileDataFuture:
+    r"""
+    A future to FileData. All pyroquad Futures are eagerly evaluated,
+    meaning thex execute as soon as they are created.
+    """
     def result(self) -> typing.Optional[FileData]: ...
     def result_nowait(self) -> FileData: ...
     def result_nowait_timeout(self, timeout: builtins.float = 0.0) -> typing.Optional[FileData]:
         r"""
         waits for the result, with timeout in seconds.
-        """
-    def to_image_future(self) -> ImageFuture:
-        r"""
-        Chains a FileData Future into a Image Future.
-        """
-    def to_texture2D_future(self) -> Texture2D:
-        r"""
-        Chains a FileData Future into a Image Future.
         """
 
 @typing.final
@@ -5547,6 +5542,10 @@ class Image:
 
 @typing.final
 class ImageFuture:
+    r"""
+    A future to Image. All pyroquad Futures are eagerly evaluated,
+    meaning thex execute as soon as they are created.
+    """
     def result(self) -> typing.Optional[Image]: ...
     def result_nowait(self) -> Image: ...
     def result_nowait_timeout(self, timeout: builtins.float = 0.0) -> typing.Optional[Image]:
@@ -5798,7 +5797,7 @@ class Mesh:
         If the object does not have a tick function, this will do nothing.
         """
     @staticmethod
-    def from_file_data(data: FileData, texture: typing.Optional[Texture2D], collider_type: ColliderOptions) -> Mesh: ...
+    def from_file_data(data: FileData, texture: typing.Optional[Texture2D] = None, collider_type: ColliderOptions = ...) -> Mesh: ...
 
 @typing.final
 class Physics:
@@ -8200,20 +8199,6 @@ def load_file(path: builtins.str) -> FileData:
     """
 
 def load_file_future(path: builtins.str) -> FileDataFuture: ...
-
-def loop_over_range(range: range, fun: typing.Callable) -> None:
-    r"""
-    Calls a function over a range.
-    
-    The current range step is passed as an argument:
-    
-    ```python
-    def fun(step: int):
-        print(step)
-    
-    loop_over_range(range(100), fun)
-    ```
-    """
 
 def measure_text(text: builtins.str, font: typing.Optional[Font], font_size: builtins.int, font_scale: builtins.float) -> TextDimensions: ...
 

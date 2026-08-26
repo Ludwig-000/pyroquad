@@ -87,9 +87,7 @@ impl Loading {
             let _ = tx.send(res);
         });
 
-        Ok(FileDataFuture {
-            future: std::sync::Mutex::new(Some(rx)),
-        })
+        Ok( FileDataFuture::new(rx) )
     }
 
 

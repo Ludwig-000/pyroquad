@@ -76,6 +76,12 @@ while not is_quit_requested():
 ```
 Importantly, `is_quit_requested()` does nothing, unless `prevent_quit()` is also called, which prevents the window from being closed.
 
+## Camera:
+The set camera will be reset each frame.
+the camera can be set by either creating a 2d or 3d camera, and calling `.set_camera()`
+By default, you will be drawing to absolute pixels to the screen. that means, if the window is 600p by 800p, and a rectangle is drawn at 600p-900p, it will only be visible if the window is resized.
+Cameras create a virtual screen, that is always projected onto the window, meaning resizing the window no longer reveals more screen, it simply stretches the bounds of the camera. the default behaviour can be re-established by calling `set_default_camera()`. This does not call, for the default 2D camera to be set, but for drawing to continue without a camera.
+
 
 ## Objects:
 - pyroquad has types of powerful object types:
