@@ -124,5 +124,5 @@ jobs:
           tag_name: ${{ github.event.inputs.version }}
           target_commitish: ${{ github.ref_name }}
           files: release_dist/*.whl
-          body: "Pre-alpha release of Pyroquad Engine."
+          body: "Alpha release of Pyroquad Engine."
           generate_release_notes: true

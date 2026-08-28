@@ -93,24 +93,27 @@ pub fn load_file(path: &str)-> PyResult<FileData>{
 }
 
 
-use std::thread;
-use std::time::Duration;
-use reqwest::blocking::Client;
-use pyo3::prelude::*;
 
-static CLIENT: LazyLock<Client> = LazyLock::new(|| {
-    Client::builder()
-        .user_agent("PyroquadEngine")
-        .pool_max_idle_per_host(32)
-        .build()
-        .expect("Failed to initialize HTTP client")
-});
-
-
+#[cfg(not(any(target_arch = "wasm32", target_os = "ios")))]
 /// Downloads a file and returning it's raw data.
 #[gen_stub_pyfunction]
 #[pyfunction]
 pub fn download_file(url: &str) -> PyResult<FileData> {
+
+    
+    use std::thread;
+    use std::time::Duration;
+    use reqwest::blocking::Client;
+    use pyo3::prelude::*;
+    static CLIENT: LazyLock<Client> = LazyLock::new(|| {
+        Client::builder()
+            .user_agent("PyroquadEngine")
+            .pool_max_idle_per_host(32)
+            .build()
+            .expect("Failed to initialize HTTP client")
+    });
+
+
     let max_retries = 7;
     let mut retry_delay = Duration::from_millis(100);
 
@@ -128,10 +131,16 @@ pub fn download_file(url: &str) -> PyResult<FileData> {
             }
         }
     }
-
+    
     Err(PError::BasicErr(format!("Download timed out for {url}")).into())
 }
 
+#[cfg(target_arch = "wasm32")]
+#[gen_stub_pyfunction]
+#[pyfunction]
+pub fn download_file(url: &str) -> PyResult<FileData> {
+    todo!("HTTP downloads are not available directly on wasm32-wasip1");
+}
 
 #[gen_stub_pyfunction]
 #[pyfunction]
