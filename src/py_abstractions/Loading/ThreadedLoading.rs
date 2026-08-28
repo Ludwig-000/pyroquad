@@ -1,6 +1,6 @@
 use pyo3::prelude::*;
  
-use pyo3_stub_gen::derive::* ;
+
 use pyo3::types::PyDict;
 use pyo3::PyResult;
 
@@ -13,11 +13,11 @@ use crate::py_abstractions::PFuture::{FileDataFuture, Future as FutureP};
 
 
 /// Namespace for static Download-related functions.
-#[gen_stub_pyclass]
+
 #[pyclass]
 pub struct Loading;
 
-#[gen_stub_pymethods]
+
 #[pymethods]
 impl Loading {
     

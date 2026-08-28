@@ -1,6 +1,6 @@
 use pyo3::prelude::*;
 use pyo3::types::PyList;
-use pyo3_stub_gen::derive::* ;
+
 use pyo3::exceptions::*;
 
 use crate::py_abstractions::Textures_and_Images::Texture2D;
@@ -19,7 +19,7 @@ use crate::py_abstractions::structs::TwoDObjects::collision::collides_with_rec_r
 use crate::py_assert;
 use pyo3::types::PyDict;
 
-#[gen_stub_pyclass]
+
 #[pyclass(eq, weakref, dict)]
 #[derive(PartialEq)]
 pub struct Rectangle{
@@ -46,7 +46,7 @@ crate::implement_tick2D!(Rectangle,  r#"Rectangle()"#);
 
 crate::implement_magic_methods2D!(Rectangle);
 
-#[gen_stub_pymethods]
+
 #[pymethods]
 impl Rectangle{
     #[new]

@@ -1,13 +1,13 @@
 use macroquad::audio as au;
 use pyo3::{pyclass,pymethods};
 use crate::engine::PChannel::PChannel;
-use pyo3_stub_gen::derive::*;
+
 use crate::engine::CoreLoop::COMMAND_QUEUE;
 use crate::engine::CoreLoop::Command;
 use pyo3::prelude::*;
 use crate::engine::PArc::PArc;
 
-#[gen_stub_pyclass]
+
 #[pyclass(from_py_object)]
 #[derive(Clone, Debug)]
 pub struct Sound {
@@ -16,7 +16,7 @@ pub struct Sound {
 
 
 
-#[gen_stub_pymethods]
+
 #[pymethods]
 impl Sound {
 
@@ -100,7 +100,7 @@ impl From<&Sound> for au::Sound {
 }
 
 
-#[gen_stub_pyclass]
+
 #[pyclass(from_py_object)]
 #[derive(Clone, Copy)]
 pub struct PlaySoundParams {
@@ -112,7 +112,7 @@ pub struct PlaySoundParams {
     pub volume: f32,
 }
 
-#[gen_stub_pymethods]
+
 #[pymethods]
 impl PlaySoundParams {
 

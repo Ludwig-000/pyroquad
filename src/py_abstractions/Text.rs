@@ -4,12 +4,12 @@ use pyo3::prelude::*;
 //use pyo3::type_gen::generate_type_as_function;
 use macroquad::prelude as mq;
 
-use pyo3_stub_gen::derive::* ;
+
 
 use crate::{engine::{PArc::PArc, PChannel::PChannel}, py_abstractions::{Loading::FileData::FileData, Textures_and_Images::FilterMode}};
 use crate::engine::CoreLoop::COMMAND_QUEUE;
 use crate::engine::CoreLoop::Command;
-#[gen_stub_pyclass]
+
 #[pyclass(from_py_object)]
 #[derive(Clone)]
 pub struct Font {
@@ -17,7 +17,7 @@ pub struct Font {
 }
 
 
-#[gen_stub_pymethods]
+
 #[pymethods]
 impl Font {
 
@@ -80,7 +80,7 @@ impl From<Font> for mq::Font{
 
 
 /// World space dimensions of the text, measured by 'measure_text' function
-#[gen_stub_pyclass]
+
 #[pyclass(from_py_object)]
 #[derive(Debug, Default, Clone, Copy)]
 pub struct TextDimensions {
@@ -97,7 +97,7 @@ pub struct TextDimensions {
     pub offset_y: f32,
 }
 
-#[gen_stub_pymethods]
+
 #[pymethods]
 impl TextDimensions {
     #[new]
@@ -118,7 +118,7 @@ impl From<TextDimensions> for mq::TextDimensions{
 }
 
 
-#[gen_stub_pyfunction]
+
 #[pyfunction]
 pub fn measure_text(text: String, font: Option<Font>, font_size: u16, font_scale: f32)-> PyResult<TextDimensions>{
     let (sender, receiver) = PChannel::channel();

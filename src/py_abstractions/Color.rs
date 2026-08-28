@@ -1,8 +1,8 @@
 use pyo3::prelude::*;
  
-use pyo3_stub_gen::derive::* ;
 
-#[gen_stub_pyclass]
+
+
 #[pyclass(from_py_object)]
 #[derive(Clone, Copy, PartialEq, Debug)]
 pub struct Color {
@@ -25,7 +25,7 @@ pub struct Color {
 
 }
 
-#[gen_stub_pymethods]
+
 #[pymethods]
 impl Color {
 

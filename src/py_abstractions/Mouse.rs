@@ -1,8 +1,8 @@
 use pyo3::prelude::*;
-use pyo3_stub_gen::derive::gen_stub_pyclass;
-use pyo3_stub_gen::derive::gen_stub_pyclass_enum;
-use pyo3_stub_gen::derive::gen_stub_pyfunction;
-use pyo3_stub_gen::derive::gen_stub_pymethods;
+
+
+
+
 
 use crate::engine::CoreLoop::COMMAND_QUEUE;
 use crate::engine::CoreLoop::Command;
@@ -14,7 +14,7 @@ use crate::py_abstractions::MouseButton::MouseButton;
 
 
 /// This feature is experimental.
-#[gen_stub_pyfunction]
+
 #[pyfunction]
 pub fn mouse_inside_window() -> PyResult<bool>  {
     let (sender, receiver) = PChannel::channel();
@@ -22,13 +22,13 @@ pub fn mouse_inside_window() -> PyResult<bool>  {
     Ok(receiver.recv()?.2)
 }
 
-#[gen_stub_pyfunction]
+
 #[pyfunction]
 pub fn set_cursor_grab(option: bool)  {
     COMMAND_QUEUE.push(Command::SetCursorGrab(option));
 }
 
-#[gen_stub_pyfunction]
+
 #[pyfunction]
 pub fn show_mouse(option: bool) {
     COMMAND_QUEUE.push(Command::ShowMouse(option));
@@ -36,7 +36,7 @@ pub fn show_mouse(option: bool) {
 
 
 
-#[gen_stub_pyfunction]
+
 #[pyfunction]
 pub fn get_mouse_buttons_down() -> HashSet<MouseButton> {
 
@@ -48,7 +48,7 @@ pub fn get_mouse_buttons_down() -> HashSet<MouseButton> {
 }
 
 
-#[gen_stub_pyfunction]
+
 #[pyfunction]
 pub fn get_mouse_buttons_pressed() -> HashSet<MouseButton> {
 
@@ -59,7 +59,7 @@ pub fn get_mouse_buttons_pressed() -> HashSet<MouseButton> {
         .collect()
 }
 
-#[gen_stub_pyfunction]
+
 #[pyfunction]
 pub fn get_mouse_buttons_released() -> HashSet<MouseButton> {
 
@@ -74,7 +74,7 @@ pub fn get_mouse_buttons_released() -> HashSet<MouseButton> {
 
 
 
-#[gen_stub_pyfunction]
+
 #[pyfunction]
 pub fn get_mouse_wheel() -> Vec2 {
     use crate::engine::FrameInfo as fi;
@@ -82,7 +82,7 @@ pub fn get_mouse_wheel() -> Vec2 {
     Vec2::const_new(wheel.0, wheel.1)
 }
 
-#[gen_stub_pyfunction]
+
 #[pyfunction]
 pub fn get_mouse_position() -> Vec2 {
     use crate::engine::FrameInfo as fi;
@@ -91,7 +91,7 @@ pub fn get_mouse_position() -> Vec2 {
 }
 
 /// Return mouse position in range [-1; 1].
-#[gen_stub_pyfunction]
+
 #[pyfunction]
 pub fn get_mouse_position_local() -> Vec2 {
     use crate::engine::FrameInfo as fi;
@@ -100,7 +100,7 @@ pub fn get_mouse_position_local() -> Vec2 {
 }
 
 
-#[gen_stub_pyfunction]
+
 #[pyfunction]
 pub fn get_mouse_delta_position() -> Vec2 {
     use crate::engine::FrameInfo as fi;
@@ -109,7 +109,7 @@ pub fn get_mouse_delta_position() -> Vec2 {
 }
 
 /// Clears input queue
-#[gen_stub_pyfunction]
+
 #[pyfunction]
 pub fn clear_input_queue() {
     // TOOD: make sure the internal macroquad buffer stays synced with our custom buffer!!!!!!
@@ -120,7 +120,7 @@ pub fn clear_input_queue() {
 
 /// This is set to true by default, meaning touches will raise mouse events in addition to raising touch events.
 /// If set to false, touches won't affect mouse events.
-#[gen_stub_pyfunction]
+
 #[pyfunction]
 pub fn is_simulating_mouse_with_touch()-> PyResult<bool> {
     let (sender, receiver) = PChannel::channel();
@@ -132,7 +132,7 @@ pub fn is_simulating_mouse_with_touch()-> PyResult<bool> {
 
 /// This is set to true by default, meaning touches will raise mouse events in addition to raising touch events.
 /// If set to false, touches won't affect mouse events.
-#[gen_stub_pyfunction]
+
 #[pyfunction]
 pub fn simulate_mouse_with_touch(option: bool) {
     COMMAND_QUEUE.push( Command::SimulateMouseWithTouch(option));
@@ -140,7 +140,7 @@ pub fn simulate_mouse_with_touch(option: bool) {
 
 
 /// Return touches with positions in pixels.
-#[gen_stub_pyfunction]
+
 #[pyfunction]
 pub fn touches() -> PyResult<Vec<Touch>> {
     let (sender, receiver) = PChannel::channel();
@@ -151,7 +151,7 @@ pub fn touches() -> PyResult<Vec<Touch>> {
 
 
 /// Return touches with positions in range [-1; 1].
-#[gen_stub_pyfunction]
+
 #[pyfunction]
 pub fn touches_local() -> PyResult<Vec<Touch>> {
     let (sender, receiver) = PChannel::channel();
@@ -163,7 +163,7 @@ pub fn touches_local() -> PyResult<Vec<Touch>> {
 }
 
 
-#[gen_stub_pyclass_enum]
+
 #[pyclass(from_py_object)]
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum TouchPhase{
@@ -197,7 +197,7 @@ impl From<TouchPhase> for macroquad::prelude::TouchPhase{
 }
 
 
-#[gen_stub_pyclass]
+
 #[pyclass(from_py_object)]
 #[derive(Debug, Clone, Copy)]
 pub struct Touch{
@@ -209,7 +209,7 @@ pub struct Touch{
     pub position: Vec2,
 }
 
-#[gen_stub_pymethods]
+
 #[pymethods]
 impl Touch{
     #[new]

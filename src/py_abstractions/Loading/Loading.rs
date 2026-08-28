@@ -2,7 +2,7 @@ use std::path::Path;
 use std::sync::{LazyLock, Mutex};
 
 use pyo3::prelude::*;
-use pyo3_stub_gen::derive::* ;
+
 use crate::engine::PChannel::PChannel;
 use crate::engine::PError::PError;
 
@@ -15,7 +15,6 @@ pub static PC_ASSET_FOLDER: LazyLock<Mutex<String>> =
 
 /// Loads a file.
 #[cfg(not(any(target_arch = "wasm32", target_os = "ios")))]
-#[gen_stub_pyfunction]
 #[pyfunction]
 pub fn load_file(path: &str)-> PyResult<FileData>{
 
@@ -41,7 +40,7 @@ pub fn load_file(path: &str)-> PyResult<FileData>{
 }
 
 
-#[gen_stub_pyfunction]
+
 #[pyfunction]
 pub fn load_file_future(path: &str) -> PyResult<FileDataFuture> {
     let (tx, rx) = PChannel::channel();
@@ -73,7 +72,6 @@ pub fn load_file_future(path: &str) -> PyResult<FileDataFuture> {
 
 /// Loads a file.
 #[cfg(any(target_arch = "wasm32", target_os = "ios"))]
-#[gen_stub_pyfunction]
 #[pyfunction]
 pub fn load_file(path: &str)-> PyResult<FileData>{
     use crate::engine::PChannel::PChannel;
@@ -96,7 +94,7 @@ pub fn load_file(path: &str)-> PyResult<FileData>{
 
 #[cfg(not(any(target_arch = "wasm32", target_os = "ios")))]
 /// Downloads a file and returning it's raw data.
-#[gen_stub_pyfunction]
+
 #[pyfunction]
 pub fn download_file(url: &str) -> PyResult<FileData> {
 
@@ -136,13 +134,13 @@ pub fn download_file(url: &str) -> PyResult<FileData> {
 }
 
 #[cfg(target_arch = "wasm32")]
-#[gen_stub_pyfunction]
+
 #[pyfunction]
 pub fn download_file(url: &str) -> PyResult<FileData> {
     todo!("HTTP downloads are not available directly on wasm32-wasip1");
 }
 
-#[gen_stub_pyfunction]
+
 #[pyfunction]
 pub fn download_file_future(url: &str) -> PyResult<FileDataFuture> {
     let (tx, rx) = PChannel::channel();
@@ -160,7 +158,7 @@ pub fn download_file_future(url: &str) -> PyResult<FileDataFuture> {
 /// Writes raw data to file.
 /// On WASM, this function does nothing.
 #[cfg(not(any(target_arch = "wasm32", target_os = "ios")))]
-#[gen_stub_pyfunction]
+
 #[pyfunction]
 pub fn write_to_file(contents: &FileData, path: String) -> PyResult<()> {
     use std::path::Path;
@@ -192,7 +190,7 @@ pub fn write_to_file(contents: &FileData, path: String) -> PyResult<()> {
 /// Writes raw data to file.
 /// On WASM, this function does nothing.
 #[cfg(any(target_arch = "wasm32", target_os = "ios"))]
-#[gen_stub_pyfunction]
+
 #[pyfunction]
 pub fn write_to_file(contents: &FileData, path: String) -> PyResult<()> {
     Ok(())

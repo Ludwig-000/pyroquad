@@ -4,7 +4,7 @@ use pyo3::prelude::*;
 //use pyo3::type_gen::generate_type_as_function;
 use macroquad::prelude as mq;
 
-use pyo3_stub_gen::derive::* ;
+
 
 use crate::{engine::{PArc::PArc, PChannel::PChannel}, py_abstractions::{Loading::FileData::FileData, Textures_and_Images::FilterMode}};
 use crate::engine::CoreLoop::COMMAND_QUEUE;
@@ -12,7 +12,7 @@ use crate::engine::CoreLoop::Command;
 
 
 
-#[gen_stub_pyclass_enum]
+
 #[pyclass(from_py_object)]
 #[derive(Debug, Clone, Copy)]
 pub enum UniformType {
@@ -77,7 +77,7 @@ impl From<mq::UniformType> for UniformType {
 /// E.g. XYZ will first apply the z-axis rotation.
 ///
 /// YXZ can be used for yaw (y-axis), pitch (x-axis), roll (z-axis).
-#[gen_stub_pyclass_enum]
+
 #[pyclass(from_py_object)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum EulerRot {
@@ -130,7 +130,7 @@ impl Default for EulerRot {
 
 
 /// A pixel-wise comparison function.
-#[gen_stub_pyclass_enum]
+
 #[pyclass(from_py_object)]
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
 pub enum Comparison {

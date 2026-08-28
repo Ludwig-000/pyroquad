@@ -9,10 +9,6 @@ name = "_pyroquad"
 crate-type = ["cdylib", "rlib"]
 
 
-[[bin]]
-name = "stub_gen"
-doc = false
-
 [profile.release]
 overflow-checks = true
 panic = "unwind"
@@ -24,14 +20,7 @@ panic = "unwind"
 macroquad = { version = "=0.4.14", features = ["audio"] }
 
 #used to build the python library
-pyo3 = { version = "=0.28.3", features = ["extension-module", "multiple-pymethods"] }
-
-# modified version of stub gen that doesnt complain when compiling with python 3.9
-pyo3-stub-gen = { git = "https://github.com/Ludwig-000/pyo3-stub-gen", branch = "patch-1", optional = true }
-
-# up to date stub generation tool
-pyo3-stub-gen-real = { package = "pyo3-stub-gen", version = "=0.22.3", optional = true }
-
+pyo3 = { version = "=0.29.2", features = ["extension-module", "multiple-pymethods", "experimental-inspect"] }
 
 crossbeam = "=0.8.4" # used for the main Command Queue inside lib.rs
 
@@ -99,11 +88,6 @@ ehttp = "0.5" # wasm replacement for http
 # compile using:
 # maturin build --release --features abi_314 --no-default-features
 [features]
-
-# we switch between the modified version of stub gen, and the official one, to juggle new features, and the fact that maturin supports python 3.9, while current stub gen does not.
-default = ["use-dummy"]
-use-dummy = ["dep:pyo3-stub-gen"]
-use-real = ["dep:pyo3-stub-gen-real"]
 
 
 abi_314 = ["pyo3/abi3", "pyo3/abi3-py314"] # python 3.14 and up

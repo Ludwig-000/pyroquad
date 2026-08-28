@@ -4,7 +4,7 @@ use glam::Vec2 as gl;
 
 use pyo3::prelude::*;
 
-use pyo3_stub_gen::derive::*;
+
 //define_stub_info_gatherer!(stub_info);
 
 
@@ -12,7 +12,7 @@ use pyo3_stub_gen::derive::*;
 // A python abstraction for the Vec2 struct from the GLAM crate.
 // This file implements all functionality from Glam, replacing uses of BVec2 and Vec2 with the pyabstracted versions.
 //
-#[gen_stub_pyclass]
+
 #[cfg_attr(feature = "abi_314", pyclass(eq,str,frozen, immutable_type, from_py_object))]
 #[cfg_attr(not(feature = "abi_314"), pyclass(eq,str,frozen, from_py_object))]
 #[repr(C)]
@@ -39,7 +39,7 @@ impl Vec2 {
     }
 }
 
-#[gen_stub_pymethods]
+
 #[pymethods]
 impl Vec2 {
     #[new]
@@ -1019,13 +1019,3 @@ pub enum Vec2OrF32 {
 }
 
 
-use pyo3_stub_gen::{PyStubType, TypeInfo};
-
-impl PyStubType for Vec2OrF32 {
-    fn type_input() -> TypeInfo {
-        TypeInfo::unqualified("Vec2 | float")
-    }
-    fn type_output() -> TypeInfo {
-        TypeInfo::unqualified("Vec2 | float")
-    }
-}

@@ -2,10 +2,10 @@
 use glam::BVec2 as gl;
 
 use pyo3::prelude::*;
-use pyo3_stub_gen::derive::*;
+
 
 /// An immutable Boolean Vector with 2 elements: x,y.
-#[gen_stub_pyclass]
+
 #[cfg_attr(feature = "abi_314", pyclass(eq,str,hash,frozen, immutable_type, from_py_object))]
 #[cfg_attr(not(feature = "abi_314"), pyclass(eq,str,hash,frozen, from_py_object))]
 #[repr(C)]
@@ -41,7 +41,7 @@ impl BVec2 {
 
 const MASK: [u32; 2] = [0, 0xff_ff_ff_ff];
 
-#[gen_stub_pymethods]
+
 #[pymethods]
 impl BVec2 {
     

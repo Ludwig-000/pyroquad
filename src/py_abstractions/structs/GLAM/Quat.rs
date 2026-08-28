@@ -1,12 +1,12 @@
 use pyo3::{pyclass, pymethods};
-use pyo3_stub_gen::derive::{gen_stub_pyclass, gen_stub_pymethods};
+
 
 use crate::py_abstractions::structs::GLAM::Vec4::Vec4;
 
 
 
 /// A minimal pyclass for basic Quat usage.
-#[gen_stub_pyclass]
+
 #[cfg_attr(feature = "abi_314", pyclass(eq,str,frozen, immutable_type, from_py_object))]
 #[cfg_attr(not(feature = "abi_314"), pyclass(eq,str,frozen, from_py_object))]
 #[derive(Clone, Copy, PartialEq,Debug)]
@@ -21,7 +21,7 @@ pub struct Quat {
     pub w: f32,
 }
 
-#[gen_stub_pymethods]
+
 #[pymethods]
 impl Quat{
 

@@ -19,7 +19,7 @@ use pyo3::prelude::*;
 
 use pyo3::types::PyRange;
 use pyo3::types::PyRangeMethods;
-use pyo3_stub_gen::{derive::gen_stub_pyfunction};
+
 
 use crate::engine::PChannel;
 
@@ -50,7 +50,7 @@ pub static ENGINE_CURRENTLY_ACTIVE: AtomicBool = AtomicBool::new(false);
 /// but other functions may result in a deadlock.
 /// 
 /// The engine is built, assuming none of it's library calls are ever executed without the engine being active.
-#[gen_stub_pyfunction]
+
 #[pyfunction]
 #[pyo3(signature = (conf = None))] // overloads activate_engine with config
 pub fn activate_engine( conf: Option<Config>) -> PyResult<()>{
@@ -106,7 +106,7 @@ pub fn activate_engine( conf: Option<Config>) -> PyResult<()>{
 
 
 
-#[gen_stub_pyfunction]
+
 #[pyfunction]
 pub fn draw_all_objects() {
     COMMAND_QUEUE.push( Command::DrawAll3DObjects() );
@@ -117,39 +117,39 @@ pub fn draw_all_objects() {
 /// draws a rectangle with a given color.
 /// viewing the rectangle required a 2D Camera ( default )
 ///
-#[gen_stub_pyfunction]
+
 #[pyfunction]
 pub fn draw_rectangle(x: f32, y: f32, w: f32, h: f32, color: Color) {
     COMMAND_QUEUE.push(Command::DrawRect { x, y, w, h,color: color.into()});
 }
 
-#[gen_stub_pyfunction]
+
 #[pyfunction]
 pub fn draw_rectangle_lines(x: f32, y: f32, w: f32, h: f32,thickness: f32,  color: Color) {
     COMMAND_QUEUE.push(Command::DrawRectLines { x, y, w, h,thickness,color: color.into()});
 }
 
 
-#[gen_stub_pyfunction]
+
 #[pyfunction]
 pub fn draw_triangle(v1: Vec2, v2: Vec2, v3: Vec2, color: Color) {
     COMMAND_QUEUE.push(Command::DrawTriangle { v1: v1.into(), v2: v2.into(), v3: v3.into(), color: color.into() });
 }
 
-#[gen_stub_pyfunction]
+
 #[pyfunction]
 pub fn draw_triangle_lines(v1: Vec2, v2: Vec2, v3: Vec2, thickness: f32, color: Color) {
     COMMAND_QUEUE.push(Command::DrawTriangleLines { v1: v1.into(), v2: v2.into(), v3: v3.into(), thickness, color: color.into() });
 }
 
-#[gen_stub_pyfunction]
+
 #[pyfunction]
 pub fn draw_affine_parallelepiped(offset: Vec3, e1: Vec3,e2: Vec3,e3: Vec3,texture: Option<Texture2D>,color: Color) {
     
     COMMAND_QUEUE.push(Command::DrawAfflineParallelpiped { offset: offset.into(), e1: e1.into(), e2: e2.into(), e3: e3.into(), texture: texture.map(Into::into), color: color.into() });
 }
 
-#[gen_stub_pyfunction]
+
 #[pyfunction]
 pub fn draw_affine_parallelogram(offset: Vec3, e1: Vec3,e2: Vec3,texture: Option<Texture2D>,color: Color) {
     
@@ -157,14 +157,14 @@ pub fn draw_affine_parallelogram(offset: Vec3, e1: Vec3,e2: Vec3,texture: Option
         e2: e2.into(), texture: texture.map(Into::into), color: color.into() });
 }
 
-#[gen_stub_pyfunction]
+
 #[pyfunction]
 pub fn step_physics(distance: f32) {
     
     COMMAND_QUEUE.push(Command::ManuallyStepPhysics(distance));
 }
 
-#[gen_stub_pyfunction]
+
 #[pyfunction]
 pub fn draw_arc( x: f32,
     y: f32,
@@ -180,14 +180,14 @@ pub fn draw_arc( x: f32,
 
 
 
-#[gen_stub_pyfunction]
+
 #[pyfunction]
 pub fn draw_cube_wires( position: Vec3, size: Vec3, color: Color) {
     
     COMMAND_QUEUE.push(Command::DrawCubeWires {position: position.into(),size: size.into(),color: color.into()});
 }
 
-#[gen_stub_pyfunction]
+
 #[pyfunction]
 pub fn draw_cylinder( position: Vec3,
     radius_top: f32,
@@ -201,7 +201,7 @@ pub fn draw_cylinder( position: Vec3,
 }
 
 
-#[gen_stub_pyfunction]
+
 #[pyfunction]
 pub fn draw_cylinder_wires( position: Vec3,
     radius_top: f32,
@@ -214,13 +214,13 @@ pub fn draw_cylinder_wires( position: Vec3,
         height, texture: texture.map(Into::into),color: color.into()});
 }
 
-#[gen_stub_pyfunction]
+
 #[pyfunction]
 pub fn draw_ellipse( x: f32, y: f32, w: f32, h: f32, rotation: f32, color: Color){
     COMMAND_QUEUE.push(Command::DrawEllipse { x, y, w, h, rotation, color: color.into()});
 }
 
-#[gen_stub_pyfunction]
+
 #[pyfunction]
 pub fn draw_ellipse_lines( x: f32,
     y: f32,
@@ -232,7 +232,7 @@ pub fn draw_ellipse_lines( x: f32,
     COMMAND_QUEUE.push(Command::DrawEllipseLines { x, y, w, h, rotation, thickness, color: color.into()});
 }
 
-#[gen_stub_pyfunction]
+
 #[pyfunction]
 pub fn draw_hexagon( x: f32,
     y: f32,
@@ -244,12 +244,12 @@ pub fn draw_hexagon( x: f32,
     COMMAND_QUEUE.push(Command::DrawHexagon { x, y, size, border, vertical, border_color: border_color.into(), fill_color: fill_color.into()});
 }
 
-#[gen_stub_pyfunction]
+
 #[pyfunction]
 pub fn draw_line_3d( start: Vec3, end: Vec3, color: Color){
     COMMAND_QUEUE.push(Command::DrawLine3D { start: start.into(), end: end.into(), color: color.into()});
 }
-#[gen_stub_pyfunction]
+
 #[pyfunction]
 pub fn draw_line(x1: f32, y1: f32, x2: f32, y2: f32, thickness: f32, color: Color){
     COMMAND_QUEUE.push(Command::DrawLine { x1, y1, x2, y2, thickness, color: color.into() });
@@ -259,7 +259,7 @@ pub fn draw_line(x1: f32, y1: f32, x2: f32, y2: f32, thickness: f32, color: Colo
 /// draws a basic grid in 3d space.
 /// requires a 3d camera to be seen.
 ///
-#[gen_stub_pyfunction]
+
 #[pyfunction]
 #[pyo3(signature = (slices, spacing, axes_color, other_color, center= Vec3::ZERO(), rotation=Quat::IDENTITY()))] 
 pub fn draw_grid(slices: u32, spacing: f32, axes_color: Color, other_color: Color, center: Vec3, rotation: Quat) {
@@ -270,7 +270,7 @@ pub fn draw_grid(slices: u32, spacing: f32, axes_color: Color, other_color: Colo
 /// draws a flat plane in 3d space.
 /// requires a 3d camera to be seen.
 ///
-#[gen_stub_pyfunction]
+
 #[pyfunction]
 pub fn draw_plane(center: Vec3, size: Vec2, color: Color, texture: Option<Texture2D>)  {
     let cen = mq::vec3( center.x,center.y,center.z);
@@ -285,7 +285,7 @@ pub fn draw_plane(center: Vec3, size: Vec2, color: Color, texture: Option<Textur
 /// draws a basic 3d cube.
 /// requires a 3d camera to be seen.
 ///
-#[gen_stub_pyfunction]
+
 #[pyfunction]
 pub fn draw_cube(position: Vec3, size: Vec3, color: Color, texture: Option<Texture2D>) {
     let texture = texture.map( Into::into );
@@ -295,14 +295,14 @@ pub fn draw_cube(position: Vec3, size: Vec3, color: Color, texture: Option<Textu
 /// fills the entire screen with a single color.
 /// this is usually used at the start of a frame.
 ///
-#[gen_stub_pyfunction]
+
 #[pyfunction]
 pub fn clear_background(color: Color) {
     COMMAND_QUEUE.push(Command::ClearBackground { color: color.into()});
 }
 
 
-#[gen_stub_pyfunction]
+
 #[pyfunction]
 pub fn screen_dpi_scale() -> PyResult<f32>{
     let (sender, receiver) = PChannel::PChannel::channel();
@@ -314,7 +314,7 @@ pub fn screen_dpi_scale() -> PyResult<f32>{
 /// blocks until the frame has been drawn.
 ///
 /// also, this function cleans up dropped memory such as Texture2D
-#[gen_stub_pyfunction]
+
 #[pyfunction]
 #[pyo3(signature = (physics_step = Some(0.0)))] 
 pub fn next_frame(py: Python<'_>, physics_step: Option<f32>) -> PyResult<()>{
@@ -330,7 +330,7 @@ pub fn next_frame(py: Python<'_>, physics_step: Option<f32>) -> PyResult<()>{
 /// draws a text in 2d space.
 /// requires a 2d camera to be seen.
 ///
-#[gen_stub_pyfunction]
+
 #[pyfunction]
 #[pyo3(signature = (text, x, y, color = Color::WHITE(), font_size  = 20,
     font = None,  font_scale = 1.0, font_scale_aspect =  1.0, rotation = 0.0))] 
@@ -347,7 +347,7 @@ pub fn draw_text(text: String, x: f32, y: f32, color: Color, font_size: u16,
     Ok(receiver.recv()?.into())
 }
 
-#[gen_stub_pyfunction]
+
 #[pyfunction]
 pub fn get_text_center(text: String, font: Option<Font>, font_size: u16, font_scale: f32, rotation: f32) -> PyResult<Vec2>{
     let (sender, receiver) = PChannel::PChannel::channel();
@@ -357,7 +357,7 @@ pub fn get_text_center(text: String, font: Option<Font>, font_size: u16, font_sc
 }
 
 
-#[gen_stub_pyfunction]
+
 #[pyfunction]
 #[pyo3(signature = (text, x,y,font_size = 20, color = Color::WHITE(), font = None, rotation=0.0, line_distance_factor=None, font_scale=1.0, font_scale_aspect=1.0))]
 pub fn draw_multiline_text(text: String, x: f32, y: f32, font_size: u16, color: Color, font: Option<Font>, rotation: f32, line_distance_factor: Option<f32>, 
@@ -374,13 +374,13 @@ pub fn draw_multiline_text(text: String, x: f32, y: f32, font_size: u16, color: 
 /// note that this function simply draws a 20-sided polygon.
 /// for a more "round" circle, simply call `draw_poly()` with a greater ammount of sides.
 ///
-#[gen_stub_pyfunction]
+
 #[pyfunction]
 pub fn draw_circle(x: f32, y: f32, r: f32, color: Color) {
     COMMAND_QUEUE.push(Command::DrawPoly{ x, y, sides:20, radius:r, rotation:0.0, color: color.into()});
 }
 
-#[gen_stub_pyfunction]
+
 #[pyfunction]
 pub fn draw_circle_lines(x: f32, y: f32, r: f32, thickness: f32, color: Color) {
     COMMAND_QUEUE.push(Command::DrawPolyLines{ x, y, sides:20, radius:r, rotation:0.0,thickness, color: color.into()});
@@ -390,12 +390,12 @@ pub fn draw_circle_lines(x: f32, y: f32, r: f32, thickness: f32, color: Color) {
 /// increasing the polygon count will simply make it a circle.
 /// requires a 2d camera to be seen.
 ///
-#[gen_stub_pyfunction]
+
 #[pyfunction]
 pub fn draw_poly(x: f32, y: f32, sides: u8, radius: f32, rotation: f32, color: Color) {
     COMMAND_QUEUE.push(Command::DrawPoly{ x, y, sides, radius, rotation, color: color.into()});
 }
-#[gen_stub_pyfunction]
+
 #[pyfunction]
 pub fn draw_poly_lines(x: f32, y: f32, sides: u8, radius: f32, rotation: f32,thickness: f32, color: Color) {
     COMMAND_QUEUE.push(Command::DrawPolyLines { x, y, sides, radius, rotation, thickness, color: color.into() });
@@ -406,7 +406,7 @@ pub fn draw_poly_lines(x: f32, y: f32, sides: u8, radius: f32, rotation: f32,thi
 /// 
 /// a texture gets created by calling `Texture2D.from_image( image )`
 ///
-#[gen_stub_pyfunction]
+
 #[pyfunction]
 #[pyo3(signature = (texture, x=0.0, y=0.0, color=Color::WHITE()))]
 pub fn draw_texture(texture: Texture2D,x: f32, y: f32, color: Color ) {
@@ -415,7 +415,7 @@ pub fn draw_texture(texture: Texture2D,x: f32, y: f32, color: Color ) {
 }
 
 /// returns the current frames per second
-#[gen_stub_pyfunction]
+
 #[pyfunction]
 pub fn get_fps() -> i32 {
     use crate::engine::FrameInfo::*;
@@ -437,7 +437,7 @@ pub fn get_fps() -> i32 {
 ///...
 ///...  next_frame()
 /// ```
-#[gen_stub_pyfunction]
+
 #[pyfunction]
 pub fn get_delta_time() -> f32 {
     use crate::engine::FrameInfo as fi;
@@ -447,7 +447,7 @@ pub fn get_delta_time() -> f32 {
 
 
 
-#[gen_stub_pyfunction]
+
 #[pyfunction]
 pub fn get_screen_data() -> PyResult<Image> {
     let (tx, rx) = PChannel::PChannel::channel();
@@ -462,7 +462,7 @@ pub fn get_screen_data() -> PyResult<Image> {
 
 /// returns an list of all keys that have been pressed since the last check.
 /// pressed = key down + key up
-#[gen_stub_pyfunction]
+
 #[pyfunction]
 pub fn get_keys_pressed() -> HashSet<KeyCode> {
     
@@ -481,7 +481,7 @@ pub fn get_keys_pressed() -> HashSet<KeyCode> {
 
 
 /// returns an list of all keys that have been released since the last check.
-#[gen_stub_pyfunction]
+
 #[pyfunction]
 pub fn get_keys_released() -> HashSet<KeyCode> {
     
@@ -501,7 +501,7 @@ pub fn get_keys_released() -> HashSet<KeyCode> {
 
 
 /// returns an list of all keys that are currently in the process of being pressed.
-#[gen_stub_pyfunction]
+
 #[pyfunction]
 pub fn get_keys_down() -> HashSet<KeyCode> {
 
@@ -519,7 +519,7 @@ pub fn get_keys_down() -> HashSet<KeyCode> {
 
 /// This function is useful in combination with 'prevent_quit()', 
 ///     to run some cleanup logic before closing the window and terminating the process.
-#[gen_stub_pyfunction]
+
 #[pyfunction]
 pub fn is_quit_requested() -> PyResult<bool> {
     let (sender, receiver) = PChannel::PChannel::channel();
@@ -533,12 +533,12 @@ pub fn is_quit_requested() -> PyResult<bool> {
 /// 
 /// Once called, this flag will last the entire program.
 /// 
-#[gen_stub_pyfunction]
+
 #[pyfunction]
 pub fn prevent_quit() {
     COMMAND_QUEUE.push( Command::PreventQuit);
 }
-#[gen_stub_pyfunction]
+
 #[pyfunction]
 pub fn set_fullscreen(fullscreen: bool) {
     COMMAND_QUEUE.push( Command::SetFullscreen(fullscreen));
@@ -547,7 +547,7 @@ pub fn set_fullscreen(fullscreen: bool) {
 
 
 /// Return the last pressed key.
-#[gen_stub_pyfunction]
+
 #[pyfunction]
 pub fn get_last_key_pressed() -> Option<KeyCode> {
     use crate::engine::FrameInfo as fi;
@@ -558,7 +558,7 @@ pub fn get_last_key_pressed() -> Option<KeyCode> {
 
 /// Return the last pressed char.
 /// Each "get_char_pressed" call will consume a character from the input queue.
-#[gen_stub_pyfunction]
+
 #[pyfunction]
 pub fn get_char_pressed() -> Option<char> {
 
@@ -568,7 +568,7 @@ pub fn get_char_pressed() -> Option<char> {
 
 /// TODO: appears to not update when resizing the window?
 /// need to investigate
-#[gen_stub_pyfunction]
+
 #[pyfunction]
 pub fn screen_width() -> f32 {
 
@@ -580,7 +580,7 @@ pub fn screen_width() -> f32 {
 /// This takes DPI into account.
 /// Note that the OS might decide to give a different size. 
 /// Additionally, the size won't be updated until the next next_frame()
-#[gen_stub_pyfunction]
+
 #[pyfunction]
 pub fn request_new_screen_size(width: f32, height: f32) {
     COMMAND_QUEUE.push( Command::RequestNewScreenSize { width, height });
@@ -588,7 +588,7 @@ pub fn request_new_screen_size(width: f32, height: f32) {
 
 /// TODO: appears to not update when resizing the window?
 /// need to investigate
-#[gen_stub_pyfunction]
+
 #[pyfunction]
 pub fn screen_height() -> f32 {
     use crate::engine::FrameInfo as fi;
@@ -614,7 +614,7 @@ pub fn screen_height() -> f32 {
  * 
  * Also, you might need to mirror the Image vertically before converting it to a Texture2D.
  */
-#[gen_stub_pyfunction]
+
 #[pyfunction]
 #[pyo3(signature = (texture, tint = Color::WHITE()))] 
 pub fn draw_skybox(texture: Texture2D, tint: Color) {
@@ -626,14 +626,14 @@ pub fn draw_skybox(texture: Texture2D, tint: Color) {
 
 
 /// Converts 2d polar coordinates to 2d cartesian coordinates.
-#[gen_stub_pyfunction]
+
 #[pyfunction]
 pub fn polar_to_cartesian(rho: f32, theta: f32) -> Vec2{
     mq::polar_to_cartesian(rho, theta).into()
 }
 
 /// Converts 2d polar coordinates to 2d cartesian coordinates.
-#[gen_stub_pyfunction]
+
 #[pyfunction]
 pub fn cartesian_to_polar(cartesian: Vec2) -> Vec2{
     mq::cartesian_to_polar(cartesian.into()).into()
@@ -663,7 +663,7 @@ pub fn cartesian_to_polar(cartesian: Vec2) -> Vec2{
 /// In the future there going to be some sort of meta-data file for PC as well.
 /// But right now to resolve this situation and keep pathes consistent across platforms
 /// `set_pc_assets_folder("assets");`call before first `load_file`/`load_texture` will allow using same pathes on PC and Android.
-#[gen_stub_pyfunction]
+
 #[pyfunction]
 pub fn set_pc_assets_folder(path: String){
 
@@ -692,7 +692,7 @@ pub fn set_pc_assets_folder(path: String){
 ///     batch_draw_shapes(objects) <- do this instead.
 /// ```
 /// 
-#[gen_stub_pyfunction]
+
 #[pyfunction]
 pub fn batch_draw_shapes<'py>(input: Vec<Shape<'py>>){
     for shape in input{

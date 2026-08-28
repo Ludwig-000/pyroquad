@@ -16,11 +16,11 @@ use crate::py_abstractions::structs::GLAM::Vec3::Vec3;
 
 use macroquad::prelude as mq;
 use pyo3::{PyResult, pyclass, pymethods};
-use pyo3_stub_gen::derive::{gen_stub_pyclass, gen_stub_pyclass_enum, gen_stub_pymethods};
+
 use crate::py_abstractions::structs::GLAM::Mat4::Mat4;
 use crate::py_abstractions::{Color::Color, Textures_and_Images::Texture2D};
 
-#[gen_stub_pyclass]
+
 #[pyclass(frozen, from_py_object)]
 #[repr(C)]
 #[derive(Clone, Debug, Copy)]
@@ -35,7 +35,7 @@ pub struct Vertex {
     pub normal: mq::Vec4,
 }
 
-#[gen_stub_pymethods]
+
 #[pymethods]
 impl Vertex{
 
@@ -64,7 +64,7 @@ impl From<Vertex> for mq::Vertex{
 }
 
 
-#[gen_stub_pyclass_enum]
+
 #[pyclass(from_py_object)]
 #[derive(Clone, Copy)]
 pub enum DrawMode{
@@ -74,14 +74,14 @@ pub enum DrawMode{
 
 
 /// A Pipeline, created via 'create_gl_pipeline'
-#[gen_stub_pyclass]
+
 #[pyclass(from_py_object)]
 #[derive(Clone, Copy)]
 pub struct  GlPipeline(mq::GlPipeline);
 
 /// A simple datatype that holds a Vector of Vertices and a Vector of indices.
 /// using this Wrapper in conjunction with 'geometry()' avoids cloning any data.
-#[gen_stub_pyclass]
+
 #[pyclass(from_py_object)]
 #[derive(Clone)]
 pub struct Geometry{
@@ -92,7 +92,7 @@ pub struct Geometry{
 /// NOT YET IMPLEMENTED
 /// try to convince Stub gen this is a module.
 // #[gen_stub_pyclass(module = "pyroquad.internal_gl")] // module = .. does not seem to do anything but does not err?
-#[gen_stub_pyclass] 
+ 
 #[pyclass(from_py_object)]
 #[derive(Clone, Copy)]
 pub struct InternalGL();
@@ -101,7 +101,7 @@ pub struct InternalGL();
 // Note:
 // All commented out functions are not easily implemented since it's inputs/outputs 
 // are hard to convert into python types.
-#[gen_stub_pymethods]
+
 #[pymethods]
 impl InternalGL{
     #[staticmethod]

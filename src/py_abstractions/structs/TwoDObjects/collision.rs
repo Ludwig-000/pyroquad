@@ -16,18 +16,8 @@ pub enum Shape<'py> {
 }
 
 
-use pyo3_stub_gen::{PyStubType, TypeInfo};
+
 use rapier3d::parry::simba::scalar::SupersetOf;
-
-impl PyStubType for Shape<'_> {
-    fn type_input() -> TypeInfo {
-        TypeInfo::unqualified("Rectangle | Circle")
-    }
-    fn type_output() -> TypeInfo {
-        TypeInfo::unqualified("Rectangle | Circle")
-    }
-}
-
 
 
 pub fn collides_with_rec_rec(lhs: &Rectangle, rhs: &Rectangle) -> bool {

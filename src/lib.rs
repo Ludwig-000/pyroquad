@@ -15,17 +15,13 @@
 #![allow(clippy::style)]
 
 
-#[cfg(feature = "use-real")]
-pub extern crate pyo3_stub_gen_real as pyo3_stub_gen;
-#[cfg(not(feature = "use-real"))]
-pub use ::pyo3_stub_gen;
 
 
 use pyo3::prelude::*;
-use pyo3_stub_gen::derive::*;
+
 
 use pyo3::prelude::*;
-use pyo3_stub_gen::define_stub_info_gatherer;
+
 
 mod engine;
 mod py_abstractions;
@@ -200,8 +196,6 @@ pub fn _pyroquad( m: &Bound<'_, PyModule>) -> PyResult<()> {
     
     Ok(())
 }
-
-define_stub_info_gatherer!(stub_info);
 
 
 /*
