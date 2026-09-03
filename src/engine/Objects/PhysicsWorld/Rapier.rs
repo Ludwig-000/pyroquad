@@ -144,6 +144,9 @@ impl RapierWorld{
             InnerColliderOptions::Dynamic { .. } =>{
                 Some(self.dynamic_collider_builder(obj,key,collider))
             }
+            InnerColliderOptions::Fixed { friction, restitution } => {
+                Some(self.fixed_collider_builder(obj, key, collider))
+            }
         }
     }
 
@@ -219,6 +222,82 @@ impl RapierWorld{
             .gravity_scale(gravity_scale)
             .linear_damping(0.0) 
             .angular_damping(0.0)
+            .user_data(key_to_u128(key))
+            .build();
+
+        collider.user_data = key_to_u128(key);
+        let rigid_body_handle = self.rigidBS.insert(rigid_body);
+        
+        let collider_handle = self.coll.insert_with_parent(
+            collider,
+            rigid_body_handle,
+            &mut self.rigidBS
+        );
+
+        ObjectHandle { rigid_body_handle, collider_handle }
+    }
+
+    fn fixed_collider_builder(&mut self, obj: &obj::Object, key: ObjectKey, options: ColliderOptions) -> ObjectHandle {
+        let (friction_val, restitution_val) = match options.0 {
+            InnerColliderOptions::Fixed { friction, restitution } => (friction, restitution),
+            _ => unreachable!()
+        };
+
+        let t: Transforms<'_> = extract_object_transforms(obj);
+
+        let mut collider = match obj {
+            obj::Object::Cube(_) => {
+                ColliderBuilder::cuboid(t.scale.x / 2.0, t.scale.y / 2.0, t.scale.z / 2.0)
+                    .friction(friction_val)
+                    .restitution(restitution_val)
+                    .build()
+            },
+            obj::Object::Mesh(mesh_wrapper) => {
+                 let vertices: Vec<rapier3d::math::Vec3> = mesh_wrapper.mesh.vertices
+                 .iter()
+                 .map(|v| {
+                     rapier3d::math::Vec3::new(
+                         v.position.x * mesh_wrapper.scale.x,
+                         v.position.y * mesh_wrapper.scale.y,
+                         v.position.z * mesh_wrapper.scale.z,
+                     )
+                 })
+                 .collect();
+
+                let indices: Vec<[u32; 3]> = mesh_wrapper.mesh.indices
+                    .chunks_exact(3)
+                    .map(|chunk| [chunk[0] as u32, chunk[1] as u32, chunk[2] as u32])
+                    .collect();
+
+                ColliderBuilder::trimesh(vertices, indices)
+                    .expect("Could not build fixed mesh collider")
+                    .friction(friction_val)
+                    .restitution(restitution_val)
+                    .build()
+            },
+            obj::Object::Sphere(_) => {
+                ColliderBuilder::ball(t.scale.x / 2.0)
+                    .friction(friction_val)
+                    .restitution(restitution_val)
+                    .build()
+            },
+            obj::Object::Cylinder(_) => {
+                ColliderBuilder::cylinder(t.scale.y / 2.0, t.scale.x / 2.0)
+                    .friction(friction_val)
+                    .restitution(restitution_val)
+                    .build()
+            },
+            obj::Object::Pill(_) => {
+                ColliderBuilder::capsule_y(t.scale.y / 2.0, t.scale.x / 2.0)
+                    .friction(friction_val)
+                    .restitution(restitution_val)
+                    .build()
+            },
+        };
+
+        let rigid_body = RigidBodyBuilder::fixed()
+            .translation(rapier3d::math::Vec3::new(t.pos.x, t.pos.y, t.pos.z))
+            .rotation(rapier3d::math::Vec3::new(t.rot.x, t.rot.y, t.rot.z))
             .user_data(key_to_u128(key))
             .build();
 
