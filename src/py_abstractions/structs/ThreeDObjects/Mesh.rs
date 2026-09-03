@@ -1,5 +1,5 @@
 use pyo3::{pyclass, pymethods};
-use pyo3_stub_gen::derive::{gen_stub_pyclass, gen_stub_pymethods};
+
 
 use slotmap::Key;
 use std::hash::{Hash, Hasher};
@@ -27,7 +27,6 @@ use crate::engine::Objects::ObjectDataCache;
 
 use crate::engine::Objects::ObjectManagement::ObjectStorage::ObjectKey;
 
-#[gen_stub_pyclass]
 #[pyclass(weakref, dict)]
 pub struct Mesh{
 	pub key: ObjectKey,
@@ -53,7 +52,6 @@ crate::implement_manual_drawing_options3D!(Mesh, r#"Mesh.from_file_data(...)"#);
 crate::implement_remove_tick3D!(Mesh);
 crate::implement_Drop3D!(Mesh);
 
-#[gen_stub_pymethods]
 #[pymethods]
 impl Mesh{
 

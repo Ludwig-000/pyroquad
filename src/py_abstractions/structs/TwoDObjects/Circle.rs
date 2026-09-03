@@ -1,5 +1,5 @@
 use pyo3::prelude::*;
-use pyo3_stub_gen::derive::* ;
+
 
 use pyo3::exceptions::*;
 
@@ -18,7 +18,6 @@ use crate::py_abstractions::structs::TwoDObjects::collision::collides_with_circl
 use crate::py_abstractions::structs::TwoDObjects::collision::collides_with_rec_circ;
 use pyo3::types::PyDict;
 
-#[gen_stub_pyclass]
 #[pyclass(eq, weakref, dict)]
 #[derive(PartialEq)]
 pub struct Circle{
@@ -43,7 +42,7 @@ crate::implement_Drop2D!(Circle);
 crate::implement_tick2D!(Circle,  r#"Circle()"#);
 
 crate::implement_magic_methods2D!(Circle);
-#[gen_stub_pymethods]
+
 #[pymethods]
 impl Circle{
     #[new]

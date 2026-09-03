@@ -15,12 +15,10 @@ use crate::py_abstractions::structs::GLAM::Vec3::Vec3;
 
 
 use macroquad::prelude as mq;
-use pyo3::{PyResult, pyclass, pymethods};
-use pyo3_stub_gen::derive::{gen_stub_pyclass, gen_stub_pyclass_enum, gen_stub_pymethods};
+use pyo3::{PyResult, pyclass, pyfunction, pymethods};
 use crate::py_abstractions::structs::GLAM::Mat4::Mat4;
 use crate::py_abstractions::{Color::Color, Textures_and_Images::Texture2D};
 
-#[gen_stub_pyclass]
 #[pyclass(frozen, from_py_object)]
 #[repr(C)]
 #[derive(Clone, Debug, Copy)]
@@ -35,7 +33,6 @@ pub struct Vertex {
     pub normal: mq::Vec4,
 }
 
-#[gen_stub_pymethods]
 #[pymethods]
 impl Vertex{
 
@@ -64,7 +61,7 @@ impl From<Vertex> for mq::Vertex{
 }
 
 
-#[gen_stub_pyclass_enum]
+
 #[pyclass(from_py_object)]
 #[derive(Clone, Copy)]
 pub enum DrawMode{
@@ -74,14 +71,12 @@ pub enum DrawMode{
 
 
 /// A Pipeline, created via 'create_gl_pipeline'
-#[gen_stub_pyclass]
 #[pyclass(from_py_object)]
 #[derive(Clone, Copy)]
 pub struct  GlPipeline(mq::GlPipeline);
 
 /// A simple datatype that holds a Vector of Vertices and a Vector of indices.
 /// using this Wrapper in conjunction with 'geometry()' avoids cloning any data.
-#[gen_stub_pyclass]
 #[pyclass(from_py_object)]
 #[derive(Clone)]
 pub struct Geometry{
@@ -89,136 +84,137 @@ pub struct Geometry{
     indices: Arc<[u16]>,
 }
 
-/// NOT YET IMPLEMENTED
-/// try to convince Stub gen this is a module.
-// #[gen_stub_pyclass(module = "pyroquad.internal_gl")] // module = .. does not seem to do anything but does not err?
-#[gen_stub_pyclass] 
-#[pyclass(from_py_object)]
-#[derive(Clone, Copy)]
-pub struct InternalGL();
-
 
 // Note:
-// All commented out functions are not easily implemented since it's inputs/outputs 
+// All commented out functions are not easily implemented since their inputs/outputs 
 // are hard to convert into python types.
-#[gen_stub_pymethods]
-#[pymethods]
-impl InternalGL{
-    #[staticmethod]
-    pub fn clear_draw_calls(){
-        let c = GlEnum::ClearDrawCalls;
-        COMMAND_QUEUE.push( Command::GlEnum(c));
-    }
-    #[staticmethod]
-    pub fn delete_pipeline(pipeline: GlPipeline){
-        let c  = GlEnum::DeletePipeline(pipeline);
-        COMMAND_QUEUE.push( Command::GlEnum(c));
-    }
-    #[staticmethod]
-    pub fn depth_test(enable: bool){
-        let c  = GlEnum::DepthTest(enable);
-        COMMAND_QUEUE.push( Command::GlEnum(c));
-    }
-    // #[staticmethod]
-    // pub fn draw(ctx: &mut dyn miniquad::RenderingBackend, projection: glam::Mat4){
-    //     todo!()
-    // }
-    #[staticmethod]
-    pub fn draw_mode(draw_mode: DrawMode){
-        let c  = GlEnum::DrawMode(draw_mode);
-        COMMAND_QUEUE.push( Command::GlEnum(c));
-    }
-    #[staticmethod]
-    pub fn geometry(geometry: Geometry){
-        let c  = GlEnum::Geometry(geometry);
-        COMMAND_QUEUE.push( Command::GlEnum(c));
-    }
-    // #[staticmethod]
-    // pub fn get_active_render_pass()-> Option<RenderPass>{
-    //     todo!()
-    // }
-    #[staticmethod]
-    pub fn get_viewport_matrix()-> PyResult<Mat4>{
-        let (tx,rx) = PChannel::channel();
-        let c  = GlEnum::GetViewportMatrix(tx);
-        COMMAND_QUEUE.push( Command::GlEnum(c));
 
-        Ok(rx.recv()?)
-    }
-    #[staticmethod]
-    pub fn get_viewport()-> PyResult<(i32,i32,i32,i32)>{
-        let (tx,rx) = PChannel::channel();
-        let c  = GlEnum::GetViewport(tx);
-        COMMAND_QUEUE.push( Command::GlEnum(c));
+#[pyfunction]
+pub fn clear_draw_calls() {
+    let c = GlEnum::ClearDrawCalls;
+    COMMAND_QUEUE.push(Command::GlEnum(c));
+}
 
-        Ok(rx.recv()?)
-    }
-    #[staticmethod]
-    pub fn is_depth_test_enabled()-> PyResult<bool>{
-        let (tx,rx) = PChannel::channel();
-        let c  = GlEnum::IsDephTestEnabled(tx);
-        COMMAND_QUEUE.push( Command::GlEnum(c));
+#[pyfunction]
+pub fn delete_pipeline(pipeline: GlPipeline) {
+    let c = GlEnum::DeletePipeline(pipeline);
+    COMMAND_QUEUE.push(Command::GlEnum(c));
+}
 
-        Ok(rx.recv()?)
-    }
-    // #[staticmethod]
-    // pub fn make_pipeline(
-    //     ctx: &mut (dyn RenderingBackend + 'static), 
-    //     shader: ShaderSource<'_>, 
-    //     params: PipelineParams, 
-    //     uniforms: Vec<UniformDesc, Global>, 
-    //     textures: Vec<String, Global>)
-    //      -> Result<GlPipeline, Error>{
-    //     todo!()
-    // }
-    #[staticmethod]
-    pub fn pipeline(pipeline: Option<GlPipeline>){
-        let c  = GlEnum::Pipeline(pipeline);
-        COMMAND_QUEUE.push( Command::GlEnum(c));
-    }
-    #[staticmethod]
-    pub fn pop_model_matrix(){
-        let c  = GlEnum::PopModelMatrx;
-        COMMAND_QUEUE.push( Command::GlEnum(c));
-    }
-    #[staticmethod]
-    pub fn push_model_matrix(matrix: Mat4){
-        let c  = GlEnum::PushModelMatrix(matrix);
-        COMMAND_QUEUE.push( Command::GlEnum(c));
-    }
-    // #[staticmethod]
-    // pub fn render_pass(render_pass: Option<RenderPass>){
-    //     todo!()
-    // }
-    
-    ///Reset internal state to known default
-    #[staticmethod]
-    pub fn reset(){
-        let c  = GlEnum::Reset;
-        COMMAND_QUEUE.push( Command::GlEnum(c));
-    }
-    #[staticmethod]
-    pub fn scissor(clip: Option<(i32, i32, i32, i32)>){
-        let c  = GlEnum::Scissor(clip);
-        COMMAND_QUEUE.push( Command::GlEnum(c));
-    }
-    #[staticmethod]
-    pub fn set_texture(pipeline: GlPipeline, name: &str, texture: Texture2D){
-        let c  = GlEnum::SetTexture { pipeline, name: name.into(), texture };
-        COMMAND_QUEUE.push( Command::GlEnum(c));
-    }
+#[pyfunction]
+pub fn depth_test(enable: bool) {
+    let c = GlEnum::DepthTest(enable);
+    COMMAND_QUEUE.push(Command::GlEnum(c));
+}
 
-    #[staticmethod]
-    pub fn texture(texture: Option<Texture2D>){
-        let c  = GlEnum::Texture(texture);
-        COMMAND_QUEUE.push( Command::GlEnum(c));
-    }
-    #[staticmethod]
-    pub fn viewport(viewport: Option<(i32, i32, i32, i32)>){
-        let c  = GlEnum::Viewport(viewport);
-        COMMAND_QUEUE.push( Command::GlEnum(c));
-    }
+// pub fn draw(ctx: &mut dyn miniquad::RenderingBackend, projection: glam::Mat4) {
+//     todo!()
+// }
 
+#[pyfunction]
+pub fn draw_mode(draw_mode: DrawMode) {
+    let c = GlEnum::DrawMode(draw_mode);
+    COMMAND_QUEUE.push(Command::GlEnum(c));
+}
+
+#[pyfunction]
+pub fn geometry(geometry: Geometry) {
+    let c = GlEnum::Geometry(geometry);
+    COMMAND_QUEUE.push(Command::GlEnum(c));
+}
+
+// pub fn get_active_render_pass() -> Option<RenderPass> {
+//     todo!()
+// }
+
+#[pyfunction]
+pub fn get_viewport_matrix() -> PyResult<Mat4> {
+    let (tx, rx) = PChannel::channel();
+    let c = GlEnum::GetViewportMatrix(tx);
+    COMMAND_QUEUE.push(Command::GlEnum(c));
+
+    Ok(rx.recv()?)
+}
+
+#[pyfunction]
+pub fn get_viewport() -> PyResult<(i32, i32, i32, i32)> {
+    let (tx, rx) = PChannel::channel();
+    let c = GlEnum::GetViewport(tx);
+    COMMAND_QUEUE.push(Command::GlEnum(c));
+
+    Ok(rx.recv()?)
+}
+
+#[pyfunction]
+pub fn is_depth_test_enabled() -> PyResult<bool> {
+    let (tx, rx) = PChannel::channel();
+    let c = GlEnum::IsDephTestEnabled(tx);
+    COMMAND_QUEUE.push(Command::GlEnum(c));
+
+    Ok(rx.recv()?)
+}
+
+// pub fn make_pipeline(
+//     ctx: &mut (dyn RenderingBackend + 'static), 
+//     shader: ShaderSource<'_>, 
+//     params: PipelineParams, 
+//     uniforms: Vec<UniformDesc, Global>, 
+//     textures: Vec<String, Global>)
+//      -> Result<GlPipeline, Error> {
+//     todo!()
+// }
+
+#[pyfunction]
+pub fn pipeline(pipeline: Option<GlPipeline>) {
+    let c = GlEnum::Pipeline(pipeline);
+    COMMAND_QUEUE.push(Command::GlEnum(c));
+}
+
+#[pyfunction]
+pub fn pop_model_matrix() {
+    let c = GlEnum::PopModelMatrx;
+    COMMAND_QUEUE.push(Command::GlEnum(c));
+}
+
+#[pyfunction]
+pub fn push_model_matrix(matrix: Mat4) {
+    let c = GlEnum::PushModelMatrix(matrix);
+    COMMAND_QUEUE.push(Command::GlEnum(c));
+}
+
+// pub fn render_pass(render_pass: Option<RenderPass>) {
+//     todo!()
+// }
+
+/// Reset internal state to known default
+#[pyfunction]
+pub fn reset() {
+    let c = GlEnum::Reset;
+    COMMAND_QUEUE.push(Command::GlEnum(c));
+}
+
+#[pyfunction]
+pub fn scissor(clip: Option<(i32, i32, i32, i32)>) {
+    let c = GlEnum::Scissor(clip);
+    COMMAND_QUEUE.push(Command::GlEnum(c));
+}
+
+#[pyfunction]
+pub fn set_texture(pipeline: GlPipeline, name: &str, texture: Texture2D) {
+    let c = GlEnum::SetTexture { pipeline, name: name.into(), texture };
+    COMMAND_QUEUE.push(Command::GlEnum(c));
+}
+
+#[pyfunction]
+pub fn texture(texture: Option<Texture2D>) {
+    let c = GlEnum::Texture(texture);
+    COMMAND_QUEUE.push(Command::GlEnum(c));
+}
+
+#[pyfunction]
+pub fn viewport(viewport: Option<(i32, i32, i32, i32)>) {
+    let c = GlEnum::Viewport(viewport);
+    COMMAND_QUEUE.push(Command::GlEnum(c));
 }
 
 

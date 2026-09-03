@@ -1,13 +1,9 @@
 use pyo3::prelude::*;
- 
-//use pyo3::type_gen::generate_type;
-//use pyo3::type_gen::generate_type_as_function;
 
-use pyo3_stub_gen::derive::gen_stub_pyclass_enum;
 
 use macroquad::prelude as mq;
 
-#[gen_stub_pyclass_enum]
+
 #[cfg_attr(feature = "abi_314", pyclass(eq, hash, frozen, immutable_type,from_py_object))]
 #[cfg_attr(not(feature = "abi_314"), pyclass(eq, hash, frozen,from_py_object))]
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]

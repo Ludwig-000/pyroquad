@@ -10,7 +10,7 @@ use crate::py_abstractions::Textures_and_Images::Texture2D;
 use pyo3::exceptions::PyRuntimeError;
 use pyo3::prelude::*;
 use crate::engine::PChannel::PReceiver;
-use pyo3_stub_gen::derive::* ;
+
 use pyo3::PyErr;
 
 /// TODO: maybe add a trait for internal future handling
@@ -20,7 +20,6 @@ use pyo3::PyErr;
 
 
 use pyo3::prelude::*;
-use pyo3_stub_gen::{PyStubType, TypeInfo};
 pub struct Timeout();
 
 impl<'py> IntoPyObject<'py> for Timeout {
@@ -33,10 +32,6 @@ impl<'py> IntoPyObject<'py> for Timeout {
     }
 }
 
-impl PyStubType for Timeout {
-    fn type_input() -> TypeInfo { TypeInfo::unqualified("typing.Literal['Timeout']") }
-    fn type_output() -> TypeInfo { TypeInfo::unqualified("typing.Literal['Timeout']") }
-}
 
 pub struct EmptyFuture();
 
@@ -48,11 +43,6 @@ impl<'py> IntoPyObject<'py> for EmptyFuture {
     fn into_pyobject(self, py: Python<'py>) -> Result<Self::Output, Self::Error> {
         Ok(pyo3::types::PyString::new(py, "EmptyFuture"))
     }
-}
-
-impl PyStubType for EmptyFuture {
-    fn type_input() -> TypeInfo { TypeInfo::unqualified("typing.Literal['EmptyFuture']") }
-    fn type_output() -> TypeInfo { TypeInfo::unqualified("typing.Literal['EmptyFuture']") }
 }
 
 
@@ -75,15 +65,6 @@ impl<'py> IntoPyObject<'py> for FutureWaitResult {
     }
 }
 
-// This is what combines them in the Python .pyi file
-impl PyStubType for FutureWaitResult {
-    fn type_input() -> TypeInfo {
-        TypeInfo::unqualified("typing.Literal['Timeout', 'EmptyFuture']")
-    }
-    fn type_output() -> TypeInfo {
-        TypeInfo::unqualified("typing.Literal['Timeout', 'EmptyFuture']")
-    }
-}
 
 
 
@@ -94,7 +75,6 @@ macro_rules! generate_pfuture {
     ($res_type:ty) => {
         paste::paste! {
             #[doc = "A future to " $res_type ". All pyroquad Futures are eagerly evaluated,\nmeaning thex execute as soon as they are created."]
-            #[gen_stub_pyclass]
             #[pyclass]
             pub struct [<$res_type Future>] {
                 pub future: std::sync::Mutex<Option<PReceiver<PyResult<$res_type>>>>,
@@ -106,7 +86,6 @@ macro_rules! generate_pfuture {
                     }
                 }
             }
-            #[gen_stub_pymethods]
             #[pymethods]
             impl [<$res_type Future>] {
                 pub fn result(&self) -> PyResult<Option<$res_type>> {
@@ -170,13 +149,11 @@ macro_rules! generate_pfuture {
 
 
 
-#[gen_stub_pyclass]
 #[pyclass]
 pub struct Future {
     pub future: std::sync::Mutex<Option<PReceiver<PyResult<()>>>>,
 }
 
-#[gen_stub_pymethods]
 #[pymethods]
 impl Future {
 

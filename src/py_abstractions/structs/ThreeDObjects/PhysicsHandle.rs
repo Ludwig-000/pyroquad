@@ -1,6 +1,6 @@
 
 use pyo3::{ pyclass, pymethods};
-use pyo3_stub_gen::derive::{gen_stub_pyclass, gen_stub_pymethods};
+
 
 
 use crate::py_abstractions::structs::GLAM::BVec3::BVec3;
@@ -19,7 +19,6 @@ use crate::engine::Objects::ObjectManagement::ObjectStorage::ObjectKey;
 
 /// Physics that are bound to a Dynamic 3D object.
 /// This class can only be used by making a Dynamic 3D object, and accessing it's 'physics' field.
-#[gen_stub_pyclass]
 #[cfg_attr(feature = "abi_314", pyclass(frozen, immutable_type))]
 #[cfg_attr(not(feature = "abi_314"), pyclass(frozen))]
 pub struct Physics{
@@ -27,7 +26,6 @@ pub struct Physics{
     pub handle: ObjectKey
 }
 
-#[gen_stub_pymethods]
 #[pymethods]
 impl Physics{
     pub fn set_linear_velocity(&self, py: Python<'_>, velocity: Vec3)-> PyResult<()> {

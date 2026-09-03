@@ -3,14 +3,13 @@ use crate::py_abstractions::structs::GLAM::BVec3::BVec3;
 use glam::Vec3 as gl;
 use glam::Vec2 as glVec2;
 use pyo3::prelude::*;
-use pyo3_stub_gen::derive::*;
+
 
 
 //
 // A python abstraction for the Vec3 struct from the GLAM crate.
 // This file implements all functionality from Glam, replacing uses of BVec3 and Vec2 with the pyabstracted versions.
 //
-#[gen_stub_pyclass]
 #[cfg_attr(feature = "abi_314", pyclass(eq,str,frozen, immutable_type, from_py_object))]
 #[cfg_attr(not(feature = "abi_314"), pyclass(eq,str,frozen, from_py_object))]
 #[repr(C)]
@@ -39,7 +38,6 @@ impl Vec3 {
     }
 }
 
-#[gen_stub_pymethods]
 #[pymethods]
 impl Vec3 {
     #[new]
@@ -1072,16 +1070,4 @@ impl From<gl> for Vec3 {
 pub enum Vec3OrF32 {
     Vec3(Vec3),
     F32(f32),
-}
-
-
-use pyo3_stub_gen::{PyStubType, TypeInfo};
-
-impl PyStubType for Vec3OrF32 {
-    fn type_input() -> TypeInfo {
-        TypeInfo::unqualified("Vec3 | float")
-    }
-    fn type_output() -> TypeInfo {
-        TypeInfo::unqualified("Vec3 | float")
-    }
 }

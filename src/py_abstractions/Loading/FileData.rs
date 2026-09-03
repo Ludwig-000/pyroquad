@@ -1,6 +1,6 @@
 
 use pyo3::prelude::*;
-use pyo3_stub_gen::derive::* ;
+
 use crate::py_abstractions::{Loading::Loading::load_file, Text::Font, structs::ThreeDObjects::{ColliderOptions::ColliderOptions, Mesh::Mesh}};
 use crate::py_abstractions::Audio::Sound;
 use crate::py_abstractions::Textures_and_Images::{Image,Texture2D};
@@ -17,7 +17,6 @@ use crate::py_abstractions::Textures_and_Images;
 /// ...
 /// ```
 /// or use the `Loading` class.
-#[gen_stub_pyclass]
 #[pyclass(from_py_object)]
 #[derive(Clone)]
 pub struct FileData{
@@ -28,7 +27,6 @@ pub struct FileData{
     pub bytes: Vec<u8>,
 }
 
-#[gen_stub_pymethods]
 #[pymethods]
 impl FileData{
 

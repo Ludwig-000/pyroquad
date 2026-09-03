@@ -1,17 +1,14 @@
 use macroquad::prelude as mq;
 use pyo3::PyResult;
 use pyo3::{pyclass, pyfunction,pymethods};
-use pyo3_stub_gen::derive::gen_stub_pyfunction;
-
 use crate::engine::PChannel::PChannel;
-use pyo3_stub_gen::derive::*;
+
 use crate::engine::CoreLoop::COMMAND_QUEUE;
 use crate::engine::CoreLoop::Command;
  
 use crate::engine::PArc::PArc;
 
 
-#[gen_stub_pyclass]
 #[pyclass(from_py_object)]
 #[derive(Clone, Debug)]
 pub struct RenderTarget {
@@ -43,7 +40,6 @@ impl From<&RenderTarget> for mq::RenderTarget{
 
 
 /// A shortcut to create a render target with no depth buffer and `sample_count: 4`
-#[gen_stub_pyfunction]
 #[pyfunction]
 pub fn render_target_msaa(width: u32, height: u32) -> PyResult<RenderTarget> {
     let (tx, rx) = PChannel::channel();
@@ -54,7 +50,6 @@ pub fn render_target_msaa(width: u32, height: u32) -> PyResult<RenderTarget> {
 }
 
 
-#[gen_stub_pyfunction]
 #[pyfunction]
 #[pyo3(signature = (width, height, params = None))]
 pub fn render_target(width: u32, height: u32, params: Option<RenderTargetParams>) -> PyResult<RenderTarget> {
@@ -70,7 +65,6 @@ pub fn render_target(width: u32, height: u32, params: Option<RenderTargetParams>
 
 
 
-#[gen_stub_pyclass]
 #[pyclass(from_py_object)]
 #[derive(Clone,Copy, PartialEq, Debug)]
 pub struct RenderTargetParams {
@@ -85,7 +79,6 @@ pub struct RenderTargetParams {
     pub depth: bool,
 }
 
-#[gen_stub_pymethods]
 #[pymethods]
 impl RenderTargetParams {
 

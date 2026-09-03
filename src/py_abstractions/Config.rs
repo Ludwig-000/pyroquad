@@ -4,9 +4,8 @@ use pyo3::prelude::*;
 //use pyo3::type_gen::generate_type_as_function;
 use macroquad::{miniquad::conf::Icon, prelude as mq};
 
-use pyo3_stub_gen::derive::* ;
 
-#[gen_stub_pyclass]
+
 #[pyclass(from_py_object)]
 #[derive(Clone, PartialEq, Debug)]
 pub struct Config {
@@ -51,7 +50,6 @@ pub struct Config {
 }
 
 
-#[gen_stub_pymethods]
 #[pymethods]
 impl Config {
     #[new]

@@ -1,7 +1,9 @@
 
 
 
+use pyo3::{Bound, FromPyObject, IntoPyObject};
 
+use crate::py_abstractions::structs::ThreeDObjects::{Cube::Cube, Cylinder::Cylinder, Mesh::Mesh, Pill::Pill, Sphere::Sphere};
 
 #[derive(FromPyObject, IntoPyObject)]
 pub enum Objct<'py> {
@@ -13,20 +15,6 @@ pub enum Objct<'py> {
 }
 
 
-use pyo3_stub_gen::{PyStubType, TypeInfo};
-use rapier3d::parry::simba::scalar::SupersetOf;
-use pyo3::prelude::*;
-use crate::py_abstractions::structs::ThreeDObjects::{Cube::Cube, Cylinder::Cylinder, Mesh::Mesh, Pill::Pill, Sphere::Sphere};
-
-impl PyStubType for Objct<'_> {
-    fn type_input() -> TypeInfo {
-        TypeInfo::unqualified("Cube | Cylinder | Mesh | Pill | Sphere")
-    }
-    fn type_output() -> TypeInfo {
-        TypeInfo::unqualified("Cube | Cylinder | Mesh | Pill | Sphere")
-    }
-}
-
 
 
 
@@ -35,7 +23,6 @@ macro_rules! implement_basic_magic_methods3D {
     ($name:ident) => {
         paste::paste! {
 
-            #[gen_stub_pymethods]
             #[pymethods]
             impl $name {
 
@@ -87,7 +74,6 @@ macro_rules! implement_basic_getter_methods3D {
     ($name:ident) => {
         paste::paste! {
 
-            #[gen_stub_pymethods]
             #[pymethods]
             impl $name {
 #[doc = 
@@ -185,7 +171,6 @@ since " $name ".scale returns a copy of its scale, one has to write:
 macro_rules! implement_basic_setter_methods3D {
     ($name:ident) => {paste::paste! {
 
-            #[gen_stub_pymethods]
             #[pymethods]
             impl $name {
                 
@@ -230,7 +215,6 @@ macro_rules! implement_check_collision3D {
     ($name:ident) => {
         paste::paste! {
             use $crate::py_abstractions::structs::ThreeDObjects::ObjectMacros::Objct;
-            #[gen_stub_pymethods]
             #[pymethods]
             impl $name {
 
@@ -291,7 +275,6 @@ macro_rules! implement_tick3D {
     ($name:ident,  $py_constructor:expr) => {
         paste::paste! {
 
-            #[gen_stub_pymethods]
             #[pymethods]
             impl $name {
 
@@ -356,7 +339,6 @@ macro_rules! implement_remove_tick3D {
     ($name:ident) => {
         paste::paste! {
 
-            #[gen_stub_pymethods]
             #[pymethods]
             impl $name {
 
@@ -388,7 +370,6 @@ macro_rules! implement_set_collider3D {
     ($name:ident) => {
         paste::paste! {
 
-            #[gen_stub_pymethods]
             #[pymethods]
             impl $name {
                 
@@ -429,7 +410,6 @@ macro_rules! implement_manual_drawing_options3D {
     ($name:ident,  $py_constructor:expr) => {
         paste::paste! {
 
-            #[gen_stub_pymethods]
             #[pymethods]
             impl $name {
                 

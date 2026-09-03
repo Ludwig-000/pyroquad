@@ -1,5 +1,5 @@
 use pyo3::prelude::*;
-use pyo3_stub_gen::derive::* ;
+
 use pyo3::types::{PyWeakref, PyWeakrefReference};
 use pyo3::exceptions::*;
 use crate::engine::PChannel::PChannel;
@@ -22,7 +22,6 @@ use crate::py_abstractions::Color::Color;
 use crate::engine::Objects::ObjectManagement::ObjectStorage::ObjectKey;
 
 
-#[gen_stub_pyclass]
 #[pyclass(weakref, dict)]
 pub struct Pill{
     key: ObjectKey, // The key to the actual underlying cube, stored inside "ObjectStorage".
@@ -50,7 +49,6 @@ crate::implement_manual_drawing_options3D!(Pill,  r#"Pill()"#);
 crate::implement_remove_tick3D!(Pill);
 crate::implement_Drop3D!(Pill);
 
-#[gen_stub_pymethods]
 #[pymethods]
 impl Pill {
 

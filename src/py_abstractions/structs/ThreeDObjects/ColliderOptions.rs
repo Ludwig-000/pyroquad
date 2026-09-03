@@ -1,5 +1,5 @@
 use pyo3::prelude::*;
-use pyo3_stub_gen::derive::* ;
+
 
 
 /// A Settings-Class for Colliders.
@@ -15,13 +15,11 @@ use pyo3_stub_gen::derive::* ;
 /// ...# both physics and collision.
 /// >>>ColliderOptions.DYNAMIC(...)
 /// ```
-#[gen_stub_pyclass]
 #[cfg_attr(feature = "abi_314", pyclass(frozen, immutable_type, from_py_object, eq))]
 #[cfg_attr(not(feature = "abi_314"), pyclass(frozen, from_py_object, eq))]
 #[derive(Clone, Copy, PartialEq)]
 pub struct ColliderOptions(pub InnerColliderOptions);
 
-#[gen_stub_pymethods]
 #[pymethods]
 impl ColliderOptions{
 

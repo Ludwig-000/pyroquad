@@ -1,12 +1,10 @@
 use macroquad::prelude;
 use pyo3::prelude::*;
-use pyo3_stub_gen::{derive::*};
 
 
 
 /// A Shader is a program, compiled at runtime, that operates on the GPU.
 /// Typically, shaders modify how objects are drawn.
-#[gen_stub_pyclass]
 #[pyclass(from_py_object)]
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Shader {
@@ -15,7 +13,6 @@ pub struct Shader {
 }
 
 
-#[gen_stub_pymethods]
 #[pymethods]
 impl Shader{
 
@@ -104,7 +101,7 @@ impl Shader{
 
 
 /// Not yet implmented, but will be used to set uniform variables for shaders.
-#[gen_stub_pyclass_enum]
+
 #[pyclass]
 #[derive(Debug)]
 pub enum ShaderSource {

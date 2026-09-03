@@ -10,7 +10,7 @@ use crate::engine::CoreLoop::Command;
 use crate::engine::PChannel::PSender;
 use crate::py_abstractions::structs::GLAM::Vec2::Vec2;
 use crate::py_assert;
-use pyo3::exceptions::PyValueError;use pyo3_stub_gen::derive::*;
+use pyo3::exceptions::PyValueError;
 use crate::py_abstractions::Color::*;
 use crate::engine::PArc::PArc;
 
@@ -19,7 +19,6 @@ use image::ImageReader as ImageReader;
 use std::io::Cursor;
 
 /// Image, data stored in CPU memory
-#[gen_stub_pyclass]
 #[pyclass(from_py_object)]
 #[derive(Debug, Clone, PartialEq, Eq,)]
 pub struct Image {
@@ -33,7 +32,6 @@ pub struct Image {
     pub height: u16,
 }
 
-#[gen_stub_pymethods]
 #[pymethods]
 impl Image {
 
@@ -270,14 +268,12 @@ impl From<Image> for mq::Image {
 
 
 /// Texture, data stored in GPU memory
-#[gen_stub_pyclass]
 #[pyclass(from_py_object)]
 #[derive(Clone, Debug, PartialEq)]
 pub struct Texture2D {
    pub texture: PArc<mq::Texture2D>,
 }
 
-#[gen_stub_pymethods]
 #[pymethods]
 impl Texture2D {
    
@@ -411,7 +407,7 @@ impl Texture2D {
 
 }
 
-#[gen_stub_pyclass_enum]
+
 #[pyclass(from_py_object)]
 #[derive(Clone, Copy)]
 pub enum FilterMode{
@@ -564,7 +560,6 @@ impl EngineTexImgEnum{
 /// the one from the atlas
 /// NOTE: the GPU memory and texture itself in Texture2D will still be allocated
 /// and Texture->Image conversions will work with Texture2D content, not the atlas
-#[gen_stub_pyfunction]
 #[pyfunction]
 pub fn build_texture_atlas(){
     COMMAND_QUEUE.push( Command::BuildTextureAtlas );

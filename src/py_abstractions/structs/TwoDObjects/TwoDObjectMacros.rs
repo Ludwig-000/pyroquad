@@ -29,7 +29,6 @@ macro_rules! implement_tick2D {
     ($name:ident,  $py_constructor:expr) => {
         paste::paste! {
 
-            #[gen_stub_pymethods]
             #[pymethods]
             impl $name {
 
@@ -123,7 +122,6 @@ macro_rules! implement_magic_methods2D {
     ($name:ident) => {
         paste::paste! {
             use pyo3::types::{PyBytes, PyTuple};
-            #[gen_stub_pymethods]
             #[pymethods]
             impl $name {
 

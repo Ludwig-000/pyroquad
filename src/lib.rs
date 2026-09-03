@@ -15,194 +15,134 @@
 #![allow(clippy::style)]
 
 
-#[cfg(feature = "use-real")]
-pub extern crate pyo3_stub_gen_real as pyo3_stub_gen;
-#[cfg(not(feature = "use-real"))]
-pub use ::pyo3_stub_gen;
-
 
 use pyo3::prelude::*;
-use pyo3_stub_gen::derive::*;
 
-use pyo3::prelude::*;
-use pyo3_stub_gen::define_stub_info_gatherer;
 
 mod engine;
 mod py_abstractions;
 
 
-#[pymodule]
-#[pyo3(gil_used = false)]
-pub fn _pyroquad( m: &Bound<'_, PyModule>) -> PyResult<()> {
+#[pyo3::pymodule]
+pub mod _pyroquad {
+
+    #[pyo3::pymodule]
+    #[pyo3(gil_used = false)]
+    pub mod InternalGL {
+        #[pymodule_export]
+        pub use crate::py_abstractions::GL::{
+            DrawMode, Geometry, GlPipeline, Vertex,
+        };
+
+        #[pymodule_export]
+        pub use crate::py_abstractions::GL::{
+            clear_draw_calls, delete_pipeline, depth_test, draw_mode, geometry,
+            get_viewport, get_viewport_matrix, is_depth_test_enabled, pipeline,
+            pop_model_matrix, push_model_matrix, reset, scissor, set_texture,
+            texture, viewport,
+        };
+    }
+
+    #[pymodule_export]
+    pub use crate::py_abstractions::py_functions::{
+        activate_engine, batch_draw_shapes, cartesian_to_polar, clear_background, draw_affine_parallelepiped,
+        draw_affine_parallelogram, draw_all_objects, draw_arc, draw_circle, draw_circle_lines, draw_cube,
+        draw_cube_wires, draw_cylinder, draw_cylinder_wires, draw_ellipse, draw_ellipse_lines, draw_grid,
+        draw_hexagon, draw_line, draw_line_3d, draw_multiline_text, draw_plane, draw_poly, draw_poly_lines,
+        draw_rectangle, draw_rectangle_lines, draw_skybox, draw_text, draw_texture, draw_triangle,
+        draw_triangle_lines, get_char_pressed, get_delta_time, get_fps, get_keys_down, get_keys_pressed,
+        get_keys_released, get_last_key_pressed, get_screen_data, get_text_center, is_quit_requested, next_frame,
+        polar_to_cartesian, prevent_quit, request_new_screen_size, screen_dpi_scale, screen_height, screen_width,
+        set_fullscreen, set_pc_assets_folder, step_physics,
+    };
+
+    #[pymodule_export]
+    pub use crate::py_abstractions::Mouse::{
+        clear_input_queue, get_mouse_buttons_down, get_mouse_buttons_pressed, get_mouse_buttons_released,
+        get_mouse_delta_position, get_mouse_position, get_mouse_position_local, get_mouse_wheel,
+        is_simulating_mouse_with_touch, mouse_inside_window, set_cursor_grab, show_mouse, simulate_mouse_with_touch,
+        touches, touches_local, Touch, TouchPhase,
+    };
+
+    #[pymodule_export]
+    pub use crate::py_abstractions::Camera::{
+        camera_font_scale, pop_camera_state, push_camera_state, set_default_camera, Camera2D, Camera3D, Projection,
+    };
+
+    #[pymodule_export]
+    pub use crate::py_abstractions::Text::{
+        measure_text, Font, TextDimensions,
+    };
+
+    #[pymodule_export]
+    pub use crate::py_abstractions::Color::Color;
+
+    #[pymodule_export]
+    pub use crate::py_abstractions::Loading::ThreadedLoading::Loading;
+    #[pymodule_export]
+    pub use crate::py_abstractions::Loading::FileData::FileData;
+    #[pymodule_export]
+    pub use crate::py_abstractions::Loading::Loading::{
+        download_file, download_file_future, load_file, load_file_future, write_to_file,
+    };
+
     
-    
-    m.add_function(wrap_pyfunction!(crate::py_abstractions::py_functions::activate_engine, m)?)?;
-    
-    m.add_function(wrap_pyfunction!(crate::py_abstractions::py_functions::draw_all_objects, m)?)?;
-    m.add_function(wrap_pyfunction!(crate::py_abstractions::py_functions::draw_rectangle, m)?)?;
-    m.add_function(wrap_pyfunction!(crate::py_abstractions::py_functions::draw_rectangle_lines, m)?)?;
-    m.add_function(wrap_pyfunction!(crate::py_abstractions::py_functions::draw_triangle, m)?)?;
-    m.add_function(wrap_pyfunction!(crate::py_abstractions::py_functions::draw_triangle_lines, m)?)?;
-    m.add_function(wrap_pyfunction!(crate::py_abstractions::py_functions::draw_poly, m)?)?;
-    m.add_function(wrap_pyfunction!(crate::py_abstractions::py_functions::draw_poly_lines, m)?)?;
-    m.add_function(wrap_pyfunction!(crate::py_abstractions::py_functions::draw_circle, m)?)?;
-    m.add_function(wrap_pyfunction!(crate::py_abstractions::py_functions::draw_circle_lines, m)?)?;
-    m.add_function(wrap_pyfunction!(crate::py_abstractions::py_functions::draw_affine_parallelepiped, m)?)?;
-    m.add_function(wrap_pyfunction!(crate::py_abstractions::py_functions::draw_affine_parallelogram, m)?)?;
-    m.add_function(wrap_pyfunction!(crate::py_abstractions::py_functions::draw_arc, m)?)?;
-    m.add_function(wrap_pyfunction!(crate::py_abstractions::py_functions::draw_cube_wires, m)?)?;
-    m.add_function(wrap_pyfunction!(crate::py_abstractions::py_functions::draw_cylinder, m)?)?;
-    m.add_function(wrap_pyfunction!(crate::py_abstractions::py_functions::draw_cylinder_wires, m)?)?;
-    m.add_function(wrap_pyfunction!(crate::py_abstractions::py_functions::draw_ellipse, m)?)?;
-    m.add_function(wrap_pyfunction!(crate::py_abstractions::py_functions::draw_ellipse_lines, m)?)?;
-    m.add_function(wrap_pyfunction!(crate::py_abstractions::py_functions::draw_hexagon, m)?)?;
-    m.add_function(wrap_pyfunction!(crate::py_abstractions::py_functions::draw_line, m)?)?;
-    m.add_function(wrap_pyfunction!(crate::py_abstractions::py_functions::draw_line_3d, m)?)?;
 
-    m.add_function(wrap_pyfunction!(crate::py_abstractions::py_functions::step_physics, m)?)?;
+    #[pymodule_export]
+    pub use crate::py_abstractions::RenderTarget::{
+        render_target, render_target_msaa, RenderTarget, RenderTargetParams,
+    };
 
+    #[pymodule_export]
+    pub use crate::py_abstractions::Textures_and_Images::{
+        build_texture_atlas, FilterMode, Image, Texture2D,
+    };
 
-    m.add_function(wrap_pyfunction!(crate::py_abstractions::py_functions::next_frame, m)?)?;
-    m.add_function(wrap_pyfunction!(crate::py_abstractions::py_functions::clear_background, m)?)?;
-    m.add_function(wrap_pyfunction!(crate::py_abstractions::py_functions::draw_multiline_text, m)?)?;
-    m.add_function(wrap_pyfunction!(crate::py_abstractions::py_functions::draw_text, m)?)?;
-    m.add_function(wrap_pyfunction!(crate::py_abstractions::py_functions::get_text_center, m)?)?;
+    #[pymodule_export]
+    pub use crate::py_abstractions::Audio::{PlaySoundParams, Sound};
 
-    m.add_function(wrap_pyfunction!(crate::py_abstractions::py_functions::batch_draw_shapes, m)?)?;
-    
-
-    m.add_function(wrap_pyfunction!(crate::py_abstractions::py_functions::get_fps, m)?)?;
-    m.add_function(wrap_pyfunction!(crate::py_abstractions::py_functions::get_delta_time, m)?)?;
-    m.add_function(wrap_pyfunction!(crate::py_abstractions::py_functions::get_keys_pressed, m)?)?;
-    m.add_function(wrap_pyfunction!(crate::py_abstractions::py_functions::get_keys_down, m)?)?;
-    m.add_function(wrap_pyfunction!(crate::py_abstractions::py_functions::get_keys_released, m)?)?;
-    m.add_function(wrap_pyfunction!(crate::py_abstractions::py_functions::get_char_pressed, m)?)?;
-    
-    m.add_function(wrap_pyfunction!(crate::py_abstractions::Mouse::mouse_inside_window, m)?)?;
-    m.add_function(wrap_pyfunction!(crate::py_abstractions::Mouse::get_mouse_buttons_down, m)?)?;
-    m.add_function(wrap_pyfunction!(crate::py_abstractions::Mouse::get_mouse_buttons_pressed, m)?)?;
-    m.add_function(wrap_pyfunction!(crate::py_abstractions::Mouse::get_mouse_buttons_released, m)?)?;
-    m.add_function(wrap_pyfunction!(crate::py_abstractions::Mouse::get_mouse_delta_position, m)?)?;
-    m.add_function(wrap_pyfunction!(crate::py_abstractions::Mouse::get_mouse_position_local, m)?)?;
-    m.add_function(wrap_pyfunction!(crate::py_abstractions::Mouse::get_mouse_wheel, m)?)?;
-    m.add_function(wrap_pyfunction!(crate::py_abstractions::Mouse::get_mouse_position, m)?)?;
-    m.add_function(wrap_pyfunction!(crate::py_abstractions::Mouse::set_cursor_grab, m)?)?;
-    m.add_function(wrap_pyfunction!(crate::py_abstractions::Mouse::show_mouse, m)?)?;
-    m.add_function(wrap_pyfunction!(crate::py_abstractions::Mouse::clear_input_queue, m)?)?;
-    m.add_function(wrap_pyfunction!(crate::py_abstractions::Mouse::is_simulating_mouse_with_touch, m)?)?;
-    m.add_function(wrap_pyfunction!(crate::py_abstractions::Mouse::simulate_mouse_with_touch, m)?)?;
-    m.add_function(wrap_pyfunction!(crate::py_abstractions::Mouse::touches, m)?)?;
-    m.add_function(wrap_pyfunction!(crate::py_abstractions::Mouse::touches_local, m)?)?;
-    
-    m.add_class::<crate::py_abstractions::Mouse::Touch>()?;
-    m.add_class::<crate::py_abstractions::Mouse::TouchPhase>()?;
-
-    m.add_function(wrap_pyfunction!(crate::py_abstractions::py_functions::get_screen_data, m)?)?;
-    m.add_function(wrap_pyfunction!(crate::py_abstractions::py_functions::screen_height, m)?)?;
-    m.add_function(wrap_pyfunction!(crate::py_abstractions::py_functions::screen_width, m)?)?;
-    m.add_function(wrap_pyfunction!(crate::py_abstractions::py_functions::request_new_screen_size, m)?)?;
-    m.add_function(wrap_pyfunction!(crate::py_abstractions::py_functions::screen_dpi_scale, m)?)?;
-
-    m.add_function(wrap_pyfunction!(crate::py_abstractions::py_functions::get_last_key_pressed, m)?)?;
-    m.add_function(wrap_pyfunction!(crate::py_abstractions::py_functions::draw_grid, m)?)?;
-    m.add_function(wrap_pyfunction!(crate::py_abstractions::py_functions::draw_texture, m)?)?;
-    m.add_function(wrap_pyfunction!(crate::py_abstractions::py_functions::draw_plane, m)?)?;
-    m.add_function(wrap_pyfunction!(crate::py_abstractions::py_functions::draw_cube, m)?)?;
-
-    m.add_function(wrap_pyfunction!(crate::py_abstractions::py_functions::polar_to_cartesian, m)?)?;
-    m.add_function(wrap_pyfunction!(crate::py_abstractions::py_functions::cartesian_to_polar, m)?)?;
-    m.add_function(wrap_pyfunction!(crate::py_abstractions::py_functions::set_pc_assets_folder, m)?)?;
-    
-    m.add_function(wrap_pyfunction!(crate::py_abstractions::py_functions::draw_skybox, m)?)?;
-
-    m.add_function(wrap_pyfunction!(crate::py_abstractions::py_functions::set_fullscreen, m)?)?;
-
-    m.add_function(wrap_pyfunction!(crate::py_abstractions::Camera::set_default_camera, m)?)?;
-    m.add_function(wrap_pyfunction!(crate::py_abstractions::Camera::push_camera_state, m)?)?;
-    m.add_function(wrap_pyfunction!(crate::py_abstractions::Camera::pop_camera_state, m)?)?;
-    m.add_function(wrap_pyfunction!(crate::py_abstractions::Camera::camera_font_scale, m)?)?;
-
-    m.add_class::<crate::py_abstractions::Text::Font>()?;
-    m.add_class::<crate::py_abstractions::Text::TextDimensions>()?;
-    m.add_function(wrap_pyfunction!(crate::py_abstractions::Text::measure_text, m)?)?;
-    
-    m.add_class::<crate::py_abstractions::Color::Color>()?;
-
-    m.add_class::<crate::py_abstractions::Loading::ThreadedLoading::Loading>()?;
-    m.add_class::<crate::py_abstractions::Loading::FileData::FileData>()?;
-    m.add_function(wrap_pyfunction!(crate::py_abstractions::Loading::Loading::load_file, m)?)?;
-    m.add_function(wrap_pyfunction!(crate::py_abstractions::Loading::Loading::load_file_future, m)?)?;
-    m.add_function(wrap_pyfunction!(crate::py_abstractions::Loading::Loading::download_file, m)?)?;
-    m.add_function(wrap_pyfunction!(crate::py_abstractions::Loading::Loading::download_file_future, m)?)?;
-    m.add_function(wrap_pyfunction!(crate::py_abstractions::Loading::Loading::write_to_file, m)?)?;
-
-    m.add_class::<crate::py_abstractions::GL::Vertex>()?;
-
-    m.add_function(wrap_pyfunction!(crate::py_abstractions::py_functions::is_quit_requested, m)?)?;
-    m.add_function(wrap_pyfunction!(crate::py_abstractions::py_functions::prevent_quit, m)?)?;
-    
-    m.add_class::<crate::py_abstractions::GL::InternalGL>()?;
-    m.add_class::<crate::py_abstractions::RenderTarget::RenderTarget>()?;
-    m.add_class::<crate::py_abstractions::RenderTarget::RenderTargetParams>()?;
-    m.add_class::<crate::py_abstractions::Textures_and_Images::Texture2D>()?;
-    m.add_class::<crate::py_abstractions::Textures_and_Images::FilterMode>()?;
-    m.add_class::<crate::py_abstractions::Textures_and_Images::Image>()?;
-    m.add_function(wrap_pyfunction!(crate::py_abstractions::Textures_and_Images::build_texture_atlas, m)?)?;
-    m.add_class::<crate::py_abstractions::Camera::Camera2D>()?;
-    m.add_class::<crate::py_abstractions::Camera::Camera3D>()?;
-    m.add_class::<crate::py_abstractions::Camera::Projection>()?;
-    m.add_function(wrap_pyfunction!(crate::py_abstractions::RenderTarget::render_target_msaa, m)?)?;
-    m.add_function(wrap_pyfunction!(crate::py_abstractions::RenderTarget::render_target, m)?)?;
+    #[pymodule_export]
+    pub use crate::py_abstractions::Config::Config;
 
 
 
-    m.add_class::<crate::py_abstractions::Audio::PlaySoundParams>()?;
-    m.add_class::<crate::py_abstractions::Audio::Sound>()?;
-
-    m.add_class::<crate::py_abstractions::Config::Config>()?;
-
-    m.add_class::<crate::py_abstractions::structs::GLAM::BVec2::BVec2>()?;
-    m.add_class::<crate::py_abstractions::structs::GLAM::BVec3::BVec3>()?;
-    m.add_class::<crate::py_abstractions::structs::GLAM::Vec3::Vec3>()?;
-    m.add_class::<crate::py_abstractions::structs::GLAM::Vec4::Vec4>()?;
-    m.add_class::<crate::py_abstractions::structs::GLAM::Vec2::Vec2>()?;
-    m.add_class::<crate::py_abstractions::structs::GLAM::Mat4::Mat4>()?;
-    m.add_class::<crate::py_abstractions::structs::GLAM::Quat::Quat>()?;
+    #[pymodule_export]
+    pub use crate::py_abstractions::structs::GLAM::{
+        BVec2::BVec2, BVec3::BVec3, Mat4::Mat4, Quat::Quat, Vec2::Vec2, Vec3::Vec3, Vec4::Vec4};
 
 
-    m.add_class::<crate::py_abstractions::structs::ThreeDObjects::Cube::Cube>()?;
-    m.add_class::<crate::py_abstractions::structs::ThreeDObjects::Sphere::Sphere>()?;
-    m.add_class::<crate::py_abstractions::structs::ThreeDObjects::Mesh::Mesh>()?;
-    m.add_class::<crate::py_abstractions::structs::ThreeDObjects::Pill::Pill>()?;
-    m.add_class::<crate::py_abstractions::structs::ThreeDObjects::Cylinder::Cylinder>()?;
-
-    m.add_class::<crate::py_abstractions::structs::TwoDObjects::Circle::Circle>()?;
-    m.add_class::<crate::py_abstractions::structs::TwoDObjects::Rectangle::Rectangle>()?;
-    m.add_class::<crate::py_abstractions::structs::ThreeDObjects::PhysicsHandle::Physics>()?;
-    m.add_class::<crate::py_abstractions::structs::ThreeDObjects::ColliderOptions::ColliderOptions>()?;
-
-    m.add_class::<crate::py_abstractions::Shader::Shader>()?;
-    m.add_class::<crate::py_abstractions::Shader::ShaderSource>()?;
-    m.add_class::<crate::py_abstractions::KeyCode::KeyCode>()?;
-
-    m.add_class::<crate::py_abstractions::MouseButton::MouseButton>()?;
-
-    m.add_class::<crate::py_abstractions::UniformType::UniformType>()?;
-    m.add_class::<crate::py_abstractions::UniformType::EulerRot>()?;
-    m.add_class::<crate::py_abstractions::UniformType::Comparison>()?;
+    #[pymodule_export]
+    pub use crate::py_abstractions::structs::ThreeDObjects::ColliderOptions::ColliderOptions;
+    #[pymodule_export]
+    pub use crate::py_abstractions::structs::ThreeDObjects::{
+        Cube::Cube, Cylinder::Cylinder, Mesh::Mesh, PhysicsHandle::Physics, Pill::Pill, Sphere::Sphere};
 
 
-    m.add_class::<crate::py_abstractions::PFuture::ImageFuture>()?;
-    m.add_class::<crate::py_abstractions::PFuture::FileDataFuture>()?;
-    m.add_class::<crate::py_abstractions::PFuture::Future>()?;
-    //m.add_class::<crate::py_abstractions::PFuture::Timeout>()?;
-    //m.add_class::<crate::py_abstractions::PFuture::EmptyFuture>()?;
-    
-    Ok(())
+    #[pymodule_export]
+    pub use crate::py_abstractions::structs::TwoDObjects::Circle::Circle;
+    #[pymodule_export]
+    pub use crate::py_abstractions::structs::TwoDObjects::Rectangle::Rectangle;
+
+    #[pymodule_export]
+    pub use crate::py_abstractions::Shader::{Shader, ShaderSource};
+
+    #[pymodule_export]
+    pub use crate::py_abstractions::KeyCode::KeyCode;
+    #[pymodule_export]
+    pub use crate::py_abstractions::MouseButton::MouseButton;
+
+    #[pymodule_export]
+    pub use crate::py_abstractions::UniformType::{Comparison, EulerRot, UniformType};
+
+    #[pymodule_export]
+    pub use crate::py_abstractions::PFuture::{FileDataFuture, Future, ImageFuture};
 }
 
-define_stub_info_gatherer!(stub_info);
 
+
+
+//m.add_class::<crate::py_abstractions::PFuture::Timeout>()?;
+//m.add_class::<crate::py_abstractions::PFuture::EmptyFuture>()?;
 
 /*
 list of macroquad::prelude functions
