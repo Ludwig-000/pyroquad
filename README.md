@@ -53,17 +53,14 @@ This is a Python game engine based on [macroquad](https://github.com/not-fl3/mac
 >         `.venv\Scripts\activate`
 >
 >    3) Install the [maturin build tool](https://github.com/PyO3/maturin) using `pip install maturin`
->    4) (**optional**) Run `cargo run --bin stub_gen --no-default-features --features use-real` to gennerate up-to-date python stubs in [init.pyi](src/python/pyroquad/_pyroquad/__init__.pyi). 
->
->       Stub generation specifically requires python >= 3.10
 >
 >    5) Compilation:
 >
->       run  `maturin build --release --features abi_39` for python >= 3.9
+>       run  `maturin build --release --features abi_39 --generate-stubs    ` for python >= 3.9
 >
->       run  `maturin build --release --features abi_310` for python >= 3.10
+>       run  `maturin build --release --features abi_310 --generate-stubs    ` for python >= 3.10
 >
->       run  `maturin build --release --features abi_314` for python >= 3.14
+>       run  `maturin build --release --features abi_314 --generate-stubs    ` for python >= 3.14
 >
 >       *(Note: Older ABIs offer better backward compatibility, but newer versions yield performance improvements)*
 >

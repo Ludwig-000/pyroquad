@@ -17,23 +17,24 @@
 
 
 use pyo3::prelude::*;
-
-
 mod engine;
 mod py_abstractions;
 
 
 #[pyo3::pymodule]
+#[pyo3(gil_used = false)]
 pub mod _pyroquad {
+
 
     #[pyo3::pymodule]
     #[pyo3(gil_used = false)]
     pub mod InternalGL {
+
         #[pymodule_export]
         pub use crate::py_abstractions::GL::{
             DrawMode, Geometry, GlPipeline, Vertex,
         };
-
+        
         #[pymodule_export]
         pub use crate::py_abstractions::GL::{
             clear_draw_calls, delete_pipeline, depth_test, draw_mode, geometry,

@@ -457,11 +457,11 @@ Example:
 >>>     if enemy_used_invisibility:
 >>>         enemy.set_draw_each_frame(False)
 >>>     if is_spottet:
->>>         enemy.manually_draw_now()
+>>>         enemy.draw()
 ```
 "
 ]
-                pub fn manually_draw_now(&self){
+                pub fn draw(&self){
                     COMMAND_QUEUE.push(
                         Command::DrawObjectNow( self.key )
                     );
