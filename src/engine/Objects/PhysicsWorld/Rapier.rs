@@ -144,7 +144,7 @@ impl RapierWorld{
             InnerColliderOptions::Dynamic { .. } =>{
                 Some(self.dynamic_collider_builder(obj,key,collider))
             }
-            InnerColliderOptions::Fixed { friction, restitution } => {
+            InnerColliderOptions::Fixed { .. } => {
                 Some(self.fixed_collider_builder(obj, key, collider))
             }
         }
@@ -238,20 +238,38 @@ impl RapierWorld{
     }
 
     fn fixed_collider_builder(&mut self, obj: &obj::Object, key: ObjectKey, options: ColliderOptions) -> ObjectHandle {
-        let (friction_val, restitution_val) = match options.0 {
-            InnerColliderOptions::Fixed { friction, restitution } => (friction, restitution),
+        // 1. Extract all your exposed options
+        let (friction_val, restitution_val, is_sensor_val, detect_kinematic_val) = match options.0 {
+            InnerColliderOptions::Fixed { friction, restitution, is_sensor, detect_kinematic } => 
+                (friction, restitution, is_sensor, detect_kinematic),
             _ => unreachable!()
         };
 
         let t: Transforms<'_> = extract_object_transforms(obj);
 
+        // 2. Base builder closure to prevent repeating the configuration
+        let apply_options = |mut builder: ColliderBuilder| -> Collider {
+            builder = builder
+                .friction(friction_val)
+                .restitution(restitution_val)
+                .sensor(is_sensor_val);
+            
+            if detect_kinematic_val {
+                builder = builder.active_collision_types(
+                    ActiveCollisionTypes::default() 
+                    | ActiveCollisionTypes::DYNAMIC_FIXED 
+                    | ActiveCollisionTypes::KINEMATIC_FIXED
+                );
+            }
+            
+            builder.build()
+        };
+
+        // 3. Build the shape and apply options
         let mut collider = match obj {
-            obj::Object::Cube(_) => {
+            obj::Object::Cube(_) => apply_options(
                 ColliderBuilder::cuboid(t.scale.x / 2.0, t.scale.y / 2.0, t.scale.z / 2.0)
-                    .friction(friction_val)
-                    .restitution(restitution_val)
-                    .build()
-            },
+            ),
             obj::Object::Mesh(mesh_wrapper) => {
                  let vertices: Vec<rapier3d::math::Vec3> = mesh_wrapper.mesh.vertices
                  .iter()
@@ -269,30 +287,20 @@ impl RapierWorld{
                     .map(|chunk| [chunk[0] as u32, chunk[1] as u32, chunk[2] as u32])
                     .collect();
 
-                ColliderBuilder::trimesh(vertices, indices)
-                    .expect("Could not build fixed mesh collider")
-                    .friction(friction_val)
-                    .restitution(restitution_val)
-                    .build()
+                apply_options(
+                    ColliderBuilder::trimesh(vertices, indices)
+                        .expect("Could not build fixed mesh collider")
+                )
             },
-            obj::Object::Sphere(_) => {
+            obj::Object::Sphere(_) => apply_options(
                 ColliderBuilder::ball(t.scale.x / 2.0)
-                    .friction(friction_val)
-                    .restitution(restitution_val)
-                    .build()
-            },
-            obj::Object::Cylinder(_) => {
+            ),
+            obj::Object::Cylinder(_) => apply_options(
                 ColliderBuilder::cylinder(t.scale.y / 2.0, t.scale.x / 2.0)
-                    .friction(friction_val)
-                    .restitution(restitution_val)
-                    .build()
-            },
-            obj::Object::Pill(_) => {
+            ),
+            obj::Object::Pill(_) => apply_options(
                 ColliderBuilder::capsule_y(t.scale.y / 2.0, t.scale.x / 2.0)
-                    .friction(friction_val)
-                    .restitution(restitution_val)
-                    .build()
-            },
+            ),
         };
 
         let rigid_body = RigidBodyBuilder::fixed()
@@ -302,8 +310,8 @@ impl RapierWorld{
             .build();
 
         collider.user_data = key_to_u128(key);
-        let rigid_body_handle = self.rigidBS.insert(rigid_body);
         
+        let rigid_body_handle = self.rigidBS.insert(rigid_body);
         let collider_handle = self.coll.insert_with_parent(
             collider,
             rigid_body_handle,

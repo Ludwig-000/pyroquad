@@ -38,10 +38,10 @@ impl ColliderOptions{
     }
 
     /// An immovable solid obstacle (e.g., floors, walls). Blocks dynamic objects and applies surface properties, but never moves or responds to forces.
-    #[pyo3(signature = (friction = 0.5, restitution = 0.0))]
+    #[pyo3(signature = (friction = 0.5, restitution = 0.0, is_sensor = false, detect_kinematic = true))]
     #[staticmethod]
-    pub fn FIXED(friction: f32, restitution: f32) -> ColliderOptions {
-        ColliderOptions(InnerColliderOptions::Fixed { friction, restitution })
+    pub fn FIXED(friction: f32, restitution: f32, is_sensor: bool, detect_kinematic: bool) -> ColliderOptions {
+        ColliderOptions(InnerColliderOptions::Fixed { friction, restitution, is_sensor, detect_kinematic })
     }
 
     /// A fully simulated dynamic object affected by gravity, external forces, impulses, and collisions.
@@ -60,6 +60,8 @@ pub enum InnerColliderOptions{
     Fixed{
         friction: f32,
         restitution: f32,
+        is_sensor: bool,
+        detect_kinematic: bool,
     },
     Dynamic{
         gravity_scale: f32,
