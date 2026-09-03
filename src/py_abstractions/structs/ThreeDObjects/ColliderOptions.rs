@@ -16,36 +16,51 @@ use pyo3_stub_gen::derive::* ;
 /// >>>ColliderOptions.DYNAMIC(...)
 /// ```
 #[gen_stub_pyclass]
-#[cfg_attr(feature = "abi_314", pyclass(frozen, immutable_type, from_py_object))]
-#[cfg_attr(not(feature = "abi_314"), pyclass(frozen, from_py_object))]
-#[derive(Clone, Copy)]
+#[cfg_attr(feature = "abi_314", pyclass(frozen, immutable_type, from_py_object, eq))]
+#[cfg_attr(not(feature = "abi_314"), pyclass(frozen, from_py_object, eq))]
+#[derive(Clone, Copy, PartialEq)]
 pub struct ColliderOptions(pub InnerColliderOptions);
 
 #[gen_stub_pymethods]
 #[pymethods]
 impl ColliderOptions{
 
+    /// Disables collisions and physics entirely. The object will not trigger overlap events or block movement.
     #[classattr]
     pub fn NONE() -> ColliderOptions {
         ColliderOptions(InnerColliderOptions::None)
     }
 
+    /// A non-physical sensor collider. Detects overlap events without blocking movement or applying physical forces.
     #[classattr]
     pub fn STATIC() -> ColliderOptions {
         ColliderOptions(InnerColliderOptions::Static)
     }
 
+    /// An immovable solid obstacle (e.g., floors, walls). Blocks dynamic objects and applies surface properties, but never moves or responds to forces.
+    #[pyo3(signature = (friction = 0.5, restitution = 0.0))]
+    #[staticmethod]
+    pub fn FIXED(friction: f32, restitution: f32) -> ColliderOptions {
+        ColliderOptions(InnerColliderOptions::Fixed { friction, restitution })
+    }
+
+    /// A fully simulated dynamic object affected by gravity, external forces, impulses, and collisions.
     #[pyo3(signature=(gravity_scale =1.0, friction=0.5, restitution=0.7,density= 1.0))]
     #[staticmethod]
     pub fn DYNAMIC(gravity_scale: f32, friction: f32,restitution: f32, density:f32 ) -> ColliderOptions {
         ColliderOptions(InnerColliderOptions::Dynamic { gravity_scale,friction,restitution,density })
     }
+    
 }
 
-#[derive(Clone,Copy)]
+#[derive(Clone,Copy, PartialEq)]
 pub enum InnerColliderOptions{
     None,
     Static,
+    Fixed{
+        friction: f32,
+        restitution: f32,
+    },
     Dynamic{
         gravity_scale: f32,
         friction: f32,

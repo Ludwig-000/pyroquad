@@ -57,8 +57,7 @@ impl RapierWorld{
     pub fn move_object(&mut self, handle: &RigidBodyHandle, pos: &Vec3) {
         let rb  = self.rigidBS.get_mut(*handle).expect("Missing Rigid body handle!!??");
         rb.set_translation(rapier3d::math::Vec3::new(pos.x,pos.y,pos.z), true);
-    
-
+        rb.wake_up(true);
     }
     pub fn rotate_object(&mut self, handle: &RigidBodyHandle, rot: &Vec3) {
         use rapier3d::na::UnitQuaternion;
@@ -67,6 +66,7 @@ impl RapierWorld{
         let rotation = UnitQuaternion::from_euler_angles(rot.x, rot.y, rot.z);
         
         rb.set_rotation(rotation.into(), true);
+        rb.wake_up(true);
     }
     pub fn scale_object(&mut self, handle: &ColliderHandle, obj_type: &obj::Object, scale: &Vec3) {
         let collider = self.coll.get_mut(*handle).expect("Missing collider despite holding handle.");
@@ -76,20 +76,16 @@ impl RapierWorld{
                 SharedShape::cuboid(scale.x / 2.0, scale.y / 2.0, scale.z / 2.0)
             },
             obj::Object::Sphere(_) => {
-                // Uses X scale as radius
                 SharedShape::ball(scale.x / 2.0)
             },
             obj::Object::Cylinder(_) => {
-                // Cylinder takes half-height (y) and radius (x)
                 SharedShape::cylinder(scale.y / 2.0, scale.x / 2.0)
             },
             obj::Object::Pill(_) => {
-                // Capsule takes half-height of the segment (y) and radius (x)
                 SharedShape::capsule_y(scale.y / 2.0, scale.x / 2.0)
             },
             obj::Object::Mesh(mesh_wrapper) => {
-                // We must reconstruct the Trimesh with the new scale values applied 
-                // to the original vertex positions.
+
                 let vertices: Vec<rapier3d::math::Vec3> = mesh_wrapper.mesh.vertices
                     .iter()
                     .map(|v| {
@@ -112,8 +108,6 @@ impl RapierWorld{
 
         collider.set_shape(new_shape);
         
-        // Optional: If the object is sleeping, you might want to wake it up so physics 
-        // reacts to the size change immediately.
         if let Some(parent_handle) = collider.parent()
             && let Some(rb) = self.rigidBS.get_mut(parent_handle) {
                  rb.wake_up(true);
@@ -163,7 +157,6 @@ impl RapierWorld{
 
         let t: Transforms<'_> = extract_object_transforms(obj);
 
-        // 2. Build the Collider (Shape)
         let mut collider = match obj {
             obj::Object::Cube(_) => {
                 ColliderBuilder::cuboid(t.scale.x / 2.0, t.scale.y / 2.0, t.scale.z / 2.0)
@@ -197,7 +190,6 @@ impl RapierWorld{
                     .build()
             },
             obj::Object::Sphere(_) => {
-                // ball() takes the radius
                 ColliderBuilder::ball(t.scale.x / 2.0)
                     .friction(friction_val)
                     .restitution(restitution_val)
@@ -205,7 +197,6 @@ impl RapierWorld{
                     .build()
             },
             obj::Object::Cylinder(_) => {
-                // cylinder() takes half-height and radius
                 ColliderBuilder::cylinder(t.scale.y / 2.0, t.scale.x / 2.0)
                     .friction(friction_val)
                     .restitution(restitution_val)
@@ -213,7 +204,6 @@ impl RapierWorld{
                     .build()
             },
             obj::Object::Pill(_) => {
-                // capsule_y() takes half-height of the inner cylindrical segment and the radius
                 ColliderBuilder::capsule_y(t.scale.y / 2.0, t.scale.x / 2.0)
                     .friction(friction_val)
                     .restitution(restitution_val)
@@ -222,8 +212,7 @@ impl RapierWorld{
             },
         };
 
-        // 3. Build the RigidBody
-        // CHANGE HERE: Added .user_data()
+
         let rigid_body = RigidBodyBuilder::dynamic()
             .translation(rapier3d::math::Vec3::new(t.pos.x,t.pos.y,t.pos.z))
             .rotation(rapier3d::math::Vec3::new(t.rot.x,t.rot.y,t.rot.z))
@@ -233,10 +222,7 @@ impl RapierWorld{
             .user_data(key_to_u128(key))
             .build();
 
-        // 4. Link User Data to Collider (You already had this)
         collider.user_data = key_to_u128(key);
-
-        // 5. Insert into Sets
         let rigid_body_handle = self.rigidBS.insert(rigid_body);
         
         let collider_handle = self.coll.insert_with_parent(
