@@ -4,6 +4,8 @@ use pyo3::prelude::*;
 //use pyo3::type_gen::generate_type_as_function;
 use macroquad::{miniquad::conf::Icon, prelude as mq};
 
+use crate::_pyroquad::FilterMode;
+
 
 
 #[pyclass(from_py_object)]
@@ -46,7 +48,18 @@ pub struct Config {
 
     /// once the window gets closed ( not minimized ) the python script gets terminated.
     #[pyo3(get, set)] 
-    pub stop_python_when_closing_window: bool    
+    pub stop_python_when_closing_window: bool,
+
+    /// max number of verices a single mesh can have.
+    #[pyo3(get, set)] 
+    pub draw_call_vertex_capacity: usize,
+    
+    /// max number of indices a single mesh can have.
+    #[pyo3(get, set)] 
+    pub draw_call_index_capacity: usize,
+
+    #[pyo3(get, set)] 
+    pub default_filter_mode: FilterMode
 }
 
 
@@ -62,6 +75,9 @@ impl Config {
         sample_count= 1,
         window_resizable= true,
         stop_python_when_closing_window= true,
+        draw_call_vertex_capacity= 10_000,
+        draw_call_index_capacity= 5_000,
+        default_filter_mode= FilterMode::Linear,
     ))]
     pub fn new(
         window_title: String,
@@ -72,6 +88,9 @@ impl Config {
         sample_count: i32,
         window_resizable: bool,
         stop_python_when_closing_window: bool,
+        draw_call_vertex_capacity: usize,
+        draw_call_index_capacity: usize,
+        default_filter_mode: FilterMode,
     ) -> Self {
         Config {
             window_title,
@@ -82,6 +101,9 @@ impl Config {
             sample_count,
             window_resizable,
             stop_python_when_closing_window,
+            draw_call_vertex_capacity,
+            draw_call_index_capacity,
+            default_filter_mode
         }
     }
 }
@@ -119,9 +141,12 @@ impl Config{
             macroquad::conf::Conf {
                 miniquad_conf: miniConf,
                 update_on: Some(macroquad::conf::UpdateTrigger::default()),
-                default_filter_mode: macroquad::prelude::FilterMode::Linear,
-                draw_call_vertex_capacity: 10000,
-                draw_call_index_capacity: 5000,
+                default_filter_mode: match config.default_filter_mode{ 
+                    FilterMode::Linear => mq::FilterMode::Linear,
+                    FilterMode::Nearest => mq::FilterMode::Nearest,
+                },
+                draw_call_vertex_capacity: config.draw_call_vertex_capacity,
+                draw_call_index_capacity: config.draw_call_index_capacity,
             }
     }
 }
@@ -138,6 +163,9 @@ impl Default for Config {
                 sample_count: 1,
                 window_resizable: true,
                 stop_python_when_closing_window: true,
+                draw_call_vertex_capacity: 10_000,
+                draw_call_index_capacity: 5_000,
+                default_filter_mode: FilterMode::Linear,
             }
 
     }

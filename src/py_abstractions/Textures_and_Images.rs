@@ -417,7 +417,7 @@ impl Texture2D {
 
 
 #[pyclass(from_py_object)]
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub enum FilterMode{
     Nearest,
     Linear

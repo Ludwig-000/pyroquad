@@ -13,7 +13,7 @@ use pyo3::prelude::*;
 #[cfg_attr(feature = "abi_314", pyclass(eq,str,frozen, immutable_type, from_py_object))]
 #[cfg_attr(not(feature = "abi_314"), pyclass(eq,str,frozen, from_py_object))]
 #[repr(C)]
-#[derive(Clone, Copy, PartialEq,Debug)]
+#[derive(Clone, Copy, PartialEq, Debug)]
 pub struct Vec3 {
     #[pyo3(get)]
     pub x: f32,
