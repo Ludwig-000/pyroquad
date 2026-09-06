@@ -113,7 +113,6 @@ impl From<TextDimensions> for mq::TextDimensions{
     }
 }
 
-
 #[pyfunction]
 pub fn measure_text(text: String, font: Option<Font>, font_size: u16, font_scale: f32)-> PyResult<TextDimensions>{
     let (sender, receiver) = PChannel::channel();

@@ -20,6 +20,15 @@ class PlayerCamera:
         set_cursor_grab(True)
         self.cam =  Camera3D(position, target, aspect, up, fovy,projection,render_target,viewport,z_near,z_far)
         self.middleMousePos =  get_mouse_position()
+        
+        dir_vec = target - position
+        if dir_vec.x != 0 or dir_vec.y != 0 or dir_vec.z != 0:
+            dir_vec = dir_vec.normalize()
+            self.pitch = math.degrees(math.asin(dir_vec.y))
+            self.yaw = math.degrees(math.atan2(dir_vec.x, dir_vec.z))
+        else:
+            self.yaw = 0.0
+            self.pitch = 0.0
 
 
 

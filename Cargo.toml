@@ -14,7 +14,6 @@ crate-type = ["cdylib", "rlib"]
 overflow-checks = true
 panic = "unwind"
 
-
 [dependencies]
 
 #core dependency
@@ -28,12 +27,7 @@ crossbeam = "=0.8.4" # used for the main Command Queue inside lib.rs
 
 glam = { version = "=0.27.0", features = ["scalar-math"] } # used for vector maths.
 
-rapier3d = { version = "=0.35.0-beta.0", features = ["parallel"] } # used for DBTV trees.
-
-
-
-
-
+rapier3d = { version = "=0.35.0-beta.0", features = ["parallel"] } # used for 3d physics
 
 slotmap = "=1.0.7" # fast hasher for object management. <3 slopmap >_<
 

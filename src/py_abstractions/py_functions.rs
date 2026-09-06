@@ -643,6 +643,7 @@ pub fn set_pc_assets_folder(path: String){
 ///     batch_draw_shapes(objects) <- do this instead.
 /// ```
 /// 
+/// 
 #[pyfunction]
 pub fn batch_draw_shapes<'py>(input: Vec<Shape<'py>>){
     for shape in input{

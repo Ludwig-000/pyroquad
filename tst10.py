@@ -177,7 +177,8 @@ start = time.time()
 examples.loading_screen_future(
     lambda a: Loading.download_file_future(prefix + a["url"]),
     asset_definitions,
-    "Downloading Assets"
+    "Downloading Assets",
+    show_rotating_square=True
 )
 
 end = time.time()

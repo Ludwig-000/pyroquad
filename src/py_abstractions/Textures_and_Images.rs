@@ -4,6 +4,7 @@ use pyo3::prelude::*;
 use macroquad::prelude as mq;
 use std::sync::Arc;
 
+use crate::_pyroquad::draw_texture;
 use crate::engine::PChannel::PChannel;
 use crate::engine::CoreLoop::COMMAND_QUEUE;
 use crate::engine::CoreLoop::Command;
@@ -403,6 +404,13 @@ impl Texture2D {
         COMMAND_QUEUE.push(Command::TexImEnum(c));
         let res =rx.recv()?;
         Ok(res.into())
+    }
+
+    /// draws the texture to the screen. for finer controll, apply the texture to a rectangle.
+    /// x and y are the top left coordinates. 'color' is the tint.
+    #[pyo3(signature = (x = 0.0, y = 0.0, color= Color::WHITE()))]
+    pub fn draw(&self, x: f32, y: f32, color: Color){
+        draw_texture(self.clone(), x, y, color);
     }
 
 }
