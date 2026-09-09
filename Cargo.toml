@@ -29,12 +29,27 @@ glam = { version = "=0.27.0", features = ["scalar-math"] } # used for vector mat
 
 rapier3d = { version = "=0.35.0-beta.0", features = ["parallel"] } # used for 3d physics
 
-slotmap = "=1.0.7" # fast hasher for object management. <3 slopmap >_<
+slotmap = "=1.0.7" # fast hasher for object management. slopmap~ <3
 
 hound = "=3.5.1" #for converting audio formats
 symphonia = { version = "=0.5.5", features = ["mp3"] } #for converting audio formats
 
-gltf = "=1.4.1" # for parsing 3DAssets
+
+gltf = { version = "=1.4.1", features = [
+    "KHR_texture_transform",
+    "KHR_materials_unlit",
+    "KHR_lights_punctual",
+    "KHR_materials_volume",
+    "KHR_materials_specular",
+    "KHR_materials_transmission",
+    "KHR_materials_ior",
+    "KHR_materials_emissive_strength",
+] } # for parsing 3DAssets
+tobj = "=4.0.2" # for OBJ mesh loading
+
+
+
+
 
 paste = "=1.0.15" # for better macro control, allowing the writing of generic comments.
 

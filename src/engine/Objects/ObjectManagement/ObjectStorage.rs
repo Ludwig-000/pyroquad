@@ -46,7 +46,6 @@ impl ObjectStorage {
 
     pub fn push(&mut self, obj: Object,collider: ColliderOptions, weak_ref_handle: Py<PyWeakref>) -> ObjectKey {
 
-        
         let idx = self.storage.len(); // the index of where the obj will be placed eventually.
         let key = self.keymap.insert((idx, Arc::new(weak_ref_handle)));
 

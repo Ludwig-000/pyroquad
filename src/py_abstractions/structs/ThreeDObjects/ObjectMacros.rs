@@ -391,11 +391,15 @@ macro_rules! implement_Drop3D {
         paste::paste! {
             impl Drop for $name {
                 fn drop(&mut self) {
+
                     // function storage MUST be cleaned first, since a function inside fun-storage may rely on the object still living.
-                    if let Some(key) = self.function_key{
-                        crate::py_abstractions::structs::ThreeDObjects::ObjectFunStorage::remove_function(key);
+                    if let Some(key) = self.function_key && key != FunctionKey::null(){
+                        crate::py_abstractions::structs::ThreeDObjects::ObjectFunStorage::remove_function(key)
                     }
-                    COMMAND_QUEUE.push( Command::DeleteObject { key: self.key });
+
+                    if self.key != ObjectKey::null(){
+                        COMMAND_QUEUE.push( Command::DeleteObject { key: self.key })
+                    }
                 }
             }
         }
