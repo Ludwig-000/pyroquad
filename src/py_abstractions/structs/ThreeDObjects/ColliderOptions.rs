@@ -9,10 +9,13 @@ use pyo3::prelude::*;
 /// ...# no collision or physics
 /// >>>ColliderOptions.NONE 
 /// ...
-/// ...# collision but no physics
+/// ...# can detect collisions
 /// >>>ColliderOptions.STATIC
 /// ...
-/// ...# both physics and collision.
+/// ...# both physics and collision but immoveable.
+/// >>>ColliderOptions.FIXED(...)
+/// ...
+/// ...# a dynamic object with physics and collision.
 /// >>>ColliderOptions.DYNAMIC(...)
 /// ```
 #[cfg_attr(feature = "abi_314", pyclass(frozen, immutable_type, from_py_object, eq))]

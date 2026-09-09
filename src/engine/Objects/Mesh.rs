@@ -3,17 +3,22 @@ use glam::{Vec3A, Mat3A, Quat, EulerRot};
 use gltf::mesh::util::ReadIndices;
 use glam::{ Mat4, Mat3, Vec3};
 
+pub struct InternalMesh{
+    pub splitpoints: Option<Vec<usize>>,
 
-pub struct Mesh{
+    pub vertices: Vec<mq::Vertex>,
+    pub indices: Vec<u16>
+}
+
+pub struct Mesh {
     
     pub scale: mq::Vec3,
     pub position: mq::Vec3,
     pub rotation: mq::Vec3,
-    pub color: mq::Color,
 
-    pub mesh: mq::Mesh,
     pub draw_each_frame: bool,
 
+    pub mesh: mq::Mesh,
 }
 
 ///i do NOT KNOW why the FUCK mq::Mesh does not have CLONE BUT I AM DOING IT MYSELF 
@@ -22,14 +27,13 @@ impl Clone for Mesh{
         Mesh { 
             scale: self.scale,
             position: self.position, 
-            rotation: self.rotation, 
-            color: self.color, 
+            rotation: self.rotation,
+            draw_each_frame: self.draw_each_frame,
             mesh: mq::Mesh { 
                 vertices: self.mesh.vertices.clone(), 
                 indices: self.mesh.indices.clone(), 
                 texture: self.mesh.texture.clone()
             },
-            draw_each_frame: self.draw_each_frame
         }
     }
 }
@@ -158,13 +162,12 @@ impl Mesh{
             scale: mq::vec3(1.0, 1.0, 1.0),
             position: mq::vec3(0.0, 0.0, 0.0),
             rotation: mq::vec3(0.0, 0.0, 0.0),
-            color: mq::WHITE,
+            draw_each_frame: true,
             mesh: mq::Mesh {
                 vertices,
                 indices,
                 texture: final_texture,
             },
-            draw_each_frame: true,
         })
     }
 
@@ -229,7 +232,8 @@ impl Mesh{
             }
 
             for &idx in &mesh.indices {
-                indices.push(idx as u16 + vertex_start);
+                let idx = idx as u16;
+                indices.push(idx + vertex_start);
             }
         }
 
@@ -237,13 +241,12 @@ impl Mesh{
             scale: mq::vec3(1.0, 1.0, 1.0),
             position: mq::vec3(0.0, 0.0, 0.0),
             rotation: mq::vec3(0.0, 0.0, 0.0),
-            color: mq::WHITE,
+            draw_each_frame: true,
             mesh: mq::Mesh {
                 vertices,
                 indices,
                 texture,
             },
-            draw_each_frame: true,
         })
     }
 
@@ -305,12 +308,6 @@ impl Mesh{
 }
 
 
-// ═════════════════════════════════════════════════════════════════════
-//  HELPER FUNCTIONS  (private to this module)
-// ═════════════════════════════════════════════════════════════════════
-
-/// Extracts the best representative color from a glTF material.
-/// Reads PBR base color factor and blends with emissive if present.
 fn extract_material_color(material: &gltf::Material) -> mq::Color {
     let pbr = material.pbr_metallic_roughness();
     let base = pbr.base_color_factor();
