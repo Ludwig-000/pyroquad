@@ -3,13 +3,19 @@ use glam::{Vec3A, Mat3A, Quat, EulerRot};
 use gltf::mesh::util::ReadIndices;
 use glam::{ Mat4, Mat3, Vec3};
 
-pub struct InternalMesh{
-    pub splitpoints: Option<Vec<usize>>,
+/// Largest relative index we allow in a rendering chunk.
+/// We use 65_000 instead of 65_535 to leave a small safety margin.
+const MAX_CHUNK_INDEX: usize = 65_000;
 
-    pub vertices: Vec<mq::Vertex>,
-    pub indices: Vec<u16>
+/// Describes where one rendering chunk ends and the next begins.
+/// Both `vertex` and `index` are *exclusive* end-offsets into the flat buffers.
+#[derive(Clone, Debug)]
+pub struct SplitPoint {
+    pub vertex: usize,
+    pub index: usize,
 }
 
+#[derive(Clone)]
 pub struct Mesh {
     
     pub scale: mq::Vec3,
@@ -18,41 +24,76 @@ pub struct Mesh {
 
     pub draw_each_frame: bool,
 
-    pub mesh: mq::Mesh,
+    pub splitpoints: Option<Vec<SplitPoint>>,
+    pub vertices: Vec<mq::Vertex>,
+    pub indices: Vec<u16>,
+    pub texture: Option<mq::Texture2D>,
 }
 
-///i do NOT KNOW why the FUCK mq::Mesh does not have CLONE BUT I AM DOING IT MYSELF 
-impl Clone for Mesh{
-    fn clone(&self) -> Self {
-        Mesh { 
-            scale: self.scale,
-            position: self.position, 
-            rotation: self.rotation,
-            draw_each_frame: self.draw_each_frame,
-            mesh: mq::Mesh { 
-                vertices: self.mesh.vertices.clone(), 
-                indices: self.mesh.indices.clone(), 
-                texture: self.mesh.texture.clone()
-            },
-        }
-    }
-}
 impl Mesh{
     pub fn draw(&self, gl: &mut macroquad::prelude::QuadGl ){
-        gl.texture(self.mesh.texture.as_ref());
-        gl.geometry(&self.mesh.vertices, &self.mesh.indices);
+        gl.texture(self.texture.as_ref());
+
+        println!("Drawing {} Vertices and {} Indices", self.vertices.len(), self.indices.len());
+        match self.splitpoints.as_deref() {
+            None => gl.geometry(&self.vertices, &self.indices),
+            Some(splitpoints) => {
+
+                let mut vtx_start = 0usize;
+                let mut idx_start = 0usize;
+
+                for sp in splitpoints {
+                    gl.geometry(
+                        &self.vertices[vtx_start..sp.vertex],
+                        &self.indices[idx_start..sp.index],
+                    );
+                    vtx_start = sp.vertex;
+                    idx_start = sp.index;
+                }
+
+                if vtx_start < self.vertices.len() {
+                    gl.geometry(
+                        &self.vertices[vtx_start..],
+                        &self.indices[idx_start..],
+                    );
+                }
+            }
+        }
+    }
+
+    pub fn absolute_indices_u32(&self) -> Vec<u32> {
+        let Some(splitpoints) = self.splitpoints.as_deref() else {
+            return self.indices.iter().map(|&i| i as u32).collect();
+        };
+
+        let mut result = Vec::with_capacity(self.indices.len());
+        let mut vtx_start: u32 = 0;
+        let mut idx_start: usize = 0;
+
+        for sp in splitpoints {
+            for &idx in &self.indices[idx_start..sp.index] {
+                result.push(idx as u32 + vtx_start);
+            }
+            vtx_start = sp.vertex as u32;
+            idx_start = sp.index;
+        }
+
+        for &idx in &self.indices[idx_start..] {
+            result.push(idx as u32 + vtx_start);
+        }
+
+        result
     }
 
     pub fn load_from_bytes(data: &[u8], texture: Option<mq::Texture2D>) -> Result<Self, String> {
         if data.len() >= 4 && &data[0..4] == b"glTF" {
-            println!("111");
-            return Self::load_from_gltf(data, texture).map_err(|e| format!("glTF error: {e}"));
+            return Self::load_from_gltf(data, texture);
         }
 
         let start = data.iter().position(|&b| !b.is_ascii_whitespace() && b != 0xEF && b != 0xBB && b != 0xBF);
         if let Some(idx) = start {
             if data[idx] == b'{' {
-                return Self::load_from_gltf(data, texture).map_err(|e| format!("glTF error: {e}"));
+                return Self::load_from_gltf(data, texture);
             }
         }
 
@@ -66,12 +107,16 @@ impl Mesh{
 
 
 
-    pub fn load_from_gltf(data: &[u8], texture: Option<mq::Texture2D>) -> Result<Self, gltf::Error> {
-        let (document, buffers, images) = gltf::import_slice(data)?;
+    pub fn load_from_gltf(data: &[u8], texture: Option<mq::Texture2D>) -> Result<Self, String> {
+        let (document, buffers, images) =
+            gltf::import_slice(data).map_err(|e| format!("glTF import error: {e}"))?;
 
         let mut vertices = Vec::new();
         let mut indices = Vec::new();
+        let mut splitpoints: Option<Vec<SplitPoint>> = None;
         let mut extracted_texture: Option<mq::Texture2D> = None;
+
+        let mut chunk_vertex_count: usize = 0;
 
         let mut global_transforms = vec![Mat4::IDENTITY; document.nodes().count()];
         let mut stack = Vec::new();
@@ -112,15 +157,46 @@ impl Mesh{
                         Some(iter) => iter.collect(),
                         None => continue,
                     };
+
+                    let prim_vertex_count = positions.len();
+
+                    let primitive_indices: Vec<u32> = match reader.read_indices() {
+                        Some(read_indices) => match read_indices {
+                            ReadIndices::U16(iter) => iter.map(u32::from).collect(),
+                            ReadIndices::U32(iter) => iter.collect(),
+                            ReadIndices::U8(iter) => iter.map(u32::from).collect(),
+                        },
+                        None => Vec::new(),
+                    };
+
+                    if let Some(&max_index) = primitive_indices.iter().max() {
+                        let max_index = max_index as usize;
+                        if max_index > MAX_CHUNK_INDEX {
+                            return Err(format!(
+                                "glTF primitive has referenced index {max_index}, which exceeds the configured u16 chunk limit"
+                            ));
+                        }
+
+                        if chunk_vertex_count > 0
+                            && chunk_vertex_count + max_index > MAX_CHUNK_INDEX
+                        {
+                            splitpoints.get_or_insert_with(Vec::new).push(SplitPoint {
+                                vertex: vertices.len(),
+                                index: indices.len(),
+                            });
+                            chunk_vertex_count = 0;
+                        }
+                    }
+
                     let normals: Vec<[f32; 3]> = reader
                         .read_normals()
                         .map(|n| n.collect())
-                        .unwrap_or_else(|| vec![[0.0, 1.0, 0.0]; positions.len()]);
+                        .unwrap_or_else(|| vec![[0.0, 1.0, 0.0]; prim_vertex_count]);
 
                     let tex_coords: Vec<_> = reader
                         .read_tex_coords(0)
                         .map(|uv| uv.into_f32().map(|v| mq::vec2(v[0], v[1])).collect())
-                        .unwrap_or_else(|| vec![mq::vec2(0.0, 0.0); positions.len()]);
+                        .unwrap_or_else(|| vec![mq::vec2(0.0, 0.0); prim_vertex_count]);
 
                     let colors: Vec<_> = reader
                         .read_colors(0)
@@ -129,11 +205,11 @@ impl Mesh{
                                 .map(|rgba| mq::Color::from_vec(mq::vec4(rgba[0], rgba[1], rgba[2], rgba[3])))
                                 .collect()
                         })
-                        .unwrap_or_else(|| vec![material_color; positions.len()]);
+                        .unwrap_or_else(|| vec![material_color; prim_vertex_count]);
 
-                    let vertex_start = vertices.len() as u16;
+                    let vertex_start = chunk_vertex_count;
 
-                    for i in 0..positions.len() {
+                    for i in 0..prim_vertex_count {
                         let local_pos = Vec3::from_array(positions[i]);
                         let world_pos = transform.transform_point3(local_pos);
 
@@ -148,13 +224,11 @@ impl Mesh{
                         });
                     }
 
-                    if let Some(read_indices) = reader.read_indices() {
-                        match read_indices {
-                            ReadIndices::U16(iter) => indices.extend(iter.map(|i| i + vertex_start)),
-                            ReadIndices::U32(iter) => indices.extend(iter.map(|i| (i as u16) + vertex_start)),
-                            ReadIndices::U8(iter) => indices.extend(iter.map(|i| (i as u16) + vertex_start)),
-                        }
-                    }
+                    chunk_vertex_count += prim_vertex_count;
+
+                    indices.extend(primitive_indices.into_iter().map(|i| {
+                        (i as usize + vertex_start) as u16
+                    }));
                 }
             }
         }
@@ -163,11 +237,10 @@ impl Mesh{
             position: mq::vec3(0.0, 0.0, 0.0),
             rotation: mq::vec3(0.0, 0.0, 0.0),
             draw_each_frame: true,
-            mesh: mq::Mesh {
-                vertices,
-                indices,
-                texture: final_texture,
-            },
+            splitpoints,
+            vertices,
+            indices,
+            texture: final_texture,
         })
     }
 
@@ -188,12 +261,29 @@ impl Mesh{
 
         let mut vertices = Vec::new();
         let mut indices = Vec::new();
+        let mut splitpoints: Option<Vec<SplitPoint>> = None;
+        let mut chunk_vertex_count: usize = 0;
 
         for model in &models {
             let mesh = &model.mesh;
-            let vertex_start = vertices.len() as u16;
-
             let num_verts = mesh.positions.len() / 3;
+
+            let max_index = mesh.indices.iter().copied().max().unwrap_or(0) as usize;
+            if max_index > MAX_CHUNK_INDEX {
+                return Err(format!(
+                    "OBJ mesh contains index {max_index}, which cannot be represented by the u16 renderer"
+                ));
+            }
+
+            if chunk_vertex_count > 0 && chunk_vertex_count + max_index > MAX_CHUNK_INDEX {
+                splitpoints.get_or_insert_with(Vec::new).push(SplitPoint {
+                    vertex: vertices.len(),
+                    index: indices.len(),
+                });
+                chunk_vertex_count = 0;
+            }
+
+            let vertex_start = chunk_vertex_count;
 
             for i in 0..num_verts {
                 let px = mesh.positions[i * 3];
@@ -231,9 +321,10 @@ impl Mesh{
                 });
             }
 
+            chunk_vertex_count += num_verts;
+
             for &idx in &mesh.indices {
-                let idx = idx as u16;
-                indices.push(idx + vertex_start);
+                indices.push((idx as usize + vertex_start) as u16);
             }
         }
 
@@ -242,11 +333,10 @@ impl Mesh{
             position: mq::vec3(0.0, 0.0, 0.0),
             rotation: mq::vec3(0.0, 0.0, 0.0),
             draw_each_frame: true,
-            mesh: mq::Mesh {
-                vertices,
-                indices,
-                texture,
-            },
+            splitpoints,
+            vertices,
+            indices,
+            texture,
         })
     }
 
@@ -256,7 +346,7 @@ impl Mesh{
         let new = Vec3A::from(new_pos);
         let delta = new - old;
 
-        for vertex in self.mesh.vertices.iter_mut() {
+        for vertex in self.vertices.iter_mut() {
             let mut pos = Vec3A::from(vertex.position);
             pos += delta;
             vertex.position = glam::Vec3::from(pos);
@@ -274,7 +364,7 @@ impl Mesh{
 
         let rot_matrix = Mat3A::from_quat(q_delta);
 
-        for vertex in self.mesh.vertices.iter_mut() {
+        for vertex in self.vertices.iter_mut() {
             let pos = Vec3A::from(vertex.position);
             let local = pos - pivot_simd;
             let rotated = rot_matrix * local;
@@ -296,7 +386,7 @@ impl Mesh{
 
         let ratio = new_s / old_s;
 
-        for vertex in self.mesh.vertices.iter_mut() {
+        for vertex in self.vertices.iter_mut() {
             let pos = Vec3A::from(vertex.position);
             
             let offset = pos - pivot_simd;
@@ -317,10 +407,8 @@ fn extract_material_color(material: &gltf::Material) -> mq::Color {
     let mut b = base[2];
     let a = base[3];
 
-    // Blend in emissive for a more representative color if no texture is used.
     let emissive = material.emissive_factor();
     if emissive[0] > 0.0 || emissive[1] > 0.0 || emissive[2] > 0.0 {
-        // Additive blend (clamped to 1.0)
         r = (r + emissive[0]).min(1.0);
         g = (g + emissive[1]).min(1.0);
         b = (b + emissive[2]).min(1.0);

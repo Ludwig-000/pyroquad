@@ -86,7 +86,7 @@ impl RapierWorld{
             },
             obj::Object::Mesh(mesh_wrapper) => {
 
-                let vertices: Vec<rapier3d::math::Vec3> = mesh_wrapper.mesh.vertices
+                let vertices: Vec<rapier3d::math::Vec3> = mesh_wrapper.vertices
                     .iter()
                     .map(|v| {
                         rapier3d::math::Vec3::new(
@@ -97,9 +97,10 @@ impl RapierWorld{
                     })
                     .collect();
 
-                let indices: Vec<[u32; 3]> = mesh_wrapper.mesh.indices
+                let abs_indices = mesh_wrapper.absolute_indices_u32();
+                let indices: Vec<[u32; 3]> = abs_indices
                     .chunks_exact(3)
-                    .map(|chunk| [chunk[0] as u32, chunk[1] as u32, chunk[2] as u32])
+                    .map(|chunk| [chunk[0], chunk[1], chunk[2]])
                     .collect();
 
                 SharedShape::trimesh(vertices, indices).expect("Failed to build Mesh.")
@@ -169,7 +170,7 @@ impl RapierWorld{
                     .build()
             },
             obj::Object::Mesh(mesh_wrapper) => {
-                 let vertices: Vec<rapier3d::math::Vec3> = mesh_wrapper.mesh.vertices
+                 let vertices: Vec<rapier3d::math::Vec3> = mesh_wrapper.vertices
                  .iter()
                  .map(|v| {
                      rapier3d::math::Vec3::new(
@@ -180,9 +181,10 @@ impl RapierWorld{
                  })
                  .collect();
 
-                let indices: Vec<[u32; 3]> = mesh_wrapper.mesh.indices
+                let abs_indices = mesh_wrapper.absolute_indices_u32();
+                let indices: Vec<[u32; 3]> = abs_indices
                     .chunks_exact(3)
-                    .map(|chunk| [chunk[0] as u32, chunk[1] as u32, chunk[2] as u32])
+                    .map(|chunk| [chunk[0], chunk[1], chunk[2]])
                     .collect();
 
                 ColliderBuilder::trimesh(vertices, indices)
@@ -271,7 +273,7 @@ impl RapierWorld{
                 ColliderBuilder::cuboid(t.scale.x / 2.0, t.scale.y / 2.0, t.scale.z / 2.0)
             ),
             obj::Object::Mesh(mesh_wrapper) => {
-                 let vertices: Vec<rapier3d::math::Vec3> = mesh_wrapper.mesh.vertices
+                 let vertices: Vec<rapier3d::math::Vec3> = mesh_wrapper.vertices
                  .iter()
                  .map(|v| {
                      rapier3d::math::Vec3::new(
@@ -282,9 +284,10 @@ impl RapierWorld{
                  })
                  .collect();
 
-                let indices: Vec<[u32; 3]> = mesh_wrapper.mesh.indices
+                let abs_indices = mesh_wrapper.absolute_indices_u32();
+                let indices: Vec<[u32; 3]> = abs_indices
                     .chunks_exact(3)
-                    .map(|chunk| [chunk[0] as u32, chunk[1] as u32, chunk[2] as u32])
+                    .map(|chunk| [chunk[0], chunk[1], chunk[2]])
                     .collect();
 
                 apply_options(
@@ -343,8 +346,7 @@ impl RapierWorld{
                     .build()
             },
             obj::Object::Mesh(mesh_wrapper) => {
-                // ... (Mesh processing logic remains the same) ...
-                let vertices: Vec<rapier3d::math::Vec3> = mesh_wrapper.mesh.vertices
+                let vertices: Vec<rapier3d::math::Vec3> = mesh_wrapper.vertices
                     .iter()
                     .map(|v| {
                         rapier3d::math::Vec3::new(
@@ -355,9 +357,10 @@ impl RapierWorld{
                     })
                     .collect();
             
-                let indices: Vec<[u32; 3]> = mesh_wrapper.mesh.indices
+                let abs_indices = mesh_wrapper.absolute_indices_u32();
+                let indices: Vec<[u32; 3]> = abs_indices
                     .chunks_exact(3)
-                    .map(|chunk| [chunk[0] as u32, chunk[1] as u32, chunk[2] as u32])
+                    .map(|chunk| [chunk[0], chunk[1], chunk[2]])
                     .collect();
             
                 ColliderBuilder::trimesh(vertices, indices)
