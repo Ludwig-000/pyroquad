@@ -39,32 +39,48 @@ impl Mesh{
         gl.geometry(&self.mesh.vertices, &self.mesh.indices);
     }
 
+    pub fn load_from_bytes(data: &[u8], texture: Option<mq::Texture2D>) -> Result<Self, String> {
+        if data.len() >= 4 && &data[0..4] == b"glTF" {
+            println!("111");
+            return Self::load_from_gltf(data, texture).map_err(|e| format!("glTF error: {e}"));
+        }
+
+        let start = data.iter().position(|&b| !b.is_ascii_whitespace() && b != 0xEF && b != 0xBB && b != 0xBF);
+        if let Some(idx) = start {
+            if data[idx] == b'{' {
+                return Self::load_from_gltf(data, texture).map_err(|e| format!("glTF error: {e}"));
+            }
+        }
+
+        let is_ascii_ish = data.iter().take(512).all(|&b| b.is_ascii() || b > 127);
+        if is_ascii_ish {
+            return Self::load_from_obj(data, texture);
+        }
+
+        Err("Unrecognized mesh format. Supported formats: glTF/GLB (.glb, .gltf) and Wavefront OBJ (.obj)".to_string())
+    }
+
+
 
     pub fn load_from_gltf(data: &[u8], texture: Option<mq::Texture2D>) -> Result<Self, gltf::Error> {
-        let (document, buffers, _) = gltf::import_slice(data)?;
+        let (document, buffers, images) = gltf::import_slice(data)?;
 
         let mut vertices = Vec::new();
         let mut indices = Vec::new();
+        let mut extracted_texture: Option<mq::Texture2D> = None;
 
-        // 1. RESOLVE GLOBAL TRANSFORMS FOR ALL NODES
-        // glTF nodes have hierarchies. We need to calculate the global transformation 
-        // matrix for each node by multiplying it by its parent's matrix.
         let mut global_transforms = vec![Mat4::IDENTITY; document.nodes().count()];
         let mut stack = Vec::new();
 
-        // Start with root nodes from the default scene
         if let Some(scene) = document.default_scene().or_else(|| document.scenes().next()) {
             for node in scene.nodes() {
                 stack.push((node, Mat4::IDENTITY));
             }
         }
 
-        // Traverse the tree iteratively
         while let Some((node, parent_transform)) = stack.pop() {
-            // Get local transform (gltf matrix is column-major)
             let local_transform = Mat4::from_cols_array_2d(&node.transform().matrix());
             let global_transform = parent_transform * local_transform;
-            
             global_transforms[node.index()] = global_transform;
 
             for child in node.children() {
@@ -72,40 +88,26 @@ impl Mesh{
             }
         }
 
-        // 2. ITERATE NODES AND READ MESHES
+        if texture.is_none() && !images.is_empty() {
+            extracted_texture = try_decode_gltf_image(&images[0]);
+        }
+
+        let final_texture = texture.or(extracted_texture);
+
         for node in document.nodes() {
             if let Some(mesh) = node.mesh() {
-                
-                // Get the baked global transform we calculated for this specific node
                 let transform = global_transforms[node.index()];
-                
-                // To rotate normals correctly (especially if non-uniform scaling is used), 
-                // we need the inverse-transpose of the 3x3 portion of the transform matrix.
                 let normal_matrix = Mat3::from_mat4(transform).inverse().transpose();
 
                 for primitive in mesh.primitives() {
                     let reader = primitive.reader(|buffer| Some(&buffers[buffer.index()]));
 
-                    // --- MATERIAL COLOR ---
-                    let material = primitive.material();
-                    let pbr = material.pbr_metallic_roughness();
-                    let base_color_factor = pbr.base_color_factor();
-                    let material_color = mq::Color::from_vec(mq::vec4(
-                        base_color_factor[0],
-                        base_color_factor[1],
-                        base_color_factor[2],
-                        base_color_factor[3],
-                    ));
+                    let material_color = extract_material_color(&primitive.material());
 
-                    // --- READ RAW POSITIONS ---
-                    let positions_reader = match reader.read_positions() {
-                        Some(iter) => iter,
+                    let positions: Vec<[f32; 3]> = match reader.read_positions() {
+                        Some(iter) => iter.collect(),
                         None => continue,
                     };
-                    // Keep as raw arrays initially to easily convert to Glam vectors
-                    let positions: Vec<[f32; 3]> = positions_reader.collect(); 
-
-                    // --- READ RAW NORMALS ---
                     let normals: Vec<[f32; 3]> = reader
                         .read_normals()
                         .map(|n| n.collect())
@@ -127,13 +129,10 @@ impl Mesh{
 
                     let vertex_start = vertices.len() as u16;
 
-                    // --- APPLY TRANSFORMS TO VERTICES ---
                     for i in 0..positions.len() {
-                        // Position: Multiply local position by the global transformation matrix
                         let local_pos = Vec3::from_array(positions[i]);
                         let world_pos = transform.transform_point3(local_pos);
 
-                        // Normal: Multiply local normal by the normal matrix
                         let local_normal = Vec3::from_array(normals[i]);
                         let world_normal = normal_matrix.mul_vec3(local_normal).normalize_or_zero();
 
@@ -145,7 +144,6 @@ impl Mesh{
                         });
                     }
 
-                    // --- INDICES ---
                     if let Some(read_indices) = reader.read_indices() {
                         match read_indices {
                             ReadIndices::U16(iter) => indices.extend(iter.map(|i| i + vertex_start)),
@@ -156,9 +154,85 @@ impl Mesh{
                 }
             }
         }
+        Ok(Self {
+            scale: mq::vec3(1.0, 1.0, 1.0),
+            position: mq::vec3(0.0, 0.0, 0.0),
+            rotation: mq::vec3(0.0, 0.0, 0.0),
+            color: mq::WHITE,
+            mesh: mq::Mesh {
+                vertices,
+                indices,
+                texture: final_texture,
+            },
+            draw_each_frame: true,
+        })
+    }
 
-        // We bake the nodes into the vertices, so the structural transform of the overall 
-        // Macroquad "Mesh" container starts perfectly clean at the origin (0,0,0) at scale 1.
+
+    pub fn load_from_obj(data: &[u8], texture: Option<mq::Texture2D>) -> Result<Self, String> {
+
+        let mut cursor = std::io::Cursor::new(data);
+
+        let (models, _materials_result) = tobj::load_obj_buf(
+            &mut cursor,
+            &tobj::LoadOptions {
+                triangulate: true,
+                single_index: true,
+                ..Default::default()
+            },
+            |_mtl_path| Err(tobj::LoadError::GenericFailure),
+        ).map_err(|e| format!("OBJ load error: {e}"))?;
+
+        let mut vertices = Vec::new();
+        let mut indices = Vec::new();
+
+        for model in &models {
+            let mesh = &model.mesh;
+            let vertex_start = vertices.len() as u16;
+
+            let num_verts = mesh.positions.len() / 3;
+
+            for i in 0..num_verts {
+                let px = mesh.positions[i * 3];
+                let py = mesh.positions[i * 3 + 1];
+                let pz = mesh.positions[i * 3 + 2];
+
+                let (nx, ny, nz) = if !mesh.normals.is_empty() && i * 3 + 2 < mesh.normals.len() {
+                    (mesh.normals[i * 3], mesh.normals[i * 3 + 1], mesh.normals[i * 3 + 2])
+                } else {
+                    (0.0, 1.0, 0.0)
+                };
+
+                let uv = if !mesh.texcoords.is_empty() && i * 2 + 1 < mesh.texcoords.len() {
+                    mq::vec2(mesh.texcoords[i * 2], mesh.texcoords[i * 2 + 1])
+                } else {
+                    mq::vec2(0.0, 0.0)
+                };
+
+                let color = if !mesh.vertex_color.is_empty() && i * 3 + 2 < mesh.vertex_color.len() {
+                    mq::Color::new(
+                        mesh.vertex_color[i * 3],
+                        mesh.vertex_color[i * 3 + 1],
+                        mesh.vertex_color[i * 3 + 2],
+                        1.0,
+                    )
+                } else {
+                    mq::WHITE
+                };
+
+                vertices.push(mq::Vertex {
+                    position: mq::vec3(px, py, pz),
+                    uv,
+                    color: color.into(),
+                    normal: mq::vec3(nx, ny, nz).extend(0.0),
+                });
+            }
+
+            for &idx in &mesh.indices {
+                indices.push(idx as u16 + vertex_start);
+            }
+        }
+
         Ok(Self {
             scale: mq::vec3(1.0, 1.0, 1.0),
             position: mq::vec3(0.0, 0.0, 0.0),
@@ -172,6 +246,7 @@ impl Mesh{
             draw_each_frame: true,
         })
     }
+
 
     pub fn  recalculate_pos(&mut self, old_pos: mq::Vec3, new_pos: mq::Vec3) {
         let old = Vec3A::from(old_pos);
@@ -227,4 +302,142 @@ impl Mesh{
             vertex.position = glam::Vec3::from(final_pos);
         }
     }
+}
+
+
+// ═════════════════════════════════════════════════════════════════════
+//  HELPER FUNCTIONS  (private to this module)
+// ═════════════════════════════════════════════════════════════════════
+
+/// Extracts the best representative color from a glTF material.
+/// Reads PBR base color factor and blends with emissive if present.
+fn extract_material_color(material: &gltf::Material) -> mq::Color {
+    let pbr = material.pbr_metallic_roughness();
+    let base = pbr.base_color_factor();
+
+    let mut r = base[0];
+    let mut g = base[1];
+    let mut b = base[2];
+    let a = base[3];
+
+    // Blend in emissive for a more representative color if no texture is used.
+    let emissive = material.emissive_factor();
+    if emissive[0] > 0.0 || emissive[1] > 0.0 || emissive[2] > 0.0 {
+        // Additive blend (clamped to 1.0)
+        r = (r + emissive[0]).min(1.0);
+        g = (g + emissive[1]).min(1.0);
+        b = (b + emissive[2]).min(1.0);
+    }
+
+    mq::Color::new(r, g, b, a)
+}
+
+
+/// Attempts to decode an embedded glTF image into a macroquad Texture2D.
+/// Returns None on failure (graceful — we just skip the texture).
+fn try_decode_gltf_image(image_data: &gltf::image::Data) -> Option<mq::Texture2D> {
+    let (width, height) = (image_data.width, image_data.height);
+
+    // Convert pixel data to RGBA8 regardless of source format
+    let rgba_bytes = match image_data.format {
+        gltf::image::Format::R8G8B8A8 => {
+            image_data.pixels.clone()
+        }
+        gltf::image::Format::R8G8B8 => {
+            // Expand RGB → RGBA
+            let mut rgba = Vec::with_capacity(image_data.pixels.len() / 3 * 4);
+            for chunk in image_data.pixels.chunks_exact(3) {
+                rgba.push(chunk[0]);
+                rgba.push(chunk[1]);
+                rgba.push(chunk[2]);
+                rgba.push(255);
+            }
+            rgba
+        }
+        gltf::image::Format::R8 => {
+            // Grayscale → RGBA
+            let mut rgba = Vec::with_capacity(image_data.pixels.len() * 4);
+            for &p in &image_data.pixels {
+                rgba.push(p);
+                rgba.push(p);
+                rgba.push(p);
+                rgba.push(255);
+            }
+            rgba
+        }
+        gltf::image::Format::R8G8 => {
+            // RG → RGBA (treat as grayscale + alpha)
+            let mut rgba = Vec::with_capacity(image_data.pixels.len() * 2);
+            for chunk in image_data.pixels.chunks_exact(2) {
+                rgba.push(chunk[0]);
+                rgba.push(chunk[0]);
+                rgba.push(chunk[0]);
+                rgba.push(chunk[1]);
+            }
+            rgba
+        }
+        gltf::image::Format::R16 | gltf::image::Format::R16G16 |
+        gltf::image::Format::R16G16B16 | gltf::image::Format::R16G16B16A16 => {
+            // 16-bit formats: convert to 8-bit by taking the high byte
+            let bytes_per_component = 2;
+            let components_per_pixel = match image_data.format {
+                gltf::image::Format::R16 => 1,
+                gltf::image::Format::R16G16 => 2,
+                gltf::image::Format::R16G16B16 => 3,
+                gltf::image::Format::R16G16B16A16 => 4,
+                _ => return None,
+            };
+            let pixel_count = (image_data.pixels.len() / (components_per_pixel * bytes_per_component)) as usize;
+            let mut rgba = Vec::with_capacity(pixel_count * 4);
+
+            for pixel_idx in 0..pixel_count {
+                let base = pixel_idx * components_per_pixel * bytes_per_component;
+                // Read high byte of each 16-bit component (little-endian: high byte is at offset 1)
+                let r = if components_per_pixel >= 1 { image_data.pixels[base + 1] } else { 0 };
+                let g = if components_per_pixel >= 2 { image_data.pixels[base + bytes_per_component + 1] } else { r };
+                let b = if components_per_pixel >= 3 { image_data.pixels[base + 2 * bytes_per_component + 1] } else { r };
+                let a = if components_per_pixel >= 4 { image_data.pixels[base + 3 * bytes_per_component + 1] } else { 255 };
+                rgba.push(r);
+                rgba.push(g);
+                rgba.push(b);
+                rgba.push(a);
+            }
+            rgba
+        }
+        // R32G32B32FLOAT or R32G32B32A32FLOAT
+        gltf::image::Format::R32G32B32FLOAT | gltf::image::Format::R32G32B32A32FLOAT => {
+            let components = match image_data.format {
+                gltf::image::Format::R32G32B32FLOAT => 3,
+                gltf::image::Format::R32G32B32A32FLOAT => 4,
+                _ => return None,
+            };
+            let pixel_count = image_data.pixels.len() / (components * 4);
+            let mut rgba = Vec::with_capacity(pixel_count * 4);
+
+            for pixel_idx in 0..pixel_count {
+                let base = pixel_idx * components * 4;
+                let r = f32::from_le_bytes([image_data.pixels[base], image_data.pixels[base+1], image_data.pixels[base+2], image_data.pixels[base+3]]);
+                let g = f32::from_le_bytes([image_data.pixels[base+4], image_data.pixels[base+5], image_data.pixels[base+6], image_data.pixels[base+7]]);
+                let b = f32::from_le_bytes([image_data.pixels[base+8], image_data.pixels[base+9], image_data.pixels[base+10], image_data.pixels[base+11]]);
+                let a = if components == 4 {
+                    f32::from_le_bytes([image_data.pixels[base+12], image_data.pixels[base+13], image_data.pixels[base+14], image_data.pixels[base+15]])
+                } else {
+                    1.0
+                };
+                rgba.push((r.clamp(0.0, 1.0) * 255.0) as u8);
+                rgba.push((g.clamp(0.0, 1.0) * 255.0) as u8);
+                rgba.push((b.clamp(0.0, 1.0) * 255.0) as u8);
+                rgba.push((a.clamp(0.0, 1.0) * 255.0) as u8);
+            }
+            rgba
+        }
+    };
+
+    let expected_len = (width * height * 4) as usize;
+    if rgba_bytes.len() < expected_len {
+        return None; // Data mismatch — skip gracefully
+    }
+
+    let mq_texture = mq::Texture2D::from_rgba8(width as u16, height as u16, &rgba_bytes);
+    Some(mq_texture)
 }

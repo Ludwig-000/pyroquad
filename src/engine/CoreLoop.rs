@@ -49,6 +49,11 @@ use crate::engine::Objects::ObjectManagement::ObjectManagement;
 
 
 pub enum Command {
+    CreateMeshFromBytes{
+        data: Vec<u8>,
+        texture: Option<mq::Texture2D>,
+        sender: PChannel::PSender<Result<Mesh, PError>>,
+    },
     GetCustomMouseState{
         sender: PSender<(f32,f32,bool)>,
     },
@@ -322,6 +327,12 @@ pub async fn proccess_commands_loop() {
         while let Some(command) = COMMAND_QUEUE.pop() {
             
             match command {
+                Command::CreateMeshFromBytes{data, texture, sender}=>{
+                    let mesh = Mesh::load_from_bytes(&data, texture.map(|t|t.into())).map_err(|e|{
+                        PError::BasicErr(format!("invalid mesh: {e}"))
+                    });
+                    let _ = sender.send(mesh);
+                }
                 Command::GetCustomMouseState { sender }=>{
                     let (x,y,inside) = unsafe { MouseInsideScreen::get_mouse_state_info() };
                     sender.send((x,y,inside));

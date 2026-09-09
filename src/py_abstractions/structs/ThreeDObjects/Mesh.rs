@@ -76,9 +76,12 @@ impl Mesh{
             weak_ref_ref.cast_into::<PyWeakref>()?.unbind() 
         };
 
-        let mesh =  internal_mesh::Mesh::load_from_gltf(&data.bytes, texture.map(|t|t.into())).map_err(|e|{
-            PError::GLTFError(e)
-        })?;
+        let mesh ={ // this is a compromise, since we cannot do texture loading on the python thread.
+            let (tx, rx) = PChannel::channel();
+
+            COMMAND_QUEUE.push(Command::CreateMeshFromBytes { data: data.bytes, texture: texture.map(|t|t.into()), sender: tx });
+            rx.recv()??
+        };
 
         COMMAND_QUEUE.push(Command::CreateMesh { mesh, collider: collider_type, weak_ref: weak_ref_handle.clone_ref(py), sender });
         
