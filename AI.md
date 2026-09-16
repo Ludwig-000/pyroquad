@@ -18,7 +18,7 @@ description: Cross-platform python game engine, based on 'Macroquad'.
 - **Initialization:** `activate_engine()` must be called to start the engine. Most functions require an active engine; blocking calls throw `BaseException` if called early.
 - **Architecture:** No support for subclassing. No async functions.
 - **Thread-Safety:** Fully thread-safe.
-- **Utilities:** `next_frame()` draws, clears buffer, and cleans memory. Use `get_delta_time()`, `window_width()`, and `window_height()` for frame logic.
+- **Utilities:** `next_frame()` draws, clears buffer, and cleans memory. Use `get_delta_time()`, `screen_width()`, and `screen_height()` for frame logic.
 
 ## Coordinate System & Colors
 
@@ -32,7 +32,7 @@ description: Cross-platform python game engine, based on 'Macroquad'.
 
 ## Config
 Configured via `Config(...)` passed to `activate_engine()`:
-- **Fullscreen:** If `True`, `window_width/height` are overwritten by monitor max.
+- **Fullscreen:** If `True`, `screen_width/height` are overwritten by monitor max.
 - **Swap Interval:** `None` (V-Sync), `0` (Max speed). Driver dependent; manual caps recommended if the user requests such.
 - **Advanced Exit Flow:** `stop_python_when_closing_window` When set to False, combine with `prevent_quit()` -> prevents the window from closing, and `is_quit_requested()` to intercept the close signal and perform cleanup before the process terminates.
 

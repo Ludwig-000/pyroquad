@@ -4,12 +4,9 @@ use gltf::mesh::util::ReadIndices;
 use glam::{ Mat4, Mat3, Vec3};
 
 /// Largest relative index we allow in a rendering chunk.
-/// We use 65_000 instead of 65_535 to leave a small safety margin.
 const MAX_CHUNK_INDEX: usize = 65_000;
 
-/// Describes where one rendering chunk ends and the next begins.
-/// Both `vertex` and `index` are *exclusive* end-offsets into the flat buffers.
-#[derive(Clone, Debug)]
+#[derive(Clone, Copy, Debug)]
 pub struct SplitPoint {
     pub vertex: usize,
     pub index: usize,
@@ -32,9 +29,10 @@ pub struct Mesh {
 
 impl Mesh{
     pub fn draw(&self, gl: &mut macroquad::prelude::QuadGl ){
+        
         gl.texture(self.texture.as_ref());
 
-        println!("Drawing {} Vertices and {} Indices", self.vertices.len(), self.indices.len());
+        // println!("Drawing {} Vertices and {} Indices", self.vertices.len(), self.indices.len());
         match self.splitpoints.as_deref() {
             None => gl.geometry(&self.vertices, &self.indices),
             Some(splitpoints) => {

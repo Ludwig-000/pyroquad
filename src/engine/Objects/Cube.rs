@@ -1,3 +1,5 @@
+use std::ops::Add;
+
 use macroquad::{prelude::{self as mq,}, texture::Texture2D};
 use glam::{Vec3A, Mat3A, Quat, EulerRot};
 

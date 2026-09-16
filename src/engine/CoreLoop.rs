@@ -47,7 +47,6 @@ use crate::engine::Objects::Cube::*;
 use crate::engine::Objects::ObjectManagement::ObjectStorage;
 use crate::engine::Objects::ObjectManagement::ObjectManagement;
 
-
 pub enum Command {
     CreateMeshFromBytes{
         data: Vec<u8>,
@@ -297,7 +296,7 @@ pub enum Command {
         sender: PChannel::PSender<mq::Image>,
     },
 
-    SetCamera{camera_2d: Option<mq::Camera2D>, camera_3d: Option<mq::Camera3D>},
+    SetCamera{camera_2d: Box<Option<mq::Camera2D>>, camera_3d: Box<Option<mq::Camera3D>>},
 
     SetCursorGrab ( bool ),
 
@@ -325,6 +324,7 @@ pub async fn proccess_commands_loop() {
 
     loop {
         while let Some(command) = COMMAND_QUEUE.pop() {
+
             
             match command {
                 Command::CreateMeshFromBytes{data, texture, sender}=>{
@@ -813,7 +813,7 @@ pub async fn proccess_commands_loop() {
                     );
                 }
                 Command::SetCamera { camera_2d, camera_3d } => { // merged cam2d and 3d for simplicity.
-                    match (camera_2d, camera_3d) {
+                    match (*camera_2d, *camera_3d) {
                         (Some(cam), None) => {
                             set_camera(&mut cam_memory, Camera::Camera2D(cam));
                         },

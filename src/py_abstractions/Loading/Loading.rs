@@ -71,7 +71,6 @@ pub fn load_file_future(path: &str) -> PyResult<FileDataFuture> {
 
 /// Loads a file.
 #[cfg(any(target_arch = "wasm32", target_os = "ios"))]
-#[gen_stub_pyfunction]
 #[pyfunction]
 pub fn load_file(path: &str)-> PyResult<FileData>{
     use crate::engine::PChannel::PChannel;
@@ -133,7 +132,6 @@ pub fn download_file(url: &str) -> PyResult<FileData> {
 }
 
 #[cfg(target_arch = "wasm32")]
-#[gen_stub_pyfunction]
 #[pyfunction]
 pub fn download_file(url: &str) -> PyResult<FileData> {
     todo!("HTTP downloads are not available directly on wasm32-wasip1");
@@ -187,7 +185,6 @@ pub fn write_to_file(contents: &FileData, path: String) -> PyResult<()> {
 /// Writes raw data to file.
 /// On WASM, this function does nothing.
 #[cfg(any(target_arch = "wasm32", target_os = "ios"))]
-#[gen_stub_pyfunction]
 #[pyfunction]
 pub fn write_to_file(contents: &FileData, path: String) -> PyResult<()> {
     Ok(())

@@ -44,6 +44,15 @@ pub mod _pyroquad {
         };
     }
 
+    
+    #[pyo3::pymodule]
+    #[pyo3(gil_used = false)]
+    pub mod ColorMod{
+        #[pymodule_export]
+        pub use crate::py_abstractions::Color::Color;
+    
+    }
+
     #[pymodule_export]
     pub use crate::py_abstractions::py_functions::{
         activate_engine, batch_draw_shapes, cartesian_to_polar, clear_background, draw_affine_parallelepiped,
@@ -75,8 +84,6 @@ pub mod _pyroquad {
         measure_text, Font, TextDimensions,
     };
 
-    #[pymodule_export]
-    pub use crate::py_abstractions::Color::Color;
 
     #[pymodule_export]
     pub use crate::py_abstractions::Loading::ThreadedLoading::Loading;

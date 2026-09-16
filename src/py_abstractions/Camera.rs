@@ -109,7 +109,7 @@ impl Camera2D {
 
     /// Set active 2D camera.
     pub fn set_camera(&self) {
-        COMMAND_QUEUE.push(Command::SetCamera { camera_2d: Some(self.clone().into()), camera_3d: None });
+        COMMAND_QUEUE.push(Command::SetCamera { camera_2d: Box::new(Some(self.clone().into())), camera_3d: Box::new(None) });
     }
 }
 
@@ -311,7 +311,7 @@ impl Camera3D {
 
     /// Set active 3D camera.
     pub fn set_camera(&self) {
-        COMMAND_QUEUE.push(Command::SetCamera { camera_2d: None, camera_3d: Some(self.clone().into()) });
+        COMMAND_QUEUE.push(Command::SetCamera { camera_2d: Box::new(None), camera_3d: Box::new(Some(self.clone().into())) });
     }
 }
 
