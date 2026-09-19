@@ -84,6 +84,7 @@ pub fn activate_engine( conf: Option<Config>) -> PyResult<()>{
             crate::engine::EngineSetup::setup_engine();
             crate::engine::FrameInfo::update_frame_info();
 
+            mq::set_fullscreen(conf.fullscreen);
             crate::engine::CoreLoop::proccess_commands_loop().await;
         });
 

@@ -89,7 +89,33 @@ def imports(path):
                     _, p = uleb(data, p)
             elif kind == 3:
                 p += 2
+            elif kind == 4:
+                # A tag: an attribute byte plus a type index. This is wasm
+                # exception handling - rustc lowers panics to it, and the module
+                # imports Pyodide's `__cpp_exception` (see docs/WASM.md, §2).
+                #
+                # Not having this case was survivable for a long time only by
+                # accident: the tag was the very last import, so the loop ended
+                # before the missing skip could shift anything. Built through
+                # pyodide-build it is not last, and every import after it was
+                # read at the wrong offset.
+                p += 1
+                _, p = uleb(data, p)
+            else:
+                raise SystemExit(
+                    f"{path}: unhandled import kind {kind} for {mod}.{nm} - "
+                    f"this parser needs a case for it"
+                )
             out.append((mod, nm, kind))
+
+        # A descriptor decoded at the wrong width silently shifts every import
+        # after it, which shows up as gibberish names or a UnicodeDecodeError
+        # rather than as something diagnosable. The section must come out exact.
+        if p != end:
+            raise SystemExit(
+                f"{path}: import section consumed up to {p}, expected {end} - "
+                f"the import parser is out of step with the binary"
+            )
     return out
 
 
