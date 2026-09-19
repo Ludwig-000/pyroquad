@@ -47,3 +47,7 @@ emsdk
 
 web/pyodide/
 web/pyroquad_pkg.zip
+web/pyroquad.whl
+
+# maturin --out dist (the wasm wheel)
+dist/

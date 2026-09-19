@@ -7,6 +7,7 @@ This is a Python game engine based on [macroquad](https://github.com/not-fl3/mac
 
 
 * Install via `pip install pyroquad`
+  (in the browser: `micropip.install("pyroquad")`)
 * Requires Python >= 3.9
 * Supported Platforms: windows, linux, mac, and the browser
   (WebAssembly via Pyodide - see [docs/WASM.md](docs/WASM.md))
@@ -79,22 +80,40 @@ This is a Python game engine based on [macroquad](https://github.com/not-fl3/mac
 >forked or patched - macroquad, miniquad, quad-snd and Pyodide are all stock.
 >[docs/WASM.md](docs/WASM.md) explains how and why it works.
 >
+>Since [PEP 783](https://peps.python.org/pep-0783/) the browser build is
+>published to PyPI like any other wheel, so **most people never need to build it
+>at all** - see *Running in the browser* below. The rest of this section is for
+>building it yourself.
+>
 >    1) Prerequesites (in addition to the ones above):
 >       - The `wasm32-unknown-emscripten` Rust target:
 >
 >         `rustup target add wasm32-unknown-emscripten`
 >
->       - The [Emscripten SDK](https://emscripten.org/docs/getting_started/downloads.html).
->         If you do not already have one, put it in the project root - the build
+>       - `pyodide-build` and a recent `maturin`:
+>
+>         `pip install "pyodide-build>=0.39" "maturin>=1.13.2"`
+>
+>         `pyodide-build` owns the cross-build environment: it decides the
+>         Emscripten version, the linker flags and the wheel's platform tag, so
+>         that what you build matches the Pyodide that will load it. `maturin`
+>         1.13.2 is the first release that emits the PEP 783 tag.
+>
+>         **`pyodide-build` does not run natively on Windows.** Build the wheel
+>         on Linux, macOS or WSL. For local iteration on Windows there is a
+>         wheel-less path - see *Developing on the module itself* below.
+>
+>       - The [Emscripten SDK](https://emscripten.org/docs/getting_started/downloads.html),
+>         at the version Pyodide was built with (step 3 prints it). The build
 >         script looks for `emcc` under `$EMCC`, then `$EMSDK`, then the
 >         project-local `emsdk/`, then `PATH`, so **no `emsdk_env` activation
 >         step is needed**:
 >
 >         `git clone https://github.com/emscripten-core/emsdk.git`
 >
->         `./emsdk/emsdk install latest`
+>         `./emsdk/emsdk install <version>`
 >
->         `./emsdk/emsdk activate latest`
+>         `./emsdk/emsdk activate <version>`
 >
 >         *(on Windows, use `emsdk\emsdk.bat` in place of `./emsdk/emsdk`)*
 >
@@ -109,51 +128,136 @@ This is a Python game engine based on [macroquad](https://github.com/not-fl3/mac
 >
 >       This is the stock `pyodide-core` release, unpacked and otherwise
 >       untouched - the web build deliberately runs on an unmodified Pyodide.
+>       It is what the local test page loads, and what `check_imports.py`
+>       resolves symbols against.
 >
 >       *(Pyodide releases are versioned after the CPython they ship: the pinned
 >       314.0.7 is CPython 3.14.2, which is what `--features abi_314` targets.
 >       `python web/get_pyodide.py <version>` takes a different one.)*
 >
->    3) Compilation:
+>    3) Install the matching cross-build environment:
 >
->       `RUSTFLAGS` is what turns the crate into an Emscripten *side module* -
->       the same thing Pyodide builds every other extension module as.
+>       `pyodide xbuildenv install 314.0.7`
 >
->       - macOS / Linux:
+>       Then read back what it wants - these are the values the build uses, and
+>       `emscripten_version` is the emsdk version to install in step 1:
 >
->         `RUSTFLAGS="-C link-arg=-sSIDE_MODULE=2" PYO3_CROSS_PYTHON_VERSION=3.14 cargo build --target wasm32-unknown-emscripten --release --features abi_314`
+>       `pyodide config get emscripten_version`
 >
->       - Windows (PowerShell):
+>       `pyodide config get rustflags`
 >
->         `$env:RUSTFLAGS="-C link-arg=-sSIDE_MODULE=2"; $env:PYO3_CROSS_PYTHON_VERSION="3.14"`
+>       `pyodide config get pyodide_abi_version`
 >
->         `cargo build --target wasm32-unknown-emscripten --release --features abi_314`
+>    4) Build the wheel (macOS / Linux / WSL):
 >
->       *(`maturin` is not used here: the browser loads the module directly, so
->       there is no wheel to build. Also remember to clear `RUSTFLAGS` again
->       before building natively in the same shell - it applies to every target.)*
+>       ```
+>       CARGO_TARGET_WASM32_UNKNOWN_EMSCRIPTEN_RUSTFLAGS="$(pyodide config get rustflags)" \
+>       MATURIN_PYEMSCRIPTEN_PLATFORM_VERSION="$(pyodide config get pyodide_abi_version)" \
+>       PYO3_CROSS_PYTHON_VERSION=3.14 \
+>       maturin build --release --target wasm32-unknown-emscripten --out dist --features abi_314
+>       ```
 >
->    4) Bundle the module together with the pure-Python half of the package:
+>       This writes `dist/pyroquad-<version>-cp314-abi3-pyemscripten_<year>_<n>_wasm32.whl`.
 >
->       `python web/build_web.py`
->
->       This writes `web/pyroquad_pkg.zip`, which the page unpacks into Pyodide.
->       Re-run it after every `cargo build`.
+>       `pyodide config get rustflags` is what turns the crate into an Emscripten
+>       *side module* - the same thing Pyodide builds every other extension
+>       module as. It is passed as `CARGO_TARGET_<TARGET>_RUSTFLAGS` rather than
+>       as a bare `RUSTFLAGS` on purpose: this crate has a `build.rs`, which is
+>       compiled for the **host**, and bare `RUSTFLAGS` would apply the
+>       side-module flags to it as well and break it.
 >
 >    5) Check the build (optional, but it catches the one failure mode that is
 >       otherwise only visible as a cryptic `dlopen` error in the browser):
 >
->       `python web/check_imports.py`
+>       ```
+>       python -m zipfile -e dist/*.whl wheel_unpacked/
+>       python web/check_imports.py wheel_unpacked/pyroquad/_pyroquad*.so
+>       ```
 >
 >       It cross-references every symbol the module imports against what Pyodide
 >       actually provides, and exits non-zero if anything is unresolved.
 >
->    6) Run it:
+>    6) Stage the wheel for the test page, then run it:
+>
+>       `python web/build_web.py`
 >
 >       `python web/serve.py`
 >
 >       then open
 >       - `http://127.0.0.1:8000/web/index.html?script=tests/test_rec.py`
+>
+>       `build_web.py` copies the newest `dist/*wasm32.whl` to
+>       `web/pyroquad.whl`, and the page installs it with micropip - the same
+>       path `micropip.install("pyroquad")` takes for a real user, so a
+>       mis-tagged wheel is rejected here rather than in the wild.
+>
+>
+>## Running in the browser:
+>
+>Install it inside [Pyodide](https://pyodide.org) with
+>[micropip](https://micropip.pyodide.org) - the `pyemscripten_*_wasm32` wheel
+>comes straight from PyPI, exactly like the desktop ones:
+>
+>```html
+><script type="module">
+>  import { loadPyodide } from "./pyodide/pyodide.mjs";
+>
+>  const pyodide = await loadPyodide();
+>  await pyodide.loadPackage("micropip");
+>  const micropip = pyodide.pyimport("micropip");
+>  await micropip.install("pyroquad");
+>
+>  // runPythonAsync, not runPython: pyroquad yields to the browser between
+>  // frames through JSPI, which needs the async entry point.
+>  await pyodide.runPythonAsync(`
+>      from pyroquad import *
+>
+>      activate_engine()
+>
+>      while True:
+>          draw_rectangle(x=100, y=100, w=600, h=300, color=Color.GREEN)
+>          next_frame()
+>          examples.limit_fps(60)
+>  `);
+></script>
+>```
+>
+>The page needs a `<canvas>` for the engine to draw into, and Chrome 137+ for
+>JSPI. `web/index.html` is a complete working example of both.
+>
+>A plain static server is enough - this port uses JSPI rather than
+>`SharedArrayBuffer`, so no COOP/COEP headers are required.
+>
+>
+>## Developing on the module itself:
+>
+>For iterating on the Rust side there is a shorter loop that skips the wheel
+>(and works on Windows, where `pyodide-build` does not run). It builds the side
+>module directly and hands it to the test page as a zip:
+>
+>    - macOS / Linux:
+>
+>      `RUSTFLAGS="-C link-arg=-sSIDE_MODULE=2" PYO3_CROSS_PYTHON_VERSION=3.14 cargo build --target wasm32-unknown-emscripten --release --features abi_314`
+>
+>    - Windows (PowerShell):
+>
+>      `$env:RUSTFLAGS="-C link-arg=-sSIDE_MODULE=2"; $env:PYO3_CROSS_PYTHON_VERSION="3.14"`
+>
+>      `cargo build --target wasm32-unknown-emscripten --release --features abi_314`
+>
+>then `python web/build_web.py`. With no wheel in `dist/` it falls back to
+>zipping the module together with the pure-Python half of the package into
+>`web/pyroquad_pkg.zip`, which `web/index.html` unpacks directly instead of
+>going through micropip. Re-run it after every `cargo build`.
+>
+>Only ever one of the two is staged - `build_web.py` deletes the other - so the
+>page cannot quietly load a stale artifact of the kind you are not testing.
+>
+>*(Remember to clear `RUSTFLAGS` again before building natively in the same
+>shell - it applies to every target. This path uses whatever emsdk you have
+>rather than the one Pyodide was built with; that skew is usually fine, for the
+>reason given in [docs/WASM.md](docs/WASM.md) §3, but the wheel build in step 4
+>is the one that matches the shipped artifact.)*
 >
 
 

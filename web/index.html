@@ -70,9 +70,25 @@ print("Vec2      ", Vec2(3, 4).length())
     log("pyodide " + pyodide.version + "  (CPython " + pyodide.runPython("import sys; sys.version.split()[0]") + ")", "ok");
     log("JSPI available: " + (typeof WebAssembly.Suspending !== "undefined"), "dim");
 
+    // build_web.py stages exactly one of these. A wheel is what ships to PyPI,
+    // so when there is one it is installed through micropip - the same path
+    // `micropip.install("pyroquad")` takes for a real user, which also means
+    // micropip gets to reject a wrongly tagged wheel here rather than in the
+    // wild. The zip is the short loop's bare side module, unpacked directly.
     log("installing pyroquad ...", "dim");
-    const buf = await (await fetch("./pyroquad_pkg.zip", { cache: "no-store" })).arrayBuffer();
-    pyodide.unpackArchive(buf, "zip");
+    const wheelURL = new URL("./pyroquad.whl", location.href).href;
+    const haveWheel = (await fetch(wheelURL, { method: "HEAD", cache: "no-store" })).ok;
+
+    if (haveWheel) {
+      await pyodide.loadPackage("micropip");
+      const micropip = pyodide.pyimport("micropip");
+      await micropip.install(wheelURL);
+      log("installed pyroquad.whl via micropip", "ok");
+    } else {
+      const buf = await (await fetch("./pyroquad_pkg.zip", { cache: "no-store" })).arrayBuffer();
+      pyodide.unpackArchive(buf, "zip");
+      log("unpacked pyroquad_pkg.zip (side module - no wheel staged)", "ok");
+    }
 
     if (script) {
       log("fetching ../" + script, "dim");

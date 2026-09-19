@@ -149,13 +149,17 @@ src/web/shim.c              the 30-odd platform functions (see §3)
 src/web/mod.rs              the Rust half: the single-threaded engine loop,
                             the JSPI yields, the query dispatch path (see §6)
 
-web/build_web.py            zips src/python/pyroquad + the .so into
-                            web/pyroquad_pkg.zip
+web/build_web.py            stages one artifact for the page: the wheel from
+                            dist/ if there is one, else the .so + the Python
+                            half zipped into web/pyroquad_pkg.zip
 web/check_imports.py        build gate: every import resolvable? (see §5)
 web/serve.py                threaded static dev server for the repo root
-web/index.html              loads Pyodide, unpacks the package, runs the
-                            import smoke test - or ?script=test.py /
-                            ?script=test2.py to run one of the test scripts
+web/index.html              loads Pyodide, installs the staged wheel through
+                            micropip (or unpacks the zip), runs the import
+                            smoke test - or ?script=test.py / ?script=test2.py
+                            to run one of the test scripts
+web/get_pyodide.py          fetches pyodide-core, plus micropip's wheel, which
+                            pyodide-core lists but does not ship
 web/pyodide/                stock pyodide-core 314.0.7, unmodified
 ```
 
@@ -171,15 +175,59 @@ unchanged. The engine-side files that gained a browser path are
 
 ## 5. Building and running
 
+There are two ways to build this, and they differ only in packaging.
+
+### The shipped artifact: a PEP 783 wheel
+
+[PEP 783](https://peps.python.org/pep-0783/) was accepted in April 2026 and PyPI
+now accepts `pyemscripten_*_wasm32` wheels, so the browser build is published
+alongside the native ones and installs with `micropip.install("pyroquad")`. This
+is what CI builds and what `pip`/`micropip` hand people, so it is the version
+that matters.
+
+Here `pyodide-build` owns the cross-build environment — it decides the Emscripten
+version, the RUSTFLAGS and the platform tag, so the wheel matches the Pyodide
+that will load it:
+
 ```bash
-# 1. the side module  (RUSTFLAGS is what makes it an Emscripten side module,
-#    matching how Pyodide builds every other extension module)
+pip install "pyodide-build>=0.39" "maturin>=1.13.2"
+pyodide xbuildenv install 314.0.7
+
+CARGO_TARGET_WASM32_UNKNOWN_EMSCRIPTEN_RUSTFLAGS="$(pyodide config get rustflags)" \
+MATURIN_PYEMSCRIPTEN_PLATFORM_VERSION="$(pyodide config get pyodide_abi_version)" \
+PYO3_CROSS_PYTHON_VERSION=3.14 \
+  maturin build --release --target wasm32-unknown-emscripten --out dist --features abi_314
+```
+
+Two details are load-bearing:
+
+* **`CARGO_TARGET_<TARGET>_RUSTFLAGS`, not `RUSTFLAGS`.** This crate has a
+  `build.rs`, which is compiled for the *host*. A bare `RUSTFLAGS` would apply
+  the side-module flags to the build script too and break it.
+* **`pyodide-build` does not run natively on Windows**, so the wheel is built on
+  Linux, macOS or WSL. The path below is the Windows-friendly one.
+
+`python web/build_web.py` then copies the newest `dist/*wasm32.whl` to
+`web/pyroquad.whl`, and `web/index.html` installs *that* with micropip - the
+same path a user takes, so micropip rejects a mis-tagged wheel locally rather
+than in the wild. `web/get_pyodide.py` fetches micropip's own wheel for this:
+`pyodide-core` lists micropip in `pyodide-lock.json` but does not ship the file,
+and `loadPackage` resolves it against the page's `indexURL`.
+
+### The short loop: a bare side module
+
+For iterating on the Rust side, skipping the wheel is faster and works anywhere.
+`RUSTFLAGS` here is the hand-written equivalent of what `pyodide config get
+rustflags` returns above:
+
+```bash
+# 1. the side module
 RUSTFLAGS="-C link-arg=-sSIDE_MODULE=2" PYO3_CROSS_PYTHON_VERSION=3.14 \
   cargo build --target wasm32-unknown-emscripten --release --features abi_314
 ```
 
 ```bash
-# 2. bundle it with the pure-Python half
+# 2. stage it for the page (falls back to the zip when dist/ has no wheel)
 python web/build_web.py
 ```
 
@@ -192,8 +240,9 @@ python web/serve.py
 ```
 
 `emcc` is found by `build.rs` via `$EMCC`, then `$EMSDK`, then the project-local
-`emsdk/` (the same one `.cargo/config.toml` points the linker at), then `PATH`.
-No emsdk activation step is needed.
+`emsdk/` (the same one `.cargo/config.toml` points the linker at), then PATH.
+No emsdk activation step is needed. This path uses whatever emsdk is on hand
+rather than the one Pyodide was built with; §3 is why that skew is tolerable.
 
 A plain static server is enough — this port uses **JSPI**, not
 `SharedArrayBuffer`, so no COOP/COEP is required. (`serve.py` sends the headers
@@ -205,10 +254,18 @@ anyway; they are harmless.)
 cross-references every name against `web/pyodide/pyodide.asm.wasm`'s exports and
 `pyodide.asm.mjs`'s `wasmImports` object — the same table Emscripten's
 `resolveGlobalSymbol` consults at dlopen time. It exits non-zero on anything
-unresolved, so it works as a build gate.
+unresolved, so it works as a build gate — which is exactly how CI uses it, on
+both workflows.
 
 ```bash
+# the short loop's output (its default path)
 python web/check_imports.py
+```
+
+```bash
+# or the bytes that actually ship, unpacked from the wheel
+python -m zipfile -e dist/*.whl wheel_unpacked/
+python web/check_imports.py wheel_unpacked/pyroquad/_pyroquad*.so
 ```
 
 ```
@@ -408,3 +465,11 @@ displayed frame, pinned to the display's refresh rate.
 * Pyodide 314.0.7 (CPython 3.14.2), the stock `pyodide-core` tarball, unmodified.
   Pyodide itself was built with Emscripten 5.0.3; the version skew is fine
   because, per §3, the shim depends on Emscripten only through symbol names.
+
+That is what §7 was verified on. **CI does not reproduce the skew**: both
+`.github/workflows/verify.yml` (every push) and `.github/workflows/ci.yml` (the
+release) install the emsdk that `pyodide config get emscripten_version` names, so
+the published wheel is built with the same Emscripten as the Pyodide that loads
+it. The version pinned in `web/get_pyodide.py` is the single source of truth for
+which Pyodide that is — both workflows read `DEFAULT_VERSION` back out of it
+rather than hardcoding a version of their own.

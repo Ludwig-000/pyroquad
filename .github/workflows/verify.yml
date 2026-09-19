@@ -44,16 +44,52 @@ jobs:
           command: build
           args: --features abi_310 --interpreter python3.10
 
+  # Deliberately the same build the release runs (ci.yml), not a cheaper
+  # approximation of it - a green check here should mean the published wheel
+  # links. See the comments there for why each piece is shaped this way.
   compile-wasm:
-    name: Build Check (wasm32-unknown-emscripten)
+    name: Build Check (wasm32-emscripten)
     runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install Rust
-        uses: dtolnay/rust-toolchain@stable
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
+          python-version: "3.14"
+
+      - name: Install Build Tooling
+        run: pip install "pyodide-build>=0.39" "maturin>=1.13.2"
+
+      - name: Read the Pinned Pyodide Version
+        id: pyodide
+        run: |
+          VER=$(python -c "import sys; sys.path.insert(0, 'web'); import get_pyodide; print(get_pyodide.DEFAULT_VERSION)")
+          echo "version=$VER" >> "$GITHUB_OUTPUT"
+          echo "targeting pyodide $VER"
+
+      - name: Install the Pyodide Cross-Build Environment
+        run: pyodide xbuildenv install "${{ steps.pyodide.outputs.version }}"
+
+      - name: Read the Pyodide Build Configuration
+        id: pyodide-config
+        run: |
+          echo "emscripten-version=$(pyodide config get emscripten_version)" >> "$GITHUB_OUTPUT"
+          echo "rustflags=$(pyodide config get rustflags)" >> "$GITHUB_OUTPUT"
+          echo "abi-version=$(pyodide config get pyodide_abi_version)" >> "$GITHUB_OUTPUT"
+
+          # Pyodide's rustflags can carry -Z flags, which would need nightly.
+          # Whatever it asks for is installed and forced below; stable is only
+          # a fallback for a config that does not pin one.
+          RT=$(pyodide config get rust_toolchain || true)
+          [ -z "$RT" ] && RT=stable
+          echo "rust-toolchain=$RT" >> "$GITHUB_OUTPUT"
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: ${{ steps.pyodide-config.outputs.rust-toolchain }}
           targets: wasm32-unknown-emscripten
 
       # No X11/ALSA/GL packages here: the browser build links against WebGL and
@@ -61,18 +97,27 @@ jobs:
       - name: Install Emscripten
         uses: mymindstorm/setup-emsdk@v14
         with:
-          version: 6.0.8
+          version: ${{ steps.pyodide-config.outputs.emscripten-version }}
           actions-cache-folder: emsdk-cache
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.14"
 
       - name: Rust Cache
         uses: Swatinem/rust-cache@v2
         with:
           key: wasm32-unknown-emscripten
+
+      # CARGO_TARGET_<TARGET>_RUSTFLAGS, not plain RUSTFLAGS: this crate has a
+      # build.rs, which is compiled for the *host*. Bare RUSTFLAGS would apply
+      # the Emscripten side-module flags to it too and break the build script.
+      #
+      # RUSTUP_TOOLCHAIN overrides rust-toolchain.toml, which pins stable and
+      # would otherwise win over the toolchain installed above.
+      - name: Build Pyodide Wheel
+        env:
+          CARGO_TARGET_WASM32_UNKNOWN_EMSCRIPTEN_RUSTFLAGS: ${{ steps.pyodide-config.outputs.rustflags }}
+          MATURIN_PYEMSCRIPTEN_PLATFORM_VERSION: ${{ steps.pyodide-config.outputs.abi-version }}
+          RUSTUP_TOOLCHAIN: ${{ steps.pyodide-config.outputs.rust-toolchain }}
+          PYO3_CROSS_PYTHON_VERSION: "3.14"
+        run: maturin build --release --target wasm32-unknown-emscripten --out dist --features abi_314
 
       - name: Cache the Pyodide runtime
         id: pyodide-cache
@@ -85,11 +130,17 @@ jobs:
         if: steps.pyodide-cache.outputs.cache-hit != 'true'
         run: python web/get_pyodide.py
 
-      - name: Build Emscripten Side Module
-        env:
-          RUSTFLAGS: "-C link-arg=-sSIDE_MODULE=2"
-          PYO3_CROSS_PYTHON_VERSION: "3.14"
-        run: cargo build --target wasm32-unknown-emscripten --release --features abi_314
-
+      # The build gate: every symbol the module imports has to be resolvable at
+      # dlopen time, either by stock Pyodide or by the shim. Otherwise the only
+      # symptom is a cryptic `dlopen` failure in the browser.
+      #
+      # Checked on the .so unpacked from the wheel rather than on cargo's
+      # target/ output, so this gates the exact bytes that would be published.
       - name: Check Imports Against Pyodide
-        run: python web/check_imports.py
+        run: |
+          WHEEL=$(ls dist/*.whl)
+          echo "built $WHEEL"
+          python -m zipfile -e "$WHEEL" wheel_unpacked/
+          SO=$(find wheel_unpacked -name '_pyroquad*.so' -print -quit)
+          if [ -z "$SO" ]; then echo "no _pyroquad*.so inside $WHEEL"; exit 1; fi
+          python web/check_imports.py "$SO"

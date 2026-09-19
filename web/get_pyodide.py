@@ -16,6 +16,7 @@ Pyodide releases are versioned after the CPython they ship: 314.0.7 is CPython
 from __future__ import annotations
 
 import io
+import json
 import shutil
 import sys
 import tarfile
@@ -25,6 +26,43 @@ from pathlib import Path
 DEFAULT_VERSION = "314.0.7"
 WEB = Path(__file__).resolve().parent
 URL = "https://github.com/pyodide/pyodide/releases/download/{v}/pyodide-core-{v}.tar.bz2"
+PYPI = "https://pypi.org/pypi/{name}/{version}/json"
+
+
+def fetch_micropip(dest: Path) -> None:
+    """Put micropip's wheel next to the runtime.
+
+    ``pyodide-core`` lists micropip in ``pyodide-lock.json`` but does not ship
+    the file, and ``loadPackage`` resolves package filenames against the page's
+    ``indexURL`` - so without this, ``index.html`` cannot install the pyroquad
+    wheel the way a user would. micropip is a pure-Python wheel, so the copy on
+    PyPI is byte-identical to the one in the full Pyodide distribution.
+    """
+    lock = json.loads((dest / "pyodide-lock.json").read_text(encoding="utf8"))
+    entry = lock["packages"]["micropip"]
+    file_name = entry["file_name"]
+
+    if (dest / file_name).is_file():
+        print(f"micropip already present ({file_name})")
+        return
+
+    # file_name is `micropip-<version>-py3-none-any.whl`.
+    version = file_name.split("-")[1]
+    with urllib.request.urlopen(PYPI.format(name="micropip", version=version)) as response:
+        meta = json.load(response)
+
+    for item in meta["urls"]:
+        if item["filename"] == file_name:
+            print(f"downloading {file_name}")
+            with urllib.request.urlopen(item["url"]) as response:
+                (dest / file_name).write_bytes(response.read())
+            return
+
+    print(
+        f"warning: {file_name} not found on PyPI - index.html will fall back to\n"
+        f"         unpacking web/pyroquad_pkg.zip instead of installing a wheel",
+        file=sys.stderr,
+    )
 
 
 def main(version: str) -> int:
@@ -54,6 +92,8 @@ def main(version: str) -> int:
     if not marker.is_file():
         print(f"unexpected archive layout: {marker} is missing", file=sys.stderr)
         return 1
+
+    fetch_micropip(dest)
 
     print(f"pyodide {version} ready in {dest}")
     return 0
