@@ -97,9 +97,93 @@ jobs:
           name: pyroquad-${{ matrix.os }}-py${{ matrix.py_ver }}
           path: dist/*.whl
 
+  build-wasm:
+    name: Build WebAssembly Browser Bundle
+    needs: bump-version
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref }}
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-unknown-emscripten
+
+      # No X11/ALSA/GL packages here: the browser build links against WebGL and
+      # WebAudio through src/web/shim.c, not against the system libraries.
+      - name: Install Emscripten
+        uses: mymindstorm/setup-emsdk@v14
+        with:
+          # The version docs/WASM.md was verified against. build.rs finds emcc
+          # through the $EMSDK this sets, so no activation step is needed.
+          version: 6.0.8
+          actions-cache-folder: emsdk-cache
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.14"
+
+      - name: Rust Cache
+        uses: Swatinem/rust-cache@v2
+        with:
+          key: wasm32-unknown-emscripten
+
+      - name: Cache the Pyodide runtime
+        id: pyodide-cache
+        uses: actions/cache@v4
+        with:
+          path: web/pyodide
+          key: pyodide-${{ hashFiles('web/get_pyodide.py') }}
+
+      - name: Fetch the Pyodide runtime
+        if: steps.pyodide-cache.outputs.cache-hit != 'true'
+        run: python web/get_pyodide.py
+
+      # Deliberately without the CARGO_PROFILE_RELEASE_* overrides the native
+      # wheels use: this is the exact command docs/WASM.md verified in the
+      # browser, and the side module's link (wasm EH, the __em_js__ exports) is
+      # the part of this build least worth changing codegen under.
+      #
+      # RUSTFLAGS is what makes the crate an Emscripten side module, the same
+      # way Pyodide builds every other extension module. See docs/WASM.md §5.
+      - name: Build Emscripten Side Module
+        env:
+          RUSTFLAGS: "-C link-arg=-sSIDE_MODULE=2"
+          PYO3_CROSS_PYTHON_VERSION: "3.14"
+        run: cargo build --target wasm32-unknown-emscripten --release --features abi_314
+
+      # Every symbol the module imports has to be resolvable at dlopen time,
+      # either by stock Pyodide or by the shim. Otherwise the only symptom is a
+      # cryptic dlopen failure in the browser.
+      - name: Check Imports Against Pyodide
+        run: python web/check_imports.py
+
+      - name: Bundle the Browser Package
+        run: python web/build_web.py
+
+      - name: Name the Bundle After the Release
+        run: |
+          VER="${{ github.event.inputs.version }}"
+          VER="${VER#v}" # Strip leading 'v' if present
+
+          mkdir -p wasm_dist
+          cp web/pyroquad_pkg.zip "wasm_dist/pyroquad-web-${VER}.zip"
+
+      # NOTE: deliberately not named pyroquad-*, so the publish job's wheel
+      # download pattern cannot sweep this zip into the files sent to PyPI.
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: wasm-web-bundle
+          path: wasm_dist/*.zip
+
   publish:
     name: Publish to PyPI & GitHub Release
-    needs: build
+    needs: [build, build-wasm]
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -112,6 +196,14 @@ jobs:
           pattern: pyroquad-*
           merge-multiple: true
 
+      - name: Download the WebAssembly bundle
+        uses: actions/download-artifact@v4
+        with:
+          name: wasm-web-bundle
+          path: wasm_dist
+
+      # Wheels only - the browser bundle is not a wheel, and goes to the GitHub
+      # release instead.
       - name: Publish package to PyPI
         uses: PyO3/maturin-action@v1
         with:
@@ -123,6 +215,13 @@ jobs:
         with:
           tag_name: ${{ github.event.inputs.version }}
           target_commitish: ${{ github.ref_name }}
-          files: release_dist/*.whl
-          body: "Alpha release of Pyroquad Engine."
+          files: |
+            release_dist/*.whl
+            wasm_dist/*.zip
+          body: |
+            Alpha release of Pyroquad Engine.
+
+            `pyroquad-web-*.zip` is the WebAssembly browser bundle: the Emscripten
+            side module plus the pure-Python half of the package, ready to be
+            unpacked into Pyodide. See [docs/WASM.md](docs/WASM.md).
           generate_release_notes: true

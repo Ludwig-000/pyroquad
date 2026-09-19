@@ -43,3 +43,53 @@ jobs:
         with:
           command: build
           args: --features abi_310 --interpreter python3.10
+
+  compile-wasm:
+    name: Build Check (wasm32-unknown-emscripten)
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-unknown-emscripten
+
+      # No X11/ALSA/GL packages here: the browser build links against WebGL and
+      # WebAudio through `src/web/shim.c`, not against the system libraries.
+      - name: Install Emscripten
+        uses: mymindstorm/setup-emsdk@v14
+        with:
+          version: 6.0.8
+          actions-cache-folder: emsdk-cache
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.14"
+
+      - name: Rust Cache
+        uses: Swatinem/rust-cache@v2
+        with:
+          key: wasm32-unknown-emscripten
+
+      - name: Cache the Pyodide runtime
+        id: pyodide-cache
+        uses: actions/cache@v4
+        with:
+          path: web/pyodide
+          key: pyodide-${{ hashFiles('web/get_pyodide.py') }}
+
+      - name: Fetch the Pyodide runtime
+        if: steps.pyodide-cache.outputs.cache-hit != 'true'
+        run: python web/get_pyodide.py
+
+      - name: Build Emscripten Side Module
+        env:
+          RUSTFLAGS: "-C link-arg=-sSIDE_MODULE=2"
+          PYO3_CROSS_PYTHON_VERSION: "3.14"
+        run: cargo build --target wasm32-unknown-emscripten --release --features abi_314
+
+      - name: Check Imports Against Pyodide
+        run: python web/check_imports.py
