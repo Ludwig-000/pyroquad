@@ -8,7 +8,8 @@ This is a Python game engine based on [macroquad](https://github.com/not-fl3/mac
 
 * Install via `pip install pyroquad`
 * Requires Python >= 3.9
-* Supported Platforms: windows, linux, mac, (wasm eventually)
+* Supported Platforms: windows, linux, mac, and the browser
+  (WebAssembly via Pyodide - see [docs/WASM.md](docs/WASM.md))
 
 ---
 
@@ -67,6 +68,93 @@ This is a Python game engine based on [macroquad](https://github.com/not-fl3/mac
 >    6) Installation:
 >       - The generated package can be found at: `/target/wheels/`
 >       - Install the package: `pip install \path\to\your\file.whl --force-reinstall`
+
+
+
+
+>## How to build for the browser (WebAssembly):
+>
+>The web build is a single WebAssembly module that runs inside
+>[Pyodide](https://pyodide.org) (CPython compiled with Emscripten). Nothing is
+>forked or patched - macroquad, miniquad, quad-snd and Pyodide are all stock.
+>[docs/WASM.md](docs/WASM.md) explains how and why it works.
+>
+>    1) Prerequesites (in addition to the ones above):
+>       - The `wasm32-unknown-emscripten` Rust target:
+>
+>         `rustup target add wasm32-unknown-emscripten`
+>
+>       - The [Emscripten SDK](https://emscripten.org/docs/getting_started/downloads.html).
+>         If you do not already have one, put it in the project root - the build
+>         script looks for `emcc` under `$EMCC`, then `$EMSDK`, then the
+>         project-local `emsdk/`, then `PATH`, so **no `emsdk_env` activation
+>         step is needed**:
+>
+>         `git clone https://github.com/emscripten-core/emsdk.git`
+>
+>         `./emsdk/emsdk install latest`
+>
+>         `./emsdk/emsdk activate latest`
+>
+>         *(on Windows, use `emsdk\emsdk.bat` in place of `./emsdk/emsdk`)*
+>
+>       - A browser with **JSPI** (JavaScript Promise Integration): Chrome 137+.
+>         This is what lets synchronous Python (`while True: ... next_frame()`)
+>         hand the page back to the browser between frames. Firefox and Safari
+>         have not shipped it yet.
+>
+>    2) Fetch the Pyodide runtime into `web/pyodide/` (once):
+>
+>       `python web/get_pyodide.py`
+>
+>       This is the stock `pyodide-core` release, unpacked and otherwise
+>       untouched - the web build deliberately runs on an unmodified Pyodide.
+>
+>       *(Pyodide releases are versioned after the CPython they ship: the pinned
+>       314.0.7 is CPython 3.14.2, which is what `--features abi_314` targets.
+>       `python web/get_pyodide.py <version>` takes a different one.)*
+>
+>    3) Compilation:
+>
+>       `RUSTFLAGS` is what turns the crate into an Emscripten *side module* -
+>       the same thing Pyodide builds every other extension module as.
+>
+>       - macOS / Linux:
+>
+>         `RUSTFLAGS="-C link-arg=-sSIDE_MODULE=2" PYO3_CROSS_PYTHON_VERSION=3.14 cargo build --target wasm32-unknown-emscripten --release --features abi_314`
+>
+>       - Windows (PowerShell):
+>
+>         `$env:RUSTFLAGS="-C link-arg=-sSIDE_MODULE=2"; $env:PYO3_CROSS_PYTHON_VERSION="3.14"`
+>
+>         `cargo build --target wasm32-unknown-emscripten --release --features abi_314`
+>
+>       *(`maturin` is not used here: the browser loads the module directly, so
+>       there is no wheel to build. Also remember to clear `RUSTFLAGS` again
+>       before building natively in the same shell - it applies to every target.)*
+>
+>    4) Bundle the module together with the pure-Python half of the package:
+>
+>       `python web/build_web.py`
+>
+>       This writes `web/pyroquad_pkg.zip`, which the page unpacks into Pyodide.
+>       Re-run it after every `cargo build`.
+>
+>    5) Check the build (optional, but it catches the one failure mode that is
+>       otherwise only visible as a cryptic `dlopen` error in the browser):
+>
+>       `python web/check_imports.py`
+>
+>       It cross-references every symbol the module imports against what Pyodide
+>       actually provides, and exits non-zero if anything is unresolved.
+>
+>    6) Run it:
+>
+>       `python web/serve.py`
+>
+>       then open
+>       - `http://127.0.0.1:8000/web/index.html?script=tests/test_rec.py`
+>
 
 
 

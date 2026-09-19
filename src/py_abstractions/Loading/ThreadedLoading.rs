@@ -58,6 +58,56 @@ impl Loading {
         Ok(FutureP::new(rx))
     }
 
+    /// Browser build of the three functions above.
+    ///
+    /// Same contract, without the thread pool: the fetch is asynchronous to
+    /// begin with, so the future is handed back immediately and its callback
+    /// fills it in. `write_to_file` lands in Emscripten's in-memory filesystem,
+    /// which `load_file` reads back exactly as it would on desktop - so the
+    /// download-then-read-then-decode pipeline the example game uses needs no
+    /// changes at all.
+    #[cfg(target_os = "emscripten")]
+    #[staticmethod]
+    pub fn download_file_and_save(url: String, filepath: String) -> PyResult<()> {
+        use crate::py_abstractions::Loading::Loading::does_file_exist;
+
+        if does_file_exist(&filepath) {
+            return Ok(());
+        }
+
+        let data = download_file(&url)?;
+        write_to_file(&data, filepath)
+    }
+
+    #[cfg(target_os = "emscripten")]
+    #[staticmethod]
+    pub fn download_file_and_save_future(url: String, filepath: String) -> PyResult<FutureP> {
+        use crate::py_abstractions::Loading::Loading::does_file_exist;
+
+        let (tx, rx) = PChannel::channel();
+
+        if does_file_exist(&filepath) {
+            let _ = tx.send(Ok(()));
+            return Ok(FutureP::new(rx));
+        }
+
+        crate::web::fetch(&url, move |result| {
+            let outcome = match result {
+                Ok(bytes) => write_to_file(&FileData { bytes }, filepath.clone()),
+                Err(e) => Err(crate::engine::PError::PError::BasicErr(e).into()),
+            };
+            let _ = tx.send(outcome);
+        });
+
+        Ok(FutureP::new(rx))
+    }
+
+    #[cfg(target_os = "emscripten")]
+    #[staticmethod]
+    fn download_file_future(url: &str) -> PyResult<FileDataFuture> {
+        load::download_file_future(url)
+    }
+
     /// TODO: do not download if file exists already.
     #[staticmethod]
     pub fn download_file_and_save_and_load(url: String, filepath: String)-> PyResult<FileData>{
@@ -128,6 +178,18 @@ impl Loading {
 }
 
 
+/// Browser build: one thread, so the map is just a map.
+#[cfg(target_os = "emscripten")]
+fn threaded_map<T, U, F>(items: Vec<T>, op: &F) -> PyResult<Vec<U>>
+where
+    T: Send + 'static,
+    U: Send + 'static,
+    F: Fn(T) -> PyResult<U> + Send + Sync + 'static + Clone,
+{
+    items.into_iter().map(op).collect()
+}
+
+#[cfg(not(target_os = "emscripten"))]
 fn threaded_map<T, U, F>(
     items: Vec<T>, 
     op: &F

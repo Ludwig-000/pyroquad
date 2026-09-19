@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>pyroquad on wasm</title>
+<style>
+  html, body { margin: 0; height: 100%; background: #101014; color: #cfd2d8;
+               font: 13px/1.5 ui-monospace, Consolas, monospace; overflow: hidden; }
+  #glcanvas  { display: block; width: 100vw; height: 100vh; outline: none; }
+  #log       { position: fixed; inset: 0 auto auto 0; margin: 10px; padding: 8px 10px;
+               max-width: min(560px, calc(100vw - 40px)); max-height: calc(100vh - 40px);
+               overflow: auto; white-space: pre-wrap; background: rgba(8,8,12,.78);
+               border: 1px solid #2a2d35; border-radius: 6px; pointer-events: auto;
+               cursor: pointer; }
+  /* Once a script is actually running, the page belongs to it - the log
+     collapses to a corner badge and expands again on click. */
+  #log.collapsed { max-height: 1.6em; overflow: hidden; opacity: .35; }
+  #log.collapsed > :not(:last-child) { display: none; }
+  .err { color: #ff8a80; }
+  .ok  { color: #9ae6a0; }
+  .dim { color: #7f8694; }
+</style>
+</head>
+<body>
+<canvas id="glcanvas" tabindex="0"></canvas>
+<pre id="log"></pre>
+
+<script src="./pyodide/pyodide.js"></script>
+<script>
+(() => {
+  "use strict";
+
+  const logEl = document.getElementById("log");
+  logEl.addEventListener("click", () => logEl.classList.toggle("collapsed"));
+  const log = (msg, cls) => {
+    const line = document.createElement("span");
+    if (cls) line.className = cls;
+    line.textContent = msg + "\n";
+    logEl.appendChild(line);
+    logEl.scrollTop = logEl.scrollHeight;
+    console.log(msg);
+  };
+
+  // ?script=test.py runs a file from the repo root; with no ?script= we only do
+  // the import smoke test, which is what "goal 1" needs to prove.
+  const params = new URLSearchParams(location.search);
+  const script = params.get("script");
+
+  const SMOKE = `
+import sys, pyroquad
+from pyroquad import *
+print("python  ", sys.version.split()[0])
+print("platform", sys.platform)
+print("package ", pyroquad.__file__)
+names = [n for n in dir(pyroquad) if not n.startswith("_")]
+print("exports ", len(names))
+print("sample  ", ", ".join(sorted(names)[:14]))
+print("Color.RED", Color.RED)
+print("Vec2      ", Vec2(3, 4).length())
+`;
+
+  (async () => {
+    log("loading pyodide ...", "dim");
+    const pyodide = await loadPyodide({
+      indexURL: "./pyodide/",
+      stdout: (s) => log(s),
+      stderr: (s) => log(s, "err"),
+    });
+    window.pyodide = pyodide;
+    log("pyodide " + pyodide.version + "  (CPython " + pyodide.runPython("import sys; sys.version.split()[0]") + ")", "ok");
+    log("JSPI available: " + (typeof WebAssembly.Suspending !== "undefined"), "dim");
+
+    log("installing pyroquad ...", "dim");
+    const buf = await (await fetch("./pyroquad_pkg.zip", { cache: "no-store" })).arrayBuffer();
+    pyodide.unpackArchive(buf, "zip");
+
+    if (script) {
+      log("fetching ../" + script, "dim");
+      const src = await (await fetch("../" + script, { cache: "no-store" })).text();
+      log("running " + script + " ...", "dim");
+      setTimeout(() => logEl.classList.add("collapsed"), 1500);
+      await pyodide.runPythonAsync(src);
+      logEl.classList.remove("collapsed");
+      log("finished " + script, "ok");
+    } else {
+      log("import smoke test ...", "dim");
+      await pyodide.runPythonAsync(SMOKE);
+      log("import OK", "ok");
+    }
+  })().catch((e) => {
+    log("FAILED: " + (e && e.message ? e.message : e), "err");
+    if (e && e.stack) log(e.stack, "dim");
+  });
+})();
+</script>
+</body>
+</html>

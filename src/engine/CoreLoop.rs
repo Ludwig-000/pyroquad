@@ -311,21 +311,195 @@ pub enum Command {
     },
 }
 
-pub static COMMAND_QUEUE: LazyLock<SegQueue<Command>> = LazyLock::new(SegQueue::new);
+/// The engine's inbox.
+///
+/// Natively this is a plain queue that the engine thread drains. On Emscripten
+/// there is no engine thread, so `push` also decides *when* a command runs:
+/// frame-local commands wait for the next frame, everything else is executed
+/// immediately, on the caller's stack. See [`crate::web`].
+pub struct CommandQueue {
+    inner: SegQueue<Command>,
+}
+
+impl CommandQueue {
+    fn new() -> Self {
+        Self { inner: SegQueue::new() }
+    }
+
+    pub fn push(&self, command: Command) {
+        #[cfg(target_os = "emscripten")]
+        if !command.is_frame_local()
+            && crate::py_abstractions::py_functions::ENGINE_CURRENTLY_ACTIVE
+                .load(std::sync::atomic::Ordering::Relaxed)
+        {
+            // Only once the engine exists - before that, dispatching would call
+            // into macroquad without a context. Leaving the command in the queue
+            // instead lets `PReceiver::recv` report the usual "you forgot
+            // activate_engine()" error.
+            crate::web::run_query_now(command);
+            return;
+        }
+
+        self.inner.push(command);
+    }
+
+    pub fn pop(&self) -> Option<Command> {
+        self.inner.pop()
+    }
+}
+
+pub static COMMAND_QUEUE: LazyLock<CommandQueue> = LazyLock::new(CommandQueue::new);
+
+impl Command {
+    /// Whether this command has to run *inside* a macroquad frame.
+    ///
+    /// macroquad resets the draw list in `begin_frame()`, so anything that puts
+    /// geometry on the screen - or changes render state those draws depend on,
+    /// like the camera - only makes sense between a `begin_frame()` and the
+    /// matching `end_frame()`. Everything else can run at any time.
+    ///
+    /// Natively the distinction is irrelevant: one thread drains one queue in
+    /// order. In the browser the engine shares Python's thread, and a command
+    /// that owes Python an answer cannot wait for a frame that will only happen
+    /// once Python is unblocked - so the two kinds take different paths. See
+    /// [`crate::web`].
+    ///
+    /// Written out exhaustively on purpose: a new [`Command`] should not compile
+    /// until someone has decided which side it belongs on.
+    #[cfg(target_os = "emscripten")]
+    pub fn is_frame_local(&self) -> bool {
+        match self {
+            Command::GlEnum(..)
+            | Command::DrawRectangleFromPyClass(..)
+            | Command::DrawCircleFromPyClass(..)
+            | Command::DrawAll3DObjects(..)
+            | Command::DrawObjectNow(..)
+            | Command::DrawArc { .. }
+            | Command::DrawCubeWires { .. }
+            | Command::DrawCylinder { .. }
+            | Command::DrawCylinderWires { .. }
+            | Command::DrawEllipse { .. }
+            | Command::DrawEllipseLines { .. }
+            | Command::DrawHexagon { .. }
+            | Command::DrawLine3D { .. }
+            | Command::DrawLine { .. }
+            | Command::DrawAfflineParallelpiped { .. }
+            | Command::DrawAfflineParallogram { .. }
+            | Command::SetDefaultCamera(..)
+            | Command::DrawRect { .. }
+            | Command::DrawRectLines { .. }
+            | Command::DrawTriangle { .. }
+            | Command::DrawTriangleLines { .. }
+            | Command::DrawPlane { .. }
+            | Command::DrawGrid { .. }
+            | Command::DrawCube { .. }
+            | Command::DrawSkyBox { .. }
+            | Command::DrawPoly { .. }
+            | Command::DrawPolyLines { .. }
+            | Command::DrawText { .. }
+            | Command::DrawMultilineText { .. }
+            | Command::DrawTexture { .. }
+            | Command::ClearBackground { .. }
+            | Command::NextFrame { .. }
+            | Command::SetCamera { .. }
+            | Command::PushCameraState
+            | Command::PopCameraState => true,
+
+            Command::CreateMeshFromBytes { .. }
+            | Command::GetCustomMouseState { .. }
+            | Command::Camera2DWorldToScreen { .. }
+            | Command::Camera2DScreenToWorld { .. }
+            | Command::Camera2DToMatrix { .. }
+            | Command::MeasureText { .. }
+            | Command::BuildTextureAtlas
+            | Command::SetPcAssetFolder(..)
+            | Command::Touches(..)
+            | Command::TouchesLocal(..)
+            | Command::SimulateMouseWithTouch(..)
+            | Command::LoadTTFFOnt { .. }
+            | Command::PopulateFontCache { .. }
+            | Command::SetFontFilter { .. }
+            | Command::LoadTTFFontFromBytes { .. }
+            | Command::RequestNewScreenSize { .. }
+            | Command::IsQuitRequested(..)
+            | Command::PreventQuit
+            | Command::SetFullscreen(..)
+            | Command::TexImEnum(..)
+            | Command::PhysicsEnum(..)
+            | Command::ManuallyStepPhysics(..)
+            | Command::SetCollisionForObject { .. }
+            | Command::GetColissionObjects { .. }
+            | Command::DoesObjectCollide { .. }
+            | Command::SetDrawEachFrame { .. }
+            | Command::DeleteObject { .. }
+            | Command::GetObjectScale { .. }
+            | Command::GetObjectPos { .. }
+            | Command::GetObjectRotation { .. }
+            | Command::SetObjectScale { .. }
+            | Command::SetObjectPos { .. }
+            | Command::SetObjectRotation { .. }
+            | Command::CreateCube { .. }
+            | Command::CreateSphere { .. }
+            | Command::CreatePill { .. }
+            | Command::CreateCylinder { .. }
+            | Command::CreateMesh { .. }
+            | Command::DropThisItem(..)
+            | Command::LoadFile { .. }
+            | Command::LoadSound { .. }
+            | Command::LoadSoundFromBytes { .. }
+            | Command::PlaySound { .. }
+            | Command::PlaySoundOnce { .. }
+            | Command::SetSoundVolume { .. }
+            | Command::StopSound { .. }
+            | Command::RenderTargetMsaa { .. }
+            | Command::RenderTargetEx { .. }
+            | Command::GetTextCenter { .. }
+            | Command::ScreenDpiScale(..)
+            | Command::LoadImage { .. }
+            | Command::GetScreenData { .. }
+            | Command::SetCursorGrab(..)
+            | Command::ShowMouse(..)
+            | Command::ClearInputQueue
+            | Command::IsSimulatingMouseWithTouch(..)
+            | Command::CameraFontScale { .. } => false,
+        }
+    }
+}
 
 
 
-/// processes commands that rely on the macroquad engine
-/// commands that do not rely on it's core (openGL) components ( or just the internal Core-Thread ) are found in pyabstractions.
-pub async fn proccess_commands_loop() {
-    
-    let mut object_storage = ObjectStorage::ObjectStorage::new();
-    let mut cam_memory = CamMemory::new();
 
-    loop {
-        while let Some(command) = COMMAND_QUEUE.pop() {
+/// State the engine owns for as long as the window lives.
+///
+/// Natively this is just a local of [`proccess_commands_loop`]. On Emscripten
+/// two different call paths dispatch commands, so it has to be shared - see
+/// [`crate::web`].
+pub struct EngineState {
+    pub object_storage: ObjectStorage::ObjectStorage,
+    pub cam_memory: CamMemory,
+}
 
-            
+impl EngineState {
+    pub fn new() -> Self {
+        Self {
+            object_storage: ObjectStorage::ObjectStorage::new(),
+            cam_memory: CamMemory::new(),
+        }
+    }
+}
+
+impl Default for EngineState {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+/// Executes exactly one command.
+///
+/// Only a handful of arms ever `.await` - `NextFrame` and the asset loads.
+/// Every other command completes on the first poll, which is what lets the
+/// browser build run queries straight off the Python stack.
+pub async fn dispatch(command: Command, st: &mut EngineState) {
             match command {
                 Command::CreateMeshFromBytes{data, texture, sender}=>{
                     let mesh = Mesh::load_from_bytes(&data, texture.map(|t|t.into())).map_err(|e|{
@@ -432,26 +606,26 @@ pub async fn proccess_commands_loop() {
                     sm::switch_to_desired_shader(sm::ShaderKind::None, &None);
                     draw_rect(&rect)},
                 Command::PhysicsEnum(phys,key )=> {
-                    let handle = object_storage.get_handle(key).expect("No physics handle found, yet physics function was called.");
-                    object_storage.apply_physics_enum(phys, &handle);
+                    let handle = st.object_storage.get_handle(key).expect("No physics handle found, yet physics function was called.");
+                    st.object_storage.apply_physics_enum(phys, &handle);
                 }
                 Command::DoesObjectCollide { key, sender }=>{
                     let mut res = false;
-                    if let Some(handle) = object_storage.get_handle(key){
-                        res = object_storage.physics_world.has_collision(handle.collider_handle);
+                    if let Some(handle) = st.object_storage.get_handle(key){
+                        res = st.object_storage.physics_world.has_collision(handle.collider_handle);
                     }
                     let _ = sender.send(res);
                 }
                 Command::SetCollisionForObject{key, collider}=> {
-                    object_storage.set_collision_for_object(key, collider);
+                    st.object_storage.set_collision_for_object(key, collider);
                 }
                 Command::GetColissionObjects { key, sender }=>{
-                    let keys = object_storage.collides_with(key);
-                    let py_refs  = object_storage.keys_to_py(keys);
+                    let keys = st.object_storage.collides_with(key);
+                    let py_refs  = st.object_storage.keys_to_py(keys);
                     let _ = sender.send(py_refs);
                 }
                 Command::ManuallyStepPhysics(distance)=>{
-                    object_storage.step_physics(distance);
+                    st.object_storage.step_physics(distance);
                 }
                 Command::DrawAll3DObjects()=> {
                     let matrix;
@@ -460,7 +634,7 @@ pub async fn proccess_commands_loop() {
                         matrix= mat.quad_gl.get_projection_matrix()
                     }
                     sm::switch_to_desired_shader(sm::ShaderKind::Basic, &None);
-                    ObjectManagement::draw_all_Objects(&object_storage, matrix);
+                    ObjectManagement::draw_all_Objects(&st.object_storage, matrix);
                 }
                 Command::DrawObjectNow(obj_key)=> {
                     let gl = unsafe {
@@ -468,7 +642,7 @@ pub async fn proccess_commands_loop() {
                     };
                     sm::switch_to_desired_shader(sm::ShaderKind::Basic, &None);
                     gl.draw_mode(mq::DrawMode::Triangles);
-                    let obj=  object_storage.get(obj_key);
+                    let obj=  st.object_storage.get(obj_key);
                     match obj {
                         Object::Cube(c)=> c.draw(gl),
                         Object::Cylinder(c)=> c.draw(gl),
@@ -478,7 +652,7 @@ pub async fn proccess_commands_loop() {
                     }
                 }
                 Command::SetDrawEachFrame { key, set }=>{
-                    let obj = unsafe {object_storage.get_mut(key)};
+                    let obj = unsafe {st.object_storage.get_mut(key)};
                     match obj{
                         Object::Cube(c)=> c.draw_each_frame = set,
                         Object::Cylinder(c)=> c.draw_each_frame = set,
@@ -488,10 +662,10 @@ pub async fn proccess_commands_loop() {
                     }
                 }
                 Command::DeleteObject { key }=> {
-                    object_storage.remove_object(key);
+                    st.object_storage.remove_object(key);
                 }
                 Command::GetObjectPos { key, sender } => {
-                    let pos = match  object_storage.get(key){
+                    let pos = match  st.object_storage.get(key){
                         Object::Cube(cube) => cube.position,
                         Object::Mesh(mesh) => mesh.position,
                         Object::Sphere(sphere)=> sphere.position,
@@ -501,7 +675,7 @@ pub async fn proccess_commands_loop() {
                     let _ = sender.send(pos);
                 }
                 Command::GetObjectScale { key, sender } => {
-                    let pos = match  object_storage.get(key){
+                    let pos = match  st.object_storage.get(key){
                         Object::Cube(cube) => cube.scale,
                         Object::Mesh(mesh)=> mesh.scale,
                         Object::Sphere(sphere)=> sphere.scale,
@@ -511,7 +685,7 @@ pub async fn proccess_commands_loop() {
                     let _ = sender.send(pos);
                 }
                 Command::GetObjectRotation { key, sender } => {
-                    let pos = match  object_storage.get(key){
+                    let pos = match  st.object_storage.get(key){
                         Object::Cube(cube) => cube.rotation,
                         Object::Mesh(mesh)=> mesh.rotation,
                         Object::Sphere(sphere)=> sphere.rotation,
@@ -521,7 +695,7 @@ pub async fn proccess_commands_loop() {
                     let _ = sender.send(pos);
                 }
                 Command::SetObjectPos { key, position } => {
-                    object_storage.change_obj_position(&position, key, 
+                    st.object_storage.change_obj_position(&position, key, 
                         move |obj|{
                         match obj{
                             Object::Cube(cube)=> {
@@ -549,7 +723,7 @@ pub async fn proccess_commands_loop() {
                 }
                 Command::SetObjectScale { key, scale } => {
 
-                    object_storage.change_obj_scale(&scale, key, 
+                    st.object_storage.change_obj_scale(&scale, key, 
                         move |obj|{
                             match obj{
                                 Object::Cube(cube)=> {
@@ -576,7 +750,7 @@ pub async fn proccess_commands_loop() {
                         });
                 }
                 Command::SetObjectRotation { key, rotation } => {
-                    object_storage.change_obj_rotation(&rotation, key, 
+                    st.object_storage.change_obj_rotation(&rotation, key, 
                         move |obj|{
                             match obj{
                                 Object::Cube(cube)=> {
@@ -604,14 +778,14 @@ pub async fn proccess_commands_loop() {
                     
                 }
                 Command::CreatePill { size, position, rotation, color,texture, collider, weak_ref, sender }=>{
-                    object_storage.quick_push(collider,sender, weak_ref, 
+                    st.object_storage.quick_push(collider,sender, weak_ref, 
                         move || {
                             let internal_pill = Pill::new(size, position, rotation, color,texture,);
                             Object::Pill(internal_pill)
                         });
                 }
                 Command::CreateCylinder { size, position, rotation, color,texture, collider, weak_ref, sender }=>{
-                    object_storage.quick_push(collider,sender, weak_ref, 
+                    st.object_storage.quick_push(collider,sender, weak_ref, 
                         move || {
                             let internal_cyl = Cylinder::new(size, position, rotation, color,texture);
                             Object::Cylinder(internal_cyl)
@@ -619,7 +793,7 @@ pub async fn proccess_commands_loop() {
                 }
                 Command::CreateCube { size, position, rotation,color,texture,collider, weak_ref: pyAny, sender }=>{
 
-                    object_storage.quick_push(collider,sender, pyAny, 
+                    st.object_storage.quick_push(collider,sender, pyAny, 
                         move || {
                             let internal_cube = Cube::new(size, position, rotation, color,texture);
                             Object::Cube(internal_cube)
@@ -628,14 +802,14 @@ pub async fn proccess_commands_loop() {
                 }
                 Command::CreateMesh { mesh,collider, weak_ref, sender }=>{
 
-                    object_storage.quick_push(collider,sender, weak_ref, 
+                    st.object_storage.quick_push(collider,sender, weak_ref, 
                         move || {
                             Object::Mesh(mesh)
                         });
                 }
                 Command::CreateSphere { size, position, rotation,color,texture, collider,weak_ref: pyAny, sender }=>{
 
-                    object_storage.quick_push(collider,sender, pyAny, 
+                    st.object_storage.quick_push(collider,sender, pyAny, 
                         move || {
                             let internal_sphere = Sphere::new(size, position, rotation, color, texture);
                             Object::Sphere(internal_sphere)
@@ -682,7 +856,7 @@ pub async fn proccess_commands_loop() {
                 }
                 Command::DrawSkyBox {texture, tint} => {
                     
-                    let cam  =match &cam_memory.current_cam{
+                    let cam  =match &st.cam_memory.current_cam{
                         Camera::Camera2D(_)=> panic!("should be 3d cam"),
                         Camera::Camera3D(_cam)=> clone_camera3d(_cam)
                     };
@@ -754,7 +928,7 @@ pub async fn proccess_commands_loop() {
                     mq::draw_poly(x,y,sides,radius,rotation,color  );
                 }
                 Command::SetDefaultCamera() =>{ 
-                    set_default_camera(&mut cam_memory);
+                    set_default_camera(&mut st.cam_memory);
                 }
         
                 Command::DrawTexture { texture,x,y,color}=>
@@ -778,7 +952,7 @@ pub async fn proccess_commands_loop() {
                     let _ = sender.send(());
                     
                     if let Some(physics_step)  = physics_step{
-                        object_storage.step_physics(physics_step);
+                        st.object_storage.step_physics(physics_step);
                     }
                     mq::clear_background(BLACK); // 3d rendering is bugged if we don't clear.
                 }
@@ -815,10 +989,10 @@ pub async fn proccess_commands_loop() {
                 Command::SetCamera { camera_2d, camera_3d } => { // merged cam2d and 3d for simplicity.
                     match (*camera_2d, *camera_3d) {
                         (Some(cam), None) => {
-                            set_camera(&mut cam_memory, Camera::Camera2D(cam));
+                            set_camera(&mut st.cam_memory, Camera::Camera2D(cam));
                         },
                         (None, Some(cam)) => {
-                            set_camera(&mut cam_memory, Camera::Camera3D(cam));
+                            set_camera(&mut st.cam_memory, Camera::Camera3D(cam));
                         },
                         _ => panic!("invalid cam pattern"),
         
@@ -907,8 +1081,25 @@ pub async fn proccess_commands_loop() {
         
                 
             }
+}
+
+/// processes commands that rely on the macroquad engine
+/// commands that do not rely on it's core (openGL) components ( or just the internal Core-Thread ) are found in pyabstractions.
+#[cfg(not(target_os = "emscripten"))]
+pub async fn proccess_commands_loop() {
+    let mut st = EngineState::new();
+
+    loop {
+        while let Some(command) = COMMAND_QUEUE.pop() {
+            dispatch(command, &mut st).await;
         }
-
-
     }
+}
+
+/// In the browser the engine shares one thread with CPython and the event loop,
+/// so the loop needs a different shape entirely.
+/// See [`crate::web::engine_loop`].
+#[cfg(target_os = "emscripten")]
+pub async fn proccess_commands_loop() {
+    crate::web::engine_loop().await
 }

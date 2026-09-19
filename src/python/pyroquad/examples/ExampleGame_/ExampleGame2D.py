@@ -1500,7 +1500,7 @@ class DamageSystem(): # combined class handling all Damage related events.
     player_dmg: float = .51
     projectile_damage_player_: float = .5
     projectile_damage_enemy: float = 1.
-    player_damage_to_destructible: float = .2
+    player_damage_to_destructible: float = 0.2
 
     @staticmethod
     def tick(enemies: list[BasicEnemy | ProjectileEnemy], projectiles: list[EnemyProjectile], player: Player, destructible_manager: DestructibleManager):

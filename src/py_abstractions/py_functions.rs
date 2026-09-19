@@ -52,9 +52,52 @@ pub static ENGINE_CURRENTLY_ACTIVE: AtomicBool = AtomicBool::new(false);
 #[pyo3(signature = (conf = None))] // overloads activate_engine with config
 pub fn activate_engine( conf: Option<Config>) -> PyResult<()>{
 
-    
+
     let conf = conf.unwrap_or_default();
     let macroConf =  Config::to_window_config(conf.clone());
+
+    // In the browser there is no second thread to give the engine, and blocking
+    // the one we have would stop the page dead. The window is created on this
+    // very stack instead - miniquad's `run()` returns as soon as the canvas and
+    // the event listeners are up - and from then on frames are pulled by
+    // `next_frame()` rather than pushed by requestAnimationFrame.
+    // See `src/web/mod.rs` and docs/WASM.md.
+    #[cfg(target_os = "emscripten")]
+    {
+        if !crate::web::page_is_ready() {
+            return Err(pyo3::exceptions::PyRuntimeError::new_err(
+                "pyroquad: the page has no <canvas id=\"glcanvas\"> (or WebGL is unavailable). \
+                 Add the canvas before calling activate_engine().",
+            ));
+        }
+
+        let _guard = crate::PDropGuard!("'activate_engine' cannot be called multiple times in once process.");
+
+        crate::web::platform_init();
+        crate::web::set_frame_driver_manual(true);
+
+        ENGINE_CURRENTLY_ACTIVE.store(true, Ordering::SeqCst);
+
+        macroquad::Window::from_config(macroConf, async move {
+            let _guard = _guard;
+
+            crate::engine::EngineSetup::setup_engine();
+            crate::engine::FrameInfo::update_frame_info();
+
+            crate::engine::CoreLoop::proccess_commands_loop().await;
+        });
+
+        // `Window::from_config` only *creates* the future; nothing in it has run
+        // yet. One frame gets the shaders compiled and the frame-info statics
+        // filled, so that engine calls made before the first `next_frame()`
+        // behave the same as they do natively.
+        crate::web::frame_now();
+
+        return Ok(());
+    }
+
+    #[allow(unreachable_code)]
+    {
 
     #[allow(clippy::disallowed_methods)]
     let (tx, rx) = std::sync::mpsc::sync_channel(1);
@@ -97,6 +140,8 @@ pub fn activate_engine( conf: Option<Config>) -> PyResult<()>{
         ENGINE_CURRENTLY_ACTIVE.store(false, Ordering::SeqCst);
         pyo3::exceptions::PyRuntimeError::new_err("Engine failed to initialize")
     })
+
+    }
 }
 
 
@@ -294,12 +339,29 @@ pub fn screen_dpi_scale() -> PyResult<f32>{
 #[pyo3(signature = (physics_step = Some(0.0)))] 
 pub fn next_frame(py: Python<'_>, physics_step: Option<f32>) -> PyResult<()>{
     crate::py_abstractions::structs::ThreeDObjects::ObjectFunStorage::execute_all_functions(py)?;
-    
+
     let (sender, receiver) = PChannel::PChannel::channel();
     COMMAND_QUEUE.push(Command::NextFrame { physics_step, sender });
 
-    receiver.recv()?;
-    Ok(())
+    // In the browser nobody else is going to run a frame for us: this call *is*
+    // the engine's heartbeat. `frame_now()` executes everything queued since the
+    // last call inside one macroquad frame (which is what flushes it to WebGL),
+    // and `frame_yield()` then hands the page back to the browser long enough
+    // for it to paint and to deliver input - suspending this Python stack
+    // through JSPI rather than blocking it. See `src/web/mod.rs`.
+    #[cfg(target_os = "emscripten")]
+    {
+        crate::web::frame_now();
+        receiver.recv()?;
+        crate::web::frame_yield(py)?;
+        return Ok(());
+    }
+
+    #[allow(unreachable_code)]
+    {
+        receiver.recv()?;
+        Ok(())
+    }
 }
 
 /// draws a text in 2d space.
@@ -311,6 +373,44 @@ pub fn next_frame(py: Python<'_>, physics_step: Option<f32>) -> PyResult<()>{
 pub fn draw_text(text: String, x: f32, y: f32, color: Color, font_size: u16,
     font: Option<Font>, font_scale: f32, font_scale_aspect: f32, rotation: f32) -> PyResult<TextDimensions>{
 
+    // `DrawText` is the only command that both draws *and* owes Python an
+    // answer, and in the browser those two halves cannot happen at the same
+    // time: the drawing has to wait for the next frame, the answer cannot.
+    //
+    // So the measurement is taken now.
+    #[cfg(target_os = "emscripten")]
+    {
+        let (m_sender, m_receiver) = PChannel::PChannel::channel();
+        COMMAND_QUEUE.push(Command::MeasureText {
+            text: text.clone(),
+            font: font.clone().map(Into::into),
+            font_size,
+            font_scale,
+            sender: m_sender,
+        });
+        let measured = m_receiver.recv()?;
+
+        let (sender, _receiver) = PChannel::PChannel::channel();
+        COMMAND_QUEUE.push(Command::DrawText {
+            text,
+            x,
+            y,
+            color: color.into(),
+            font: font.map(Into::into),
+            font_size,
+            font_scale,
+            font_scale_aspect,
+            rotation,
+            sender,
+        });
+
+        let mut dimensions: TextDimensions = measured.into();
+        dimensions.width *= font_scale_aspect;
+        return Ok(dimensions);
+    }
+
+    #[allow(unreachable_code)]
+    {
     let (sender, receiver) = PChannel::PChannel::channel();
     COMMAND_QUEUE.push(Command::DrawText { 
         text, 
@@ -319,6 +419,7 @@ pub fn draw_text(text: String, x: f32, y: f32, color: Color, font_size: u16,
         color: color.into(), 
         font: font.map(Into::into), font_size, font_scale, font_scale_aspect, rotation, sender });
     Ok(receiver.recv()?.into())
+    }
 }
 
 #[pyfunction]

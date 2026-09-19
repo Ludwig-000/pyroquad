@@ -139,3 +139,27 @@ Cameras create a virtual screen, that is always projected onto the window, meani
 4. **Local README:** If offline, the `.whl` file contains an internal `README.md` (extractable via zip tools).
 
 # Example code can be found in README.md
+
+
+minimal viable automatic game loop:
+
+```Python
+from pyroquad import *
+activate_engine()
+while True:
+    next_frame()
+    examples.limit_fps(60)
+```
+
+minimal viable manual game loop:
+
+```Python
+from pyroquad import *
+activate_engine()
+prevent_quit()
+while True:
+    if is_quit_requested():
+        break
+    next_frame()
+    examples.limit_fps(60)
+```

@@ -48,20 +48,37 @@ impl<T> Drop for PSender<T>{
 }
 impl<T> PReceiver<T> {
     pub fn recv(&self) -> Result<T, PChannelError> {
+        // In the browser there is no other thread to wait for: whoever was going
+        // to answer has already had its turn by the time we get here (see
+        // `crate::web`), so the reply is either present or never coming. Falling
+        // through to a blocking `recv()` would freeze the tab for good.
+        #[cfg(target_os = "emscripten")]
+        {
+            return match self.inner.try_recv() {
+                Ok(result) => result,
+                Err(_) if !crate::py_abstractions::py_functions::ENGINE_CURRENTLY_ACTIVE
+                    .load(Ordering::Relaxed) => Err(PChannelError::DeadlockError),
+                Err(_) => Err(PChannelError::SendError),
+            };
+        }
+
+        #[allow(unreachable_code)]
+        {
         for _ in 0..1_000 { // we busy wait for roughly the first 10 micro seconds.
             match self.inner.try_recv(){
                 Ok(result) => return result,
                 Err(_) => {}
             }
         }
-        
-        if !crate::py_abstractions::py_functions::ENGINE_CURRENTLY_ACTIVE.load(Ordering::Relaxed){ 
+
+        if !crate::py_abstractions::py_functions::ENGINE_CURRENTLY_ACTIVE.load(Ordering::Relaxed){
             return Err(PChannelError::DeadlockError)
         }
 
         self.inner.recv().unwrap_or(
             Err(PChannelError::SendError)
         )
+        }
     }
     pub fn try_recv(&self) -> Option<Result<T, PChannelError>>{
         self.inner.try_recv().ok()

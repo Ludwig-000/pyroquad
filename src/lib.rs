@@ -15,6 +15,8 @@
 #![allow(clippy::style)]
 
 
+#[cfg(target_os = "emscripten")]
+pub mod web;
 
 use pyo3::prelude::*;
 mod engine;

@@ -57,7 +57,19 @@ impl Semipor {
 }
 
 
+/// Browser build: there are no threads to hand work to, so it runs inline.
+///
+/// Every caller in this crate ultimately waits for the result anyway, so the
+/// observable difference is that the work is already finished when the call
+/// returns. Panics are swallowed exactly like the threaded version swallows
+/// them into the joined thread.
+#[cfg(target_os = "emscripten")]
+pub fn limited_thread<F: FnOnce() + Send + 'static>(_task: TaskType, fun: F) {
+    let _ = catch_unwind(AssertUnwindSafe(fun));
+}
+
 /// I'll probably deprecate this, since its inferior to 'thread_pool' in almost every way.
+#[cfg(not(target_os = "emscripten"))]
 pub fn limited_thread<F: FnOnce()->() + Send + 'static>(task: TaskType, fun: F) {
     static CORE_COUNT: LazyLock<usize> = LazyLock::new(|| thread::available_parallelism().map(|a|a.get()).unwrap_or(4));
     static GLOBAL_SEM: Semipor = Semipor::new();
@@ -188,7 +200,15 @@ impl Pool{
 
 
 
+/// Browser build: see [`limited_thread`].
+/// no threading on WASM :(
+#[cfg(target_os = "emscripten")]
+pub fn thread_pool<F: FnOnce() + Send + 'static>(_task: TaskType, fun: F) {
+    let _ = catch_unwind(AssertUnwindSafe(fun));
+}
+
 /// 🔥🚀🧵
+#[cfg(not(target_os = "emscripten"))]
 pub fn thread_pool<F: FnOnce()->() + Send + 'static>(task: TaskType, fun: F) {
 
 

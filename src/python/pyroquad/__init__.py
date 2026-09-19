@@ -7,3 +7,11 @@ Color = ColorMod.Color
 del ColorMod
 
 from . import examples #imports the python-half of the library
+
+
+
+
+"""
+if you are looking for documentation, note there exists (AI.md)[https://github.com/Ludwig-000/pyroquad/blob/main/AI.md]
+and (README.md)[https://github.com/Ludwig-000/pyroquad/blob/main/README.md]
+"""

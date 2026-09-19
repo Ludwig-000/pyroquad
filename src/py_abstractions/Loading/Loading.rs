@@ -14,7 +14,7 @@ pub static PC_ASSET_FOLDER: LazyLock<Mutex<String>> =
     LazyLock::new(|| Mutex::new(String::new()));
 
 /// Loads a file.
-#[cfg(not(any(target_arch = "wasm32", target_os = "ios")))]
+#[cfg(pq_std_fs)]
 #[pyfunction]
 pub fn load_file(path: &str)-> PyResult<FileData>{
 
@@ -45,7 +45,7 @@ pub fn load_file_future(path: &str) -> PyResult<FileDataFuture> {
     let (tx, rx) = PChannel::channel();
     let path_str = path.to_string();
 
-    #[cfg(not(any(target_arch = "wasm32", target_os = "ios")))]
+    #[cfg(pq_std_fs)]
     {
         // On Desktop: Spawn a thread to perform the blocking disk I/O
 
@@ -57,7 +57,7 @@ pub fn load_file_future(path: &str) -> PyResult<FileDataFuture> {
         });
     }
 
-    #[cfg(any(target_arch = "wasm32", target_os = "ios"))]
+    #[cfg(not(pq_std_fs))]
     {
         thread_pool( crate::engine::PThreading::TaskType::LOAD,move || {
             let result = load_file(&path_str);
@@ -70,7 +70,7 @@ pub fn load_file_future(path: &str) -> PyResult<FileDataFuture> {
 }
 
 /// Loads a file.
-#[cfg(any(target_arch = "wasm32", target_os = "ios"))]
+#[cfg(not(pq_std_fs))]
 #[pyfunction]
 pub fn load_file(path: &str)-> PyResult<FileData>{
     use crate::engine::PChannel::PChannel;
@@ -91,7 +91,7 @@ pub fn load_file(path: &str)-> PyResult<FileData>{
 
 
 
-#[cfg(not(any(target_arch = "wasm32", target_os = "ios")))]
+#[cfg(not(target_arch = "wasm32"))]
 /// Downloads a file and returning it's raw data.
 #[pyfunction]
 pub fn download_file(url: &str) -> PyResult<FileData> {
@@ -131,12 +131,23 @@ pub fn download_file(url: &str) -> PyResult<FileData> {
     Err(PError::BasicErr(format!("Download timed out for {url}")).into())
 }
 
-#[cfg(target_arch = "wasm32")]
+/// Downloads a file and returns its raw data.
+///
+/// In the browser this is a real `fetch`, waited on by suspending the Python
+/// stack through JSPI rather than by blocking the thread - blocking would stop
+/// the event loop that has to deliver the response in the first place.
+/// Prefer [`download_file_future`] when loading more than one thing: it lets
+/// the downloads overlap.
+#[cfg(target_os = "emscripten")]
 #[pyfunction]
 pub fn download_file(url: &str) -> PyResult<FileData> {
-    todo!("HTTP downloads are not available directly on wasm32-wasip1");
+    match crate::web::fetch_blocking(url) {
+        Ok(bytes) => Ok(FileData { bytes }),
+        Err(e) => Err(PError::BasicErr(e).into()),
+    }
 }
 
+#[cfg(not(target_os = "emscripten"))]
 #[pyfunction]
 pub fn download_file_future(url: &str) -> PyResult<FileDataFuture> {
     let (tx, rx) = PChannel::channel();
@@ -150,10 +161,28 @@ pub fn download_file_future(url: &str) -> PyResult<FileDataFuture> {
     Ok( FileDataFuture::new(rx) )
 }
 
+/// Browser build: no thread to hand the download to, but also none needed -
+/// the fetch is already asynchronous, so this just hands back the future and
+/// lets the callback fill it in. Downloads started this way run concurrently.
+#[cfg(target_os = "emscripten")]
+#[pyfunction]
+pub fn download_file_future(url: &str) -> PyResult<FileDataFuture> {
+    let (tx, rx) = PChannel::channel();
+
+    crate::web::fetch(url, move |result| {
+        let _ = tx.send(match result {
+            Ok(bytes) => Ok(FileData { bytes }),
+            Err(e) => Err(PError::BasicErr(e).into()),
+        });
+    });
+
+    Ok( FileDataFuture::new(rx) )
+}
+
 
 /// Writes raw data to file.
 /// On WASM, this function does nothing.
-#[cfg(not(any(target_arch = "wasm32", target_os = "ios")))]
+#[cfg(pq_std_fs)]
 #[pyfunction]
 pub fn write_to_file(contents: &FileData, path: String) -> PyResult<()> {
     use std::path::Path;
@@ -184,13 +213,13 @@ pub fn write_to_file(contents: &FileData, path: String) -> PyResult<()> {
 
 /// Writes raw data to file.
 /// On WASM, this function does nothing.
-#[cfg(any(target_arch = "wasm32", target_os = "ios"))]
+#[cfg(not(pq_std_fs))]
 #[pyfunction]
 pub fn write_to_file(contents: &FileData, path: String) -> PyResult<()> {
     Ok(())
 }
 
-#[cfg(not(any(target_arch = "wasm32", target_os = "ios")))]
+#[cfg(pq_std_fs)]
 pub fn does_file_exist(path: &str) -> bool{
 
     let path = {

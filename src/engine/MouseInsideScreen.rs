@@ -159,42 +159,19 @@ pub unsafe fn get_mouse_state_info() -> (f32, f32, bool) {
 }
 
 
+/// Web build.
+///
+/// There is no synchronous way to poll the pointer in a browser, so this
+/// reports what macroquad already knows from the last `mousemove` the canvas
+/// saw.
 #[cfg(target_arch = "wasm32")]
 pub unsafe fn get_mouse_state_info() -> (f32, f32, bool) {
-    // Note: Because you cannot synchronously poll the mouse on the web without 
-    // an active mouse event, this relies on what Macroquad is already doing, 
-    // or requires a globally registered JS 'mousemove' listener storing state in a static Mutex.
-    //
-    // For a pure drop-in, we use Macroquad's internal state combined with the canvas bounds.
-    
-    let (mq_x, mq_y) = macroquad::input::mouse_position();
-    
-    let window = match web_sys::window() {
-        Some(w) => w,
-        None => return (mq_x, mq_y, false),
-    };
-    
-    let document = match window.document() {
-        Some(d) => d,
-        None => return (mq_x, mq_y, false),
-    };
-    
-    // Macroquad uses a canvas element with id "glcanvas" by default
-    let canvas = match document.get_element_by_id("glcanvas") {
-        Some(c) => c,
-        None => return (mq_x, mq_y, false),
-    };
+    let (x, y) = macroquad::input::mouse_position();
 
-    let rect = canvas.get_bounding_client_rect();
-    
-    // In a WASM context, Macroquad stops updating mouse_position() when outside the canvas.
-    // If you need tracking OUTSIDE the canvas, you cannot do it here synchronously. 
-    // You must write a JS snippet that attaches to `window.onmousemove` and writes to WASM memory.
-    
-    let is_inside = mq_x >= 0.0 
-        && mq_y >= 0.0 
-        && mq_x < rect.width() as f32 
-        && mq_y < rect.height() as f32;
+    let inside = x >= 0.0
+        && y >= 0.0
+        && x < macroquad::window::screen_width()
+        && y < macroquad::window::screen_height();
 
-    (mq_x, mq_y, is_inside)
+    (x, y, inside)
 }

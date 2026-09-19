@@ -43,3 +43,7 @@ aaa.py
 Marbe.glb
 marble_run.glb
 even_more_marbles
+emsdk
+
+web/pyodide/
+web/pyroquad_pkg.zip
