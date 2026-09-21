@@ -169,8 +169,11 @@ EM_JS(void, pq_js_register_callbacks, (unsigned int *cbs), {
         return c;
     };
 
+    
     P.dpi_scale = function () {
-        return P.high_dpi ? (window.devicePixelRatio || 1.0) : 1.0;
+        if (!P.high_dpi) { return 1.0; }
+        if (P._dpr === undefined) { P._dpr = window.devicePixelRatio || 1.0; }
+        return P._dpr;
     };
 
     /* gl.js `resize(canvas, on_resize)`: keep the backing store in sync with
@@ -178,12 +181,12 @@ EM_JS(void, pq_js_register_callbacks, (unsigned int *cbs), {
     P.resize_canvas = function (notify) {
         var canvas = P.canvas();
         var dpr = P.dpi_scale();
-        var w = canvas.clientWidth * dpr;
-        var h = canvas.clientHeight * dpr;
+        var w = Math.round(canvas.clientWidth * dpr);
+        var h = Math.round(canvas.clientHeight * dpr);
         if (canvas.width != w || canvas.height != h) {
             canvas.width = w;
             canvas.height = h;
-            if (notify && P.cb) { P.cb.resize(Math.floor(w), Math.floor(h)); }
+            if (notify && P.cb) { P.cb.resize(w, h); }
         }
     };
 
@@ -369,6 +372,7 @@ EM_JS(void, pq_js_init_webgl, (int version), {
 EM_JS(void, pq_js_setup_canvas_size, (int high_dpi), {
     var P = globalThis.__PQ;
     P.high_dpi = !!high_dpi;
+    P._dpr = undefined;          /* re-latch: a new run may start at a new zoom */
     P.resize_canvas(false);
 });
 
@@ -570,8 +574,9 @@ EM_JS(void, pq_js_sapp_set_fullscreen, (int fullscreen), {
 EM_JS(void, pq_js_sapp_set_window_size, (unsigned int w, unsigned int h), {
     var P = globalThis.__PQ;
     var canvas = P.canvas();
-    canvas.width = w;
-    canvas.height = h;
+    var dpr = P.dpi_scale();
+    canvas.style.width  = (w / dpr) + "px";
+    canvas.style.height = (h / dpr) + "px";
     P.resize_canvas(true);
 });
 

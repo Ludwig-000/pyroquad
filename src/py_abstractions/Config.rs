@@ -59,7 +59,10 @@ pub struct Config {
     pub draw_call_index_capacity: usize,
 
     #[pyo3(get, set)] 
-    pub default_filter_mode: FilterMode
+    pub default_filter_mode: FilterMode,
+
+    #[pyo3(get, set)]
+    pub high_dpi: bool
 }
 
 
@@ -78,6 +81,7 @@ impl Config {
         draw_call_vertex_capacity= 10_000,
         draw_call_index_capacity= 5_000,
         default_filter_mode= FilterMode::Linear,
+        high_dpi= true,
     ))]
     pub fn new(
         window_title: String,
@@ -91,6 +95,7 @@ impl Config {
         draw_call_vertex_capacity: usize,
         draw_call_index_capacity: usize,
         default_filter_mode: FilterMode,
+        high_dpi: bool,
     ) -> Self {
         Config {
             window_title,
@@ -103,7 +108,8 @@ impl Config {
             stop_python_when_closing_window,
             draw_call_vertex_capacity,
             draw_call_index_capacity,
-            default_filter_mode
+            default_filter_mode,
+            high_dpi
         }
     }
 }
@@ -132,6 +138,7 @@ impl Config{
                     fullscreen: config.fullscreen,
                     sample_count: config.sample_count,
                     window_resizable: config.window_resizable,
+                    high_dpi: config.high_dpi,
                     icon: Some(ic),
                     ..Default::default()
        };
@@ -166,6 +173,7 @@ impl Default for Config {
                 draw_call_vertex_capacity: 10_000,
                 draw_call_index_capacity: 5_000,
                 default_filter_mode: FilterMode::Linear,
+                high_dpi: true,
             }
 
     }
