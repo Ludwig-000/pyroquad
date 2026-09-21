@@ -59,6 +59,8 @@ unsafe extern "C" {
     fn pq_platform_init();
     /// `1` = stop the rAF pump; frames only happen when [`frame_now`] asks.
     fn pq_set_frame_driver(manual: i32);
+    /// `0` = let the Python loop run flat out instead of at the display refresh.
+    fn pq_set_vsync(on: i32);
     /// Runs one miniquad frame synchronously on the caller's stack.
     fn pq_frame_now();
     /// `1` when the page looks usable (has `#glcanvas`, has Emscripten's `GL`).
@@ -71,6 +73,16 @@ pub fn platform_init() {
 
 pub fn set_frame_driver_manual(manual: bool) {
     unsafe { pq_set_frame_driver(manual as i32) }
+}
+
+/// Paces [`frame_yield`]: `true` waits for an animation frame, `false` only for
+/// the task queue.
+///
+/// This is where `Config.swap_interval == Some(0)` lands in the browser. The
+/// native backends hand the swap interval to the driver; WebGL has no such knob,
+/// so on the web the loop's own yield is the only place a frame cap exists.
+pub fn set_vsync(on: bool) {
+    unsafe { pq_set_vsync(on as i32) }
 }
 
 /// One miniquad frame: `begin_frame` -> poll [`engine_loop`] -> `end_frame`.

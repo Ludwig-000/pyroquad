@@ -148,6 +148,7 @@ EM_JS(void, pq_js_register_callbacks, (unsigned int *cbs), {
     P.ready = true;
 
     P.high_dpi = false;
+    P.vsync = true;
     P.blocking_event_loop = false;
     P.raf = null;
     P.clipboard = null;
@@ -252,9 +253,41 @@ EM_JS(void, pq_js_register_callbacks, (unsigned int *cbs), {
      * suspends the whole wasm stack through JSPI until the promise settles -
      * this is what lets a *synchronous* Python `next_frame()` give the browser
      * a chance to paint and to deliver input on the one thread we have. */
+    /*
+     * `postMessage` on a MessageChannel is the one way to get back to the task
+     * queue with no delay at all: `setTimeout(0)` is clamped to 4ms once five
+     * timers have nested, and rAF is clamped to the display refresh, which is
+     * the whole point of being here. Draining a queue of waiters rather than
+     * resolving from a closure keeps one port alive for the whole run instead
+     * of allocating a channel per frame.
+     */
+    P._yield_waiters = [];
+    P._yield_channel = new MessageChannel();
+    P._yield_channel.port1.onmessage = function () {
+        var resolve = P._yield_waiters.shift();
+        if (resolve) { resolve(0); }
+    };
+
+    /* One frame's worth of "give the page back to the browser".
+     *
+     * With vsync on, that means waiting for the next animation frame, which
+     * paces the Python loop at the display refresh - one drawn frame per frame
+     * the monitor can actually show. With vsync off (`swap_interval = 0`) it
+     * means only yielding to the task queue, so the loop runs as fast as the
+     * machine manages. The browser still composites at the refresh rate no
+     * matter what - the extra frames are computed and thrown away - so this
+     * buys throughput for benchmarks and simulation, never smoother motion.
+     * Input and painting keep working either way: both happen between tasks,
+     * and the message yield does return to the task queue every frame. */
     P.frame_yield = function () {
+        if (P.vsync) {
+            return new Promise(function (resolve) {
+                requestAnimationFrame(function () { resolve(0); });
+            });
+        }
         return new Promise(function (resolve) {
-            requestAnimationFrame(function () { resolve(0); });
+            P._yield_waiters.push(resolve);
+            P._yield_channel.port2.postMessage(0);
         });
     };
 
@@ -388,7 +421,18 @@ EM_JS(float, pq_js_dpi_scale, (void), {
     return globalThis.__PQ.dpi_scale();
 });
 
-EM_JS(double, pq_js_now, (void), { return Date.now() / 1000.0; });
+/*
+ * `performance.now()`, not `Date.now()`. Everything that reads this - macroquad's
+ * `frame_time`, `get_fps()`, `get_time()`, coroutine timing - only ever takes a
+ * *difference*, so the epoch is irrelevant, while the resolution is not:
+ * `Date.now()` is whole milliseconds, which quantizes a 60fps frame time into an
+ * alternating 16/17ms and collapses anything past ~100fps into noise (an
+ * uncapped loop measures a flat 0 or 1ms and reports a nonsense framerate).
+ * `performance.now()` is sub-millisecond - 5us when the page is cross-origin
+ * isolated, 100us when it is not. It is also monotonic, so a clock adjustment
+ * mid-run can no longer hand the engine a negative delta.
+ */
+EM_JS(double, pq_js_now, (void), { return performance.now() / 1000.0; });
 
 EM_JS(int, pq_js_sapp_is_elapsed_timer_supported, (void), { return 1; });
 
@@ -739,6 +783,16 @@ EM_JS(void, pq_js_set_frame_driver, (int manual), {
     }
 });
 
+/*
+ * `swap_interval = 0` in the Config, i.e. "do not pace the loop at the display
+ * refresh". miniquad's web backend has nowhere to put a swap interval - WebGL
+ * exposes no such control - so pyroquad honours it here, at the only place in
+ * the browser build that actually decides when the next frame may start.
+ */
+EM_JS(void, pq_js_set_vsync, (int on), {
+    globalThis.__PQ.vsync = !!on;
+});
+
 /* Run exactly one miniquad frame, synchronously, on the caller's stack. */
 EM_JS(void, pq_js_frame_now, (void), {
     globalThis.__PQ.cb.frame();
@@ -846,6 +900,7 @@ EMSCRIPTEN_KEEPALIVE void audio_playback_set_volume(unsigned int playback_key, f
 
 /* Called from Rust (see src/web/mod.rs). */
 EMSCRIPTEN_KEEPALIVE void pq_set_frame_driver(int manual) { pq_js_set_frame_driver(manual); }
+EMSCRIPTEN_KEEPALIVE void pq_set_vsync(int on) { pq_js_set_vsync(on); }
 EMSCRIPTEN_KEEPALIVE void pq_frame_now(void) { pq_js_frame_now(); }
 EMSCRIPTEN_KEEPALIVE int pq_probe(void) { return pq_js_probe(); }
 
