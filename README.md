@@ -9,12 +9,12 @@ This is a Python game engine based on [macroquad](https://github.com/not-fl3/mac
 * Install via `pip install pyroquad`
   (in the browser: `micropip.install("pyroquad")`)
 * Requires Python >= 3.9
-* Supported Platforms: windows, linux, mac, and the browser
-  (WebAssembly via Pyodide - see [docs/WASM.md](docs/WASM.md))
+* Supported Platforms: windows, linux, mac, and WASM via Piodide.
 
 ---
 
 >## Featuring 2D:  
+#### [view the demo here](https://ludwig-000.github.io/Pyroquad_example_game_assets/)
 ![2D Screenshot](https://raw.githubusercontent.com/Ludwig-000/pyquad/refs/heads/main/docs/2d_screenshot.png)
 
 >## and 3D:
