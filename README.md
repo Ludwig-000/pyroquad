@@ -207,8 +207,6 @@ This is a Python game engine based on [macroquad](https://github.com/not-fl3/mac
 >  const micropip = pyodide.pyimport("micropip");
 >  await micropip.install("pyroquad");
 >
->  // runPythonAsync, not runPython: pyroquad yields to the browser between
->  // frames through JSPI, which needs the async entry point.
 >  await pyodide.runPythonAsync(`
 >      from pyroquad import *
 >
