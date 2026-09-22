@@ -268,6 +268,30 @@ EM_JS(void, pq_js_register_callbacks, (unsigned int *cbs), {
         if (resolve) { resolve(0); }
     };
 
+    /* When the browser last ran its rendering step, and how often it does.
+     * A free-running rAF ticker keeps both current; the interval is a slowly
+     * decaying minimum of the observed gaps, so it tracks the display refresh
+     * (60Hz, 144Hz, ...) without being dragged up by the odd late tick. */
+    P._last_render = performance.now();
+    P._render_interval = 1000 / 60;
+    P._frame_cost = 0;
+    P._resumed_at = 0;
+    P._render_tick = function () {
+        var now = performance.now();
+        var gap = now - P._last_render;
+        if (gap > 2 && gap < 100) {
+            P._render_interval = Math.min(P._render_interval * 1.01, gap);
+        }
+        P._last_render = now;
+        requestAnimationFrame(P._render_tick);
+    };
+    requestAnimationFrame(P._render_tick);
+
+    P._resumed = function () {
+        P._resumed_at = performance.now();
+        return 0;
+    };
+
     /* One frame's worth of "give the page back to the browser".
      *
      * With vsync on, that means waiting for the next animation frame, which
@@ -277,16 +301,31 @@ EM_JS(void, pq_js_register_callbacks, (unsigned int *cbs), {
      * machine manages. The browser still composites at the refresh rate no
      * matter what - the extra frames are computed and thrown away - so this
      * buys throughput for benchmarks and simulation, never smoother motion.
-     * Input and painting keep working either way: both happen between tasks,
-     * and the message yield does return to the task queue every frame. */
+     *
+     * Returning to the task queue is *not* enough to get painted, though.
+     * Chrome schedules its rendering step ahead of a stream of message tasks,
+     * but Firefox does not: fed a MessageChannel loop that draws WebGL, its
+     * refresh driver drops to ~12Hz (80-90ms between paints), and the WebGL
+     * back-pressure from the frames it never presents inflates every frame's
+     * GL calls until the loop itself sinks to ~60fps. So the uncapped path still
+     * waits for an animation frame whenever the *next* frame - at its recent
+     * average cost - would not finish before the next refresh is due. Every
+     * refresh gets a freshly drawn frame, and the time in between is spent
+     * running as many extra frames as fit. */
     P.frame_yield = function () {
-        if (P.vsync) {
+        var now = performance.now();
+        if (P._resumed_at) {
+            /* clamped so one asset-loading stall cannot skew it for seconds */
+            var cost = Math.min(now - P._resumed_at, 50);
+            P._frame_cost = P._frame_cost ? P._frame_cost * 0.9 + cost * 0.1 : cost;
+        }
+        if (P.vsync || now - P._last_render + P._frame_cost >= P._render_interval) {
             return new Promise(function (resolve) {
-                requestAnimationFrame(function () { resolve(0); });
+                requestAnimationFrame(function () { resolve(P._resumed()); });
             });
         }
         return new Promise(function (resolve) {
-            P._yield_waiters.push(resolve);
+            P._yield_waiters.push(function () { resolve(P._resumed()); });
             P._yield_channel.port2.postMessage(0);
         });
     };
