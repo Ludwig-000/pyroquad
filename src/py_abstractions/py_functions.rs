@@ -75,9 +75,7 @@ pub fn activate_engine( conf: Option<Config>) -> PyResult<()>{
 
         crate::web::platform_init();
         crate::web::set_frame_driver_manual(true);
-        // `swap_interval` never reaches miniquad here - its web backend drops
-        // `platform.swap_interval` on the floor - so apply it to the only frame
-        // cap the browser build has. `None` keeps the default, vsync-paced loop.
+
         crate::web::set_vsync(conf.swap_interval != Some(0));
 
         ENGINE_CURRENTLY_ACTIVE.store(true, Ordering::SeqCst);

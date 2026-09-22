@@ -22,6 +22,39 @@ This is a Python game engine based on [macroquad](https://github.com/not-fl3/mac
 
 
 
+>## How to run in the browser:
+>
+>place this code inside a `.html` file and open in the browser.
+>
+>```html
+><style>#glcanvas { width: 800px !important; height: 600px !important; display: block; } <style>
+><canvas id="glcanvas" width="800" height="600"></canvas>
+><pre id="out"></pre>
+>
+><script type="module">
+>import { loadPyodide } from "https://cdn.jsdelivr.net/pyodide/v314.0.3/full/pyodide.mjs";
+>
+>const out = document.getElementById("out");
+>const print = t => out.textContent += t + "\n";
+>
+>const pyodide = await loadPyodide({ stdout: print, stderr: print });
+>await pyodide.loadPackage("micropip");
+>const micropip = pyodide.pyimport("micropip");
+>await micropip.install("pyroquad");
+>
+>await pyodide.runPythonAsync(`
+>from pyroquad import *
+>
+>activate_engine()
+>
+>while True:
+>    draw_rectangle(x=100, y=100, w=600, h=300, color=Color.GREEN)
+>    draw_text(text="Hello rectangle", x=200, y=200, font_size=50, color=Color.RED)
+>    next_frame()
+>    examples.limit_fps(60)
+>`).catch(e => print(e));
+></script>
+>```
 
 
 >## How to build:
@@ -75,16 +108,6 @@ This is a Python game engine based on [macroquad](https://github.com/not-fl3/mac
 
 >## How to build for the browser (WebAssembly):
 >
->The web build is a single WebAssembly module that runs inside
->[Pyodide](https://pyodide.org) (CPython compiled with Emscripten). Nothing is
->forked or patched - macroquad, miniquad, quad-snd and Pyodide are all stock.
->[docs/WASM.md](docs/WASM.md) explains how and why it works.
->
->Since [PEP 783](https://peps.python.org/pep-0783/) the browser build is
->published to PyPI like any other wheel, so **most people never need to build it
->at all** - see *Running in the browser* below. The rest of this section is for
->building it yourself.
->
 >    1) Prerequesites (in addition to the ones above):
 >       - The `wasm32-unknown-emscripten` Rust target:
 >
@@ -92,12 +115,7 @@ This is a Python game engine based on [macroquad](https://github.com/not-fl3/mac
 >
 >       - `pyodide-build` and a recent `maturin`:
 >
->         `pip install "pyodide-build>=0.39" "maturin>=1.13.2"`
->
->         `pyodide-build` owns the cross-build environment: it decides the
->         Emscripten version, the linker flags and the wheel's platform tag, so
->         that what you build matches the Pyodide that will load it. `maturin`
->         1.13.2 is the first release that emits the PEP 783 tag.
+>         `pip install pyodide-build`
 >
 >         **`pyodide-build` does not run natively on Windows.** Build the wheel
 >         on Linux, macOS or WSL. For local iteration on Windows there is a
@@ -192,40 +210,7 @@ This is a Python game engine based on [macroquad](https://github.com/not-fl3/mac
 >       mis-tagged wheel is rejected here rather than in the wild.
 >
 >
->## Running in the browser:
->
->Install it inside [Pyodide](https://pyodide.org) with
->[micropip](https://micropip.pyodide.org) - the `pyemscripten_*_wasm32` wheel
->comes straight from PyPI, exactly like the desktop ones:
->
->```html
-><script type="module">
->  import { loadPyodide } from "./pyodide/pyodide.mjs";
->
->  const pyodide = await loadPyodide();
->  await pyodide.loadPackage("micropip");
->  const micropip = pyodide.pyimport("micropip");
->  await micropip.install("pyroquad");
->
->  await pyodide.runPythonAsync(`
->      from pyroquad import *
->
->      activate_engine()
->
->      while True:
->          draw_rectangle(x=100, y=100, w=600, h=300, color=Color.GREEN)
->          next_frame()
->          examples.limit_fps(60)
->  `);
-></script>
->```
->
->The page needs a `<canvas>` for the engine to draw into, and Chrome 137+ for
->JSPI. `web/index.html` is a complete working example of both.
->
->A plain static server is enough - this port uses JSPI rather than
->`SharedArrayBuffer`, so no COOP/COEP headers are required.
->
+
 >
 >## Developing on the module itself:
 >
