@@ -255,9 +255,8 @@ jobs:
           target_commitish: ${{ github.ref_name }}
           files: release_dist/*.whl
           body: |
-            Alpha release of Pyroquad Engine.
-
-            Includes the `pyemscripten_*_wasm32` wheel for running in the browser
-            under Pyodide - `micropip.install("pyroquad")`. See
-            [docs/WASM.md](docs/WASM.md).
+            Release of the Pyroquad Engine.
+            included WASM binaries, aswell as support for multiple abi versions.
+            older ABI = better backwards compatability
+            newer ABI = more feature support, leading to abot 10% speed improvements.
           generate_release_notes: true
