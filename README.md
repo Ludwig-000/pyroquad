@@ -27,7 +27,7 @@ This is a Python game engine based on [macroquad](https://github.com/not-fl3/mac
 >place this code inside a `.html` file and open in the browser.
 >
 >```html
-><style>#glcanvas { width: 800px !important; height: 600px !important; display: block; } <style>
+><style>#glcanvas { width: 800px !important; height: 600px !important; display: block; } </style>
 ><canvas id="glcanvas" width="800" height="600"></canvas>
 ><pre id="out"></pre>
 >
