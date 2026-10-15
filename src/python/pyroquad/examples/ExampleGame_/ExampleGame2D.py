@@ -19,6 +19,9 @@ class DEBUG():
 
 
 def quit_program():
+    show_mouse(True)
+    set_cursor_grab(False)
+    AudioManager.__mute_toggle = True
     examples.loading_screen(lambda a: a, range(0), "Bye Bye")
 
 class Button():
