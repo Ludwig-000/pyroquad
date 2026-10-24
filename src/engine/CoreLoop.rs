@@ -339,7 +339,7 @@ impl CommandQueue {
             crate::web::run_query_now(command);
             return;
         }
-
+        #[cfg(not (target_os = "emscripten"))]
         self.inner.push(command);
     }
 

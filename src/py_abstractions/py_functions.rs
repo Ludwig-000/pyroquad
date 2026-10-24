@@ -89,10 +89,7 @@ pub fn activate_engine( conf: Option<Config>) -> PyResult<()>{
             crate::engine::CoreLoop::proccess_commands_loop().await;
         });
 
-        // `Window::from_config` only *creates* the future; nothing in it has run
-        // yet. One frame gets the shaders compiled and the frame-info statics
-        // filled, so that engine calls made before the first `next_frame()`
-        // behave the same as they do natively.
+        // initializes stuff
         crate::web::frame_now();
 
         return Ok(());

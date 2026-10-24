@@ -158,7 +158,7 @@ impl From<macroquad::prelude::TouchPhase> for TouchPhase{
     fn from(value: macroquad::prelude::TouchPhase) -> Self {
         match value{
             macroquad::input::TouchPhase::Cancelled => TouchPhase::Cancelled,
-            macroquad::input::TouchPhase::Ended => TouchPhase::Cancelled,
+            macroquad::input::TouchPhase::Ended => TouchPhase::Ended,
             macroquad::input::TouchPhase::Moved => TouchPhase::Moved,
             macroquad::input::TouchPhase::Started => TouchPhase::Started,
             macroquad::input::TouchPhase::Stationary => TouchPhase::Stationary,
