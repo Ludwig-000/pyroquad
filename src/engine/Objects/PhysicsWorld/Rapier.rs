@@ -1,7 +1,7 @@
 ﻿use rapier3d::{prelude::*};
 use glam::Vec3;
 use slotmap::{Key, KeyData};
-use crate::{engine::Objects::ObjectManagement::ObjectStorage::{self as obj}, py_abstractions::structs::ThreeDObjects::ColliderOptions::{ColliderOptions, InnerColliderOptions}};
+use crate::{engine::Objects::ObjectManagement::ObjectStorage::{self as obj}, py_abstractions::structs::ThreeDObjects::Collider::Collider};
 use crate::engine::Objects::ObjectManagement::ObjectStorage::ObjectKey;
 
 
@@ -134,27 +134,27 @@ impl RapierWorld{
             &(),
         );
     }
-    pub fn insert_object(&mut self, obj: &obj::Object, key: ObjectKey, collider: ColliderOptions) -> Option<ObjectHandle> {
-        match collider.0{
-            InnerColliderOptions::None => {
+    pub fn insert_object(&mut self, obj: &obj::Object, key: ObjectKey, collider: Collider) -> Option<ObjectHandle> {
+        match collider{
+            Collider::NONE() => {
                 None
             }
-            InnerColliderOptions::Static=> {
+            Collider::SENSOR() => {
                 Some(self.static_collider_builder(obj, key))
             }
-            InnerColliderOptions::Dynamic { .. } =>{
-                Some(self.dynamic_collider_builder(obj,key,collider))
-            }
-            InnerColliderOptions::Fixed { .. } => {
+            Collider::FIXED { .. } => {
                 Some(self.fixed_collider_builder(obj, key, collider))
+            }
+            Collider::DYNAMIC { .. } =>{
+                Some(self.dynamic_collider_builder(obj,key,collider))
             }
         }
     }
 
-    fn dynamic_collider_builder(&mut self, obj: &obj::Object, key: ObjectKey, options: ColliderOptions) -> ObjectHandle {
+    fn dynamic_collider_builder(&mut self, obj: &obj::Object, key: ObjectKey, options: Collider) -> ObjectHandle {
 
-        let (gravity_scale, friction_val, restitution_val, density_val) = match options.0 {
-            InnerColliderOptions::Dynamic { gravity_scale, friction, restitution, density } =>
+        let (gravity_scale, friction_val, restitution_val, density_val) = match options {
+            Collider::DYNAMIC { gravity_scale, friction, restitution, density } =>
             (gravity_scale,friction,restitution,density),
             _ => unreachable!()
         };
@@ -239,10 +239,10 @@ impl RapierWorld{
         ObjectHandle { rigid_body_handle, collider_handle }
     }
 
-    fn fixed_collider_builder(&mut self, obj: &obj::Object, key: ObjectKey, options: ColliderOptions) -> ObjectHandle {
+    fn fixed_collider_builder(&mut self, obj: &obj::Object, key: ObjectKey, options: Collider) -> ObjectHandle {
         // 1. Extract all your exposed options
-        let (friction_val, restitution_val, is_sensor_val, detect_kinematic_val) = match options.0 {
-            InnerColliderOptions::Fixed { friction, restitution, is_sensor, detect_kinematic } => 
+        let (friction_val, restitution_val, is_sensor_val, detect_kinematic_val) = match options {
+            Collider::FIXED { friction, restitution, is_sensor, detect_kinematic } => 
                 (friction, restitution, is_sensor, detect_kinematic),
             _ => unreachable!()
         };
@@ -250,7 +250,7 @@ impl RapierWorld{
         let t: Transforms<'_> = extract_object_transforms(obj);
 
         // 2. Base builder closure to prevent repeating the configuration
-        let apply_options = |mut builder: ColliderBuilder| -> Collider {
+        let apply_options = |mut builder: ColliderBuilder| -> rapier3d::geometry::Collider {
             builder = builder
                 .friction(friction_val)
                 .restitution(restitution_val)

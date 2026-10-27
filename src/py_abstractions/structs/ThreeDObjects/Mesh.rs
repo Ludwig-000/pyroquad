@@ -5,7 +5,7 @@ use slotmap::Key;
 use std::hash::{Hash, Hasher};
 
 use crate::engine::PError::PError;
-use crate::py_abstractions::structs::ThreeDObjects::ColliderOptions::{ColliderOptions, InnerColliderOptions};
+use crate::py_abstractions::structs::ThreeDObjects::Collider::Collider;
 use crate::py_abstractions::structs::ThreeDObjects::ObjectFunStorage::FunctionKey;
 use crate::py_abstractions::structs::ThreeDObjects::PhysicsHandle::Physics;
 use crate::py_abstractions::{Loading::FileData::FileData, Textures_and_Images::Texture2D};
@@ -56,9 +56,9 @@ crate::implement_Drop3D!(Mesh);
 impl Mesh{
 
 
-    #[pyo3(signature = (data, texture=None, collider_type = ColliderOptions::NONE()))]
+    #[pyo3(signature = (data, texture=None, collider_type = Collider::NONE()))]
     #[staticmethod]
-    pub fn from_file_data(py: Python<'_>,data: FileData, texture: Option<Texture2D>,collider_type: ColliderOptions)-> PyResult<Py<Mesh>>{
+    pub fn from_file_data(py: Python<'_>,data: FileData, texture: Option<Texture2D>,collider_type: Collider)-> PyResult<Py<Mesh>>{
         
         let (sender, receiver) = PChannel::channel();
 
@@ -90,7 +90,7 @@ impl Mesh{
         let mut mesh_ref = mesh_handle.borrow_mut(py);
         mesh_ref.key = key;
 
-        if let InnerColliderOptions::Dynamic { .. }= collider_type.0{
+        if let Collider::DYNAMIC { .. }= collider_type{
             let phys_struct = Physics {
                 identity: weak_ref_handle,
                 handle: key,

@@ -15,7 +15,7 @@ use crate::engine::CoreLoop::COMMAND_QUEUE;
 use crate::engine::CoreLoop::Command;
 
 use crate::py_abstractions::structs::GLAM::Vec3::Vec3;
-use crate::py_abstractions::structs::ThreeDObjects::ColliderOptions::{ColliderOptions, InnerColliderOptions};
+use crate::py_abstractions::structs::ThreeDObjects::Collider::Collider;
 use crate::py_abstractions::Color::Color;
 use crate::engine::Objects::ObjectManagement::ObjectStorage::ObjectKey;
 
@@ -50,7 +50,8 @@ crate::implement_Drop3D!(Cylinder);
 #[pymethods]
 impl Cylinder {
 
-    #[pyo3(signature = (position= Vec3::ZERO(), rotation = Vec3::ZERO(),scale= Vec3::ONE(), color = Color::WHITE(),texture=None, collider_type = ColliderOptions::NONE()))]
+    #[pyo3(signature = (position= Vec3::ZERO(), rotation = Vec3::ZERO(),scale= Vec3::ONE(), 
+        color = Color::WHITE(),texture=None, collider_type = Collider::NONE()))]
     #[new]
     pub fn new(
         py: Python<'_>,
@@ -59,13 +60,13 @@ impl Cylinder {
         scale: Vec3,
         color: Color,
         texture: Option<Texture2D>,
-        collider_type: ColliderOptions,
+        collider_type: Collider,
     ) -> PyResult<Py<Cylinder>> {
 
         let (sender, receiver) = PChannel::channel();
 
-        let cache  =match collider_type.0{
-            InnerColliderOptions::Dynamic { .. }=>{
+        let cache  =match collider_type{
+            Collider::DYNAMIC { .. }=>{
                 None
             },
             _=> {ObjectDataCache::ThreeDObjCache::new(position.into(), rotation.into(), scale.into(), color.into())}
@@ -95,7 +96,7 @@ impl Cylinder {
         let mut cube_ref = cube_handle.borrow_mut(py);
         cube_ref.key = key;
 
-        if let InnerColliderOptions::Dynamic { .. } = collider_type.0{
+        if let Collider::DYNAMIC { .. } = collider_type{
             let phys_struct = Physics {
                 identity: weak_ref_handle,
                 handle: key,

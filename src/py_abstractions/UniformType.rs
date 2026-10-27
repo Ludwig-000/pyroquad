@@ -129,7 +129,6 @@ impl Default for EulerRot {
 
 
 /// A pixel-wise comparison function.
-
 #[pyclass(from_py_object)]
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
 pub enum Comparison {

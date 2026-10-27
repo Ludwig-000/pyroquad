@@ -1,4 +1,6 @@
-use crate::{engine::Objects::{Cube::Cube, Cylinder::Cylinder, Mesh::Mesh, ObjectManagement::SyncObjectTransforms::sync_transforms_inner, PhysicsWorld::ApplyPhysics::apply_physics_enum, Pill::Pill, Sphere::Sphere}, py_abstractions::structs::ThreeDObjects::{ColliderOptions::ColliderOptions, PhysicsHandle::PhysicsEnum}};
+use crate::{engine::Objects::{Cube::Cube, Cylinder::Cylinder, Mesh::Mesh, 
+    ObjectManagement::SyncObjectTransforms::sync_transforms_inner, PhysicsWorld::ApplyPhysics::apply_physics_enum, 
+    Pill::Pill, Sphere::Sphere}, py_abstractions::structs::ThreeDObjects::{Collider::Collider, PhysicsHandle::PhysicsEnum}};
 use pyo3::prelude::*;
 use pyo3::types::PyWeakref;
 use slotmap::*;
@@ -44,7 +46,7 @@ impl ObjectStorage {
         }
     }
 
-    pub fn push(&mut self, obj: Object,collider: ColliderOptions, weak_ref_handle: Py<PyWeakref>) -> ObjectKey {
+    pub fn push(&mut self, obj: Object,collider: Collider, weak_ref_handle: Py<PyWeakref>) -> ObjectKey {
 
         let idx = self.storage.len(); // the index of where the obj will be placed eventually.
         let key = self.keymap.insert((idx, Arc::new(weak_ref_handle)));
@@ -60,7 +62,7 @@ impl ObjectStorage {
 
     /// Returns the Oject key through the Sender, before the object has been created.
     pub fn quick_push<F: FnOnce()-> Object>(&mut self,
-        collider: ColliderOptions,
+        collider: Collider,
         sender: PSender<ObjectKey>,
         weak_ref_handle: Py<PyWeakref>,
         object_factory: F){
@@ -232,7 +234,7 @@ impl ObjectStorage {
         }
     }
 
-    pub fn set_collision_for_object(&mut self, key: ObjectKey, collider: ColliderOptions) {
+    pub fn set_collision_for_object(&mut self, key: ObjectKey, collider: Collider) {
         let vec_idx = self.keymap.get(key).expect("key not known to the map.").0;
 
         if let Some(old_handle) = self.glue_data[vec_idx].obj_handle.take() {

@@ -10,13 +10,12 @@ use crate::py_abstractions::structs::ThreeDObjects::PhysicsHandle::Physics;
 use std::hash::{Hash, Hasher};
 
 use slotmap::Key;
-use crate::py_abstractions::structs::ThreeDObjects::ColliderOptions::InnerColliderOptions;
 use crate::engine::Objects::ObjectDataCache;
 use crate::engine::CoreLoop::COMMAND_QUEUE;
 use crate::engine::CoreLoop::Command;
 
 use crate::py_abstractions::structs::GLAM::Vec3::Vec3;
-use crate::py_abstractions::structs::ThreeDObjects::ColliderOptions::ColliderOptions;
+use crate::py_abstractions::structs::ThreeDObjects::Collider::Collider;
 use crate::py_abstractions::Color::Color;
 use crate::engine::Objects::ObjectManagement::ObjectStorage::ObjectKey;
 
@@ -52,7 +51,7 @@ crate::implement_manual_drawing_options3D!(Cube,  r#"Cube()"#);
 #[pymethods]
 impl Cube {
     
-    #[pyo3(signature = (position= Vec3::ZERO(), rotation = Vec3::ZERO(),scale= Vec3::ONE(), color = Color::WHITE(), texture=None,collider_type = ColliderOptions::NONE()))]
+    #[pyo3(signature = (position= Vec3::ZERO(), rotation = Vec3::ZERO(),scale= Vec3::ONE(), color = Color::WHITE(), texture=None,collider_type = Collider::NONE()))]
     #[new]
     pub fn new(
         py: Python<'_>,
@@ -61,13 +60,13 @@ impl Cube {
         scale: Vec3,
         color: Color,
         texture: Option<Texture2D>,
-        collider_type: ColliderOptions,
+        collider_type: Collider,
     ) -> PyResult<Py<Cube>> {
 
         let (sender, receiver) = PChannel::channel();
 
-        let cache = match collider_type.0{
-            InnerColliderOptions::Dynamic { .. }=>{
+        let cache = match collider_type{
+            Collider::DYNAMIC { .. }=>{
                 None
             },
             _=> {ObjectDataCache::ThreeDObjCache::new(position.into(), rotation.into(), scale.into(), color.into())}
@@ -97,7 +96,7 @@ impl Cube {
         let mut cube_ref = cube_handle.borrow_mut(py);
         cube_ref.key = key;
 
-        if let InnerColliderOptions::Dynamic { .. } = collider_type.0{
+        if let Collider::DYNAMIC { .. } = collider_type{
             let phys_struct = Physics {
                 identity: weak_ref_handle,
                 handle: key,

@@ -1,7 +1,7 @@
 pub mod Cube;
 pub mod Mesh;
 pub mod Sphere;
-pub mod ColliderOptions;
+pub mod Collider;
 pub mod PhysicsHandle;
 pub mod ObjectMacros;
 pub mod Cylinder;

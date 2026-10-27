@@ -121,8 +121,10 @@ pub mod _pyroquad {
         BVec2::BVec2, BVec3::BVec3, Mat4::Mat4, Quat::Quat, Vec2::Vec2, Vec3::Vec3, Vec4::Vec4};
 
 
+
     #[pymodule_export]
-    pub use crate::py_abstractions::structs::ThreeDObjects::ColliderOptions::ColliderOptions;
+    pub use crate::py_abstractions::structs::ThreeDObjects::Collider::Collider;
+
     #[pymodule_export]
     pub use crate::py_abstractions::structs::ThreeDObjects::{
         Cube::Cube, Cylinder::Cylinder, Mesh::Mesh, PhysicsHandle::Physics, Pill::Pill, Sphere::Sphere};
@@ -147,7 +149,6 @@ pub mod _pyroquad {
     #[pymodule_export]
     pub use crate::py_abstractions::PFuture::{FileDataFuture, Future, ImageFuture};
 }
-
 
 
 

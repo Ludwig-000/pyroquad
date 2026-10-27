@@ -5,8 +5,6 @@ use glam::Vec2 as gl;
 use pyo3::prelude::*;
 
 
-//define_stub_info_gatherer!(stub_info);
-
 
 //
 // A python abstraction for the Vec2 struct from the GLAM crate.
@@ -15,7 +13,7 @@ use pyo3::prelude::*;
 #[cfg_attr(feature = "abi_314", pyclass(eq,str,frozen, immutable_type, from_py_object))]
 #[cfg_attr(not(feature = "abi_314"), pyclass(eq,str,frozen, from_py_object))]
 #[repr(C)]
-#[derive(Clone, Copy, PartialEq,Debug)]
+#[derive(Clone, Copy, PartialEq, Debug)]
 pub struct Vec2 {
     #[pyo3(get)]
     pub x: f32,

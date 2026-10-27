@@ -42,10 +42,10 @@ impl Color {
     /// b represents the blue channel.
     /// 
     /// a represents the alpha channel aka. transparency.
-    #[pyo3(signature = (r= 1.0, g= 1.0, b= 1.0, a= 1.0))]
+    #[pyo3(signature = (r= 1.0, g=1.0, b= 1.0, a= 1.0))]
     #[new]
-    pub fn new(r: f32, g: f32,b: f32,a: f32) -> Self {
-       Self { r,g,b,a }
+    pub fn new(r: f32, g: f32, b: f32, a: f32) -> Self {
+       Self { r, g, b, a }
     }
 
     /// CLOUDY_BLUE | #ACC2D9 | rgb(0.675, 0.761, 0.851)

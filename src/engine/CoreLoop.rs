@@ -36,7 +36,7 @@ use crate::engine::Objects::ObjectManagement::ObjectStorage::*;
 use crate::py_abstractions::GL::GlEnum;
 use crate::py_abstractions::GL::implement_GlEnum;
 use crate::py_abstractions::Textures_and_Images::EngineTexImgEnum;
-use crate::py_abstractions::structs::ThreeDObjects::ColliderOptions::ColliderOptions;
+use crate::py_abstractions::structs::ThreeDObjects::Collider::Collider;
 use crate::py_abstractions::structs::ThreeDObjects::PhysicsHandle::PhysicsEnum;
 use crate::py_abstractions::structs::TwoDObjects::Circle::Circle;
 use crate::py_abstractions::structs::TwoDObjects::Rectangle::Rectangle;
@@ -94,7 +94,7 @@ pub enum Command {
     DrawCircleFromPyClass(Circle),
     PhysicsEnum(PhysicsEnum, ObjectKey),
     ManuallyStepPhysics(f32),
-    SetCollisionForObject{key: ObjectKey, collider: ColliderOptions},
+    SetCollisionForObject{key: ObjectKey, collider: Collider},
     GetColissionObjects{
         key: ObjectKey, sender: PChannel::PSender<Vec<Arc<Py<PyWeakref>>>>,
     },
@@ -125,7 +125,7 @@ pub enum Command {
         rotation: mq::Vec3,
         color: mq::Color,
         texture: Option<mq::Texture2D>,
-        collider: ColliderOptions,
+        collider: Collider,
         weak_ref: Py<PyWeakref>,
         sender: PChannel::PSender<ObjectKey>,
     },
@@ -135,7 +135,7 @@ pub enum Command {
         rotation: mq::Vec3,
         color: mq::Color,
         texture: Option<mq::Texture2D>,
-        collider: ColliderOptions,
+        collider: Collider,
         weak_ref: Py<PyWeakref>,
         sender: PChannel::PSender<ObjectKey>,
     },
@@ -145,7 +145,7 @@ pub enum Command {
         rotation: mq::Vec3,
         color: mq::Color,
         texture: Option<mq::Texture2D>,
-        collider: ColliderOptions,
+        collider: Collider,
         weak_ref: Py<PyWeakref>,
         sender: PChannel::PSender<ObjectKey>,
     },
@@ -155,14 +155,14 @@ pub enum Command {
         rotation: mq::Vec3,
         color: mq::Color,
         texture: Option<mq::Texture2D>,
-        collider: ColliderOptions,
+        collider: Collider,
         weak_ref: Py<PyWeakref>,
         sender: PChannel::PSender<ObjectKey>,
     },
 
     CreateMesh{
         mesh: Mesh,
-        collider: ColliderOptions,
+        collider: Collider,
         weak_ref: Py<PyWeakref>,
         sender: PChannel::PSender<ObjectKey>,
     },

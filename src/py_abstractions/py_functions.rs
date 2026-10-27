@@ -17,6 +17,7 @@ use macroquad::prelude as mq;
 
 use pyo3::prelude::*;
 
+use pyo3::pyclass;
 use pyo3::types::PyRange;
 use pyo3::types::PyRangeMethods;
 use crate::engine::PChannel;
@@ -759,4 +760,3 @@ pub fn batch_draw_shapes<'py>(input: Vec<Shape<'py>>){
         }
     }
 }
-

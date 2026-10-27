@@ -374,7 +374,7 @@ macro_rules! implement_set_collider3D {
             impl $name {
                 
                 /// overwrites the current collider with the input option.
-                pub fn set_collider(&self, collider_type: ColliderOptions){
+                pub fn set_collider(&self, collider_type: Collider){
                     COMMAND_QUEUE.push(
                         Command::SetCollisionForObject{key: self.key, collider: collider_type}
                     );

@@ -43,12 +43,11 @@ aaa.py
 Marbe.glb
 marble_run.glb
 even_more_marbles
-emsdk
+emsdk/
 
 web/pyodide/
 web/pyroquad_pkg.zip
 web/pyroquad.whl
 
-# maturin --out dist (the wasm wheel)
 dist/
 .clangd
