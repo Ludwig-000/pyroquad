@@ -27,7 +27,7 @@ crossbeam = "=0.8.4" # used for the main Command Queue inside lib.rs
 
 glam = { version = "=0.27.0", features = ["scalar-math"] } # used for vector maths.
 
-rapier3d = { version = "=0.35.0-beta.0", features = ["parallel"] } # used for 3d physics
+rapier3d = { version = "=0.35.3", features = ["parallel", "simd8"] } # used for 3d physics
 
 slotmap = "=1.0.7" # fast hasher for object management. slopmap~ <3
 
@@ -106,4 +106,3 @@ ehttp = "0.5" # wasm replacement for http
 abi_314 = ["pyo3/abi3", "pyo3/abi3-py314", "pyo3/experimental-inspect"] # python 3.14 and up
 abi_310 = ["pyo3/abi3", "pyo3/abi3-py310", "pyo3/experimental-inspect"] # python 3.10 and up
 abi_39 = ["pyo3/abi3", "pyo3/abi3-py39", "pyo3/experimental-inspect"] # python 3.9 and up
-stubs = ["pyo3/experimental-inspect"]

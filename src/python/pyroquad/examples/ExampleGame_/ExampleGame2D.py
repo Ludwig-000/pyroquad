@@ -1699,7 +1699,7 @@ class Menue():
                 Rectangle(position=Vec2(2194.0/2, 1234.0/2), rotation=0, scale=Vec2(2194.0, 1234.0), color=Color.WHITE, texture=textures.get("tree_screen"))
             ] 
             + [
-                Rectangle(position=Vec2(2194.0/2, tileSize*15), rotation=0, scale=Vec2(tileSize*30, tileSize*5), color=Color(1,1,1,0.5)),
+                Rectangle(position=Vec2(2194.0/2, tileSize*15), rotation=0, scale=Vec2(tileSize*15, tileSize*5), color=Color(1,1,1,0.5)),
                 Button(Vec2(2194.0/2 + tileSize*4, tileSize*25), Vec2(tileSize*6, tileSize*3), button_color=Color(0.7, 0.7, 0.7, 1), label="Play"),
                 Button(Vec2(2194.0/2 - tileSize*4, tileSize*25), Vec2(tileSize*6, tileSize*3), button_color=Color(0.7, 0.7, 0.7, 1), label="Quit"),
                 Button(Vec2(2194.0/2 - tileSize*15, tileSize*25), Vec2(tileSize*10, tileSize*2), button_color=Color(0.7, 0.7, 0.7, 1), label="Toggle Fullscreen"),
@@ -1758,14 +1758,14 @@ class Menue():
                     item.draw()
                 
 
-                draw_text("Haven't thought of a name yet  >_<",
-                          (2194.0/2)-tileSize*15 +2 , 
+                draw_text("Pyro Meadow",
+                          (2194.0/2)-tileSize*7 , 
                           1234.0/2 - tileSize*3 +2, Color.ORANGE_RED,
-                          tileSize*20, fonts.get("dungeon_font"), font_scale=.1, font_scale_aspect=1)
-                draw_text("Haven't thought of a name yet  >_<",
-                          (2194.0/2)-tileSize*15, 
+                          tileSize*25, fonts.get("dungeon_font"), font_scale=.1, font_scale_aspect=1)
+                draw_text("Pyro Meadow",
+                          (2194.0/2)-tileSize*7, 
                           1234.0/2 - tileSize*3, Color.BLOOD_RED,
-                          tileSize*20, fonts.get("dungeon_font"), font_scale=.1)
+                          tileSize*25, fonts.get("dungeon_font"), font_scale=.1)
                 self.draw_mouse()
                 next_frame()
                 examples.limit_fps(60)
