@@ -339,7 +339,10 @@ impl CommandQueue {
             crate::web::run_query_now(command);
             return;
         }
-        #[cfg(not (target_os = "emscripten"))]
+
+        // Also on Emscripten: frame-local commands (and anything sent before
+        // activate_engine()) have to wait here for the next frame. Dropping them
+        // would drop their reply sender too, failing the caller with SendError.
         self.inner.push(command);
     }
 
