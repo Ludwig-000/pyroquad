@@ -14,7 +14,7 @@ This is a Python game engine based on [macroquad](https://github.com/not-fl3/mac
 ---
 
 >## Featuring 2D:  
-#### [view the demo here](https://ludwig-000.github.io/Pyroquad_example_game_assets/)
+#### [view the demo here](https://def-y.itch.io/pyroquad-game)
 ![2D Screenshot](https://raw.githubusercontent.com/Ludwig-000/pyquad/refs/heads/main/docs/2d_screenshot.png)
 
 >## and 3D:
