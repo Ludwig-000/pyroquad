@@ -44,8 +44,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          # ubuntu-latest (26.04+) has no prebuilt Python 3.9 (EOL), so pin this row
-          - {os: ubuntu-24.04, py_ver: "3.9", feat: "abi_39"}
+          - {os: ubuntu-latest, py_ver: "3.9", feat: "abi_39"}
           - {os: ubuntu-latest, py_ver: "3.10", feat: "abi_310"}
           - {os: ubuntu-latest, py_ver: "3.14", feat: "abi_314"}
           - {os: windows-latest, py_ver: "3.9", feat: "abi_39"}
@@ -63,23 +62,26 @@ jobs:
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
 
-      - name: Install Linux Dependencies
-        if: runner.os == 'Linux'
-        run: |
-          sudo apt-get update
-          # These are required for macroquad/miniquad to link successfully
-          sudo apt-get install -y libasound2-dev libx11-dev libxi-dev libgl1-mesa-dev libxcursor-dev libxinerama-dev libxrandr-dev
-
       - name: Rust Cache
         uses: Swatinem/rust-cache@v2
         with:
           key: ${{ matrix.os }}-${{ matrix.feat }}
 
+      # Linux builds run inside the manylinux container below, which brings its
+      # own interpreters; the runner's Python is never used there.
       - name: Set up Python ${{ matrix.py_ver }}
+        if: runner.os != 'Linux'
         uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.py_ver }}
 
+      # On Linux the wheel is built in a manylinux_2_28 container. Building on
+      # the runner itself tags it after the runner's glibc (linux_x86_64 or a
+      # very new manylinux_2_xx), which PyPI rejects or most distros can't install.
+      #
+      # The interpreter is not pinned on Linux: the abi3 tag comes from the
+      # abi_3xx feature, so any interpreter in the container produces the same
+      # wheel, and old EOL Pythons may not be shipped in the image anymore.
       - name: Build Wheel
         uses: PyO3/maturin-action@v1
         env:
@@ -90,7 +92,11 @@ jobs:
           CARGO_PROFILE_RELEASE_OVERFLOW_CHECKS: "false"
         with:
           command: build
-          args: --release --out dist --features ${{ matrix.feat }} --interpreter python${{ matrix.py_ver }} --generate-stubs
+          manylinux: 2_28
+          # These are required for macroquad/miniquad to link successfully
+          before-script-linux: |
+            yum install -y alsa-lib-devel libX11-devel libXi-devel mesa-libGL-devel libXcursor-devel libXinerama-devel libXrandr-devel
+          args: --release --out dist --features ${{ matrix.feat }} ${{ runner.os != 'Linux' && format('--interpreter python{0}', matrix.py_ver) || '' }} --generate-stubs
 
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
