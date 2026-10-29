@@ -44,7 +44,8 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - {os: ubuntu-latest, py_ver: "3.9", feat: "abi_39"}
+          # ubuntu-latest (26.04+) has no prebuilt Python 3.9 (EOL), so pin this row
+          - {os: ubuntu-24.04, py_ver: "3.9", feat: "abi_39"}
           - {os: ubuntu-latest, py_ver: "3.10", feat: "abi_310"}
           - {os: ubuntu-latest, py_ver: "3.14", feat: "abi_314"}
           - {os: windows-latest, py_ver: "3.9", feat: "abi_39"}
