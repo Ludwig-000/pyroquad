@@ -65,6 +65,10 @@ unsafe extern "C" {
     fn pq_frame_now();
     /// `1` when the page looks usable (has `#glcanvas`, has Emscripten's `GL`).
     fn pq_probe() -> i32;
+
+    fn pq_js_is_touch_enabled() -> i32;
+
+    fn pq_js_is_mobile() -> i32;
 }
 
 pub fn platform_init() {
@@ -93,6 +97,18 @@ pub fn frame_now() {
 /// Whether the page can host the engine at all.
 pub fn page_is_ready() -> bool {
     unsafe { pq_probe() != 0 }
+}
+
+/// Whether the device supports touch input. A touchscreen laptop counts too, so
+/// this says touch is available, not that it is the primary input.
+pub fn is_touch_enabled() -> bool {
+    unsafe { pq_js_is_touch_enabled() != 0 }
+}
+
+
+/// Whether we are on a mobile device.
+pub fn is_mobile() -> bool {
+    unsafe { pq_js_is_mobile() != 0 }
 }
 
 // ---------------------------------------------------------------------------

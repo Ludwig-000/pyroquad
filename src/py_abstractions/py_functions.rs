@@ -6,6 +6,7 @@
 // also, any conversion between my abstracted pyclasses and the structs used in macroquad is being done here.
 // ( example:  Color -> mq::Color )
 
+use crate::engine::FrameInfo;
 use crate::py_abstractions::Loading::Loading::PC_ASSET_FOLDER;
 use crate::py_abstractions::Text::Font;
 use crate::py_abstractions::Text::TextDimensions;
@@ -759,4 +760,18 @@ pub fn batch_draw_shapes<'py>(input: Vec<Shape<'py>>){
             }
         }
     }
+}
+
+/// Checks if the current device a mobile one. This check only runs for WASM target.
+/// on all other platform, this always returns false.
+#[pyfunction]
+pub fn is_mobile() -> bool {
+    FrameInfo::IS_MOBILE.load(Ordering::Relaxed)
+}
+
+/// Checks if touch imput was detected. This check only runs for WASM target.
+/// on all other platform, this always returns false.
+#[pyfunction]
+pub fn is_browser_touch_detected() -> bool {
+    FrameInfo::IS_BROWSER_TOUCH_DETECTED.load(Ordering::Relaxed)
 }

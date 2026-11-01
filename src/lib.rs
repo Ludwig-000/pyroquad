@@ -65,7 +65,7 @@ pub mod _pyroquad {
         draw_triangle_lines, get_char_pressed, get_delta_time, get_fps, get_keys_down, get_keys_pressed,
         get_keys_released, get_last_key_pressed, get_screen_data, get_text_center, is_quit_requested, next_frame,
         polar_to_cartesian, prevent_quit, request_new_screen_size, screen_dpi_scale, screen_height, screen_width,
-        set_fullscreen, set_pc_assets_folder, step_physics,
+        set_fullscreen, set_pc_assets_folder, step_physics,is_mobile,is_browser_touch_detected,
     };
 
     #[pymodule_export]

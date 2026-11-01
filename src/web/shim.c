@@ -389,6 +389,17 @@ EM_JS(void, pq_js_register_callbacks, (unsigned int *cbs), {
     };
 });
 
+EM_JS(int, pq_js_is_touch_enabled, (void), {
+    return navigator.maxTouchPoints > 0 ? 1 : 0;
+});
+
+
+EM_JS(int, pq_js_is_mobile, (void), {
+    if (typeof navigator !== 'undefined' && navigator.userAgentData && navigator.userAgentData.mobile) return 1;
+    if (typeof matchMedia !== 'function') return 0;
+    return matchMedia('(pointer: coarse) and (hover: none)').matches ? 1 : 0;
+});
+
 /* ------------------------------------------------------------------------ */
 /* miniquad: console                                                         */
 /* ------------------------------------------------------------------------ */

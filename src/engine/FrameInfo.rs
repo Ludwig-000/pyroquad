@@ -1,6 +1,6 @@
 use std::collections::HashSet;
 use std::sync::{LazyLock, Mutex};
-use std::sync::atomic::{AtomicI32,Ordering};
+use std::sync::atomic::{AtomicBool, AtomicI32, Ordering};
 use macroquad::input::{MouseButton, is_mouse_button_down, is_mouse_button_pressed, is_mouse_button_released};
 use macroquad::prelude as mq;
 use macroquad::prelude::KeyCode;
@@ -23,7 +23,8 @@ pub static MOUSE_WHEEL: Mutex<(f32,f32)> = Mutex::new((0.,0.));
 pub static SCREEN_HEIGHT: AtomicF32 = AtomicF32::new(0.);
 pub static SCREEN_WIDTH: AtomicF32 = AtomicF32::new(0.);
 
-
+pub static IS_MOBILE: AtomicBool = AtomicBool::new(false);
+pub static IS_BROWSER_TOUCH_DETECTED: AtomicBool = AtomicBool::new(false);
 
 pub static LASK_KEY_PRESSED: Mutex<Option<KeyCode>> = Mutex::new(None);
 pub static CHAR_PRESSED: Mutex<Option<char>> = Mutex::new(None);
@@ -124,6 +125,12 @@ pub fn update_frame_info(){
             *MOUSE_BUTTON_RELEASED.lock().unwrap() = active_buttons;
         }
         
+    }
+
+    #[cfg(target_os = "emscripten")]
+    {
+        IS_MOBILE.store(crate::web::is_mobile(), Ordering::Relaxed);
+        IS_BROWSER_TOUCH_DETECTED.store(crate::web::is_touch_enabled(), Ordering::Relaxed);
     }
 }
 
