@@ -299,14 +299,16 @@ on the only thing that produces a frame is `pq_frame_now()`, called from Python'
 
 ```
 next_frame()          Python
+  └─ offscreen_flush()  this turn's draws → the offscreen target (§6.3)
   └─ pq_frame_now()   → miniquad frame()
         begin_frame()                       macroquad clears + resets the draw list
-        poll(engine_loop)                   drains COMMAND_QUEUE: every draw this
-                                            frame, then Command::NextFrame
+        poll(engine_loop)                   runs Command::NextFrame
                                               → frame-info + physics + reply
+                                              → offscreen target → canvas
                                               → yield  (this ends the frame)
         end_frame()                         flush to WebGL
   └─ receiver.recv()  the reply is already there
+  └─ offscreen_after_frame()  clear the target for the next turn
   └─ frame_yield()    JSPI: suspend, let the browser paint and deliver input,
                       resume
 ```
@@ -336,55 +338,23 @@ reached from `runPythonAsync`). It is a **Chrome 137+** feature; the page report
 `JSPI available` on load, and pyroquad surfaces the failure rather than papering
 over it if it is missing.
 
-### 6.3 Why commands are split in two
+### 6.3 Commands run at push time; the screen is a render target
 
-macroquad brackets every frame with `begin_frame()` / `end_frame()`, and
-`begin_frame()` **resets the draw list**. So anything that draws has to run
-inside `pq_frame_now()`. But a command that owes Python an answer cannot wait for
-a frame — Python is blocked on it *now*, so that frame would never come. Running
-a frame to service it instead would throw away everything drawn so far this
-logical frame.
+A command that owes Python an answer cannot wait for a frame — Python is blocked
+on it *now*, so that frame would never come. So `CommandQueue::push` executes
+every command except `NextFrame` immediately, on the caller's stack, in order.
+Every existing `COMMAND_QUEUE.push(...)` call site — there are hundreds — is
+unchanged, and blocking queries cost nothing: `measure_text`, `draw_text`'s
+dimensions, texture creation, camera maths and so on resolve with no round trip
+at all. This is the thing the rejected two-module port could not do: there every
+blocking call cost an engine tick, which is why its game logic ran at
+single-digit fps while its counter reported 60.
 
-[`Command::is_frame_local`](../src/engine/CoreLoop.rs) settles it, exhaustively,
-for all 92 variants:
-
-| | goes where | count |
-|---|---|---|
-| draws, camera state, `ClearBackground`, `NextFrame` | queued, run inside the frame | 35 |
-| queries, resource creation, object/physics mutation, audio, file loads | run immediately at push time | 57 |
-
-`CommandQueue::push` routes on it, so every existing `COMMAND_QUEUE.push(...)`
-call site — there are hundreds — is unchanged. Ordering stays correct for
-everything Python can observe, because an immediate command runs strictly before
-any command Python queues after it.
-
-Two consequences worth knowing:
-
-* **`DrawText` is the only command that both draws and answers.** In the browser
-  its two halves are separated: the measurement is taken immediately (it needs no
-  frame) and only the drawing is queued. The numbers are identical, not
-  approximate — macroquad derives the width from the same glyph advances as
-  `measure_text`, scaled by `font_scale * font_scale_aspect`, while height and
-  `offset_y` depend on `font_scale` alone and rotation affects none of them, so
-  applying the aspect afterwards is exact.
-* **Blocking queries cost nothing.** `measure_text`, texture creation, camera
-  maths and so on resolve on the caller's stack with no round trip at all. This
-  is the thing the rejected two-module port could not do: there every blocking
-  call cost an engine tick, which is why its game logic ran at single-digit fps
-  while its counter reported 60.
-
-### 6.3.1 Experimental: the offscreen frame (`PYROQUAD_WEB_OFFSCREEN=1`)
-
-The split has a cost: a query that depends on render state sees the state of
-the *last frame*, not of the commands Python sent just before it. `set_camera(c);
-camera_font_scale(20)` is the known case — `SetCamera` is queued, while
-`CameraFontScale` runs at once and reads the previous camera. `get_screen_data()`
-reads the canvas outside a frame and gets an empty image.
-
-With `PYROQUAD_WEB_OFFSCREEN=1` set before `activate_engine()`, every command
-except `NextFrame` runs at push time, in order. Nothing touches the canvas
-during Python's turn. The "screen" is a render target that pyroquad owns,
-so `begin_frame()`'s clear and reset have nothing to destroy:
+But macroquad brackets every frame with `begin_frame()` / `end_frame()`, and
+`begin_frame()` **clears the canvas and resets the draw list**, so anything drawn
+to the canvas between frames would be lost. Nothing is: during Python's turn
+the "screen" is a render target that pyroquad owns, so `begin_frame()`'s clear
+and reset have nothing to destroy:
 
 * `CameraManager` points the default camera, and every camera without a
   `render_target` of its own, at that target. It swaps only the pass, after
@@ -396,15 +366,16 @@ so `begin_frame()`'s clear and reset have nothing to destroy:
   `clear_background(BLACK)` clear the canvas.
 * `get_screen_data()` reads the target.
 
-`PYROQUAD_WEB_OFFSCREEN_MSAA` (default 4) matches the canvas' `antialias: true`.
-MSAA render targets need WebGL2, so asking for them switches the context to
-WebGL2. `PYROQUAD_WEB_WEBGL2=1` does the same for the split path. The target is
-built from raw miniquad/GL objects, not `render_target_ex`, because macroquad
-0.4.14 gives every render target a resolve attachment that miniquad resolves
-in `end_render_pass`, which runs once per draw call, and because miniquad
-0.4.8 can neither make a 24-bit depth buffer nor attach a multisampled one.
-`web/offscreen_bench/` holds the screenshots and the frame-time benchmark used
-to evaluate it.
+Because render state is applied in order, a query sees the commands Python sent
+just before it: `set_camera(c); camera_font_scale(20)` uses `c`.
+
+The target is 4x multisampled, matching the canvas' `antialias: true`. MSAA
+render targets need WebGL2, so the browser build always asks for a WebGL2
+context. The target is built from raw miniquad/GL objects, not
+`render_target_ex`, because macroquad 0.4.14 gives every render target a resolve
+attachment that miniquad resolves in `end_render_pass`, which runs once per draw
+call, and because miniquad 0.4.8 can neither make a 24-bit depth buffer nor
+attach a multisampled one.
 
 ### 6.4 The supporting pieces
 

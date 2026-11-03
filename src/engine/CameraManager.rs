@@ -81,7 +81,7 @@ pub fn set_default_camera(cam_memory: &mut CamMemory){
     #[allow(clippy::disallowed_methods)]
     mq::set_default_camera();
 
-    // In the browser's offscreen mode "the screen" is a render target; see crate::web.
+    // In the browser "the screen" is a render target; see crate::web.
     #[cfg(target_os = "emscripten")]
     crate::web::redirect_screen_pass();
 }

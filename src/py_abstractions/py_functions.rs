@@ -80,10 +80,9 @@ pub fn activate_engine( conf: Option<Config>) -> PyResult<()>{
 
         crate::web::set_vsync(conf.swap_interval != Some(0));
 
+        // The offscreen frame is multisampled, which needs WebGL2. See `crate::web`.
         let mut macroConf = macroConf;
-        if crate::web::wants_webgl2() {
-            macroConf.miniquad_conf.platform.webgl_version = macroquad::miniquad::conf::WebGLVersion::WebGL2;
-        }
+        macroConf.miniquad_conf.platform.webgl_version = macroquad::miniquad::conf::WebGLVersion::WebGL2;
 
         ENGINE_CURRENTLY_ACTIVE.store(true, Ordering::SeqCst);
 
@@ -358,15 +357,10 @@ pub fn next_frame(py: Python<'_>, physics_step: Option<f32>) -> PyResult<()>{
     // through JSPI rather than blocking it. See `src/web/mod.rs`.
     #[cfg(target_os = "emscripten")]
     {
-        let offscreen = crate::web::offscreen_active();
-        if offscreen {
-            crate::web::offscreen_flush();
-        }
+        crate::web::offscreen_flush();
         crate::web::frame_now();
         receiver.recv()?;
-        if offscreen {
-            crate::web::offscreen_after_frame();
-        }
+        crate::web::offscreen_after_frame();
         crate::web::frame_yield(py)?;
         return Ok(());
     }
@@ -387,53 +381,14 @@ pub fn next_frame(py: Python<'_>, physics_step: Option<f32>) -> PyResult<()>{
 pub fn draw_text(text: String, x: f32, y: f32, color: Color, font_size: u16,
     font: Option<Font>, font_scale: f32, font_scale_aspect: f32, rotation: f32) -> PyResult<TextDimensions>{
 
-    // `DrawText` is the only command that both draws *and* owes Python an
-    // answer, and in the browser those two halves cannot happen at the same
-    // time: the drawing has to wait for the next frame, the answer cannot.
-    //
-    // So the measurement is taken now.
-    #[cfg(target_os = "emscripten")]
-    {
-        let (m_sender, m_receiver) = PChannel::PChannel::channel();
-        COMMAND_QUEUE.push(Command::MeasureText {
-            text: text.clone(),
-            font: font.clone().map(Into::into),
-            font_size,
-            font_scale,
-            sender: m_sender,
-        });
-        let measured = m_receiver.recv()?;
-
-        let (sender, _receiver) = PChannel::PChannel::channel();
-        COMMAND_QUEUE.push(Command::DrawText {
-            text,
-            x,
-            y,
-            color: color.into(),
-            font: font.map(Into::into),
-            font_size,
-            font_scale,
-            font_scale_aspect,
-            rotation,
-            sender,
-        });
-
-        let mut dimensions: TextDimensions = measured.into();
-        dimensions.width *= font_scale_aspect;
-        return Ok(dimensions);
-    }
-
-    #[allow(unreachable_code)]
-    {
     let (sender, receiver) = PChannel::PChannel::channel();
-    COMMAND_QUEUE.push(Command::DrawText { 
-        text, 
-        x, 
-        y, 
-        color: color.into(), 
+    COMMAND_QUEUE.push(Command::DrawText {
+        text,
+        x,
+        y,
+        color: color.into(),
         font: font.map(Into::into), font_size, font_scale, font_scale_aspect, rotation, sender });
     Ok(receiver.recv()?.into())
-    }
 }
 
 #[pyfunction]

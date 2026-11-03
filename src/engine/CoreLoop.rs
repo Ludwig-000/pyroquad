@@ -315,7 +315,7 @@ pub enum Command {
 ///
 /// Natively this is a plain queue that the engine thread drains. On Emscripten
 /// there is no engine thread, so `push` also decides *when* a command runs:
-/// frame-local commands wait for the next frame, everything else is executed
+/// `NextFrame` waits for the frame it asks for, everything else is executed
 /// immediately, on the caller's stack. See [`crate::web`].
 pub struct CommandQueue {
     inner: SegQueue<Command>,
@@ -327,11 +327,8 @@ impl CommandQueue {
     }
 
     pub fn push(&self, command: Command) {
-        // With the offscreen frame (see `crate::web`) draws no longer need a
-        // frame either; only `NextFrame` itself still waits for one.
         #[cfg(target_os = "emscripten")]
-        if (!command.is_frame_local()
-            || (crate::web::offscreen_active() && !matches!(command, Command::NextFrame { .. })))
+        if !matches!(command, Command::NextFrame { .. })
             && crate::py_abstractions::py_functions::ENGINE_CURRENTLY_ACTIVE
                 .load(std::sync::atomic::Ordering::Relaxed)
         {
@@ -339,13 +336,13 @@ impl CommandQueue {
             // into macroquad without a context. Leaving the command in the queue
             // instead lets `PReceiver::recv` report the usual "you forgot
             // activate_engine()" error.
-            crate::web::run_query_now(command);
+            crate::web::run_now(command);
             return;
         }
 
-        // Also on Emscripten: frame-local commands (and anything sent before
-        // activate_engine()) have to wait here for the next frame. Dropping them
-        // would drop their reply sender too, failing the caller with SendError.
+        // Also on Emscripten: `NextFrame` (and anything sent before
+        // activate_engine()) has to wait here for the next frame. Dropping it
+        // would drop its reply sender too, failing the caller with SendError.
         self.inner.push(command);
     }
 
@@ -356,121 +353,6 @@ impl CommandQueue {
 
 pub static COMMAND_QUEUE: LazyLock<CommandQueue> = LazyLock::new(CommandQueue::new);
 
-impl Command {
-    /// Whether this command has to run *inside* a macroquad frame.
-    ///
-    /// macroquad resets the draw list in `begin_frame()`, so anything that puts
-    /// geometry on the screen - or changes render state those draws depend on,
-    /// like the camera - only makes sense between a `begin_frame()` and the
-    /// matching `end_frame()`. Everything else can run at any time.
-    ///
-    /// Natively the distinction is irrelevant: one thread drains one queue in
-    /// order. In the browser the engine shares Python's thread, and a command
-    /// that owes Python an answer cannot wait for a frame that will only happen
-    /// once Python is unblocked - so the two kinds take different paths. See
-    /// [`crate::web`].
-    ///
-    /// Written out exhaustively on purpose: a new [`Command`] should not compile
-    /// until someone has decided which side it belongs on.
-    #[cfg(target_os = "emscripten")]
-    pub fn is_frame_local(&self) -> bool {
-        match self {
-            Command::GlEnum(..)
-            | Command::DrawRectangleFromPyClass(..)
-            | Command::DrawCircleFromPyClass(..)
-            | Command::DrawAll3DObjects(..)
-            | Command::DrawObjectNow(..)
-            | Command::DrawArc { .. }
-            | Command::DrawCubeWires { .. }
-            | Command::DrawCylinder { .. }
-            | Command::DrawCylinderWires { .. }
-            | Command::DrawEllipse { .. }
-            | Command::DrawEllipseLines { .. }
-            | Command::DrawHexagon { .. }
-            | Command::DrawLine3D { .. }
-            | Command::DrawLine { .. }
-            | Command::DrawAfflineParallelpiped { .. }
-            | Command::DrawAfflineParallogram { .. }
-            | Command::SetDefaultCamera(..)
-            | Command::DrawRect { .. }
-            | Command::DrawRectLines { .. }
-            | Command::DrawTriangle { .. }
-            | Command::DrawTriangleLines { .. }
-            | Command::DrawPlane { .. }
-            | Command::DrawGrid { .. }
-            | Command::DrawCube { .. }
-            | Command::DrawSkyBox { .. }
-            | Command::DrawPoly { .. }
-            | Command::DrawPolyLines { .. }
-            | Command::DrawText { .. }
-            | Command::DrawMultilineText { .. }
-            | Command::DrawTexture { .. }
-            | Command::ClearBackground { .. }
-            | Command::NextFrame { .. }
-            | Command::SetCamera { .. }
-            | Command::PushCameraState
-            | Command::PopCameraState => true,
-
-            Command::CreateMeshFromBytes { .. }
-            | Command::GetCustomMouseState { .. }
-            | Command::Camera2DWorldToScreen { .. }
-            | Command::Camera2DScreenToWorld { .. }
-            | Command::Camera2DToMatrix { .. }
-            | Command::MeasureText { .. }
-            | Command::BuildTextureAtlas
-            | Command::SetPcAssetFolder(..)
-            | Command::Touches(..)
-            | Command::TouchesLocal(..)
-            | Command::SimulateMouseWithTouch(..)
-            | Command::LoadTTFFOnt { .. }
-            | Command::PopulateFontCache { .. }
-            | Command::SetFontFilter { .. }
-            | Command::LoadTTFFontFromBytes { .. }
-            | Command::RequestNewScreenSize { .. }
-            | Command::IsQuitRequested(..)
-            | Command::PreventQuit
-            | Command::SetFullscreen(..)
-            | Command::TexImEnum(..)
-            | Command::PhysicsEnum(..)
-            | Command::ManuallyStepPhysics(..)
-            | Command::SetCollisionForObject { .. }
-            | Command::GetColissionObjects { .. }
-            | Command::DoesObjectCollide { .. }
-            | Command::SetDrawEachFrame { .. }
-            | Command::DeleteObject { .. }
-            | Command::GetObjectScale { .. }
-            | Command::GetObjectPos { .. }
-            | Command::GetObjectRotation { .. }
-            | Command::SetObjectScale { .. }
-            | Command::SetObjectPos { .. }
-            | Command::SetObjectRotation { .. }
-            | Command::CreateCube { .. }
-            | Command::CreateSphere { .. }
-            | Command::CreatePill { .. }
-            | Command::CreateCylinder { .. }
-            | Command::CreateMesh { .. }
-            | Command::DropThisItem(..)
-            | Command::LoadFile { .. }
-            | Command::LoadSound { .. }
-            | Command::LoadSoundFromBytes { .. }
-            | Command::PlaySound { .. }
-            | Command::PlaySoundOnce { .. }
-            | Command::SetSoundVolume { .. }
-            | Command::StopSound { .. }
-            | Command::RenderTargetMsaa { .. }
-            | Command::RenderTargetEx { .. }
-            | Command::GetTextCenter { .. }
-            | Command::ScreenDpiScale(..)
-            | Command::LoadImage { .. }
-            | Command::GetScreenData { .. }
-            | Command::SetCursorGrab(..)
-            | Command::ShowMouse(..)
-            | Command::ClearInputQueue
-            | Command::IsSimulatingMouseWithTouch(..)
-            | Command::CameraFontScale { .. } => false,
-        }
-    }
-}
 
 
 
