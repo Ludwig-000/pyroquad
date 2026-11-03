@@ -512,6 +512,59 @@ fn supported_render_target_params(mut params: mq::RenderTargetParams) -> mq::Ren
     params
 }
 
+const GL_DEPTH_STENCIL: u32 = 0x84F9;
+const GL_DEPTH24_STENCIL8: u32 = 0x88F0;
+const GL_DEPTH_STENCIL_ATTACHMENT: u32 = 0x821A;
+
+/// `mq::render_target_ex`, but with the depth attachment as a raw GL
+/// depth-stencil renderbuffer.
+///
+/// macroquad's own depth attachment is a miniquad `TextureFormat::Depth`
+/// texture, which breaks twice: miniquad 0.4.8 allocates it with the unsized
+/// `GL_DEPTH_COMPONENT` internal format, which WebGL2 rejects - the texture has
+/// no storage and the framebuffer is FRAMEBUFFER_INCOMPLETE_ATTACHMENT, so the
+/// target stays empty - and with `sample_count > 1` it is a renderbuffer that
+/// `new_render_pass_mrt` unwraps as a texture and panics. macroquad never hands
+/// that texture out, so a renderbuffer loses nothing.
+fn new_render_target(width: u32, height: u32, params: mq::RenderTargetParams) -> mq::RenderTarget {
+    let params = supported_render_target_params(params);
+    let render_target = mq::render_target_ex(width, height, mq::RenderTargetParams { depth: false, ..params });
+    if params.depth {
+        attach_depth_stencil(render_target.render_pass.raw_miniquad_id(), width, height, params.sample_count);
+    }
+    render_target
+}
+
+fn attach_depth_stencil(pass: miniquad::RenderPass, width: u32, height: u32, sample_count: i32) {
+    use miniquad::gl::*;
+
+    let ctx = unsafe { get_internal_gl() }.quad_context;
+    unsafe {
+        // miniquad does not expose a pass' GL framebuffer, but binds it in
+        // `begin_pass`.
+        ctx.begin_pass(Some(pass), miniquad::PassAction::Nothing);
+        let mut depth_stencil: u32 = 0;
+        glGenRenderbuffers(1, &mut depth_stencil);
+        glBindRenderbuffer(GL_RENDERBUFFER, depth_stencil);
+        if sample_count > 1 {
+            // Only reached with resolve support, i.e. WebGL2 / GL3.
+            glRenderbufferStorageMultisample(
+                GL_RENDERBUFFER, sample_count, GL_DEPTH24_STENCIL8, width as i32, height as i32,
+            );
+        } else {
+            // WebGL1 only knows the unsized spelling; WebGL2 maps it to DEPTH24_STENCIL8.
+            let format = if cfg!(target_arch = "wasm32") { GL_DEPTH_STENCIL } else { GL_DEPTH24_STENCIL8 };
+            glRenderbufferStorage(GL_RENDERBUFFER, format, width as i32, height as i32);
+        }
+        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, depth_stencil);
+        glBindRenderbuffer(GL_RENDERBUFFER, 0);
+        ctx.end_render_pass();
+        // With the framebuffer unbound this only drops the name: the attachment
+        // keeps the storage alive until macroquad deletes the framebuffer.
+        glDeleteRenderbuffers(1, &depth_stencil);
+    }
+}
+
 /// Executes exactly one command.
 ///
 /// Only a handful of arms ever `.await` - `NextFrame` and the asset loads.
@@ -1024,12 +1077,11 @@ pub async fn dispatch(command: Command, st: &mut EngineState) {
                 }
                 Command::RenderTargetMsaa{ width, height, sender } => {
                     let params = mq::RenderTargetParams { sample_count: 4, ..Default::default() };
-                    let render_target = mq::render_target_ex(width, height, supported_render_target_params(params));
+                    let render_target = new_render_target(width, height, params);
                     let _ = sender.send(PArc::new(render_target));
                 }
                 Command::RenderTargetEx{ width, height, params, sender } => {
-                    let params = supported_render_target_params(params.unwrap_or_default());
-                    let render_target = mq::render_target_ex(width, height, params);
+                    let render_target = new_render_target(width, height, params.unwrap_or_default());
                     let _ = sender.send(PArc::new(render_target));
                 }
                 Command::LoadSound { path ,sender} => {
