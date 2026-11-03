@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>pyroquad offscreen bench</title>
+<style>
+  body { margin: 8px; background: #101014; color: #cfd2d8; font: 12px/1.4 ui-monospace, Consolas, monospace; }
+  iframe { width: 960px; height: 600px; border: 0; display: block; }
+</style>
+</head>
+<body>
+<div id="status">starting</div>
+<div id="frame"></div>
+<script>
+// ?plan=demos|bench|smoke  &only=<substring of run names>
+// Runs every configuration in a fresh 960x600 iframe (one engine per Pyodide),
+// one after the other. Results land in web/offscreen_bench/out/ via serve_bench.py.
+const q = new URLSearchParams(location.search);
+const plan = q.get("plan") || "smoke";
+const only = q.get("only");
+
+// base: main as-is (WebGL1, canvas MSAA). split2: this branch, split path, but
+// on WebGL2 - the fair baseline for rt4, which needs WebGL2 for its MSAA.
+// rt1: offscreen without MSAA (stays on WebGL1, so no antialiasing at all).
+const MODES = [
+  { tag: "base",   pkg: "baseline",  offscreen: 0 },
+  { tag: "split2", pkg: "offscreen", offscreen: 0, webgl2: 1 },
+  { tag: "rt4",    pkg: "offscreen", offscreen: 1, msaa: 4 },
+  { tag: "rt1",    pkg: "offscreen", offscreen: 1, msaa: 1 },
+];
+
+const runs = [];
+if (plan === "smoke") {
+  runs.push({ name: "smoke_rt4", pkg: "offscreen", offscreen: 1, msaa: 4, script: "demo.py", demo: "shapes" });
+} else if (plan === "demos") {
+  for (const demo of ["shapes", "camfont", "3d", "skybox", "usert", "screendata"])
+    for (const dpr of [1, 2])
+      for (const m of MODES)
+        runs.push({ name: `demo_${demo}_${m.tag}_dpr${dpr}`, ...m, dpr, script: "demo.py", demo });
+} else if (plan === "bench") {
+  const reps = parseInt(q.get("reps") || "1");
+  for (let r = 0; r < reps; r++)
+    for (const scenario of ["2d", "3d", "cams"])
+      for (const dpr of [1, 2])
+        for (const m of MODES)
+          runs.push({ name: `bench_${scenario}_${m.tag}_dpr${dpr}_r${r}`, ...m, dpr, script: "bench.py", scenario,
+                      frames: q.get("frames") || 1000, finish: q.get("finish") || 1 });
+} else if (plan === "gpu") {
+  for (const scenario of ["2d", "3d", "cams"])
+    for (const dpr of [2, 3])
+      for (const m of MODES)
+        runs.push({ name: `gpu_${scenario}_${m.tag}_dpr${dpr}`, ...m, dpr, script: "bench.py", scenario,
+                    frames: q.get("frames") || 1000, sync: "readpixels" });
+}
+const todo = only ? runs.filter((r) => only.split(",").some((s) => r.name.includes(s))) : runs;
+
+const status = document.getElementById("status");
+const holder = document.getElementById("frame");
+window.__results = [];
+
+function runOne(cfg) {
+  return new Promise((resolve) => {
+    const iframe = document.createElement("iframe");
+    const timer = setTimeout(() => finish("timeout"), 300000);
+    function finish(msg) {
+      clearTimeout(timer);
+      window.removeEventListener("message", onMsg);
+      iframe.remove();
+      resolve(msg);
+    }
+    function onMsg(e) {
+      if (e.data && e.data.pqbDone && e.data.name === cfg.name) finish(e.data.msg);
+    }
+    window.addEventListener("message", onMsg);
+    iframe.src = "run.html?" + new URLSearchParams(cfg).toString();
+    holder.appendChild(iframe);
+  });
+}
+
+(async () => {
+  for (let i = 0; i < todo.length; i++) {
+    status.textContent = `[${i + 1}/${todo.length}] ${todo[i].name}`;
+    const t = performance.now();
+    const msg = await runOne(todo[i]);
+    window.__results.push({ name: todo[i].name, msg, seconds: Math.round((performance.now() - t) / 100) / 10 });
+  }
+  status.textContent = "DONE " + JSON.stringify(window.__results);
+  fetch("/__results/driver_" + plan + ".json", { method: "POST", body: JSON.stringify(window.__results) });
+})();
+</script>
+</body>
+</html>

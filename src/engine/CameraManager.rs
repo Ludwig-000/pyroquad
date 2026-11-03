@@ -80,14 +80,31 @@ pub fn set_default_camera(cam_memory: &mut CamMemory){
     cam_memory.push( &Camera::Camera2D(mq::Camera2D::default()));
     #[allow(clippy::disallowed_methods)]
     mq::set_default_camera();
+
+    // In the browser's offscreen mode "the screen" is a render target; see crate::web.
+    #[cfg(target_os = "emscripten")]
+    crate::web::redirect_screen_pass();
 }
 pub fn set_camera(cam_memory: &mut CamMemory, camera: Camera){
     cam_memory.push(&camera);
+
+    // The pass is swapped *after* set_camera, so the matrix is still the one
+    // macroquad builds for the screen (Camera2D flips y for render targets).
+    #[cfg(target_os = "emscripten")]
+    let targets_screen = match &camera{
+        Camera::Camera2D(cam)=> cam.render_target.is_none(),
+        Camera::Camera3D(cam)=> cam.render_target.is_none(),
+    };
 
     #[allow(clippy::disallowed_methods)]
     match camera{
         Camera::Camera2D(cam)=> mq::set_camera(&cam),
         Camera::Camera3D(cam)=> mq::set_camera(&cam),
+    }
+
+    #[cfg(target_os = "emscripten")]
+    if targets_screen {
+        crate::web::redirect_screen_pass();
     }
 }
 pub enum Camera{

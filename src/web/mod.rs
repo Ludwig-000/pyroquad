@@ -38,6 +38,25 @@
 //! is executed immediately by [`run_query_now`] at push time, off the Python
 //! stack. Ordering is preserved for everything Python can observe, because an
 //! immediate command runs strictly before any command Python queues after it.
+//!
+//! # The offscreen alternative (experimental)
+//!
+//! With `PYROQUAD_WEB_OFFSCREEN=1` in the environment at `activate_engine()`,
+//! the split goes away: every command except `NextFrame` is dispatched at push
+//! time, in order, on one path. That is possible because nothing is drawn to
+//! the screen during Python's turn any more - "the screen" is a pyroquad-owned
+//! render target (see [`OffscreenFrame`]), and macroquad's `begin_frame()` can
+//! clear and reset all it likes:
+//!
+//! * [`CameraManager`](crate::engine::CameraManager) points the default camera,
+//!   and every user camera without a render target of its own, at it.
+//! * `next_frame()` flushes the pending draws into it *before* the frame
+//!   ([`offscreen_flush`]), copies it to the canvas inside the frame
+//!   ([`offscreen_present`]), and clears it again afterwards
+//!   ([`offscreen_after_frame`]).
+//!
+//! `PYROQUAD_WEB_OFFSCREEN_MSAA` sets its sample count (default 4, which is what
+//! the canvas' `antialias: true` gives the split path).
 
 use std::cell::RefCell;
 use std::future::Future;
@@ -45,6 +64,7 @@ use std::pin::Pin;
 use std::task::{Context, Poll, RawWaker, RawWakerVTable, Waker};
 
 use macroquad::color::BLACK;
+use macroquad::miniquad;
 use macroquad::prelude as mq;
 use pyo3::prelude::*;
 
@@ -256,11 +276,20 @@ pub async fn engine_loop() {
 
                     let _ = sender.send(());
 
+                    let offscreen = offscreen_active();
+                    if offscreen {
+                        offscreen_present();
+                    }
+
                     mq::next_frame().await;
 
                     // 3d rendering is bugged if we don't clear. Belongs to the
-                    // frame we just started, so it goes after the yield.
-                    mq::clear_background(BLACK);
+                    // frame we just started, so it goes after the yield. The
+                    // offscreen path clears in `offscreen_after_frame` instead -
+                    // here it would wipe what Python already flushed into it.
+                    if !offscreen {
+                        mq::clear_background(BLACK);
+                    }
                 }
 
                 other => {
@@ -286,6 +315,383 @@ pub async fn engine_loop() {
 /// stack rather than inside a frame. See the module docs for why.
 pub fn run_query_now(command: Command) {
     with_state(|state| block_on(Box::pin(dispatch(command, state))));
+}
+
+// ---------------------------------------------------------------------------
+// The offscreen frame
+// ---------------------------------------------------------------------------
+
+/// The render target that stands in for the canvas while Python is running.
+///
+/// Built from raw miniquad objects rather than `mq::render_target_ex`, for two
+/// reasons. macroquad gives *every* render target a resolve attachment (even at
+/// `sample_count: 1`), and miniquad resolves in `end_render_pass` - which
+/// `QuadGl::draw` calls once per draw call, so that would be a full-size blit
+/// per draw call. And it keeps the copy to the canvas out of macroquad's draw
+/// list, so presenting touches no camera, material, viewport or depth state.
+struct OffscreenFrame {
+    width: u32,
+    height: u32,
+    sample_count: i32,
+    targets: Targets,
+    blit_pipeline: miniquad::Pipeline,
+    blit_bindings: miniquad::Bindings,
+    /// The pass that was active when [`offscreen_present`] took it away so that
+    /// `end_frame()`'s UI pass lands on the canvas.
+    saved_pass: Option<miniquad::RenderPass>,
+}
+
+/// The size-dependent half of [`OffscreenFrame`], rebuilt when the canvas resizes.
+struct Targets {
+    /// What draws are redirected into. Multisampled or not.
+    pass: miniquad::RenderPass,
+    /// What gets copied to the canvas: `pass`'s own color texture, or with MSAA
+    /// a single-sampled texture that [`OffscreenFrame::resolve`] blits into.
+    texture: miniquad::TextureId,
+    /// A raw GL depth-stencil renderbuffer attached to `pass`, because miniquad
+    /// 0.4.8 can do neither of the two things needed here: its `Depth` format is
+    /// 16 bit (the canvas has 24 bit + stencil, and pyroquad's default
+    /// `z_near`/`z_far` of 0.01/10000 z-fights badly at 16), and
+    /// `new_render_pass_mrt` unwraps a multisampled depth attachment as a
+    /// texture and panics.
+    depth_stencil: u32,
+    /// MSAA only: `(read_fb, draw_fb, resolve_pass)`. The resolve is done by
+    /// hand, once per frame, for the reason in the [`OffscreenFrame`] docs.
+    msaa: Option<(u32, u32, miniquad::RenderPass)>,
+}
+
+const GL_DEPTH_STENCIL: u32 = 0x84F9;
+const GL_DEPTH24_STENCIL8: u32 = 0x88F0;
+const GL_DEPTH_STENCIL_ATTACHMENT: u32 = 0x821A;
+
+const BLIT_VERTEX: &str = r#"#version 100
+attribute vec2 in_pos;
+varying highp vec2 uv;
+void main() {
+    uv = in_pos * 0.5 + 0.5;
+    gl_Position = vec4(in_pos, 0.0, 1.0);
+}
+"#;
+
+const BLIT_FRAGMENT: &str = r#"#version 100
+precision highp float;
+varying highp vec2 uv;
+uniform sampler2D tex;
+void main() {
+    gl_FragColor = texture2D(tex, uv);
+}
+"#;
+
+impl OffscreenFrame {
+    fn new(ctx: &mut dyn miniquad::RenderingBackend, sample_count: i32) -> Self {
+        use miniquad::*;
+
+        // One triangle that covers clip space. The canvas and the target share
+        // GL's bottom-left origin, so uv = position needs no flip.
+        let vertices: [f32; 6] = [-1.0, -1.0, 3.0, -1.0, -1.0, 3.0];
+        let indices: [u16; 3] = [0, 1, 2];
+        let vertex_buffer = ctx.new_buffer(
+            BufferType::VertexBuffer,
+            BufferUsage::Immutable,
+            BufferSource::slice(&vertices),
+        );
+        let index_buffer = ctx.new_buffer(
+            BufferType::IndexBuffer,
+            BufferUsage::Immutable,
+            BufferSource::slice(&indices),
+        );
+        let shader = ctx
+            .new_shader(
+                ShaderSource::Glsl { vertex: BLIT_VERTEX, fragment: BLIT_FRAGMENT },
+                ShaderMeta {
+                    uniforms: UniformBlockLayout { uniforms: vec![] },
+                    images: vec!["tex".to_string()],
+                },
+            )
+            .expect("offscreen blit shader");
+        let blit_pipeline = ctx.new_pipeline(
+            &[BufferLayout::default()],
+            &[VertexAttribute::new("in_pos", VertexFormat::Float2)],
+            shader,
+            PipelineParams::default(),
+        );
+
+        let (width, height) = physical_screen_size();
+        let targets = Targets::new(ctx, width, height, sample_count);
+        let texture = targets.texture;
+
+        Self {
+            width,
+            height,
+            sample_count,
+            targets,
+            blit_pipeline,
+            blit_bindings: Bindings {
+                vertex_buffers: vec![vertex_buffer],
+                index_buffer,
+                images: vec![texture],
+            },
+            saved_pass: None,
+        }
+    }
+
+    /// Follows the canvas. Returns the old pass if it was replaced.
+    fn fit_to_screen(&mut self, ctx: &mut dyn miniquad::RenderingBackend) -> Option<miniquad::RenderPass> {
+        let (width, height) = physical_screen_size();
+        if (width, height) == (self.width, self.height) {
+            return None;
+        }
+        let old = self.targets.pass;
+        self.targets.delete(ctx);
+        self.targets = Targets::new(ctx, width, height, self.sample_count);
+        self.width = width;
+        self.height = height;
+        self.blit_bindings.images[0] = self.targets.texture;
+        Some(old)
+    }
+
+    fn resolve(&self) {
+        use macroquad::miniquad::gl::*;
+
+        if let Some((read_fb, draw_fb, _)) = self.targets.msaa {
+            let (w, h) = (self.width as i32, self.height as i32);
+            unsafe {
+                glBindFramebuffer(GL_READ_FRAMEBUFFER, read_fb);
+                glBindFramebuffer(GL_DRAW_FRAMEBUFFER, draw_fb);
+                glBlitFramebuffer(0, 0, w, h, 0, 0, w, h, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+                // miniquad leaves the default framebuffer bound between passes
+                // and binds explicitly in begin_pass, so this is all it expects.
+                glBindFramebuffer(GL_FRAMEBUFFER, 0);
+            }
+        }
+    }
+
+    fn clear(&self, ctx: &mut dyn miniquad::RenderingBackend) {
+        let c = BLACK;
+        ctx.begin_pass(Some(self.targets.pass), miniquad::PassAction::clear_color(c.r, c.g, c.b, c.a));
+        ctx.end_render_pass();
+    }
+}
+
+impl Targets {
+    fn new(ctx: &mut dyn miniquad::RenderingBackend, width: u32, height: u32, sample_count: i32) -> Self {
+        use macroquad::miniquad::gl::*;
+        use miniquad::*;
+
+        // Nearest: the copy to the canvas is exactly 1:1.
+        let color_params = TextureParams {
+            width,
+            height,
+            min_filter: FilterMode::Nearest,
+            mag_filter: FilterMode::Nearest,
+            ..Default::default()
+        };
+        let color = ctx.new_render_texture(TextureParams { sample_count, ..color_params });
+        let pass = ctx.new_render_pass(color, None);
+        let pass_fb = framebuffer_of(ctx, pass);
+
+        let mut depth_stencil: u32 = 0;
+        unsafe {
+            glGenRenderbuffers(1, &mut depth_stencil);
+            glBindRenderbuffer(GL_RENDERBUFFER, depth_stencil);
+            if sample_count > 1 {
+                glRenderbufferStorageMultisample(
+                    GL_RENDERBUFFER, sample_count, GL_DEPTH24_STENCIL8, width as i32, height as i32,
+                );
+            } else {
+                // The WebGL1 spelling; WebGL2 maps it to DEPTH24_STENCIL8.
+                glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_STENCIL, width as i32, height as i32);
+            }
+            glBindFramebuffer(GL_FRAMEBUFFER, pass_fb);
+            glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, depth_stencil);
+            glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        }
+
+        if sample_count <= 1 {
+            return Self { pass, texture: color, depth_stencil, msaa: None };
+        }
+
+        let resolved = ctx.new_render_texture(color_params);
+        let resolve_pass = ctx.new_render_pass(resolved, None);
+        let draw_fb = framebuffer_of(ctx, resolve_pass);
+        Self { pass, texture: resolved, depth_stencil, msaa: Some((pass_fb, draw_fb, resolve_pass)) }
+    }
+
+    fn delete(&mut self, ctx: &mut dyn miniquad::RenderingBackend) {
+        // Deleting a pass deletes the attachments miniquad knows about.
+        ctx.delete_render_pass(self.pass);
+        if let Some((_, _, resolve_pass)) = self.msaa.take() {
+            ctx.delete_render_pass(resolve_pass);
+        }
+        unsafe { macroquad::miniquad::gl::glDeleteRenderbuffers(1, &self.depth_stencil) };
+    }
+}
+
+/// miniquad does not expose a pass' GL framebuffer, but binds it in
+/// `begin_pass`.
+fn framebuffer_of(ctx: &mut dyn miniquad::RenderingBackend, pass: miniquad::RenderPass) -> u32 {
+    use macroquad::miniquad::gl::*;
+
+    let mut fb: i32 = 0;
+    ctx.begin_pass(Some(pass), miniquad::PassAction::Nothing);
+    unsafe { glGetIntegerv(GL_FRAMEBUFFER_BINDING, &mut fb) };
+    ctx.end_render_pass();
+    fb as u32
+}
+
+/// The canvas' backing store in physical pixels - i.e. `high_dpi` already
+/// applied, see `pq_js_setup_canvas_size` in `shim.c`.
+fn physical_screen_size() -> (u32, u32) {
+    let (w, h) = miniquad::window::screen_size();
+    ((w as u32).max(1), (h as u32).max(1))
+}
+
+thread_local! {
+    static OFFSCREEN: RefCell<Option<OffscreenFrame>> = const { RefCell::new(None) };
+}
+
+fn with_offscreen<R>(f: impl FnOnce(&mut OffscreenFrame) -> R) -> Option<R> {
+    OFFSCREEN.with(|cell| cell.borrow_mut().as_mut().map(f))
+}
+
+/// Whether the offscreen path is running, i.e. whether every command is
+/// dispatched at push time. Only ever turns on in [`offscreen_begin`].
+pub fn offscreen_active() -> bool {
+    OFFSCREEN.with(|cell| cell.borrow().is_some())
+}
+
+fn env_flag(name: &str) -> bool {
+    std::env::var(name).is_ok_and(|v| v != "0" && !v.is_empty())
+}
+
+/// The sample count `PYROQUAD_WEB_OFFSCREEN` asks for, or `None` for the split
+/// path.
+fn offscreen_requested() -> Option<i32> {
+    if !env_flag("PYROQUAD_WEB_OFFSCREEN") {
+        return None;
+    }
+    let samples = std::env::var("PYROQUAD_WEB_OFFSCREEN_MSAA")
+        .ok()
+        .and_then(|v| v.parse::<i32>().ok())
+        .unwrap_or(4);
+    Some(samples.max(1))
+}
+
+/// Whether `activate_engine()` should ask for a WebGL2 context.
+///
+/// macroquad defaults to WebGL1, where the canvas gets its antialiasing from
+/// `antialias: true` but a render target cannot be multisampled at all
+/// (`renderbufferStorageMultisample` and `blitFramebuffer` are WebGL2-only - on
+/// WebGL1 the call throws in JS and takes the module down with it). So an MSAA
+/// offscreen target implies WebGL2. `PYROQUAD_WEB_WEBGL2` forces it for either
+/// path, which is what makes the split path comparable.
+pub fn wants_webgl2() -> bool {
+    env_flag("PYROQUAD_WEB_WEBGL2") || offscreen_requested().is_some_and(|samples| samples > 1)
+}
+
+/// Called once by `activate_engine()`, after the first frame. Turns the
+/// offscreen path on if `PYROQUAD_WEB_OFFSCREEN` asks for it.
+pub fn offscreen_begin() {
+    let Some(sample_count) = offscreen_requested() else {
+        return;
+    };
+
+    let frame = {
+        let ctx = unsafe { mq::get_internal_gl() }.quad_context;
+        let frame = OffscreenFrame::new(ctx, sample_count);
+        frame.clear(ctx);
+        frame
+    };
+    // Nothing has set a camera yet, so the active pass is the canvas.
+    unsafe { mq::get_internal_gl() }.quad_gl.render_pass(Some(frame.targets.pass));
+    OFFSCREEN.with(|cell| *cell.borrow_mut() = Some(frame));
+}
+
+/// Where the screen is while Python is running. `CameraManager` calls this
+/// after every camera change that targets the screen.
+pub fn redirect_screen_pass() {
+    if let Some(pass) = with_offscreen(|frame| frame.targets.pass) {
+        unsafe { mq::get_internal_gl() }.quad_gl.render_pass(Some(pass));
+    }
+}
+
+/// Before the frame: puts everything drawn this turn into the offscreen target.
+/// `begin_frame()` would otherwise drop it, since `QuadGl::reset` forgets
+/// unflushed draw calls.
+pub fn offscreen_flush() {
+    // push + pop is the public way to `perform_render_passes()` with the current
+    // camera and no state change.
+    crate::engine::CameraManager::push_camera_state();
+    crate::engine::CameraManager::pop_camera_state();
+}
+
+/// Inside the frame, from `NextFrame`: copies the offscreen target onto the
+/// canvas.
+fn offscreen_present() {
+    // Anything dispatched inside this frame (only commands queued before the
+    // target existed) still has to reach it before it is copied.
+    offscreen_flush();
+
+    let gl = unsafe { mq::get_internal_gl() };
+    let saved = gl.quad_gl.get_active_render_pass();
+    // `end_frame()` draws macroquad's UI with the active pass; it belongs on the
+    // canvas, as it would be natively with the default camera.
+    gl.quad_gl.render_pass(None);
+
+    with_offscreen(|frame| {
+        frame.saved_pass = saved;
+        frame.resolve();
+
+        let ctx = gl.quad_context;
+        ctx.begin_default_pass(miniquad::PassAction::Nothing);
+        ctx.apply_pipeline(&frame.blit_pipeline);
+        ctx.apply_bindings(&frame.blit_bindings);
+        ctx.draw(0, 3, 1);
+        ctx.end_render_pass();
+    });
+}
+
+/// After the frame, before Python's next turn: puts the camera back on the
+/// offscreen target (resized to the canvas if that changed) and clears it.
+pub fn offscreen_after_frame() {
+    let gl = unsafe { mq::get_internal_gl() };
+    let ctx = gl.quad_context;
+
+    let Some((saved, old_pass, pass)) = with_offscreen(|frame| {
+        let old_pass = frame.fit_to_screen(&mut *ctx);
+        (frame.saved_pass.take(), old_pass, frame.targets.pass)
+    }) else {
+        return;
+    };
+
+    // A camera state pushed before a resize still names the old pass; that one
+    // cannot be fixed from here.
+    let restored = match saved {
+        Some(p) if Some(p) == old_pass => Some(pass),
+        other => other,
+    };
+    gl.quad_gl.render_pass(restored);
+
+    // Natively `begin_frame()` clears the canvas and the engine then clears the
+    // active pass. Here the offscreen target plays the canvas.
+    if restored != Some(pass) {
+        with_offscreen(|frame| frame.clear(&mut *ctx));
+    }
+    mq::clear_background(BLACK);
+}
+
+/// `get_screen_data()` for the offscreen path: the canvas itself only holds a
+/// finished frame inside `frame_now()`, so read the target instead. Rows come
+/// out bottom-up, exactly like `mq::get_screen_data()`.
+pub fn offscreen_screen_data() -> Option<mq::Image> {
+    offscreen_flush();
+    with_offscreen(|frame| {
+        frame.resolve();
+        let ctx = unsafe { mq::get_internal_gl() }.quad_context;
+        let mut bytes = vec![0u8; frame.width as usize * frame.height as usize * 4];
+        ctx.texture_read_pixels(frame.targets.texture, &mut bytes);
+        mq::Image { bytes, width: frame.width as u16, height: frame.height as u16 }
+    })
 }
 
 // ---------------------------------------------------------------------------

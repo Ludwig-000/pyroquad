@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>pyroquad offscreen bench run</title>
+<style>
+  html, body { margin: 0; height: 100%; background: #101014; overflow: hidden; }
+  #glcanvas  { display: block; width: 100vw; height: 100vh; outline: none; }
+</style>
+</head>
+<body>
+<canvas id="glcanvas" tabindex="0"></canvas>
+<script src="../pyodide/pyodide.js"></script>
+<script>
+// One run: ?pkg=baseline|offscreen &script=demo.py|bench.py &offscreen=0|1
+//          &msaa=N &dpr=N &name=<result prefix> + script-specific params.
+(async () => {
+  const params = Object.fromEntries(new URLSearchParams(location.search));
+  globalThis.__PQB = params;
+
+  // Everything this run prints, posted as <name>.log.txt when it ends - the
+  // devtools console outlives page loads and Pyodide aborts skip `catch`.
+  const lines = [];
+  const origError = console.error.bind(console);
+  console.error = (...a) => { lines.push("E " + a.join(" ")); origError(...a); };
+  let posted = false;
+  const postLog = () => {
+    if (posted) return;
+    posted = true;
+    fetch("/__results/" + (params.name || "run") + ".log.txt", { method: "POST", body: lines.join("\n") });
+  };
+  setTimeout(postLog, parseInt(params.log_after || "240000"));
+  // A Pyodide fatal error (an aborted module) never reaches the `catch` below.
+  window.addEventListener("unhandledrejection", (e) => setTimeout(() => done("fatal: " + (e.reason && e.reason.message || e.reason)), 200));
+  const done = (msg) => {
+    lines.push("DONE " + msg);
+    postLog();
+    parent.postMessage({ pqbDone: true, name: params.name, msg }, "*");
+  };
+
+  // Pretend to be a high-DPI screen. shim.c latches devicePixelRatio when the
+  // canvas is set up, so this has to happen before activate_engine().
+  if (params.dpr) {
+    const dpr = parseFloat(params.dpr);
+    Object.defineProperty(window, "devicePixelRatio", { get: () => dpr, configurable: true });
+  }
+
+  globalThis.__pqbPost = (name, body) =>
+    fetch("/__results/" + name, { method: "POST", body });
+
+  // Wraps frame_yield so a frame can be captured while its drawing buffer is
+  // still intact (preserveDrawingBuffer is false). Call after activate_engine().
+  globalThis.__pqbHook = () => {
+    const P = globalThis.__PQ;
+    const orig = P.frame_yield.bind(P);
+    P.frame_yield = function () {
+      if (globalThis.__pqbCapture) {
+        const name = globalThis.__pqbCapture;
+        globalThis.__pqbCapture = null;
+        __pqbPost(name, P.canvas().toDataURL("image/png"));
+      }
+      return orig();
+    };
+  };
+
+  try {
+    const pyodide = await loadPyodide({
+      indexURL: "../pyodide/",
+      stdout: (s) => { lines.push("O " + s); console.log(s); },
+      stderr: (s) => console.error(s),
+    });
+    const buf = await (await fetch("pkg/" + (params.pkg || "offscreen") + ".zip", { cache: "no-store" })).arrayBuffer();
+    pyodide.unpackArchive(buf, "zip");
+    const src = await (await fetch(params.script, { cache: "no-store" })).text();
+    await pyodide.runPythonAsync(src);
+    done("ok");
+  } catch (e) {
+    console.error(e);
+    __pqbPost((params.name || "run") + ".error.txt", String(e && e.stack || e));
+    done("error: " + (e && e.message || e));
+  }
+})();
+</script>
+</body>
+</html>

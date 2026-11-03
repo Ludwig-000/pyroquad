@@ -373,6 +373,39 @@ Two consequences worth knowing:
   call cost an engine tick, which is why its game logic ran at single-digit fps
   while its counter reported 60.
 
+### 6.3.1 Experimental: the offscreen frame (`PYROQUAD_WEB_OFFSCREEN=1`)
+
+The split has a cost: a query that depends on render state sees the state of
+the *last frame*, not of the commands Python sent just before it. `set_camera(c);
+camera_font_scale(20)` is the known case — `SetCamera` is queued, while
+`CameraFontScale` runs at once and reads the previous camera. `get_screen_data()`
+reads the canvas outside a frame and gets an empty image.
+
+With `PYROQUAD_WEB_OFFSCREEN=1` set before `activate_engine()`, every command
+except `NextFrame` runs at push time, in order. Nothing touches the canvas
+during Python's turn. The "screen" is a render target that pyroquad owns,
+so `begin_frame()`'s clear and reset have nothing to destroy:
+
+* `CameraManager` points the default camera, and every camera without a
+  `render_target` of its own, at that target. It swaps only the pass, after
+  `set_camera`, so the matrix is the screen one (macroquad flips `Camera2D`'s y
+  for render targets).
+* `next_frame()` flushes pending draws into it, runs the frame — which copies
+  it to the canvas with a one-triangle blit — and afterwards restores the pass
+  and clears the target the way `begin_frame()` + the engine's
+  `clear_background(BLACK)` clear the canvas.
+* `get_screen_data()` reads the target.
+
+`PYROQUAD_WEB_OFFSCREEN_MSAA` (default 4) matches the canvas' `antialias: true`.
+MSAA render targets need WebGL2, so asking for them switches the context to
+WebGL2. `PYROQUAD_WEB_WEBGL2=1` does the same for the split path. The target is
+built from raw miniquad/GL objects, not `render_target_ex`, because macroquad
+0.4.14 gives every render target a resolve attachment that miniquad resolves
+in `end_render_pass`, which runs once per draw call, and because miniquad
+0.4.8 can neither make a 24-bit depth buffer nor attach a multisampled one.
+`web/offscreen_bench/` holds the screenshots and the frame-time benchmark used
+to evaluate it.
+
 ### 6.4 The supporting pieces
 
 `CoreLoop.rs` was refactored so both drivers can share the command handling:

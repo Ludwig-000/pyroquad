@@ -327,8 +327,11 @@ impl CommandQueue {
     }
 
     pub fn push(&self, command: Command) {
+        // With the offscreen frame (see `crate::web`) draws no longer need a
+        // frame either; only `NextFrame` itself still waits for one.
         #[cfg(target_os = "emscripten")]
-        if !command.is_frame_local()
+        if (!command.is_frame_local()
+            || (crate::web::offscreen_active() && !matches!(command, Command::NextFrame { .. })))
             && crate::py_abstractions::py_functions::ENGINE_CURRENTLY_ACTIVE
                 .load(std::sync::atomic::Ordering::Relaxed)
         {
@@ -990,6 +993,11 @@ pub async fn dispatch(command: Command, st: &mut EngineState) {
                     let _ = sender.send(result);
                 }
                 Command::GetScreenData { sender }=>{
+                    #[cfg(target_os = "emscripten")]
+                    if let Some(res) = crate::web::offscreen_screen_data() {
+                        let _ = sender.send(res);
+                        return;
+                    }
                     let res = mq::get_screen_data();
                     let _ = sender.send(res);
                 }
