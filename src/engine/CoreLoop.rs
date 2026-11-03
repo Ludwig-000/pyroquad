@@ -497,6 +497,21 @@ impl Default for EngineState {
     }
 }
 
+/// Drops what the GL backend can't do from render target params.
+///
+/// macroquad gives every target with `sample_count != 0` - the default is 1 - a
+/// resolve attachment, which miniquad resolves with glBlitFramebuffer at the end
+/// of each pass. That needs WebGL2 / GL3, so on WebGL1 (the default context in
+/// the browser) and GL2 the first draw into the target aborts. Without resolve
+/// support there is no MSAA either, so render straight into a plain texture.
+fn supported_render_target_params(mut params: mq::RenderTargetParams) -> mq::RenderTargetParams {
+    let features = unsafe { get_internal_gl() }.quad_context.info().features;
+    if !features.resolve_attachments {
+        params.sample_count = 0;
+    }
+    params
+}
+
 /// Executes exactly one command.
 ///
 /// Only a handful of arms ever `.await` - `NextFrame` and the asset loads.
@@ -1008,21 +1023,14 @@ pub async fn dispatch(command: Command, st: &mut EngineState) {
                     mq::show_mouse(i);
                 }
                 Command::RenderTargetMsaa{ width, height, sender } => {
-                    let render_target = mq::render_target_msaa(width, height);
+                    let params = mq::RenderTargetParams { sample_count: 4, ..Default::default() };
+                    let render_target = mq::render_target_ex(width, height, supported_render_target_params(params));
                     let _ = sender.send(PArc::new(render_target));
                 }
                 Command::RenderTargetEx{ width, height, params, sender } => {
-                    match params{
-                        Some(p) => {
-                            let render_target = mq::render_target_ex(width, height, p);
-                            let _ = sender.send(PArc::new(render_target));
-                        }
-                        None => {
-                            let render_target = mq::render_target_ex(width, height, mq::RenderTargetParams::default());
-                        let _ = sender.send(PArc::new(render_target));
-                        }
-                    }
-        
+                    let params = supported_render_target_params(params.unwrap_or_default());
+                    let render_target = mq::render_target_ex(width, height, params);
+                    let _ = sender.send(PArc::new(render_target));
                 }
                 Command::LoadSound { path ,sender} => {
                     let result = async {
