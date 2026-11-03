@@ -80,6 +80,11 @@ pub fn activate_engine( conf: Option<Config>) -> PyResult<()>{
 
         crate::web::set_vsync(conf.swap_interval != Some(0));
 
+        let mut macroConf = macroConf;
+        if crate::web::wants_webgl2() {
+            macroConf.miniquad_conf.platform.webgl_version = macroquad::miniquad::conf::WebGLVersion::WebGL2;
+        }
+
         ENGINE_CURRENTLY_ACTIVE.store(true, Ordering::SeqCst);
 
         macroquad::Window::from_config(macroConf, async move {
@@ -93,6 +98,7 @@ pub fn activate_engine( conf: Option<Config>) -> PyResult<()>{
 
         // initializes stuff
         crate::web::frame_now();
+        crate::web::offscreen_begin();
 
         return Ok(());
     }
@@ -352,8 +358,15 @@ pub fn next_frame(py: Python<'_>, physics_step: Option<f32>) -> PyResult<()>{
     // through JSPI rather than blocking it. See `src/web/mod.rs`.
     #[cfg(target_os = "emscripten")]
     {
+        let offscreen = crate::web::offscreen_active();
+        if offscreen {
+            crate::web::offscreen_flush();
+        }
         crate::web::frame_now();
         receiver.recv()?;
+        if offscreen {
+            crate::web::offscreen_after_frame();
+        }
         crate::web::frame_yield(py)?;
         return Ok(());
     }
