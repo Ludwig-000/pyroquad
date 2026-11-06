@@ -26,7 +26,7 @@ def cube_gen()-> list[Cube]:
                 Vec3.splat(10), 
                 charitable_color, 
                 None,
-                ColliderOptions.DYNAMIC(0,0.1,0.1,1)
+                Collider.DYNAMIC(0,0.1,0.1,1)
             )
         )
 
