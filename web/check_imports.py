@@ -3,7 +3,7 @@
     python web/check_imports.py target/wasm32-unknown-emscripten/release/_pyroquad.wasm
 
 Parses the side module's wasm import section and cross-references every name
-against the Pyodide distribution in `web/pyodide/`: the exports of
+against the Pyodide distribution in `pyodide/` (repo root): the exports of
 `pyodide.asm.wasm` plus the JS-library functions in `pyodide.asm.mjs`'s
 `wasmImports` object (which is what Emscripten's `resolveGlobalSymbol` actually
 consults at dlopen time). Anything left over must be supplied by
@@ -15,7 +15,7 @@ import re
 import sys
 import os
 
-DIST = os.path.join(os.path.dirname(os.path.abspath(__file__)), "pyodide")
+DIST = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "pyodide")
 PY_WASM = os.path.join(DIST, "pyodide.asm.wasm")
 PY_MJS = os.path.join(DIST, "pyodide.asm.mjs")
 

@@ -122,15 +122,12 @@ This is a Python game engine based on [macroquad](https://github.com/not-fl3/mac
 >
 >```bash
 >pyodide xbuildenv install 314.0.7   # the Pyodide that --features abi_314 targets
->python web/get_pyodide.py           # fetch that runtime into web/pyodide/ (once)
+>python web/get_pyodide.py           # fetch that runtime into pyodide/ (once; check_imports.py needs it)
 >
 >CARGO_TARGET_WASM32_UNKNOWN_EMSCRIPTEN_RUSTFLAGS="$(pyodide config get rustflags)" \
 >MATURIN_PYEMSCRIPTEN_PLATFORM_VERSION="$(pyodide config get pyodide_abi_version)" \
 >PYO3_CROSS_PYTHON_VERSION=3.14 \
 >  maturin build --release --target wasm32-unknown-emscripten --out dist --features abi_314
->
->python web/build_web.py   # stage dist/*wasm32.whl for the test page
->python web/serve.py       # http://127.0.0.1:8000/web/index.html?script=tests/test_rec.py
 >```
 >
 >The flags go in `CARGO_TARGET_<TARGET>_RUSTFLAGS`, never a bare `RUSTFLAGS`: this crate has

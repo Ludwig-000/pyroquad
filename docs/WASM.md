@@ -149,18 +149,10 @@ src/web/shim.c              the 30-odd platform functions (see §3)
 src/web/mod.rs              the Rust half: the single-threaded engine loop,
                             the JSPI yields, the query dispatch path (see §6)
 
-web/build_web.py            stages one artifact for the page: the wheel from
-                            dist/ if there is one, else the .so + the Python
-                            half zipped into web/pyroquad_pkg.zip
 web/check_imports.py        build gate: every import resolvable? (see §5)
-web/serve.py                threaded static dev server for the repo root
-web/index.html              loads Pyodide, installs the staged wheel through
-                            micropip (or unpacks the zip), runs the import
-                            smoke test - or ?script=test.py / ?script=test2.py
-                            to run one of the test scripts
-web/get_pyodide.py          fetches pyodide-core, plus micropip's wheel, which
-                            pyodide-core lists but does not ship
-web/pyodide/                stock pyodide-core 314.0.7, unmodified
+web/get_pyodide.py          fetches pyodide-core into pyodide/, the runtime
+                            check_imports.py resolves against
+pyodide/                    stock pyodide-core 314.0.7, unmodified
 ```
 
 Everything the browser needs from the rest of the crate is behind
@@ -207,12 +199,9 @@ Two details are load-bearing:
 * **`pyodide-build` does not run natively on Windows**, so the wheel is built on
   Linux, macOS or WSL. The path below is the Windows-friendly one.
 
-`python web/build_web.py` then copies the newest `dist/*wasm32.whl` to
-`web/pyroquad.whl`, and `web/index.html` installs *that* with micropip - the
-same path a user takes, so micropip rejects a mis-tagged wheel locally rather
-than in the wild. `web/get_pyodide.py` fetches micropip's own wheel for this:
-`pyodide-core` lists micropip in `pyodide-lock.json` but does not ship the file,
-and `loadPackage` resolves it against the page's `indexURL`.
+To try a wheel in a browser, `micropip.install()` its URL from a page like the
+one under "How to run in the browser" in the README - the same path a user
+takes, so micropip rejects a mis-tagged wheel locally rather than in the wild.
 
 ### The short loop: a bare side module
 
@@ -221,37 +210,26 @@ For iterating on the Rust side, skipping the wheel is faster and works anywhere.
 rustflags` returns above:
 
 ```bash
-# 1. the side module
 RUSTFLAGS="-C link-arg=-sSIDE_MODULE=2" PYO3_CROSS_PYTHON_VERSION=3.14 \
   cargo build --target wasm32-unknown-emscripten --release --features abi_314
 ```
 
-```bash
-# 2. stage it for the page (falls back to the zip when dist/ has no wheel)
-python web/build_web.py
-```
-
-```bash
-# 3. serve, then open one of
-#      http://127.0.0.1:8000/web/index.html                 import smoke test
-#      http://127.0.0.1:8000/web/index.html?script=test.py
-#      http://127.0.0.1:8000/web/index.html?script=test2.py the example game
-python web/serve.py
-```
+That writes `target/wasm32-unknown-emscripten/release/_pyroquad.wasm`; Pyodide
+imports it as `pyroquad/_pyroquad.so` next to the Python half from
+`src/python/pyroquad/`.
 
 `emcc` is found by `build.rs` via `$EMCC`, then `$EMSDK`, then the project-local
 `emsdk/` (the same one `.cargo/config.toml` points the linker at), then PATH.
 No emsdk activation step is needed. This path uses whatever emsdk is on hand
 rather than the one Pyodide was built with; §3 is why that skew is tolerable.
 
-A plain static server is enough — this port uses **JSPI**, not
-`SharedArrayBuffer`, so no COOP/COEP is required. (`serve.py` sends the headers
-anyway; they are harmless.)
+Any plain static server can host it - this port uses **JSPI**, not
+`SharedArrayBuffer`, so no COOP/COEP headers are required.
 
 ### Verifying a build
 
 `web/check_imports.py` parses the built `.wasm`'s import section and
-cross-references every name against `web/pyodide/pyodide.asm.wasm`'s exports and
+cross-references every name against `pyodide/pyodide.asm.wasm`'s exports and
 `pyodide.asm.mjs`'s `wasmImports` object — the same table Emscripten's
 `resolveGlobalSymbol` consults at dlopen time. It exits non-zero on anything
 unresolved, so it works as a build gate — which is exactly how CI uses it, on

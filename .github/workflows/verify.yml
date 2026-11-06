@@ -123,7 +123,7 @@ jobs:
         id: pyodide-cache
         uses: actions/cache@v4
         with:
-          path: web/pyodide
+          path: pyodide
           key: pyodide-${{ hashFiles('web/get_pyodide.py') }}
 
       - name: Fetch the Pyodide runtime
