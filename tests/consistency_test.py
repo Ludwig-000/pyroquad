@@ -18,6 +18,8 @@ Usage (run from anywhere; paths are resolved relative to this file):
                                                   e.g. one dumped on Windows, one on Linux.
 
 CI (.github/workflows/consistency.yml, every push - warning-only for now):
+    --ci            = --warn-only --github, run in a supervised child process so
+                    that even a native crash (abort/segfault) becomes a warning
     --warn-only     never exit non-zero; crashes/hangs still write a partial --dump
     --github        log groups + one warning annotation per platform
     --report BASELINE "Label=dump.json" ...
@@ -192,6 +194,9 @@ class Recorder:
         """
         global _last_key, _last_time
         _last_key, _last_time = self._key(key), time.time()
+        stream_write({"at": _last_key})
+        if _last_key == os.environ.get("CONSISTENCY_SELFTEST_ABORT_AT"):
+            os.abort()  # self-test of --ci crash handling: a native abort, like an engine crash
         if TRACE:
             say("  .. " + self._key(key))
         if IS_WEB and self._key(key) in WEB_HANGS:
@@ -220,11 +225,13 @@ class Recorder:
         if k in self.data:
             raise RuntimeError(f"duplicate key {k}")
         self.data[k] = entry
+        stream_write({"k": k, "e": entry})
         return value
 
     def info(self, key, value):
         """Recorded but never compared (environment, hashes)."""
         self.data[self._key(key)] = {"info": norm(value)}
+        stream_write({"k": self._key(key), "e": self.data[self._key(key)]})
 
 
 rec = Recorder()
@@ -259,6 +266,16 @@ def progress(label: str):
     """Mark progress inside long probes (watchdog / browser diagnostics)."""
     global _last_key, _last_time
     _last_key, _last_time = label, time.time()
+    stream_write({"at": label})
+
+
+_stream = None  # --stream PATH: every entry is appended as a JSON line, flushed
+
+
+def stream_write(obj: dict):
+    if _stream is not None:
+        _stream.write(json.dumps(obj, ensure_ascii=False) + "\n")
+        _stream.flush()
 
 
 def start_watchdog():
@@ -1941,6 +1958,7 @@ def run_all() -> dict:
             p.next_frame(None)
 
     _screen_now[:] = [p.screen_width(), p.screen_height()]
+    stream_write({"screen": list(_screen_now)})
 
     with rec.section("env"):
         probe_environment(p)
@@ -2105,9 +2123,21 @@ def evaluate(base: dict, actual: dict, canvas=None, github=False) -> int:
                           f"{crashed}. {n} of the {len(actual) - 1} recorded entries differ from {bl}. "
                           "Not a build failure.")
         elif n:
+            shown = []
+            for k in failed[:6]:
+                e, a = base.get(k, {}).get("v"), actual.get(k, {}).get("v")
+                if isinstance(e, list) and len(e) > 4:  # grids: just name them
+                    shown.append(k)
+                else:
+                    shown.append(f"{k}: {_short(e, 40)} -> {_short(a, 40)}")
+            more = f"\n(+{len(failed) - len(shown)} more)" if len(failed) > len(shown) else ""
             gh_annotation("warning", f"Consistency: {al} differs from {bl}",
                           f"{n} of {entries} entries differ - {areas(failed)}. Not a build failure; "
-                          "the 'Consistency report' job summary lists every difference.")
+                          "the 'Consistency report' job summary lists every difference.\n"
+                          + "\n".join(shown) + more)
+        else:
+            gh_annotation("notice", f"Consistency: {al} matches {bl}",
+                          f"All {entries} entries match the baseline.")
     else:
         say("\n".join(lines))
         say("\n" + status)
@@ -2194,6 +2224,52 @@ def report(baseline_path: str, runs: list[tuple[str, str]], github: bool) -> str
     return text
 
 
+def supervise(args: list[str]) -> int:
+    """--ci: run the test in a child process. A native crash (abort, segfault)
+    kills the process before Python can report anything, so the child streams
+    every entry to a file and this parent turns a dead child into a partial
+    fingerprint + a warning instead of a bare non-zero exit."""
+    import signal
+    import subprocess
+    import tempfile
+    child_args = [a for a in args if a != "--ci"] + ["--warn-only", "--github"]
+    fd, stream_path = tempfile.mkstemp(prefix="consistency_", suffix=".jsonl")
+    os.close(fd)
+    cmd = [sys.executable, os.path.abspath(__file__)] + child_args + ["--stream", stream_path]
+    sys.stdout.flush()
+    code = subprocess.call(cmd)
+    if code == 0:
+        os.remove(stream_path)
+        return 0
+    try:
+        sig = signal.Signals(-code).name if code < 0 else (signal.Signals(code - 128).name if code > 128 else None)
+    except ValueError:
+        sig = None
+    data, last = {}, "<before the first probe>"
+    with open(stream_path, encoding="utf-8") as f:
+        for line in f:
+            try:
+                obj = json.loads(line)
+            except ValueError:
+                continue  # a line cut off by the crash
+            if "at" in obj:
+                last = obj["at"]
+            elif "k" in obj:
+                data[obj["k"]] = obj["e"]
+            elif "screen" in obj:
+                _screen_now[:] = obj["screen"]
+    os.remove(stream_path)
+    how = f"signal {sig}" if sig else (f"exit code {code:#x}" if code > 0xFFFF else f"exit code {code}")
+    reason = f"the process died ({how}) during '{last}'"
+    print(f"\nCRASH: {reason} - {len(data)} entries were recorded before that", flush=True)
+    rec.data = data
+    OPTS["github"] = True
+    if "--dump" in args:
+        OPTS["dump"] = os.path.abspath(args[args.index("--dump") + 1])
+    report_crash(reason)
+    return 0
+
+
 def _canvas_flag(args):
     if "--canvas" in args:
         return True
@@ -2203,8 +2279,12 @@ def _canvas_flag(args):
 
 
 def main(argv: list[str]) -> int:
-    global IMAGES_DIR, LAST_RESULT_JSON
+    global IMAGES_DIR, LAST_RESULT_JSON, _stream
     args = list(argv)
+    if "--ci" in args and not IS_WEB:
+        return supervise(args)
+    if "--stream" in args:
+        _stream = open(args[args.index("--stream") + 1], "w", encoding="utf-8")
     OPTS["warn_only"] = "--warn-only" in args
     OPTS["github"] = "--github" in args
     fail_code = (lambda code: 0) if OPTS["warn_only"] else (lambda code: code)

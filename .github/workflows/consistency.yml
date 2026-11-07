@@ -90,7 +90,10 @@ jobs:
         timeout-minutes: 15
         shell: bash
         run: |
-          ARGS="tests/consistency_test.py --warn-only --github --dump consistency-${{ matrix.id }}.json --images frames-${{ matrix.id }}"
+          # --ci: warning-only + GitHub output, and the test runs in a supervised
+          # child process so even a native crash (abort/segfault) ends up as a
+          # warning with a partial fingerprint instead of a bare exit code.
+          ARGS="tests/consistency_test.py --ci --dump consistency-${{ matrix.id }}.json --images frames-${{ matrix.id }}"
           if [ "$RUNNER_OS" = "Linux" ]; then
             pulseaudio -D --exit-idle-time=-1 || true
             xvfb-run -a -s "-screen 0 1024x768x24" python $ARGS
