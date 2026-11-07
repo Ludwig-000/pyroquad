@@ -35,6 +35,7 @@ class PlayerCamera:
     def update(self):
         r"""run at the start of every frame.
         This call is a replacement for setting the 3D camera."""
+
         delta_time = get_delta_time()
         keys = get_keys_down()
         currentMousePos = get_mouse_position()

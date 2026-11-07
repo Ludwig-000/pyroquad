@@ -44,6 +44,7 @@ crate::implement_check_collision3D!(Cylinder);
 crate::implement_set_collider3D!(Cylinder);
 crate::implement_tick3D!(Cylinder,  r#"Cylinder()"#);
 crate::implement_manual_drawing_options3D!(Cylinder,  r#"Cylinder()"#);
+crate::implement_rotate_around3D!(Cylinder,  r#"Cylinder()"#);
 crate::implement_remove_tick3D!(Cylinder);
 crate::implement_Drop3D!(Cylinder);
 

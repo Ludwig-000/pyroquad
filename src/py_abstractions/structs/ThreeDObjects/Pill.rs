@@ -46,6 +46,7 @@ crate::implement_check_collision3D!(Pill);
 crate::implement_set_collider3D!(Pill);
 crate::implement_tick3D!(Pill,  r#"Pill()"#);
 crate::implement_manual_drawing_options3D!(Pill,  r#"Pill()"#);
+crate::implement_rotate_around3D!(Pill,  r#"Pill()"#);
 crate::implement_remove_tick3D!(Pill);
 crate::implement_Drop3D!(Pill);
 

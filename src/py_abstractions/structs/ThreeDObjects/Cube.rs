@@ -47,6 +47,7 @@ crate::implement_tick3D!(Cube,  r#"Cube()"#);
 crate::implement_remove_tick3D!(Cube);
 crate::implement_Drop3D!(Cube);
 crate::implement_manual_drawing_options3D!(Cube,  r#"Cube()"#);
+crate::implement_rotate_around3D!(Cube,  r#"Cube()"#);
 
 #[pymethods]
 impl Cube {
@@ -107,5 +108,25 @@ impl Cube {
         drop(cube_ref);
 
         Ok(cube_handle)
+    }
+
+    /// defining a cube by its center can be annoying, so this allows for an alternate constructor.
+    /// x1,y1,z1 and x2,y2,z2 are two opposite corners of the cube.
+    /// The order of the corners does not matter, the cube always spans the space between them.
+    #[staticmethod]
+    #[pyo3(signature = (x1=0., y1=0., z1=0., x2=1., y2=1., z2=1., color = Color::WHITE(), texture=None, collider_type = Collider::NONE()))]
+    pub fn from_xyz(
+        py: Python<'_>,
+        x1: f32, y1: f32, z1: f32,
+        x2: f32, y2: f32, z2: f32,
+        color: Color,
+        texture: Option<Texture2D>,
+        collider_type: Collider,
+    ) -> PyResult<Py<Cube>> {
+        let position = Vec3::const_new((x1 + x2) / 2.0, (y1 + y2) / 2.0, (z1 + z2) / 2.0);
+        // abs, so swapped corners don't produce a negative (inside-out) scale.
+        let scale = Vec3::const_new((x2 - x1).abs(), (y2 - y1).abs(), (z2 - z1).abs());
+
+        Cube::new(py, position, Vec3::ZERO(), scale, color, texture, collider_type)
     }
 }

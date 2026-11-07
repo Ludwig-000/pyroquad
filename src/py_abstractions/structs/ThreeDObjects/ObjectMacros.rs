@@ -211,6 +211,66 @@ macro_rules! implement_basic_setter_methods3D {
 
 
 #[macro_export]
+macro_rules! implement_rotate_around3D {
+    ($name:ident,  $py_constructor:expr) => {
+        paste::paste! {
+
+            #[pymethods]
+            impl $name {
+
+#[doc =
+"
+Rotates the " $name " around an arbitrary point in world space, instead of its own center.
+'rotation' is applied on top of the current transform and uses the same convention as '" $name ".rot'
+(euler angles in radians, XYZ order).
+
+If 'rotate_object' is True, the " $name " also turns with the rotation, as if it were rigidly
+attached to 'origin'. If False, only its position orbits around 'origin' and its rotation stays unchanged.
+
+Example:
+
+```
+...# orbit around the world origin, always facing the same side towards it.
+>>>my" $name " = " $py_constructor "
+>>>my" $name ".pos = Vec3(5, 0, 0)
+>>>while True:
+...    my" $name ".rotate_around(Vec3.ZERO(), Vec3(0, get_delta_time(), 0))
+...    next_frame()
+```
+"
+]
+                #[pyo3(signature = (origin, rotation, rotate_object = true))]
+                pub fn rotate_around(&mut self, origin: Vec3, rotation: Vec3, rotate_object: bool) -> PyResult<()> {
+                    use macroquad::prelude as mq;
+
+                    let origin: mq::Vec3 = origin.into();
+                    let rotation: mq::Vec3 = rotation.into();
+                    let pos: mq::Vec3 = self.pos()?.into();
+
+                    let delta = mq::Quat::from_euler(mq::EulerRot::XYZ, rotation.x, rotation.y, rotation.z);
+
+                    let new_pos = origin + delta * (pos - origin);
+                    self.set_pos(new_pos.into());
+
+                    if rotate_object {
+                        let rot: mq::Vec3 = self.rot()?.into();
+                        let current = mq::Quat::from_euler(mq::EulerRot::XYZ, rot.x, rot.y, rot.z);
+                        let (x, y, z) = (delta * current).normalize().to_euler(mq::EulerRot::XYZ);
+                        self.set_rot(mq::vec3(x, y, z).into());
+                    }
+
+                    Ok(())
+                }
+            }
+        }
+
+    };
+}
+
+
+
+
+#[macro_export]
 macro_rules! implement_check_collision3D {
     ($name:ident) => {
         paste::paste! {
