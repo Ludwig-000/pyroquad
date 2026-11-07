@@ -1,0 +1,206 @@
+name: Consistency
+
+# Runs tests/consistency_test.py on every platform and compares each one against
+# tests/consistency_baseline.json (see the docstring of that file).
+#
+# WARNING-ONLY for now: the test runs with --warn-only and every test step is
+# continue-on-error, so a difference - or even a platform that cannot run the
+# engine at all - shows up as a warning annotation and in the "Consistency
+# report" job summary, never as a failed build.
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+    branches: ["**"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: consistency-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  native:
+    name: ${{ matrix.label }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { os: ubuntu-latest, id: linux, label: Linux }
+          - { os: windows-latest, id: windows, label: Windows }
+          - { os: macos-latest, id: macos, label: macOS }
+    env:
+      CONSISTENCY_LABEL: ${{ matrix.label }}
+      RUST_BACKTRACE: 1
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Rust Cache
+        uses: Swatinem/rust-cache@v2
+        with:
+          key: consistency-${{ matrix.id }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install Linux Dependencies
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          # miniquad deps + xvfb (virtual display, Mesa llvmpipe GL) + pulseaudio (audio device)
+          sudo apt-get install -y libasound2-dev libx11-dev libxi-dev libgl1-mesa-dev libxcursor-dev \
+            libxinerama-dev libxrandr-dev xvfb pulseaudio
+
+      # GitHub's Windows runners only offer GDI's OpenGL 1.1, which miniquad
+      # can't use. Mesa's opengl32.dll placed next to python.exe wins the DLL
+      # search order, giving the process a software (llvmpipe) GL 4.x.
+      - name: Software OpenGL for Windows (Mesa llvmpipe)
+        if: runner.os == 'Windows'
+        continue-on-error: true
+        shell: pwsh
+        run: |
+          $ver = "24.2.5"
+          Invoke-WebRequest "https://github.com/pal1000/mesa-dist-win/releases/download/$ver/mesa3d-$ver-release-msvc.7z" -OutFile mesa.7z
+          7z x mesa.7z -omesa -y | Out-Null
+          $pydir = Split-Path (Get-Command python).Source
+          Copy-Item mesa\x64\*.dll $pydir -Force
+          "GALLIUM_DRIVER=llvmpipe" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+
+      - name: Build and Install pyroquad
+        continue-on-error: true
+        shell: bash
+        run: |
+          python -m pip install "maturin>=1.9,<2"
+          maturin build --release --features abi_310 --out dist -i python
+          python -m pip install --no-index --find-links dist pyroquad
+
+      - name: Consistency Test
+        continue-on-error: true
+        timeout-minutes: 15
+        shell: bash
+        run: |
+          ARGS="tests/consistency_test.py --warn-only --github --dump consistency-${{ matrix.id }}.json --images frames-${{ matrix.id }}"
+          if [ "$RUNNER_OS" = "Linux" ]; then
+            pulseaudio -D --exit-idle-time=-1 || true
+            xvfb-run -a -s "-screen 0 1024x768x24" python $ARGS
+          else
+            python $ARGS
+          fi
+
+      - name: Upload Fingerprint and Frames
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: consistency-${{ matrix.id }}
+          path: |
+            consistency-${{ matrix.id }}.json
+            frames-${{ matrix.id }}/
+          if-no-files-found: ignore
+
+  # The browser: builds the wasm module the way run_web.bat does, then runs the
+  # test page in headless Chromium (WebGL2 via SwiftShader) - tests/web_ci_runner.py.
+  wasm:
+    name: Browser (wasm)
+    runs-on: ubuntu-latest
+    timeout-minutes: 75
+    env:
+      CONSISTENCY_LABEL: Browser (wasm)
+      RUST_BACKTRACE: 1
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-unknown-emscripten
+
+      # The Emscripten version run_web.bat is used with locally (docs/WASM.md).
+      - name: Install Emscripten
+        uses: mymindstorm/setup-emsdk@v14
+        with:
+          version: 6.0.8
+          actions-cache-folder: emsdk-cache
+
+      - name: Rust Cache
+        uses: Swatinem/rust-cache@v2
+        with:
+          key: consistency-wasm
+
+      - name: Cache the Pyodide runtime
+        id: pyodide-cache
+        uses: actions/cache@v4
+        with:
+          path: pyodide
+          key: pyodide-${{ hashFiles('web/get_pyodide.py') }}
+
+      - name: Fetch the Pyodide runtime
+        if: steps.pyodide-cache.outputs.cache-hit != 'true'
+        run: python web/get_pyodide.py
+
+      - name: Install Headless Chromium
+        continue-on-error: true
+        run: |
+          python -m pip install "playwright==1.55.0"
+          python -m playwright install --with-deps chromium
+
+      - name: Consistency Test (headless browser)
+        continue-on-error: true
+        timeout-minutes: 70
+        run: python tests/web_ci_runner.py --warn-only --github --out consistency-wasm.json
+
+      - name: Upload Fingerprint
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: consistency-wasm
+          path: consistency-wasm.json
+          if-no-files-found: ignore
+
+  # One page with every platform side by side: the job summary of this job.
+  report:
+    name: Consistency report
+    needs: [native, wasm]
+    if: always()
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Download Fingerprints
+        continue-on-error: true
+        uses: actions/download-artifact@v4
+        with:
+          pattern: consistency-*
+          path: results
+          merge-multiple: true
+
+      - name: Write Report
+        continue-on-error: true
+        run: |
+          python tests/consistency_test.py --github --report tests/consistency_baseline.json \
+            "Windows=results/consistency-windows.json" \
+            "Linux=results/consistency-linux.json" \
+            "macOS=results/consistency-macos.json" \
+            "Browser (wasm)=results/consistency-wasm.json"

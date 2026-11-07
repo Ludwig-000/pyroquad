@@ -8,7 +8,7 @@ def launch():
 
     hdr_raw: Image = examples.loading_screen_future(
         lambda a: download_file_future(a),
-        ["https://github.com/Ludwig-000/pyroquad/blob/main/tests/sundowner_overlook_hdr.png?raw=true"],
+        ["https://raw.githubusercontent.com/Ludwig-000/pyroquad/main/tests/sundowner_overlook_hdr.png"],
         "Grabbing HDR",
         show_rotating_square=True
     )[0].to_Image()

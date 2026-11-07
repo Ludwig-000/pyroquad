@@ -112,7 +112,6 @@ impl Cube {
 
     /// defining a cube by its center can be annoying, so this allows for an alternate constructor.
     /// x1,y1,z1 and x2,y2,z2 are two opposite corners of the cube.
-    /// The order of the corners does not matter, the cube always spans the space between them.
     #[staticmethod]
     #[pyo3(signature = (x1=0., y1=0., z1=0., x2=1., y2=1., z2=1., color = Color::WHITE(), texture=None, collider_type = Collider::NONE()))]
     pub fn from_xyz(
@@ -124,7 +123,6 @@ impl Cube {
         collider_type: Collider,
     ) -> PyResult<Py<Cube>> {
         let position = Vec3::const_new((x1 + x2) / 2.0, (y1 + y2) / 2.0, (z1 + z2) / 2.0);
-        // abs, so swapped corners don't produce a negative (inside-out) scale.
         let scale = Vec3::const_new((x2 - x1).abs(), (y2 - y1).abs(), (z2 - z1).abs());
 
         Cube::new(py, position, Vec3::ZERO(), scale, color, texture, collider_type)
