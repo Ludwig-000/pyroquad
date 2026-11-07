@@ -7,3 +7,4 @@ pub mod Mesh;
 pub mod Pill;
 pub mod Cylinder;
 pub mod TwoDObjects;
+pub mod WireObjects;

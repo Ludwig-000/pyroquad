@@ -481,8 +481,41 @@ EM_JS(float, pq_js_dpi_scale, (void), {
  * `performance.now()` is sub-millisecond - 5us when the page is cross-origin
  * isolated, 100us when it is not. It is also monotonic, so a clock adjustment
  * mid-run can no longer hand the engine a negative delta.
+ *
+ * It is also a *game* clock rather than a wall clock: it stands still while the
+ * page is hidden. A hidden tab gets no animation frames, so the Python loop is
+ * parked inside `next_frame()` the whole time - nothing in the game runs. Left
+ * as plain wall time, the first frame back would report the entire absence as
+ * one frame (`get_delta_time()` of several seconds, `get_fps()` of 0), and
+ * anything integrated with it - movement, `next_frame(physics_step)` - takes
+ * one giant step. Freezing the clock at the moment the page hides, and
+ * resuming it from there, makes the hidden time simply not exist for anything
+ * downstream (`frame_time`, `get_fps()`, `get_time()`, the `_Time` material
+ * uniform, coroutine waits). Freezing rather than subtracting afterwards also
+ * keeps it monotonic, even if a browser does hand a hidden page a frame.
  */
-EM_JS(double, pq_js_now, (void), { return performance.now() / 1000.0; });
+EM_JS(double, pq_js_now, (void), {
+    var P = globalThis.__PQ;
+    if (!P) { P = globalThis.__PQ = {}; }
+    var c = P._clock;
+    if (!c) {
+        c = P._clock = {
+            paused: 0,
+            hidden_at: document.visibilityState == "hidden" ? performance.now() : -1,
+        };
+        document.addEventListener("visibilitychange", function () {
+            var t = performance.now();
+            if (document.visibilityState == "hidden") {
+                if (c.hidden_at < 0) { c.hidden_at = t; }
+            } else if (c.hidden_at >= 0) {
+                c.paused += t - c.hidden_at;
+                c.hidden_at = -1;
+            }
+        });
+    }
+    var t = c.hidden_at >= 0 ? c.hidden_at : performance.now();
+    return (t - c.paused) / 1000.0;
+});
 
 EM_JS(int, pq_js_sapp_is_elapsed_timer_supported, (void), { return 1; });
 
