@@ -220,9 +220,10 @@ pub fn draw_arc( x: f32,
 
 
 #[pyfunction]
-pub fn draw_cube_wires( position: Vec3, size: Vec3, color: Color) {
+#[pyo3(signature=  (position = Vec3::ZERO(), size= Vec3::ONE(), rotation= Vec3::ZERO(), color= Color::WHITE()))]
+pub fn draw_cube_wires( position: Vec3, size: Vec3, rotation: Vec3, color: Color) {
     
-    COMMAND_QUEUE.push(Command::DrawCubeWires {position: position.into(),size: size.into(),color: color.into()});
+    COMMAND_QUEUE.push(Command::DrawCubeWires {position: position.into(),size: size.into(), rotation: rotation.into(), color: color.into()});
 }
 
 #[pyfunction]

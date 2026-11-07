@@ -28,6 +28,7 @@ use crate::engine::Objects::Pill::Pill;
 use crate::engine::Objects::Sphere::Sphere;
 use crate::engine::Objects::TwoDObjects::draw_circle;
 use crate::engine::Objects::TwoDObjects::draw_rect;
+use crate::engine::Objects::WireObjects::draw_cube_wires;
 use crate::engine::PChannel::PSender;
 use crate::engine::SHADERS::shader_manager as sm;
 use crate::engine::PError::PError;
@@ -192,7 +193,7 @@ pub enum Command {
         thickness: f32,
         arc: f32,
         color: mq::Color,},
-    DrawCubeWires{position: mq::Vec3, size: mq::Vec3, color: mq::Color},
+    DrawCubeWires{position: mq::Vec3, size: mq::Vec3, rotation: mq::Vec3, color: mq::Color},
     DrawCylinder{ position: mq::Vec3,
         radius_top: f32,
         radius_bottom: f32,
@@ -828,9 +829,9 @@ pub async fn dispatch(command: Command, st: &mut EngineState) {
                     mq::draw_arc(x, y, sides, radius, rotation, thickness, arc, color);
                 }
         
-                Command::DrawCubeWires { position, size, color } => {
+                Command::DrawCubeWires { position, size, rotation, color } => {
                     sm::switch_to_desired_shader(sm::ShaderKind::None, &None);
-                    mq::draw_cube_wires(position, size, color);
+                    draw_cube_wires(position, size, rotation, color);
                 }
                 Command::DrawCylinder { position, radius_top, radius_bottom, height, texture, color } => {
                     sm::switch_to_desired_shader(sm::ShaderKind::Basic, &None);
