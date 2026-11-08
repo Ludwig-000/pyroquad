@@ -53,3 +53,4 @@ emsdk/
 dist/
 .clangd
 run_web.bat
+.tests/__pycache__/

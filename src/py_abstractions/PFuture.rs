@@ -1,299 +1,263 @@
-use std::thread;
+use std::sync::{Mutex, MutexGuard, PoisonError};
 use std::time::Duration;
 
-use crate::engine::PChannel::PChannel;
-use crate::engine::PThreading::limited_thread;
-use crate::engine::PThreading::thread_pool;
-use crate::py_abstractions::Textures_and_Images::Image;
+use pyo3::prelude::*;
+use pyo3::sync::PyOnceLock;
+use pyo3::IntoPyObjectExt;
+
+use crate::engine::PChannel::{PChannelError, PReceiver};
 use crate::py_abstractions::Loading::FileData::FileData;
-use crate::py_abstractions::Textures_and_Images::Texture2D;
-use pyo3::exceptions::PyRuntimeError;
-use pyo3::prelude::*;
-use crate::engine::PChannel::PReceiver;
-
-use pyo3::PyErr;
-
-/// TODO: maybe add a trait for internal future handling
+use crate::py_abstractions::Textures_and_Images::Image;
 
 
+// pyo3's "experimental-inspect" (stub generation) is only on in builds that pass an abi_* feature.
+#[cfg(any(feature = "abi_314", feature = "abi_310", feature = "abi_39"))]
+const STATUS_TYPE: pyo3::inspect::PyStaticExpr =
+    pyo3::type_hint_identifier!("pyroquad.future_status", "Status");
 
 
+/// Rust side of `pyroquad.future_status.Status`, a plain Python `Enum`.
+#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+pub enum Status {
+    Pending,
+    Done,
+}
 
-use pyo3::prelude::*;
-pub struct Timeout();
+static PENDING: PyOnceLock<Py<PyAny>> = PyOnceLock::new();
+static DONE: PyOnceLock<Py<PyAny>> = PyOnceLock::new();
 
-impl<'py> IntoPyObject<'py> for Timeout {
-    type Target = pyo3::types::PyString;
-    type Output = Bound<'py, Self::Target>;
+impl<'py> IntoPyObject<'py> for Status {
+    type Target = PyAny;
+    type Output = Bound<'py, PyAny>;
     type Error = PyErr;
 
-    fn into_pyobject(self, py: Python<'py>) -> Result<Self::Output, Self::Error> {
-        Ok(pyo3::types::PyString::new(py, "Timeout"))
+    #[cfg(any(feature = "abi_314", feature = "abi_310", feature = "abi_39"))]
+    const OUTPUT_TYPE: pyo3::inspect::PyStaticExpr = STATUS_TYPE;
+
+    fn into_pyobject(self, py: Python<'py>) -> PyResult<Bound<'py, PyAny>> {
+        let (cell, name) = match self {
+            Status::Pending => (&PENDING, "Pending"),
+            Status::Done => (&DONE, "Done"),
+        };
+        let member = cell.get_or_try_init(py, || -> PyResult<Py<PyAny>> {
+            Ok(py.import("pyroquad.future_status")?.getattr("Status")?.getattr(name)?.unbind())
+        })?;
+        Ok(member.bind(py).clone())
+    }
+}
+
+/// `Status.Pending` on its own, for futures that have a value. Typed separately so the stubs
+/// say `Image | Literal[Status.Pending]`: after ruling out `Pending`, a type checker knows the
+/// result is the value, without also asking about `Status.Done`.
+#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+pub struct Pending;
+
+impl<'py> IntoPyObject<'py> for Pending {
+    type Target = PyAny;
+    type Output = Bound<'py, PyAny>;
+    type Error = PyErr;
+
+    #[cfg(any(feature = "abi_314", feature = "abi_310", feature = "abi_39"))]
+    const OUTPUT_TYPE: pyo3::inspect::PyStaticExpr = pyo3::type_hint_subscript!(
+        pyo3::type_hint_identifier!("typing", "Literal"),
+        pyo3::inspect::PyStaticExpr::Attribute { value: &STATUS_TYPE, attr: "Pending" }
+    );
+
+    fn into_pyobject(self, py: Python<'py>) -> PyResult<Bound<'py, PyAny>> {
+        Status::Pending.into_pyobject(py)
     }
 }
 
 
-pub struct EmptyFuture();
-
-impl<'py> IntoPyObject<'py> for EmptyFuture {
-    type Target = pyo3::types::PyString;
-    type Output = Bound<'py, Self::Target>;
-    type Error = PyErr;
-
-    fn into_pyobject(self, py: Python<'py>) -> Result<Self::Output, Self::Error> {
-        Ok(pyo3::types::PyString::new(py, "EmptyFuture"))
-    }
+/// How long `resolve` may block.
+enum Wait {
+    Poll,
+    Forever,
+    Timeout(Duration),
 }
 
-
-pub enum FutureWaitResult {
-    Timeout(Timeout),
-    Empty(EmptyFuture),
-}
-
-// Delegate the conversion to the inner ZSTs (Zero-Sized Types)
-impl<'py> IntoPyObject<'py> for FutureWaitResult {
-    type Target = pyo3::types::PyString;
-    type Output = Bound<'py, Self::Target>;
-    type Error = PyErr;
-
-    fn into_pyobject(self, py: Python<'py>) -> Result<Self::Output, Self::Error> {
-        match self {
-            FutureWaitResult::Timeout(t) => t.into_pyobject(py),
-            FutureWaitResult::Empty(e) => e.into_pyobject(py),
+impl From<Option<f64>> for Wait {
+    fn from(timeout: Option<f64>) -> Self {
+        match timeout {
+            None => Wait::Forever,
+            Some(secs) => Wait::Timeout(
+                Duration::try_from_secs_f64(secs.max(0.0)).unwrap_or(Duration::MAX)
+            ),
         }
     }
 }
 
 
+/// A `PReceiver<PyResult<T>>` with `T` erased, so `Future` can hold any of them.
+trait ErasedReceiver: Send {
+    /// None while nothing has arrived.
+    fn receive(&self, py: Python<'_>, wait: &Wait) -> Option<Result<PyResult<Py<PyAny>>, PChannelError>>;
+}
+
+impl<T> ErasedReceiver for PReceiver<PyResult<T>>
+where
+    T: for<'py> IntoPyObject<'py> + Send + 'static,
+{
+    fn receive(&self, py: Python<'_>, wait: &Wait) -> Option<Result<PyResult<Py<PyAny>>, PChannelError>> {
+        let received = match wait {
+            Wait::Poll => self.try_recv()?,
+            Wait::Forever => self.recv(),
+            Wait::Timeout(timeout) => self.recv_timeout(*timeout)?,
+        };
+        Some(received.map(|result| result.and_then(|value| value.into_py_any(py))))
+    }
+}
 
 
-/// Non-async future.
-/// this feature is experimental
-#[macro_export]
-macro_rules! generate_pfuture {
-    ($res_type:ty) => {
+enum State {
+    Waiting(Box<dyn ErasedReceiver>),
+    Ready(Py<PyAny>),
+    Failed(PyErr),
+}
+
+
+#[pyclass(subclass, frozen)]
+pub struct Future {
+    state: Mutex<State>,
+}
+
+impl Future {
+    fn new<T>(receiver: PReceiver<PyResult<T>>) -> Self
+    where
+        T: for<'py> IntoPyObject<'py> + Send + 'static,
+    {
+        Future { state: Mutex::new(State::Waiting(Box::new(receiver))) }
+    }
+
+    /// Locks the state, first receiving the outcome if it is there (waiting as `wait` allows).
+    fn update(&self, py: Python<'_>, wait: Wait) -> PyResult<MutexGuard<'_, State>> {
+        // Nothing in here can leave the state half-written, so a poisoned lock is still usable.
+        let mut state = self.state.lock().unwrap_or_else(PoisonError::into_inner);
+
+        if let State::Waiting(receiver) = &*state {
+            *state = match receiver.receive(py, &wait) {
+                None => return Ok(state),
+                // The engine was never started: a bug in the caller, and the work may still
+                // finish later, so raise without caching it.
+                Some(Err(PChannelError::DeadlockError)) => {
+                    return Err(PChannelError::DeadlockError.into())
+                }
+                Some(Err(channel_error)) => State::Failed(channel_error.into()),
+                Some(Ok(Err(error))) => State::Failed(error),
+                Some(Ok(Ok(value))) => State::Ready(value),
+            };
+        }
+        Ok(state)
+    }
+
+    /// The value once it is there, None while pending. Raises the work's exception if it failed.
+    fn resolve(&self, py: Python<'_>, wait: Wait) -> PyResult<Option<Py<PyAny>>> {
+        match &*self.update(py, wait)? {
+            State::Waiting(_) => Ok(None),
+            State::Ready(value) => Ok(Some(value.clone_ref(py))),
+            State::Failed(error) => Err(error.clone_ref(py)),
+        }
+    }
+}
+
+#[pymethods]
+impl Future {
+    /// True once the work has finished, successfully or not. Never blocks, never raises
+    /// the work's exception (`poll()` does that).
+    #[getter]
+    fn done(&self, py: Python<'_>) -> PyResult<bool> {
+        Ok(!matches!(&*self.update(py, Wait::Poll)?, State::Waiting(_)))
+    }
+}
+
+
+/// Future that has no value to hand back, only whether it is finished.
+#[pyclass(extends = Future, frozen)]
+pub struct EmptyFuture;
+
+impl EmptyFuture {
+    pub fn new(receiver: PReceiver<PyResult<()>>) -> PyResult<Py<Self>> {
+        Python::attach(|py| {
+            Py::new(py, PyClassInitializer::from(Future::new(receiver)).add_subclass(EmptyFuture))
+        })
+    }
+
+    fn finish(slf: &Bound<'_, Self>, wait: Wait) -> PyResult<Status> {
+        Ok(match slf.as_super().get().resolve(slf.py(), wait)? {
+            None => Status::Pending,
+            Some(_) => Status::Done,
+        })
+    }
+}
+
+#[pymethods]
+impl EmptyFuture {
+    /// Returns `Status.Done` or `Status.Pending`. Never blocks.
+    /// Raises the work's exception if it failed.
+    fn poll(slf: &Bound<'_, Self>) -> PyResult<Status> {
+        Self::finish(slf, Wait::Poll)
+    }
+
+    /// Blocks until the work is finished, or for at most `timeout` seconds.
+    /// Returns `Status.Pending` only if the timeout ran out. Raises the work's exception if it failed.
+    #[pyo3(signature = (timeout = None))]
+    fn wait(slf: &Bound<'_, Self>, timeout: Option<f64>) -> PyResult<Status> {
+        Self::finish(slf, Wait::from(timeout))
+    }
+}
+
+
+/// Declares a future class for one value type: `typed_future!(Image)` makes `ImageFuture`.
+macro_rules! typed_future {
+    ($value:ident) => {
         paste::paste! {
-            #[doc = "A future to " $res_type ". All pyroquad Futures are eagerly evaluated,\nmeaning thex execute as soon as they are created."]
-            #[pyclass]
-            pub struct [<$res_type Future>] {
-                pub future: std::sync::Mutex<Option<PReceiver<PyResult<$res_type>>>>,
+            /// What `poll()` / `wait()` return: the value, or `Status.Pending`.
+            #[derive(IntoPyObject)]
+            pub enum [<$value Poll>] {
+                Ready(Py<$value>),
+                Pending(Pending),
             }
-            impl [<$res_type Future>] {
-                pub fn new(rec: PReceiver<PyResult<$res_type>>) -> [<$res_type Future>] {
-                    [<$res_type Future>] {
-                        future: std::sync::Mutex::new(Some(rec)),
-                    }
+
+            #[doc = "A future to " $value ". It starts working as soon as it is created.\n\n"
+                    "`poll()` and `wait()` return the " $value " once it is there, otherwise `Status.Pending`.\n"
+                    "If the work failed, they raise the same exception the blocking function would have."]
+            #[pyclass(extends = Future, frozen)]
+            pub struct [<$value Future>];
+
+            impl [<$value Future>] {
+                pub fn new(receiver: PReceiver<PyResult<$value>>) -> PyResult<Py<Self>> {
+                    Python::attach(|py| {
+                        Py::new(py, PyClassInitializer::from(Future::new(receiver)).add_subclass([<$value Future>]))
+                    })
+                }
+
+                fn finish(slf: &Bound<'_, Self>, wait: Wait) -> PyResult<[<$value Poll>]> {
+                    let py = slf.py();
+                    Ok(match slf.as_super().get().resolve(py, wait)? {
+                        None => [<$value Poll>]::Pending(Pending),
+                        Some(value) => [<$value Poll>]::Ready(value.into_bound(py).cast_into::<$value>()?.unbind()),
+                    })
                 }
             }
+
             #[pymethods]
-            impl [<$res_type Future>] {
-                pub fn result(&self) -> PyResult<Option<$res_type>> {
-                    let mut guard = self.future.lock()
-                        .map_err(|_| pyo3::exceptions::PyRuntimeError::new_err("Mutex poisoned"))?;
-
-                    let rx = guard.as_ref().ok_or_else(|| {
-                        pyo3::exceptions::PyRuntimeError::new_err("Result already consumed")
-                    })?;
-
-                    match rx.try_recv() {
-                        None => Ok(None),
-                        Some(res) => {
-                            let _ = guard.take(); 
-                            Ok(Some(res??))
-                        }
-                    }
+            impl [<$value Future>] {
+                #[doc = "Returns the " $value " if it is there, otherwise `Status.Pending`. Never blocks.\n"
+                        "Raises the work's exception if it failed."]
+                fn poll(slf: &Bound<'_, Self>) -> PyResult<[<$value Poll>]> {
+                    Self::finish(slf, Wait::Poll)
                 }
 
-                pub fn result_nowait(&self) -> PyResult<$res_type> {
-                    let mut guard = self.future.lock()
-                        .map_err(|_| pyo3::exceptions::PyRuntimeError::new_err("Mutex poisoned"))?;
-                    
-                    let rx = guard.as_ref().ok_or_else(|| {
-                        pyo3::exceptions::PyRuntimeError::new_err("Result already consumed")
-                    })?;
-                    
-                    let res = rx.recv();
-                    let _ = guard.take();
-                    res?
-                }
-
-                /// waits for the result, with timeout in seconds.
-                #[pyo3(signature = (timeout = 0.0))]
-                pub fn result_nowait_timeout(&self, timeout: f64) -> PyResult<Option<$res_type>> {
-                    let mut guard = self.future.lock().map_err(|_| {
-                        pyo3::exceptions::PyRuntimeError::new_err("Mutex poisoned")
-                    })?;
-
-                    let rx = guard.as_ref().ok_or_else(|| {
-                        pyo3::exceptions::PyRuntimeError::new_err("Result already consumed")
-                    })?;
-
-                    match rx.recv_timeout(Duration::from_secs_f64(timeout)) {
-                        None => Ok(None),
-                        
-                        Some(res) => {
-                            let _ = guard.take();
-                            
-                            res.map_err( Into::into )
-                            .flatten()
-                            .map(Some)
-                        }
-                    }
+                #[doc = "Blocks until the " $value " is there, or for at most `timeout` seconds.\n"
+                        "Returns `Status.Pending` only if the timeout ran out. Raises the work's exception if it failed."]
+                #[pyo3(signature = (timeout = None))]
+                fn wait(slf: &Bound<'_, Self>, timeout: Option<f64>) -> PyResult<[<$value Poll>]> {
+                    Self::finish(slf, Wait::from(timeout))
                 }
             }
         }
     };
 }
 
-
-
-
-#[pyclass]
-pub struct Future {
-    pub future: std::sync::Mutex<Option<PReceiver<PyResult<()>>>>,
-}
-
-#[pymethods]
-impl Future {
-
-    pub fn result(&self) -> PyResult<Option<EmptyFuture>> {
-        let mut guard = self.future.lock()
-            .map_err(|_| pyo3::exceptions::PyRuntimeError::new_err("Mutex poisoned"))?;
-
-        let rx = guard.as_ref().ok_or_else(|| {
-            pyo3::exceptions::PyRuntimeError::new_err("Result already consumed")
-        })?;
-
-        match rx.try_recv() {
-            None => Ok(None),
-            Some(res) => {
-                let _ = guard.take(); 
-                let _ = res??;
-                Ok(Some( EmptyFuture() ))
-            }
-        }
-    }
-
-    pub fn result_nowait(&self) -> PyResult<EmptyFuture> {
-        let mut guard = self.future.lock()
-            .map_err(|_| pyo3::exceptions::PyRuntimeError::new_err("Mutex poisoned"))?;
-        
-        let rx = guard.as_ref().ok_or_else(|| {
-            pyo3::exceptions::PyRuntimeError::new_err("Result already consumed")
-        })?;
-        
-        let res = rx.recv();
-        let _ = guard.take();
-        let _ = res??;
-        Ok(EmptyFuture())
-    }
-
-    // Correctly returns PyResult<FutureWaitResult> -> Stubs: Literal['Timeout', 'EmptyFuture']
-    /// waits for the result, with timeout in seconds.
-    #[pyo3(signature = (timeout = f64::MAX))]
-    pub fn result_nowait_timeout(&self, timeout: f64) -> PyResult<FutureWaitResult> {
-        let mut guard = self.future.lock().map_err(|_| {
-            pyo3::exceptions::PyRuntimeError::new_err("Mutex poisoned")
-        })?;
-
-        let rx = guard.as_ref().ok_or_else(|| {
-            pyo3::exceptions::PyRuntimeError::new_err("Result already consumed")
-        })?;
-
-        match rx.recv_timeout(Duration::from_secs_f64(timeout)) {
-            None => Ok(FutureWaitResult::Timeout(Timeout())),
-            
-            Some(res) => {
-                let _ = guard.take();
-                let _ = res??;
-                Ok(FutureWaitResult::Empty(EmptyFuture()))
-            }
-        }
-    }
-}
-
-impl Future {
-    pub fn new(receiver: PReceiver<PyResult<()>>) -> Self {
-        Future {
-            future: std::sync::Mutex::new(Some(receiver)),
-        }
-    }
-}
-
-
-// #[derive(IntoPyObject)]
-// pub enum FutureWaitResult {
-//     Timeout(Timeout),
-//     Empty(EmptyFuture),
-// }
-// use pyo3_stub_gen::{PyStubType, TypeInfo};
-// impl PyStubType for FutureWaitResult {
-//     fn type_input() -> TypeInfo {
-//         TypeInfo::unqualified("Timeout | EmptyFuture")
-//     }
-//     fn type_output() -> TypeInfo {
-//         TypeInfo::unqualified("Timeout | EmptyFuture")
-//     }
-// }
-
-
-
-pub trait  FutureTrait<TPlusTimeout, T> {
-    fn result_nowait(&self)-> T;
-    fn result_timeout(&self, timeout: Duration)-> TPlusTimeout;
-    fn result(&self)-> Option<T>;
-}
-
-
-
-
-
-
-
-
-crate::generate_pfuture!(Image);
-crate::generate_pfuture!(FileData);
-
-// #[gen_stub_pymethods]
-// #[pymethods]
-// impl FileDataFuture {
-
-//     /// Chains a FileData Future into a Image Future.
-//     pub fn to_image_future(&self) -> PyResult<ImageFuture> {
-
-//         let (tx, rx) = PChannel::channel();
-
-//         thread_pool(crate::engine::PThreading::TaskType::CPU_TASK, move ||{
-//             loop {
-//                 if let Ok(lock) = self.future.try_lock(){
-//                     if lock.is_some(){
-//                         let  rec =lock.unwrap();
-//                         match rec.try_recv(){
-//                             Some(r) => {
-//                                 let final_result = || -> PyResult<Image>{
-//                                     let file = r??;
-//                                     file.to_Image()
-//                                 };
-
-//                                 let _ = tx.send(final_result());
-//                             },
-//                             None => thread::sleep(Duration::from_millis(1)), // receiver not yet done
-//                         }
-//                     } else {
-//                         /// receiver has already been received?
-//                         let _ = tx.send(
-//                             Err(pyo3::exceptions::PyRuntimeError::new_err("Send error: receiver has already been recieved.\nA future cannot be received twize."))
-//                         );
-//                     }
-//                 } else {
-//                     /// lock is currently occupied. try again later
-//                     thread::sleep(Duration::from_millis(1));
-//                 }
-//             }
-//         });
-
-//         Ok( ImageFuture::new(rx) )
-//     }
-
-// }
+typed_future!(Image);
+typed_future!(FileData);

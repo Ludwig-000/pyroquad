@@ -6,6 +6,8 @@ from ._pyroquad import ColorMod #type: ignore
 Color = ColorMod.Color
 del ColorMod
 
+from .future_status import Status
+
 from . import examples #imports the python-half of the library
 
 

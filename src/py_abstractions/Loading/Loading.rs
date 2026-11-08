@@ -41,7 +41,7 @@ pub fn load_file(path: &str)-> PyResult<FileData>{
 
 
 #[pyfunction]
-pub fn load_file_future(path: &str) -> PyResult<FileDataFuture> {
+pub fn load_file_future(path: &str) -> PyResult<Py<FileDataFuture>> {
     let (tx, rx) = PChannel::channel();
     let path_str = path.to_string();
 
@@ -65,7 +65,7 @@ pub fn load_file_future(path: &str) -> PyResult<FileDataFuture> {
         });
     }
 
-    Ok( FileDataFuture::new(rx) )
+    FileDataFuture::new(rx)
 
 }
 
@@ -149,7 +149,7 @@ pub fn download_file(url: &str) -> PyResult<FileData> {
 
 #[cfg(not(target_os = "emscripten"))]
 #[pyfunction]
-pub fn download_file_future(url: &str) -> PyResult<FileDataFuture> {
+pub fn download_file_future(url: &str) -> PyResult<Py<FileDataFuture>> {
     let (tx, rx) = PChannel::channel();
     let url = url.to_string();
 
@@ -158,7 +158,7 @@ pub fn download_file_future(url: &str) -> PyResult<FileDataFuture> {
         let _ = tx.send(result); 
     });
 
-    Ok( FileDataFuture::new(rx) )
+    FileDataFuture::new(rx)
 }
 
 /// Browser build: no thread to hand the download to, but also none needed -
@@ -166,7 +166,7 @@ pub fn download_file_future(url: &str) -> PyResult<FileDataFuture> {
 /// lets the callback fill it in. Downloads started this way run concurrently.
 #[cfg(target_os = "emscripten")]
 #[pyfunction]
-pub fn download_file_future(url: &str) -> PyResult<FileDataFuture> {
+pub fn download_file_future(url: &str) -> PyResult<Py<FileDataFuture>> {
     let (tx, rx) = PChannel::channel();
 
     crate::web::fetch(url, move |result| {
@@ -176,7 +176,7 @@ pub fn download_file_future(url: &str) -> PyResult<FileDataFuture> {
         });
     });
 
-    Ok( FileDataFuture::new(rx) )
+    FileDataFuture::new(rx)
 }
 
 

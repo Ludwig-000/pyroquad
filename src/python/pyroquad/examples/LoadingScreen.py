@@ -148,12 +148,12 @@ def loading_screen_future(
         new_pending = []
         
         for i in pending_indices:
-            res = futures[i].result()
-            
-            if res is not None:
-                results[i] = res
-            else:
+            res = futures[i].poll()  # raises if the work failed
+
+            if res is Status.Pending:
                 new_pending.append(i)
+            else:
+                results[i] = res
                 
         pending_indices = new_pending
         finished_count = total - len(pending_indices)

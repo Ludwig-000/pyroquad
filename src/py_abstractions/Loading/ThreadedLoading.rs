@@ -8,7 +8,7 @@ use std::thread;
 use crate::engine::PChannel::PChannel;
 use crate::py_abstractions::Loading::FileData::FileData;
 use crate::py_abstractions::Loading::Loading::{self as load, download_file, load_file, write_to_file};
-use crate::py_abstractions::PFuture::{FileDataFuture, Future as FutureP};
+use crate::py_abstractions::PFuture::{EmptyFuture, FileDataFuture};
 
 
 
@@ -38,7 +38,7 @@ impl Loading {
     /// Does nothing if the given filepath already exists.
     #[cfg(not(any(target_arch = "wasm32", target_os = "ios")))]
     #[staticmethod]
-    pub fn download_file_and_save_future(url: String, filepath: String) -> PyResult<FutureP> {
+    pub fn download_file_and_save_future(url: String, filepath: String) -> PyResult<Py<EmptyFuture>> {
         use crate::{engine::{PChannel::PChannel, PThreading::{limited_thread, thread_pool}}, py_abstractions::Loading::Loading::does_file_exist};
 
 
@@ -55,7 +55,7 @@ impl Loading {
             let _ = tx.send(result);
         });
 
-        Ok(FutureP::new(rx))
+        EmptyFuture::new(rx)
     }
 
     /// Browser build of the three functions above.
@@ -81,14 +81,14 @@ impl Loading {
 
     #[cfg(target_os = "emscripten")]
     #[staticmethod]
-    pub fn download_file_and_save_future(url: String, filepath: String) -> PyResult<FutureP> {
+    pub fn download_file_and_save_future(url: String, filepath: String) -> PyResult<Py<EmptyFuture>> {
         use crate::py_abstractions::Loading::Loading::does_file_exist;
 
         let (tx, rx) = PChannel::channel();
 
         if does_file_exist(&filepath) {
             let _ = tx.send(Ok(()));
-            return Ok(FutureP::new(rx));
+            return EmptyFuture::new(rx);
         }
 
         crate::web::fetch(&url, move |result| {
@@ -99,12 +99,12 @@ impl Loading {
             let _ = tx.send(outcome);
         });
 
-        Ok(FutureP::new(rx))
+        EmptyFuture::new(rx)
     }
 
     #[cfg(target_os = "emscripten")]
     #[staticmethod]
-    fn download_file_future(url: &str) -> PyResult<FileDataFuture> {
+    fn download_file_future(url: &str) -> PyResult<Py<FileDataFuture>> {
         load::download_file_future(url)
     }
 
@@ -125,7 +125,7 @@ impl Loading {
 
     #[cfg(not(any(target_arch = "wasm32", target_os = "ios")))]
     #[staticmethod]
-    fn download_file_future(url: &str) -> PyResult<FileDataFuture> {
+    fn download_file_future(url: &str) -> PyResult<Py<FileDataFuture>> {
         use crate::{engine::{PChannel::PChannel, PThreading::{limited_thread, thread_pool}}, py_abstractions::Loading::Loading::does_file_exist};
         let (tx, rx) = PChannel::channel();
 
@@ -135,7 +135,7 @@ impl Loading {
             let _ = tx.send(res);
         });
 
-        Ok( FileDataFuture::new(rx) )
+        FileDataFuture::new(rx)
     }
 
 

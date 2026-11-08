@@ -147,13 +147,11 @@ pub mod _pyroquad {
     pub use crate::py_abstractions::UniformType::{Comparison, EulerRot, UniformType};
 
     #[pymodule_export]
-    pub use crate::py_abstractions::PFuture::{FileDataFuture, Future, ImageFuture};
+    pub use crate::py_abstractions::PFuture::{EmptyFuture, FileDataFuture, Future, ImageFuture};
 }
 
 
 
-//m.add_class::<crate::py_abstractions::PFuture::Timeout>()?;
-//m.add_class::<crate::py_abstractions::PFuture::EmptyFuture>()?;
 
 /*
 list of macroquad::prelude functions
