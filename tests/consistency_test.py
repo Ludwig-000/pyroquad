@@ -213,7 +213,7 @@ class Recorder:
         _last_key, _last_time = self._key(key), time.time()
         stream_write({"at": _last_key})
         if _last_key == os.environ.get("CONSISTENCY_SELFTEST_ABORT_AT"):
-            os.abort()  # self-test of --ci crash handling: a native abort, like an engine crash
+            selftest_abort()
         if TRACE:
             say("  .. " + self._key(key))
         breaker = PROCESS_BREAKERS.get(sys.platform, {}).get(self._key(key))
@@ -303,7 +303,17 @@ def progress(label: str):
     _last_key, _last_time = label, time.time()
     stream_write({"at": label})
     if label == os.environ.get("CONSISTENCY_SELFTEST_ABORT_AT"):
-        os.abort()  # self-test of --ci crash handling
+        selftest_abort()
+
+
+def selftest_abort():
+    """Self-test of --ci crash handling: dies like an engine crash does - a native
+    library prints its reason to stderr, then calls abort(). The supervisor has to
+    find that line again (see crash_cause)."""
+    os.write(2, b"*** Terminating app due to uncaught exception 'SelfTestException', "
+                b"reason: 'CONSISTENCY_SELFTEST_ABORT_AT reached'
+")
+    os.abort()
 
 
 _stream = None  # --stream PATH: every entry is appended as a JSON line, flushed
@@ -318,6 +328,7 @@ def stream_write(obj: dict):
 _rust_panics: list[dict] = []  # every "thread ... panicked at" report seen on stderr
 _capture = {"on": False, "n": 0, "events": {}, "lock": None}
 _MARK = b"\x00PQ-PROBE "
+_stderr_log: str | None = None  # --stderr-log PATH (set by supervise): fd 2 goes to this file
 
 
 def capture_rust_panics():
@@ -328,7 +339,13 @@ def capture_rust_panics():
     as an exception. To attribute each report to the probe that caused it, every
     probe is bracketed by begin/end markers written into the same pipe (see
     probe_window_begin/_end): the pipe keeps the order, so a report between a
-    probe's markers was printed while that probe ran."""
+    probe's markers was printed while that probe ran.
+
+    Under --ci (see supervise) fd 2 goes to a file instead of a pipe. A native crash
+    usually prints its reason right before dying (an uncaught Objective-C exception,
+    a Rust abort, faulthandler's traceback). In a pipe those last lines die with the
+    process before the pump forwards them; in a file they are still there for the
+    supervisor to show."""
     if IS_WEB:
         return
     import re
@@ -336,44 +353,71 @@ def capture_rust_panics():
     try:
         sys.stderr.flush()
         orig = os.dup(2)
-        r, w = os.pipe()
+        if _stderr_log:
+            r = None
+            # O_APPEND: writes from several threads never overwrite each other
+            w = os.open(_stderr_log, os.O_WRONLY | os.O_CREAT | os.O_TRUNC | os.O_APPEND
+                        | getattr(os, "O_BINARY", 0))
+        else:
+            r, w = os.pipe()
         os.dup2(w, 2)
         os.close(w)
     except OSError:
         return
+    if _stderr_log:
+        import faulthandler
+        # On SIGABRT / SIGSEGV / access violation: the Python stack of every thread, written
+        # straight from the signal handler into fd 2 (= the log), so it survives the crash.
+        faulthandler.enable(all_threads=True)
     head = re.compile(rb"thread '([^']*)'(?: \(\d+\))? panicked at (.+?):\s*$")
     _capture["lock"] = threading.Lock()
+
+    def stderr_lines():
+        if r is not None:
+            with os.fdopen(r, "rb", 0) as src:
+                yield from iter(src.readline, b"")
+            return
+        with open(_stderr_log, "rb") as src:  # follow the file like `tail -f`
+            partial = b""
+            while True:
+                chunk = src.readline()
+                if not chunk:
+                    time.sleep(0.002)
+                    continue
+                partial += chunk
+                if partial.endswith(b"\n"):
+                    yield partial
+                    partial = b""
 
     def pump():
         stack: list[str] = []
         last = "<start>"
         pending = None
-        with os.fdopen(r, "rb", 0) as src:
-            for line in iter(src.readline, b""):
-                if line.startswith(_MARK):
-                    kind, n, key = line[len(_MARK):].decode(errors="replace").rstrip("\n").split(" ", 2)
-                    if kind == "B":
-                        stack.append(key)
-                    elif stack:
-                        last = stack.pop()
-                    with _capture["lock"]:
-                        ev = _capture["events"].pop(int(n), None)
-                    if ev is not None:
-                        ev.set()
-                    continue
-                try:
-                    os.write(orig, line)
-                except OSError:
-                    pass
-                m = head.match(line)
-                if m:
-                    pending = {"thread": m.group(1).decode(errors="replace"),
-                               "at": m.group(2).decode(errors="replace"),
-                               "probe": stack[-1] if stack else None, "after": last}
-                elif pending is not None:
-                    pending["message"] = line.decode(errors="replace").strip()[:200]
-                    _rust_panics.append(pending)
-                    pending = None
+        for line in stderr_lines():
+            if line.startswith(_MARK):
+                kind, n, key = line[len(_MARK):].decode(errors="replace").rstrip("\n").split(" ", 2)
+                if kind == "B":
+                    stack.append(key)
+                elif stack:
+                    last = stack.pop()
+                with _capture["lock"]:
+                    ev = _capture["events"].pop(int(n), None)
+                if ev is not None:
+                    ev.set()
+                continue
+            try:
+                os.write(orig, line)
+            except OSError:
+                pass
+            m = head.match(line)
+            if m:
+                pending = {"thread": m.group(1).decode(errors="replace"),
+                           "at": m.group(2).decode(errors="replace"),
+                           "probe": stack[-1] if stack else None, "after": last}
+            elif pending is not None:
+                pending["message"] = line.decode(errors="replace").strip()[:200]
+                _rust_panics.append(pending)
+                pending = None
 
     threading.Thread(target=pump, daemon=True).start()
     _capture["on"] = True
@@ -2457,12 +2501,14 @@ def _canvas_flag(args):
 
 
 def main(argv: list[str]) -> int:
-    global IMAGES_DIR, LAST_RESULT_JSON, _stream
+    global IMAGES_DIR, LAST_RESULT_JSON, _stream, _stderr_log
     args = list(argv)
     if "--ci" in args and not IS_WEB:
         return supervise(args)
     if "--stream" in args:
         _stream = open(args[args.index("--stream") + 1], "w", encoding="utf-8")
+    if "--stderr-log" in args:
+        _stderr_log = args[args.index("--stderr-log") + 1]
     OPTS["warn_only"] = "--warn-only" in args
     OPTS["github"] = "--github" in args
     fail_code = (lambda code: 0) if OPTS["warn_only"] else (lambda code: code)
