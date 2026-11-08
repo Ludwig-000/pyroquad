@@ -46,7 +46,7 @@ crate::implement_magic_methods2D!(Circle);
 #[pymethods]
 impl Circle{
     #[new]
-    #[pyo3(signature = ( position, rotation, radius, color, texture = None))]
+    #[pyo3(signature = ( position=Vec2::new(100.,100.), rotation=0.0, radius=50., color=Color::WHITE(), texture = None))]
     pub fn new(position: Vec2, rotation: f32, radius: f32, color: Color, texture: Option<Texture2D>)-> Self{
         Circle { position, rotation, radius, color, sides: 20,texture, function_key: None }
     }
