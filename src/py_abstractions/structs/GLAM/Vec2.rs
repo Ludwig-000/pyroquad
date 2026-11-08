@@ -131,12 +131,12 @@ impl Vec2 {
     /// uses the element from `if_false`.
     #[staticmethod]
     #[inline]
-    pub fn select(mask: &BVec2, if_true: Self, if_false: Self) -> Self {
+    pub fn select(mask: &BVec2, if_true: Self, if_false: Self) -> PyResult<Self> {
         
-        Self {
-            x: if mask.test(0) { if_true.x } else { if_false.x },
-            y: if mask.test(1) { if_true.y } else { if_false.y },
-        }
+        Ok(Self {
+            x: if mask.test(0)? { if_true.x } else { if_false.x },
+            y: if mask.test(1)? { if_true.y } else { if_false.y },
+        })
     }
 
     // constructor for splat values

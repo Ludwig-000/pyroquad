@@ -3,6 +3,8 @@ use glam::BVec2 as gl;
 
 use pyo3::prelude::*;
 
+use crate::py_assert;
+
 
 /// An immutable Boolean Vector with 2 elements: x,y.
 #[cfg_attr(feature = "abi_314", pyclass(eq,str,hash,frozen, immutable_type, from_py_object))]
@@ -84,10 +86,11 @@ impl BVec2 {
 
     /// Returns the value of index 1 or index 2.
     #[inline]
-    pub fn test(&self, index: usize) -> bool {
+    pub fn test(&self, index: usize) -> PyResult<bool> {
+        py_assert!(index == 0 || index == 1, "index out of bounds.");
         match index {
-            0 => self.x,
-            1 => self.y,
+            0 => Ok(self.x),
+            1 => Ok(self.y),
             _ => panic!("index out of bounds"),
         }
     }

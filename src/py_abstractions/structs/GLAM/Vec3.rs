@@ -144,13 +144,13 @@ impl Vec3 {
     /// uses the element from `if_false`.
     #[staticmethod]
     #[inline]
-    pub fn select(mask: &BVec3, if_true: Self, if_false: Self) -> Self {
+    pub fn select(mask: &BVec3, if_true: Self, if_false: Self) -> PyResult<Self> {
         
-        Self {
-            x: if mask.test(0) { if_true.x } else { if_false.x },
-            y: if mask.test(1) { if_true.y } else { if_false.y },
-            z: if mask.test(2) { if_true.z } else { if_false.z },
-        }
+        Ok(Self {
+            x: if mask.test(0)? { if_true.x } else { if_false.x },
+            y: if mask.test(1)? { if_true.y } else { if_false.y },
+            z: if mask.test(2)? { if_true.z } else { if_false.z },
+        })
     }
 
     /// Creates a new vector from an array.
