@@ -194,10 +194,11 @@ def run_page(url: str, run_timeout: float) -> tuple[str, str, str | None]:
             "--ignore-gpu-blocklist",
             "--autoplay-policy=no-user-gesture-required",  # WebAudio without a click
         ]
-        # Playwright's headless shell first, then the full Chromium in Chrome's
-        # new headless mode - whichever build is installed and allowed to start.
+        # Playwright's headless shell first, then its full Chromium in Chrome's
+        # new headless mode, then the system's Google Chrome (preinstalled on
+        # GitHub's Ubuntu runners, so this works even if the download failed).
         browser, errors = None, []
-        for channel in (None, "chromium"):
+        for channel in (None, "chromium", "chrome"):
             try:
                 browser = pw.chromium.launch(headless=True, channel=channel, args=flags)
                 print(f"browser: {channel or 'chromium headless shell'} {browser.version}", flush=True)

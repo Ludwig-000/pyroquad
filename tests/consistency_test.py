@@ -48,6 +48,9 @@ Every entry carries its own tolerance, chosen where it is recorded:
       count  - number of pixels that differ from the clear colour
       sha1   - info only (shows whether two platforms are bit-identical)
 Exceptions are recorded as "!TypeName" - an error is behaviour too.
+Rust panics are NOT: a panic is never intended, so it is never stored as a
+value to compare. It is recorded as {"panic": message} and every panic counts
+as a failure in every run - even when the baseline panicked the same way.
 
 Canvas mode (browser vs native)
 -------------------------------
@@ -153,10 +156,21 @@ def exc_name(e: BaseException) -> str:
     return "!" + type(e).__name__
 
 
+def is_panic(e) -> bool:
+    """A Rust panic that pyo3 turned into pyo3_runtime.PanicException."""
+    return isinstance(e, BaseException) and type(e).__name__ == "PanicException"
+
+
+def panic_message(e: BaseException) -> str:
+    lines = str(e).strip().splitlines()
+    return (lines[0] if lines else "panic")[:200]
+
+
 class Recorder:
     def __init__(self):
         self.data: dict[str, dict] = {}
         self.errors: list[str] = []
+        self.panics: list[tuple[str, str]] = []
         self._prefix: list[str] = []
         self.screen_dependent = False  # set while recording camera-based scenes
 
@@ -176,7 +190,10 @@ class Recorder:
                 rec._prefix.pop()
                 if ev is not None and not isinstance(ev, (KeyboardInterrupt, SystemExit)):
                     # A whole section blew up: record that as behaviour and continue.
-                    rec.data[rec._key(name + ".__section_error__")] = {"v": exc_name(ev)}
+                    if is_panic(ev):
+                        rec.note_panic(name + ".__section_panic__", ev)
+                    else:
+                        rec.data[rec._key(name + ".__section_error__")] = {"v": exc_name(ev)}
                     rec.errors.append(f"[{name}] " + "".join(traceback.format_exception_only(et, ev)).strip())
                     return True
                 return False
@@ -203,12 +220,18 @@ class Recorder:
         if breaker:
             value = breaker
         elif callable(value) and not isinstance(value, type):
+            probe_window_begin(self._key(key))
             try:
                 value = value()
             except (KeyboardInterrupt, SystemExit):
                 raise
             except BaseException as e:  # PanicException is a BaseException
                 value = e
+            finally:
+                probe_window_end()
+        if is_panic(value):
+            self.note_panic(key, value)
+            return value
         entry = {"v": norm(value)}
         if abs is not None:
             entry["abs"] = abs
@@ -228,6 +251,14 @@ class Recorder:
         self.data[k] = entry
         stream_write({"k": k, "e": entry})
         return value
+
+    def note_panic(self, key: str, e: BaseException):
+        """Panics are never behaviour: kept apart, and always reported."""
+        k = self._key(key)
+        msg = panic_message(e)
+        self.data[k] = {"panic": msg}
+        self.panics.append((k, msg))
+        stream_write({"k": k, "e": self.data[k]})
 
     def info(self, key, value):
         """Recorded but never compared (environment, hashes)."""
@@ -260,11 +291,6 @@ PROCESS_BREAKERS = {
         "audio.load_bytes.pcm16_zero_frames": "!HangsInBrowser",
         "audio.filedata.pcm16_zero_frames": "!HangsInBrowser",
     },
-    "darwin": {
-        # screen_width() before activate_engine() aborts the process (SIGABRT);
-        # elsewhere it returns 0.0. Found by CI run 42427363611.
-        "pre_engine.screen_width": "!AbortsProcess",
-    },
 }
 
 _last_key, _last_time = "<start>", time.time()
@@ -276,6 +302,8 @@ def progress(label: str):
     global _last_key, _last_time
     _last_key, _last_time = label, time.time()
     stream_write({"at": label})
+    if label == os.environ.get("CONSISTENCY_SELFTEST_ABORT_AT"):
+        os.abort()  # self-test of --ci crash handling
 
 
 _stream = None  # --stream PATH: every entry is appended as a JSON line, flushed
@@ -285,6 +313,121 @@ def stream_write(obj: dict):
     if _stream is not None:
         _stream.write(json.dumps(obj, ensure_ascii=False) + "\n")
         _stream.flush()
+
+
+_rust_panics: list[dict] = []  # every "thread ... panicked at" report seen on stderr
+_capture = {"on": False, "n": 0, "events": {}, "lock": None}
+_MARK = b"\x00PQ-PROBE "
+
+
+def capture_rust_panics():
+    """Tee fd 2 through a pipe and pick out Rust's panic reports.
+
+    Rust prints `thread '<name>' (id) panicked at <file:line:col>:` + the message
+    for EVERY panic - also for ones on the engine thread that never reach Python
+    as an exception. To attribute each report to the probe that caused it, every
+    probe is bracketed by begin/end markers written into the same pipe (see
+    probe_window_begin/_end): the pipe keeps the order, so a report between a
+    probe's markers was printed while that probe ran."""
+    if IS_WEB:
+        return
+    import re
+    import threading
+    try:
+        sys.stderr.flush()
+        orig = os.dup(2)
+        r, w = os.pipe()
+        os.dup2(w, 2)
+        os.close(w)
+    except OSError:
+        return
+    head = re.compile(rb"thread '([^']*)'(?: \(\d+\))? panicked at (.+?):\s*$")
+    _capture["lock"] = threading.Lock()
+
+    def pump():
+        stack: list[str] = []
+        last = "<start>"
+        pending = None
+        with os.fdopen(r, "rb", 0) as src:
+            for line in iter(src.readline, b""):
+                if line.startswith(_MARK):
+                    kind, n, key = line[len(_MARK):].decode(errors="replace").rstrip("\n").split(" ", 2)
+                    if kind == "B":
+                        stack.append(key)
+                    elif stack:
+                        last = stack.pop()
+                    with _capture["lock"]:
+                        ev = _capture["events"].pop(int(n), None)
+                    if ev is not None:
+                        ev.set()
+                    continue
+                try:
+                    os.write(orig, line)
+                except OSError:
+                    pass
+                m = head.match(line)
+                if m:
+                    pending = {"thread": m.group(1).decode(errors="replace"),
+                               "at": m.group(2).decode(errors="replace"),
+                               "probe": stack[-1] if stack else None, "after": last}
+                elif pending is not None:
+                    pending["message"] = line.decode(errors="replace").strip()[:200]
+                    _rust_panics.append(pending)
+                    pending = None
+
+    threading.Thread(target=pump, daemon=True).start()
+    _capture["on"] = True
+
+
+def _mark(kind: str, key: str = "") -> int:
+    with _capture["lock"]:
+        _capture["n"] += 1
+        n = _capture["n"]
+    os.write(2, _MARK + f"{kind} {n} {key}\n".encode("utf-8", "replace"))
+    return n
+
+
+def probe_window_begin(key: str):
+    if _capture["on"]:
+        _mark("B", key.replace("\n", " "))
+
+
+def probe_window_end():
+    """Wait until the reader has seen everything printed up to now."""
+    if not _capture["on"]:
+        return
+    import threading
+    ev = threading.Event()
+    with _capture["lock"]:
+        n = _capture["n"] + 1
+        _capture["events"][n] = ev
+    _mark("E")
+    ev.wait(2.0)
+
+
+def merge_rust_panics():
+    """Give recorded panics their source location; record the ones Python never saw."""
+    probe_window_begin("<end>")
+    probe_window_end()
+    seen = set()
+    for pnc in _rust_panics:
+        key, where, msg = pnc["probe"], pnc["at"], pnc.get("message", "")
+        if (key, where, msg) in seen:
+            continue
+        seen.add((key, where, msg))
+        entry = rec.data.get(key) if key else None
+        if entry is not None and "panic" in entry:
+            entry.setdefault("at", where)  # Python saw it: just add where it happened
+            continue
+        # Never surfaced as a Python exception (e.g. on the engine thread).
+        base = f"{key}.__panic__" if key else f"after.{pnc['after']}.__panic__"
+        k, i = base, 1
+        while k in rec.data:
+            i += 1
+            k = f"{base}{i}"
+        rec.data[k] = {"panic": f"{msg} (thread '{pnc['thread']}', not raised to Python)", "at": where}
+        rec.panics.append((k, msg))
+        stream_write({"k": k, "e": rec.data[k]})
 
 
 def start_watchdog():
@@ -384,6 +527,14 @@ def compare(expected: dict, actual: dict, label_e="baseline", label_a="this run"
         if k == "__meta__":
             continue
         e, a = expected.get(k), actual.get(k)
+        if a is not None and "panic" in a:
+            # never intended - a failure on every run, whatever the baseline did
+            failures += 1
+            failed.append(k)
+            lines.append(f"PANIC    {k}: {a['panic']}" + (f"  [{a['at']}]" if a.get("at") else ""))
+            continue
+        if e is not None and "panic" in e:
+            continue  # the baseline has no intended value here to compare against
         if a is None and only_present:
             continue
         if e is None or a is None:
@@ -852,6 +1003,8 @@ def probe_enums(p):
             try:
                 iv = int(m)
             except BaseException as e:
+                if is_panic(e):
+                    rec.note_panic(f"{E.__name__}.{n}.__int__", e)
                 iv = exc_name(e)
             out[n] = [repr(m), iv]
         rec(E.__name__, out)
@@ -1128,16 +1281,9 @@ def probe_objects2d(p):
         "c_zero": Circle(Vec2(5, 5), 0.0, 0.0, Color.RED),
     }
     names = list(shapes)
-    table = {}
-    for i, a in enumerate(names):
-        row = ""
+    for a in names:
         for b in names:
-            try:
-                row += "1" if shapes[a].collides_with(shapes[b]) else "0"
-            except BaseException:
-                row += "E"
-        table[a] = row
-    rec("collision_matrix", table)
+            rec(f"collision.{a}~{b}", lambda: shapes[a].collides_with(shapes[b]))
     lst = list(shapes.values())
     rec("collides_with_list", lambda: [names[lst.index(x)] if x in lst else "?"
                                        for x in shapes["r0"].collides_with_list(lst)])
@@ -1940,6 +2086,7 @@ def run_all() -> dict:
     import pyroquad as p
 
     start_watchdog()
+    capture_rust_panics()
 
     t0 = time.time()
     # Pure / pre-engine behaviour first.
@@ -1954,11 +2101,14 @@ def run_all() -> dict:
 
     rec("pre_engine.screen_width", lambda: p.screen_width())
 
+    # Not probes, but a crash report has to be able to name them.
+    progress("activate_engine()")
     p.activate_engine(p.Config(window_title="pyroquad consistency test", window_width=W, window_height=H,
                                fullscreen=False, window_resizable=False, high_dpi=False, swap_interval=0,
                                sample_count=MSAA))
     if IS_WEB:
         _web_canvas()
+    progress("first frames after activate_engine()")
     for _ in range(5):
         p.next_frame(None)
     if (p.screen_width(), p.screen_height()) != (W, H):
@@ -1995,6 +2145,7 @@ def run_all() -> dict:
     sizes = sorted(set(_screen_info.values()))
     rec.info("screen_data_sizes", sizes)
     _screen_now[:] = screen
+    merge_rust_panics()
     out = dict(rec.data)
     out["__meta__"] = make_meta()
     return out
@@ -2116,35 +2267,44 @@ def evaluate(base: dict, actual: dict, canvas=None, github=False) -> int:
     n, lines, failed = compare(base, actual, canvas=canvas, only_present=bool(crashed))
     bl, al = platform_label(bm), platform_label(am)
     entries = len(base) - 1
+    panics = [(k, actual[k]["panic"] + (f" [{actual[k]['at']}]" if actual[k].get("at") else ""))
+              for k in failed if "panic" in actual.get(k, {})]
+    diffs = [k for k in failed if "panic" not in actual.get(k, {})]
     if crashed:
         status = (f"CRASHED on {al}: {crashed}\n{len(actual) - 1} of {entries} entries were recorded, "
                   f"{n} of those differ from the baseline ({bl}).")
     elif n:
-        status = (f"FAILED: {n} of {entries} entries differ from the baseline (recorded on {bl} / "
-                  f"py{bm.get('python')}).\nIf the engine changed on purpose, re-record with --record on one platform.")
+        status = (f"FAILED: {len(diffs)} of {entries} entries differ from the baseline (recorded on {bl} / "
+                  f"py{bm.get('python')}), {len(panics)} probe(s) panicked.\n"
+                  "Panics are always bugs. If the engine changed on purpose, re-record with --record on one platform.")
     else:
         status = f"PASSED: all {entries} entries match the baseline (recorded on {bl})."
     if github:
         gh_group(f"Consistency differences: {al} vs {bl} ({n})", lines or ["(none)"])
         say(status)
+        if panics:
+            gh_annotation("warning", f"Consistency: {len(panics)} Rust panic(s) on {al}",
+                          "A panic is never intended behaviour. Not a build failure.\n"
+                          + "\n".join(f"{k}: {m}" for k, m in panics[:8])
+                          + (f"\n(+{len(panics) - 8} more)" if len(panics) > 8 else ""))
         if crashed:
             gh_annotation("warning", f"Consistency test crashed on {al}",
                           f"{crashed}. {n} of the {len(actual) - 1} recorded entries differ from {bl}. "
                           "Not a build failure.")
-        elif n:
+        elif diffs:
             shown = []
-            for k in failed[:6]:
+            for k in diffs[:6]:
                 e, a = base.get(k, {}).get("v"), actual.get(k, {}).get("v")
                 if isinstance(e, list) and len(e) > 4:  # grids: just name them
                     shown.append(k)
                 else:
                     shown.append(f"{k}: {_short(e, 40)} -> {_short(a, 40)}")
-            more = f"\n(+{len(failed) - len(shown)} more)" if len(failed) > len(shown) else ""
+            more = f"\n(+{len(diffs) - len(shown)} more)" if len(diffs) > len(shown) else ""
             gh_annotation("warning", f"Consistency: {al} differs from {bl}",
-                          f"{n} of {entries} entries differ - {areas(failed)}. Not a build failure; "
+                          f"{len(diffs)} of {entries} entries differ - {areas(diffs)}. Not a build failure; "
                           "the 'Consistency report' job summary lists every difference.\n"
                           + "\n".join(shown) + more)
-        else:
+        elif not panics:
             gh_annotation("notice", f"Consistency: {al} matches {bl}",
                           f"All {entries} entries match the baseline.")
     else:
@@ -2178,8 +2338,10 @@ def report(baseline_path: str, runs: list[tuple[str, str]], github: bool) -> str
             result = f"💥 crashed{mode}"
             note = f"`{crashed[:120]}`"
         elif n:
-            result = f"⚠️ differs{mode}"
-            note = areas(failed)
+            npanic = sum(1 for k in failed if "panic" in data.get(k, {}))
+            result = f"⚠️ differs{mode}" if npanic < n else f"💥 panics{mode}"
+            note = "; ".join(x for x in (f"**{npanic} panic(s)**" if npanic else "",
+                                         areas([k for k in failed if "panic" not in data.get(k, {})])) if x)
         else:
             result = f"✅ matches{mode}"
             note = ""
@@ -2194,7 +2356,7 @@ def report(baseline_path: str, runs: list[tuple[str, str]], github: bool) -> str
         if data is None:
             return "⛔"
         if key in failed:
-            return "⚠️"
+            return "💥" if "panic" in data.get(key, {}) else "⚠️"
         if data["__meta__"].get("crashed") and key not in data and key != "<screen size>":
             return "–"
         return "✅"
@@ -2216,14 +2378,15 @@ def report(baseline_path: str, runs: list[tuple[str, str]], github: bool) -> str
     if matrix:
         keys = sorted(matrix)
         shown = keys[:80]
-        md += ["### Entries that differ from the baseline", "",
+        md += ["### Entries that differ from the baseline or panic", "",
                "| Entry | " + " | ".join(labels) + " |",
                "|---|" + "|".join(":-:" for _ in labels) + "|"]
         md += [f"| `{k}` | " + " | ".join(matrix[k][label] for label in labels) + " |" for k in shown]
         if len(keys) > len(shown):
             md.append(f"| … {len(keys) - len(shown)} more | " + " | ".join("" for _ in labels) + " |")
         md.append("")
-        md.append("✅ matches · ⚠️ differs · – not recorded (the run crashed before it) · ⛔ no result")
+        md.append("✅ matches · ⚠️ differs · 💥 Rust panic (never intended) · – not recorded "
+                  "(the run crashed before it) · ⛔ no result")
         md.append("")
     if details:
         md += ["### Details", "", *details]
