@@ -311,8 +311,7 @@ def selftest_abort():
     library prints its reason to stderr, then calls abort(). The supervisor has to
     find that line again (see crash_cause)."""
     os.write(2, b"*** Terminating app due to uncaught exception 'SelfTestException', "
-                b"reason: 'CONSISTENCY_SELFTEST_ABORT_AT reached'
-")
+                b"reason: 'CONSISTENCY_SELFTEST_ABORT_AT reached'\n")
     os.abort()
 
 
@@ -2227,7 +2226,7 @@ LAST_RESULT_JSON = ""  # the browser runner reads the fingerprint from here
 PLATFORM_NAMES = {"win32": "Windows", "linux": "Linux", "darwin": "macOS", "emscripten": "Browser (wasm)"}
 
 
-def make_meta(crashed: str | None = None) -> dict:
+def make_meta(crashed: str | None = None, crash_detail: list[str] | None = None) -> dict:
     import platform as _platform
     meta = {"format": FORMAT_VERSION, "platform": sys.platform, "python": sys.version.split()[0],
             "machine": _platform.machine(), "w": W, "h": H,
@@ -2237,6 +2236,8 @@ def make_meta(crashed: str | None = None) -> dict:
         meta["label"] = os.environ["CONSISTENCY_LABEL"]
     if crashed:
         meta["crashed"] = crashed
+    if crash_detail:
+        meta["crash_detail"] = crash_detail  # stderr tail / OS crash report, see supervise
     return meta
 
 
@@ -2249,10 +2250,10 @@ def platform_label(meta: dict) -> str:
     return name
 
 
-def partial_result(reason: str) -> dict:
+def partial_result(reason: str, detail: list[str] | None = None) -> dict:
     """Whatever was recorded before a crash/hang, marked as such."""
     out = dict(rec.data)
-    out["__meta__"] = make_meta(crashed=reason)
+    out["__meta__"] = make_meta(crashed=reason, crash_detail=detail)
     return out
 
 
@@ -2260,9 +2261,9 @@ def partial_result_json(reason: str) -> str:
     return json.dumps(partial_result(reason))
 
 
-def report_crash(reason: str):
+def report_crash(reason: str, detail: list[str] | None = None):
     global LAST_RESULT_JSON
-    data = partial_result(reason)
+    data = partial_result(reason, detail)
     if IS_WEB:
         LAST_RESULT_JSON = json.dumps(data)
     if OPTS["dump"]:
@@ -2397,6 +2398,8 @@ def report(baseline_path: str, runs: list[tuple[str, str]], github: bool) -> str
             note = ""
         rows.append(f"| {label} | {result} | {recorded} | {n} | {note} |")
         if n or crashed:
+            if am.get("crash_detail"):
+                lines = [f"CRASH    {crashed}", *("  " + ln for ln in am["crash_detail"]), "", *lines]
             body = "\n".join(lines).replace("```", "'" * 3)
             details.append(f"<details><summary><b>{label}</b> – {n} difference(s)</summary>\n\n"
                            f"```text\n{body}\n```\n</details>\n")
@@ -2457,11 +2460,19 @@ def supervise(args: list[str]) -> int:
     child_args = [a for a in args if a != "--ci"] + ["--warn-only", "--github"]
     fd, stream_path = tempfile.mkstemp(prefix="consistency_", suffix=".jsonl")
     os.close(fd)
-    cmd = [sys.executable, os.path.abspath(__file__)] + child_args + ["--stream", stream_path]
+    log_path = stream_path[:-len(".jsonl")] + ".stderr.log"
+    cmd = ([sys.executable, os.path.abspath(__file__)] + child_args
+           + ["--stream", stream_path, "--stderr-log", log_path])
     sys.stdout.flush()
-    code = subprocess.call(cmd)
+    started = time.time()
+    child = subprocess.Popen(cmd)
+    code = child.wait()
     if code == 0:
-        os.remove(stream_path)
+        for path in (stream_path, log_path):
+            try:
+                os.remove(path)
+            except OSError:
+                pass
         return 0
     try:
         sig = signal.Signals(-code).name if code < 0 else (signal.Signals(code - 128).name if code > 128 else None)
@@ -2482,14 +2493,154 @@ def supervise(args: list[str]) -> int:
                 _screen_now[:] = obj["screen"]
     os.remove(stream_path)
     how = f"signal {sig}" if sig else (f"exit code {code:#x}" if code > 0xFFFF else f"exit code {code}")
+
+    # What the child printed last (it is gone, so its pump never forwarded that).
+    tail = read_stderr_tail(log_path)
+    try:
+        os.remove(log_path)
+    except OSError:
+        pass
+    cause = crash_cause(tail)
+    mac_report = macos_crash_report(child.pid, started) if sys.platform == "darwin" else []
+    if mac_report and (cause is None or cause.startswith("Fatal Python error")):
+        cause = macos_report_cause(mac_report) or cause
+
     reason = f"the process died ({how}) during '{last}'"
+    if cause:
+        reason += f": {cause}"
     print(f"\nCRASH: {reason} - {len(data)} entries were recorded before that", flush=True)
+    if tail:
+        gh_group(f"Last {len(tail)} stderr line(s) before the crash", tail)
+    if mac_report:
+        gh_group("macOS crash report", mac_report)
+    detail = tail[-CRASH_DETAIL_LINES:] + ([""] if tail and mac_report else []) + mac_report[:CRASH_DETAIL_LINES]
     rec.data = data
     OPTS["github"] = True
     if "--dump" in args:
         OPTS["dump"] = os.path.abspath(args[args.index("--dump") + 1])
-    report_crash(reason)
+    report_crash(reason, detail)
     return 0
+
+
+CRASH_DETAIL_LINES = 40  # per source, kept in the fingerprint and shown in the report
+
+
+def read_stderr_tail(path: str, max_lines: int = 60) -> list[str]:
+    """The last lines a crashed child wrote to stderr, without the probe markers."""
+    try:
+        with open(path, "rb") as f:
+            f.seek(0, os.SEEK_END)
+            f.seek(max(0, f.tell() - 256 * 1024))
+            raw = f.read()
+    except OSError:
+        return []
+    lines = [ln.decode("utf-8", "replace").rstrip() for ln in raw.splitlines() if not ln.startswith(_MARK)]
+    return [ln for ln in lines if ln.strip()][-max_lines:]
+
+
+def crash_cause(lines: list[str]) -> str | None:
+    """Pick the line that best names why the process died, most specific first."""
+    import re
+
+    def panic_at(i: int) -> str:
+        m = re.match(r"thread '([^']*)'(?: \(\d+\))? panicked at (.+?):\s*$", lines[i])
+        msg = lines[i + 1].strip() if i + 1 < len(lines) else ""
+        return f"Rust panic: {msg} (at {m.group(2)}, thread '{m.group(1)}')" if m else lines[i].strip()
+
+    def last(pattern: str, before: int | None = None) -> int | None:
+        for i in range(len(lines) if before is None else before, 0, -1):
+            if re.search(pattern, lines[i - 1]):
+                return i - 1
+        return None
+
+    def short(text: str) -> str:
+        return text.strip()[:300]
+
+    # an uncaught Objective-C exception (macOS AppKit) carries its own reason
+    i = last(r"\*\*\* Terminating app due to uncaught exception")
+    if i is not None:
+        return short(lines[i])
+    # Rust aborts the process: the panic right before that is the actual error
+    i = last(r"panic in a function that cannot unwind|non-unwinding panic|fatal runtime error|"
+             r"panicked while processing panic|failed to initiate panic")
+    if i is not None:
+        j = last(r"panicked at ", before=i)
+        return short(panic_at(j) if j is not None else lines[i])
+    i = last(r"panicked at ")
+    if i is not None:
+        return short("last one before the crash - " + panic_at(i))
+    # faulthandler only names the signal, but it is better than nothing
+    i = last(r"^Fatal Python error")
+    if i is not None:
+        return short(lines[i])
+    return None
+
+
+def macos_crash_report(pid: int, since: float, wait: float = 20.0) -> list[str]:
+    """macOS writes a crash report (.ips, JSON) for every process that dies of a signal.
+    It names an uncaught Objective-C exception and has a symbolicated backtrace of the
+    crashed thread - also when nothing reached stderr. ReportCrash writes it a few
+    seconds after the process died, so wait a little for it."""
+    import glob
+    dirs = [os.path.expanduser("~/Library/Logs/DiagnosticReports"), "/Library/Logs/DiagnosticReports"]
+    deadline = time.time() + wait
+    while True:
+        paths = [p for d in dirs for p in glob.glob(os.path.join(d, "*.ips"))]
+        for path in sorted(paths, key=os.path.getmtime, reverse=True):
+            try:
+                if os.path.getmtime(path) < since - 5:
+                    continue
+                with open(path, encoding="utf-8", errors="replace") as f:
+                    header_line, _, body_text = f.read().partition("\n")
+                body = json.loads(body_text)
+            except (OSError, ValueError):
+                continue
+            if body.get("pid") == pid:
+                return summarize_ips(path, body)
+        if time.time() > deadline:
+            return [f"(no crash report for pid {pid} showed up in {', '.join(dirs)} within {wait:.0f}s)"]
+        time.sleep(1)
+
+
+def summarize_ips(path: str, body: dict) -> list[str]:
+    images = body.get("usedImages") or []
+
+    def frame(fr: dict) -> str:
+        idx = fr.get("imageIndex", -1)
+        image = images[idx].get("name", "?") if isinstance(idx, int) and 0 <= idx < len(images) else "?"
+        sym = fr.get("symbol") or f"+{fr.get('imageOffset', 0):#x}"
+        src = f"  ({fr['sourceFile']}:{fr.get('sourceLine')})" if fr.get("sourceFile") else ""
+        return f"    {image:<28} {sym}{src}"
+
+    out = [f"report: {path}"]
+    exc = body.get("exception") or {}
+    if exc:
+        out.append("exception: " + " ".join(str(exc[k]) for k in ("type", "signal", "subtype") if exc.get(k)))
+    for image, messages in (body.get("asi") or {}).items():
+        for msg in messages if isinstance(messages, list) else [messages]:
+            out.append(f"message ({image}): {msg}")
+    backtrace = body.get("lastExceptionBacktrace")
+    if backtrace:
+        out.append("last exception backtrace:")
+        out += [frame(fr) for fr in backtrace[:30]]
+    threads = body.get("threads") or []
+    ft = body.get("faultingThread")
+    if isinstance(ft, int) and 0 <= ft < len(threads):
+        t = threads[ft]
+        label = t.get("name") or t.get("queue") or ""
+        out.append(f"crashed thread: #{ft}{' (the main thread)' if ft == 0 else ' (NOT the main thread)'}"
+                   + (f" {label}" if label else ""))
+        out += [frame(fr) for fr in (t.get("frames") or [])[:30]]
+    return out
+
+
+def macos_report_cause(report: list[str]) -> str | None:
+    """The most telling message of a crash report: an exception reason over `abort() called`."""
+    messages = [ln.split(": ", 1)[1] for ln in report if ln.startswith("message (")]
+    for msg in messages:
+        if "abort() called" not in msg:
+            return msg.strip()[:300]
+    return messages[0].strip()[:300] if messages else None
 
 
 def _canvas_flag(args):

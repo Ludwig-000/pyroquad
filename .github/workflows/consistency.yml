@@ -111,6 +111,16 @@ jobs:
             frames-${{ matrix.id }}/
           if-no-files-found: ignore
 
+      # The test already prints the relevant part of a macOS crash report (see
+      # macos_crash_report in the test); this keeps the full reports for a closer look.
+      - name: Upload macOS Crash Reports
+        if: always() && runner.os == 'macOS'
+        uses: actions/upload-artifact@v4
+        with:
+          name: crash-reports-${{ matrix.id }}
+          path: ~/Library/Logs/DiagnosticReports/*.ips
+          if-no-files-found: ignore
+
   # The browser: builds the wasm module the way run_web.bat does, then runs the
   # test page in headless Chromium (WebGL2 via SwiftShader) - tests/web_ci_runner.py.
   wasm:
