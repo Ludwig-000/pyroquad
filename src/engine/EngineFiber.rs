@@ -61,6 +61,8 @@ pub fn start(engine: impl FnOnce() + 'static) -> PyResult<()> {
     // catch_unwind, Rust aborts with "cannot catch foreign exceptions" and the exception's
     // name and reason are lost - so print every one the moment it is thrown.
     crate::engine::MacExceptionLog::install();
+    // Macs without GPU access (VMs) only have a software OpenGL renderer, which miniquad won't take.
+    crate::engine::MacSoftwareGL::install();
 
     // corosensei copies the closure onto the new stack and refuses anything over 1 KiB. The
     // engine carries the whole window config, icons included, so hand it over boxed.
