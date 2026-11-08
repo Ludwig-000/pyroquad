@@ -62,6 +62,10 @@ pub fn start(engine: impl FnOnce() + 'static) -> PyResult<()> {
     // name and reason are lost - so print every one the moment it is thrown.
     crate::engine::MacExceptionLog::install();
 
+    // corosensei copies the closure onto the new stack and refuses anything over 1 KiB. The
+    // engine carries the whole window config, icons included, so hand it over boxed.
+    let engine: Box<dyn FnOnce()> = Box::new(engine);
+
     let stack = DefaultStack::new(STACK_SIZE).map_err(|e| {
         PyRuntimeError::new_err(format!("Could not allocate the engine's stack: {e}"))
     })?;
