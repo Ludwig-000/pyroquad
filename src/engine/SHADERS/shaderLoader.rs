@@ -14,10 +14,21 @@ pub fn shader_load() {
             ..Default::default()
         };
 
+        // The browser runs WebGL2, which only gives derivatives (dFdx/dFdy) to GLSL ES 3.00 shaders.
+        // Without them, meshes without normals fall back to a fixed normal and are lit wrongly.
+        // The shaders map the 1.00 keywords themselves; only the version line has to change.
+        #[cfg(target_os = "emscripten")]
+        let (vertex, fragment) = (
+            VERTEX_SHADER_SRC.replacen("#version 100", "#version 300 es", 1),
+            FRAGMENT_SHADER_SRC.replacen("#version 100", "#version 300 es", 1),
+        );
+        #[cfg(not(target_os = "emscripten"))]
+        let (vertex, fragment) = (VERTEX_SHADER_SRC, FRAGMENT_SHADER_SRC);
+
         let material: Material = mq::load_material(
             ShaderSource::Glsl {
-                vertex: VERTEX_SHADER_SRC,
-                fragment: FRAGMENT_SHADER_SRC,
+                vertex: &vertex,
+                fragment: &fragment,
             },
             MaterialParams {
                 pipeline_params,

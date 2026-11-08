@@ -6,6 +6,14 @@
 
 precision highp float;
 
+// The browser compiles this as GLSL ES 3.00 (see shaderLoader): map the 1.00 keywords.
+#if __VERSION__ >= 300
+#define varying in
+#define texture2D texture
+out vec4 frag_color;
+#define gl_FragColor frag_color
+#endif
+
 varying lowp vec4 v_color;
 varying highp vec3 v_world_pos;
 varying mediump vec3 v_normal;
@@ -18,7 +26,8 @@ void main() {
     vec3 N = v_normal;
 
     if (length(N) < 1e-5) {
-        #ifdef GL_OES_standard_derivatives
+        // derivatives: an extension in GLSL ES 1.00, built in from 3.00 (the browser, see shaderLoader)
+        #if defined(GL_OES_standard_derivatives) || __VERSION__ >= 300
             vec3 dx = dFdx(v_world_pos);
             vec3 dy = dFdy(v_world_pos);
             N = normalize(cross(dx, dy));

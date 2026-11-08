@@ -18,5 +18,3 @@ pub mod PDropGuard;
 pub mod MacExceptionLog;
 #[cfg(target_os = "macos")]
 pub mod EngineFiber;
-#[cfg(target_os = "macos")]
-pub mod MacSoftwareGL;

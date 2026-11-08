@@ -1,5 +1,11 @@
 #version 100
 precision highp float;
+
+// The browser compiles this as GLSL ES 3.00 (see shaderLoader): map the 1.00 keywords.
+#if __VERSION__ >= 300
+#define attribute in
+#define varying out
+#endif
 attribute vec3 position;
 attribute vec2 texcoord;
 attribute vec4 color0;
