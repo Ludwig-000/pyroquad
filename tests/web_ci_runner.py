@@ -188,12 +188,24 @@ def run_page(url: str, run_timeout: float) -> tuple[str, str, str | None]:
     from playwright.sync_api import sync_playwright
 
     with sync_playwright() as pw:
-        browser = pw.chromium.launch(headless=True, args=[
+        flags = [
             "--enable-unsafe-swiftshader",            # WebGL2 without a GPU
             "--use-angle=swiftshader",
             "--ignore-gpu-blocklist",
             "--autoplay-policy=no-user-gesture-required",  # WebAudio without a click
-        ])
+        ]
+        # Playwright's headless shell first, then the full Chromium in Chrome's
+        # new headless mode - whichever build is installed and allowed to start.
+        browser, errors = None, []
+        for channel in (None, "chromium"):
+            try:
+                browser = pw.chromium.launch(headless=True, channel=channel, args=flags)
+                print(f"browser: {channel or 'chromium headless shell'} {browser.version}", flush=True)
+                break
+            except Exception as e:
+                errors.append(f"{channel or 'headless shell'}: {str(e).splitlines()[0]}")
+        if browser is None:
+            raise RuntimeError("no Chromium build could be launched - " + " | ".join(errors))
         page = browser.new_page(viewport={"width": 800, "height": 600})
         page.on("pageerror", lambda e: print("[page error]", e, flush=True))
         page.goto(url)

@@ -28,8 +28,8 @@ CI (.github/workflows/consistency.yml, every push - warning-only for now):
 
 In the browser:  run_web.bat tests/consistency_test.py
 (the canvas is resized to the test resolution automatically; the result is printed.
-Probes listed in WEB_HANGS never return in the browser and are recorded as
-"!HangsInBrowser" there instead of being run.)
+Probes listed in PROCESS_BREAKERS - hangs or aborts on one platform - are not
+run there; a placeholder value is recorded instead, which shows up as a difference.)
 
 Workflow when the engine changes on purpose: run with --record on one platform,
 commit the baseline, then run the plain compare everywhere else.
@@ -199,8 +199,9 @@ class Recorder:
             os.abort()  # self-test of --ci crash handling: a native abort, like an engine crash
         if TRACE:
             say("  .. " + self._key(key))
-        if IS_WEB and self._key(key) in WEB_HANGS:
-            value = "!HangsInBrowser"
+        breaker = PROCESS_BREAKERS.get(sys.platform, {}).get(self._key(key))
+        if breaker:
+            value = breaker
         elif callable(value) and not isinstance(value, type):
             try:
                 value = value()
@@ -248,14 +249,22 @@ def asset(name: str) -> bytes | None:
         return None
 
 
-# Probes that never return in the browser (the engine waits for an answer that
-# never comes) and therefore cannot run there. They are recorded as a failing
-# value instead of being executed, so the inconsistency stays visible.
-# Remove an entry once the engine is fixed.
-WEB_HANGS = {
-    # WebAudio rejects a 0-frame WAV and the load never reports back (natively: loads)
-    "audio.load_bytes.pcm16_zero_frames",
-    "audio.filedata.pcm16_zero_frames",
+# Probes that take the whole process down on one platform (a hang that never
+# returns, or a native abort), so nothing after them could be tested there.
+# On that platform they are not executed but recorded as the value given here,
+# which still shows up as a difference - the inconsistency stays visible.
+# Remove an entry once the engine is fixed.   {sys.platform: {probe key: value}}
+PROCESS_BREAKERS = {
+    "emscripten": {
+        # WebAudio rejects a 0-frame WAV and the load never reports back (natively: loads)
+        "audio.load_bytes.pcm16_zero_frames": "!HangsInBrowser",
+        "audio.filedata.pcm16_zero_frames": "!HangsInBrowser",
+    },
+    "darwin": {
+        # screen_width() before activate_engine() aborts the process (SIGABRT);
+        # elsewhere it returns 0.0. Found by CI run 42427363611.
+        "pre_engine.screen_width": "!AbortsProcess",
+    },
 }
 
 _last_key, _last_time = "<start>", time.time()

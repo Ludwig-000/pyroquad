@@ -157,11 +157,16 @@ jobs:
         if: steps.pyodide-cache.outputs.cache-hit != 'true'
         run: python web/get_pyodide.py
 
+      # Browsers and system packages separately: an apt hiccup must not cost us
+      # the browser download. (A continue-on-error step always shows as passed;
+      # if the test step then says it could not launch Chromium, look here.)
       - name: Install Headless Chromium
         continue-on-error: true
         run: |
           python -m pip install "playwright==1.55.0"
-          python -m playwright install --with-deps chromium
+          for i in 1 2 3; do python -m playwright install chromium chromium-headless-shell && break; sleep 10; done
+          sudo python -m playwright install-deps chromium || echo "::warning::playwright install-deps failed - Chromium may not start"
+          ls ~/.cache/ms-playwright || true
 
       - name: Consistency Test (headless browser)
         continue-on-error: true
