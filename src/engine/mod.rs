@@ -16,3 +16,5 @@ pub mod Atomics;
 pub mod PDropGuard;
 #[cfg(target_os = "macos")]
 pub mod MacExceptionLog;
+#[cfg(target_os = "macos")]
+pub mod EngineFiber;

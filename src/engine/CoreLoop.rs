@@ -1047,6 +1047,9 @@ pub async fn proccess_commands_loop() {
         while let Some(command) = COMMAND_QUEUE.pop() {
             dispatch(command, &mut st).await;
         }
+        // macOS: nothing left to do, hand the main thread back to Python. See EngineFiber.
+        #[cfg(target_os = "macos")]
+        crate::engine::EngineFiber::idle();
     }
 }
 

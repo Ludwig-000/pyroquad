@@ -102,12 +102,6 @@ pub fn activate_engine( conf: Option<Config>) -> PyResult<()>{
         return Ok(());
     }
 
-    // AppKit reports misuse by throwing Objective-C exceptions. If one unwinds into the
-    // catch_unwind below, Rust aborts with "cannot catch foreign exceptions" and the
-    // exception's name and reason are lost - so print every one the moment it is thrown.
-    #[cfg(target_os = "macos")]
-    crate::engine::MacExceptionLog::install();
-
     #[allow(unreachable_code)]
     {
 
@@ -118,7 +112,9 @@ pub fn activate_engine( conf: Option<Config>) -> PyResult<()>{
 
     let _guard = crate::PDropGuard!("'activate_engine' cannot be called multiple times in once process.\nIf your intention is to have multiple windows, I'd suggest using python's 'multiprocessing' library.");
 
-    std::thread::spawn(move || {
+    // The engine. It gets a thread of its own - except on macOS, which only allows windows on
+    // the main thread: there it runs on this thread, taking turns with Python. See EngineFiber.
+    let engine = move || {
 
         let panic_catcher = panic::catch_unwind(AssertUnwindSafe(|| {
 
@@ -145,7 +141,16 @@ pub fn activate_engine( conf: Option<Config>) -> PyResult<()>{
         }));
 
 
-    });
+    };
+
+    #[cfg(not(target_os = "macos"))]
+    std::thread::spawn(engine);
+
+    #[cfg(target_os = "macos")]
+    if let Err(e) = crate::engine::EngineFiber::start(engine) {
+        ENGINE_CURRENTLY_ACTIVE.store(false, Ordering::SeqCst);
+        return Err(e);
+    }
 
     
     rx.recv().map_err(|_| {

@@ -17,7 +17,7 @@ description: Cross-platform python game engine, based on 'Macroquad'.
 - **Architecture:** No subclassing; no async functions.
 - **Initialization:** `activate_engine()` must be called to start the engine. Most functions require an active engine; blocking calls throw `BaseException` if called early.
 - **Architecture:** No support for subclassing. No async functions.
-- **Thread-Safety:** Fully thread-safe.
+- **Thread-Safety:** Fully thread-safe. On macOS, call `activate_engine()` from the main thread. There the engine shares the main thread with Python, so a call from another thread that waits for the engine (e.g. `screen_width()`) is answered the next time the main thread calls the engine, at the latest at `next_frame()`. Don't make the main thread wait on such a thread (e.g. `join()`) without calling `next_frame()`.
 - **Utilities:** `next_frame()` draws, clears buffer, and cleans memory. Use `get_delta_time()`, `screen_width()`, and `screen_height()` for frame logic.
 
 ## Coordinate System & Colors
