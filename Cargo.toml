@@ -106,9 +106,5 @@ abi_310 = ["pyo3/abi3", "pyo3/abi3-py310", "pyo3/experimental-inspect"] # python
 abi_39 = ["pyo3/abi3", "pyo3/abi3-py39", "pyo3/experimental-inspect"] # python 3.9 and up
 
 
-# custom quad-snd fork (linux compatibility fix, graceful handling of missing audio devices).
-# this has to be a patch, not a plain dependency: macroquad's audio module depends on
-# quad-snd from crates.io, and only a patch makes macroquad use the fork instead.
-# the fork's Cargo.toml must keep version 0.2.8, or cargo will ignore the patch.
 [patch.crates-io]
-quad-snd = { git = "https://github.com/Ludwig-000/quad-snd" }
+quad-snd = { git = "https://github.com/Ludwig-000/quad-snd" } # patch for compatability and to prevent panics.

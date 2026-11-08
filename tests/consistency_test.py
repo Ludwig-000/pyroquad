@@ -2103,9 +2103,15 @@ def run_all() -> dict:
 
     # Not probes, but a crash report has to be able to name them.
     progress("activate_engine()")
-    p.activate_engine(p.Config(window_title="pyroquad consistency test", window_width=W, window_height=H,
-                               fullscreen=False, window_resizable=False, high_dpi=False, swap_interval=0,
-                               sample_count=MSAA))
+    try:
+        p.activate_engine(p.Config(window_title="pyroquad consistency test", window_width=W, window_height=H,
+                                   fullscreen=False, window_resizable=False, high_dpi=False, swap_interval=0,
+                                   sample_count=MSAA))
+    except Exception as e:
+        # stderr is teed through a pipe that can lose its last lines when the process
+        # ends (see capture_rust_panics), so put the reason on stdout as well.
+        print(f"\nactivate_engine() failed: {type(e).__name__}: {e}", flush=True)
+        raise
     if IS_WEB:
         _web_canvas()
     progress("first frames after activate_engine()")

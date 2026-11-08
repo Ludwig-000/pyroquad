@@ -102,6 +102,14 @@ pub fn activate_engine( conf: Option<Config>) -> PyResult<()>{
         return Ok(());
     }
 
+    // crash catcher for MAC OS
+    #[cfg(target_os = "macos")]
+    {
+        return Err(pyo3::exceptions::PyRuntimeError::new_err(
+            "ernm temporary flag. MACOS support should come back soon >_<"
+        ));
+    }
+
     #[allow(unreachable_code)]
     {
 
