@@ -14,3 +14,5 @@ pub mod PThreading;
 pub mod MouseInsideScreen;
 pub mod Atomics;
 pub mod PDropGuard;
+#[cfg(target_os = "macos")]
+pub mod MacExceptionLog;

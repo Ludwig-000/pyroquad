@@ -2560,6 +2560,12 @@ def crash_cause(lines: list[str]) -> str | None:
     i = last(r"\*\*\* Terminating app due to uncaught exception")
     if i is not None:
         return short(lines[i])
+    # an Objective-C exception that unwound into Rust's catch_unwind: Rust aborts without
+    # naming it, but the engine logs every throw (src/engine/MacExceptionLog.rs)
+    i = last(r"Rust cannot catch foreign exceptions")
+    if i is not None:
+        j = last(r"^Objective-C exception thrown on ", before=i)
+        return short(lines[j] if j is not None else lines[i])
     # Rust aborts the process: the panic right before that is the actual error
     i = last(r"panic in a function that cannot unwind|non-unwinding panic|fatal runtime error|"
              r"panicked while processing panic|failed to initiate panic")
