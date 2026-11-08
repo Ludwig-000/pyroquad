@@ -147,7 +147,16 @@ pub mod _pyroquad {
     pub use crate::py_abstractions::UniformType::{Comparison, EulerRot, UniformType};
 
     #[pymodule_export]
-    pub use crate::py_abstractions::PFuture::{EmptyFuture, FileDataFuture, Future, ImageFuture};
+    pub use crate::py_abstractions::PFuture::Future;
+
+    /// The concrete future types. They only come from functions like `load_file_future()`,
+    /// so they live here instead of cluttering the top-level namespace.
+    #[pyo3::pymodule]
+    #[pyo3(gil_used = false)]
+    pub mod futures {
+        #[pymodule_export]
+        pub use crate::py_abstractions::PFuture::{EmptyFuture, FileDataFuture, ImageFuture};
+    }
 }
 
 
