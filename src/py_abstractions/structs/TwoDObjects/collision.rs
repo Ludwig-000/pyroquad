@@ -42,14 +42,19 @@ pub fn collides_with_rec_rec(lhs: &Rectangle, rhs: &Rectangle) -> bool {
         (-rhs.rotation.sin(), rhs.rotation.cos()),
     ];
 
+    // A negative scale mirrors the rectangle; the area it covers is the same,
+    // so collisions only ever look at the absolute half-extents.
+    let (lhs_hw, lhs_hh) = (lhs.scale.x.abs() / 2.0, lhs.scale.y.abs() / 2.0);
+    let (rhs_hw, rhs_hh) = (rhs.scale.x.abs() / 2.0, rhs.scale.y.abs() / 2.0);
+
     for (ax, ay) in axes.iter() {
         let dist = (diff_x * ax + diff_y * ay).abs();
 
-        let lhs_extents = (lhs.scale.x / 2.0) * (axes[0].0 * ax + axes[0].1 * ay).abs() +
-                          (lhs.scale.y / 2.0) * (axes[1].0 * ax + axes[1].1 * ay).abs();
+        let lhs_extents = lhs_hw * (axes[0].0 * ax + axes[0].1 * ay).abs() +
+                          lhs_hh * (axes[1].0 * ax + axes[1].1 * ay).abs();
 
-        let rhs_extents = (rhs.scale.x / 2.0) * (axes[2].0 * ax + axes[2].1 * ay).abs() +
-                          (rhs.scale.y / 2.0) * (axes[3].0 * ax + axes[3].1 * ay).abs();
+        let rhs_extents = rhs_hw * (axes[2].0 * ax + axes[2].1 * ay).abs() +
+                          rhs_hh * (axes[3].0 * ax + axes[3].1 * ay).abs();
 
         if dist > (lhs_extents + rhs_extents) {
             return false;
@@ -81,8 +86,8 @@ pub fn collides_with_rec_circ(lhs: &Rectangle, rhs: &Circle) -> bool {
     let local_circ_x = diff_x * cos_r + diff_y * sin_r;
     let local_circ_y = -diff_x * sin_r + diff_y * cos_r;
 
-    let half_w = lhs.scale.x / 2.0;
-    let half_h = lhs.scale.y / 2.0;
+    let half_w = lhs.scale.x.abs() / 2.0;
+    let half_h = lhs.scale.y.abs() / 2.0;
 
     let closest_x = local_circ_x.clamp(-half_w, half_w);
     let closest_y = local_circ_y.clamp(-half_h, half_h);

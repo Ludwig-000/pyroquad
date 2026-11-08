@@ -7,7 +7,7 @@ use macroquad::prelude::KeyCode;
 
 use mq::Vec2;
 
-use crate::engine::AtomicF32::AtomicF32;
+use crate::engine::Atomics::{AtomicF32, AtomicVec2};
 
 
 /// Some information about the state of the engine, that is only updates once a frame,
@@ -15,10 +15,11 @@ use crate::engine::AtomicF32::AtomicF32;
 pub static DELTA_TIME: AtomicF32  = AtomicF32::new(0.);
 pub static FPS: AtomicI32 =  AtomicI32::new(0);
 
-pub static MOUSE_POSITION: Mutex<(f32,f32)> = Mutex::new((0.,0.));
-pub static MOUSE_DELTA_POSITION: Mutex<Vec2> = Mutex::new(Vec2::new(0.,0.));
-pub static MOUSE_POSITION_LOCAL: Mutex<Vec2> = Mutex::new(Vec2::new(0.,0.));
-pub static MOUSE_WHEEL: Mutex<(f32,f32)> = Mutex::new((0.,0.));
+pub static MOUSE_POSITION: AtomicVec2 = AtomicVec2::new(0., 0.);
+pub static MOUSE_DELTA_POSITION: AtomicVec2 = AtomicVec2::new(0., 0.);
+pub static MOUSE_POSITION_LOCAL: AtomicVec2 = AtomicVec2::new(0., 0.);
+
+pub static MOUSE_WHEEL: AtomicVec2 = AtomicVec2::new(0., 0.);
 
 pub static SCREEN_HEIGHT: AtomicF32 = AtomicF32::new(0.);
 pub static SCREEN_WIDTH: AtomicF32 = AtomicF32::new(0.);
@@ -60,10 +61,20 @@ pub fn update_frame_info(){
         *LASK_KEY_PRESSED.lock().unwrap() = mq::get_last_key_pressed();
         *CHAR_PRESSED.lock().unwrap() = mq::get_char_pressed();
 
-        *MOUSE_POSITION.lock().unwrap() = mq::mouse_position();
-        *MOUSE_DELTA_POSITION.lock().unwrap() = mq::mouse_delta_position();
-        *MOUSE_POSITION_LOCAL.lock().unwrap() = mq::mouse_position_local();
-        *MOUSE_WHEEL.lock().unwrap() = mq::mouse_wheel();
+        {
+            let (x,y)= mq::mouse_position();
+            MOUSE_POSITION.store(mq::Vec2::new(x, y), Ordering::Relaxed);
+        }
+        {
+            let (x,y)= mq::mouse_wheel();
+            MOUSE_WHEEL.store(mq::Vec2::new(x, y), Ordering::Relaxed);
+        }
+        MOUSE_POSITION_LOCAL.store(mq::mouse_position_local(), Ordering::Relaxed);
+        MOUSE_DELTA_POSITION.store(mq::mouse_delta_position(), Ordering::Relaxed);
+        //*MOUSE_POSITION.lock().unwrap() = mq::mouse_position();
+        //*MOUSE_DELTA_POSITION.lock().unwrap() = mq::mouse_delta_position();
+        //*MOUSE_POSITION_LOCAL.lock().unwrap() = mq::mouse_position_local();
+        //*MOUSE_WHEEL.lock().unwrap() = mq::mouse_wheel();
 
         SCREEN_HEIGHT.store(mq::screen_height(), Ordering::Relaxed);
         SCREEN_WIDTH.store(mq::screen_width(), Ordering::Relaxed);

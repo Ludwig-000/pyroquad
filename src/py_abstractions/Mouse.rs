@@ -67,22 +67,22 @@ pub fn get_mouse_buttons_released() -> HashSet<MouseButton> {
 #[pyfunction]
 pub fn get_mouse_wheel() -> Vec2 {
     use crate::engine::FrameInfo as fi;
-    let wheel = *fi::MOUSE_WHEEL.lock().unwrap();
-    Vec2::const_new(wheel.0, wheel.1)
+    let wheel = fi::MOUSE_WHEEL.load(std::sync::atomic::Ordering::Relaxed);
+    wheel.into()
 }
 
 #[pyfunction]
 pub fn get_mouse_position() -> Vec2 {
     use crate::engine::FrameInfo as fi;
-    let mouse =*fi::MOUSE_POSITION.lock().unwrap();
-    Vec2::const_new(mouse.0, mouse.1)
+    let mouse = fi::MOUSE_POSITION.load(std::sync::atomic::Ordering::Relaxed);
+    mouse.into()
 }
 
 /// Return mouse position in range [-1; 1].
 #[pyfunction]
 pub fn get_mouse_position_local() -> Vec2 {
     use crate::engine::FrameInfo as fi;
-    let mouse = *fi::MOUSE_POSITION_LOCAL.lock().unwrap();
+    let mouse = fi::MOUSE_POSITION_LOCAL.load(std::sync::atomic::Ordering::Relaxed);
     mouse.into()
 }
 
@@ -90,16 +90,15 @@ pub fn get_mouse_position_local() -> Vec2 {
 #[pyfunction]
 pub fn get_mouse_delta_position() -> Vec2 {
     use crate::engine::FrameInfo as fi;
-    let mouse = *fi::MOUSE_DELTA_POSITION.lock().unwrap();
+    let mouse = fi::MOUSE_DELTA_POSITION.load(std::sync::atomic::Ordering::Relaxed);
     mouse.into()
 }
 
 /// Clears input queue
 #[pyfunction]
 pub fn clear_input_queue() {
-    // TOOD: make sure the internal macroquad buffer stays synced with our custom buffer!!!!!!
     clear_keys_pressed();
-    COMMAND_QUEUE.push(  Command::ClearInputQueue ); // THIS DOES NOT PROPERLY CLEAR THE INPUT QUEUE!!!
+    COMMAND_QUEUE.push(  Command::ClearInputQueue );
 }
 
 
