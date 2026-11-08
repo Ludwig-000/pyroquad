@@ -487,10 +487,39 @@ def start_watchdog():
                 reason = f"hang: no progress for {STALL_SECONDS}s, last probe started: {_last_key}"
                 print(f"\nHANG: no progress for {STALL_SECONDS}s, last probe started: {_last_key}\n"
                       "(the engine thread most likely panicked - see the panic message above)", flush=True)
-                report_crash(reason)
+                stacks = macos_native_stacks() if sys.platform == "darwin" else []
+                if stacks:
+                    gh_group("Native stacks at the hang", stacks) if OPTS["github"] else say("\n".join(stacks))
+                report_crash(reason, stacks[:80] or None)
                 os._exit(0 if OPTS["warn_only"] else 3)
 
     threading.Thread(target=watch, daemon=True).start()
+
+
+def macos_native_stacks(max_lines: int = 300) -> list[str]:
+    """Where every thread of this process is stuck, from macOS' `sample` tool.
+    On macOS the engine runs on the main thread (on a stack of its own), so a hang
+    there shows up only as native frames - Python's tracebacks end at activate_engine."""
+    import subprocess
+    import tempfile
+    path = os.path.join(tempfile.gettempdir(), f"pyroquad-hang-{os.getpid()}.txt")
+    cmd = ["/usr/bin/sample", str(os.getpid()), "1", "-mayDie", "-file", path]
+    # A python.org build uses the hardened runtime, which keeps even its own user from
+    # sampling it; CI runners have password-less sudo.
+    for prefix in ([], ["sudo", "-n"]):
+        try:
+            subprocess.run(prefix + cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, timeout=60)
+            with open(path, encoding="utf-8", errors="replace") as f:
+                text = f.read()
+        except (OSError, subprocess.SubprocessError):
+            continue
+        start = text.find("Call graph:")
+        end = text.find("Binary Images:")
+        lines = text[start if start >= 0 else 0:end if end >= 0 else None].rstrip().splitlines()
+        if len(lines) > max_lines:
+            lines = lines[:max_lines] + [f"... {len(lines) - max_lines} more line(s) in {path}"]
+        return lines
+    return ["(could not sample the process: /usr/bin/sample failed, also with sudo)"]
 
 
 # ---------------------------------------------------------------------------
