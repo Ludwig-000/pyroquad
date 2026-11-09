@@ -1,14 +1,15 @@
 use crate::py_abstractions::structs::GLAM::Vec2::Vec2;
 use crate::py_abstractions::structs::GLAM::BVec3::BVec3;
+use crate::py_abstractions::structs::GLAM::Vec4::Vec4;
+use crate::py_abstractions::structs::GLAM::Quat::Quat;
 use glam::Vec3 as gl;
-use glam::Vec2 as glVec2;
 use pyo3::prelude::*;
 
 
 
 //
 // A python abstraction for the Vec3 struct from the GLAM crate.
-// This file implements all functionality from Glam, replacing uses of BVec3 and Vec2 with the pyabstracted versions.
+// This file implements all functionality from Glam, replacing uses of BVec3, Vec2 and Vec4 with the pyabstracted versions.
 //
 #[cfg_attr(feature = "abi_314", pyclass(eq,str,frozen, immutable_type, from_py_object))]
 #[cfg_attr(not(feature = "abi_314"), pyclass(eq,str,frozen, from_py_object))]
@@ -41,91 +42,91 @@ impl Vec3 {
 #[pymethods]
 impl Vec3 {
     #[new]
-    pub fn new(x: f32, y: f32, z: f32) -> Self {
+    pub const fn new(x: f32, y: f32, z: f32) -> Self {
         Self { x, y, z }
     }
 
     /// A vector with all elements set to `0.0`.
     #[classattr]
-    pub fn ZERO() -> Vec3 {
+    pub const fn ZERO() -> Vec3 {
         Self::const_splat(0.0)
     }
 
     /// A vector with all elements set to `1.0`.
     #[classattr]
-    pub fn ONE() -> Vec3 {
+    pub const fn ONE() -> Vec3 {
         Self::const_splat(1.0)
     }
 
     /// A vector with all elements set to `-1.0`.
     #[classattr]
-    pub fn NEG_ONE() -> Vec3 {
+    pub const fn NEG_ONE() -> Vec3 {
         Self::const_splat(-1.0)
     }
 
     /// A vector with all elements set to the lowest finite 32-bit float.
     #[classattr]
-    pub fn MIN() -> Vec3 {
+    pub const fn MIN() -> Vec3 {
         Self::const_splat(f32::MIN)
     }
 
     /// A vector with all elements set to the largest finite 32-bit float.
     #[classattr]
-    pub fn MAX() -> Vec3 {
+    pub const fn MAX() -> Vec3 {
         Self::const_splat(f32::MAX)
     }
 
     /// A vector with all elements set to `float("nan")`.
     #[classattr]
-    pub fn NAN() -> Vec3 {
+    pub const fn NAN() -> Vec3 {
         Self::const_splat(f32::NAN)
     }
 
     /// A vector with all elements set to `float("inf")`.
     #[classattr]
-    pub fn INFINITY() -> Vec3 {
+    pub const fn INFINITY() -> Vec3 {
         Self::const_splat(f32::INFINITY)
     }
 
     /// A vector with all elements set to `float("-inf")`.
     #[classattr]
-    pub fn NEG_INFINITY() -> Vec3 {
+    pub const fn NEG_INFINITY() -> Vec3 {
         Self::const_splat(f32::NEG_INFINITY)
     }
 
     /// The unit vector in the X direction `(1.0, 0.0, 0.0)`.
     #[classattr]
-    pub fn X() -> Vec3 {
+    pub const fn X() -> Vec3 {
         Self::const_new(1.0, 0.0, 0.0)
     }
 
     /// The unit vector in the Y direction `(0.0, 1.0, 0.0)`.
     #[classattr]
-    pub fn Y() -> Vec3 {
+    pub const fn Y() -> Vec3 {
         Self::const_new(0.0, 1.0, 0.0)
     }
 
     /// The unit vector in the Z direction `(0.0, 0.0, 1.0)`.
     #[classattr]
-    pub fn Z() -> Vec3 {
+    pub const fn Z() -> Vec3 {
         Self::const_new(0.0, 0.0, 1.0)
     }
 
     /// The unit vector in the negative X direction `(-1.0, 0.0, 0.0)`.
     #[classattr]
-    pub fn NEG_X() -> Vec3 {
+    pub const fn NEG_X() -> Vec3 {
         Self::const_new(-1.0, 0.0, 0.0)
     }
 
     /// The unit vector in the negative Y direction `(0.0, -1.0, 0.0)`.
     #[classattr]
-    pub fn NEG_Y() -> Vec3 {
+    pub const fn NEG_Y() -> Vec3 {
         Self::const_new(0.0, -1.0, 0.0)
     }
 
     /// The unit vector in the negative Z direction `(0.0, 0.0, -1.0)`.
     #[classattr]
-    pub fn NEG_Z() -> Vec3 {
+    pub const fn NEG_Z() -> Vec3 {
         Self::const_new(0.0, 0.0, -1.0)
     }
 
@@ -144,61 +145,66 @@ impl Vec3 {
     /// uses the element from `if_false`.
     #[staticmethod]
     #[inline]
-    pub fn select(mask: &BVec3, if_true: Self, if_false: Self) -> PyResult<Self> {
-        
-        Ok(Self {
-            x: if mask.test(0)? { if_true.x } else { if_false.x },
-            y: if mask.test(1)? { if_true.y } else { if_false.y },
-            z: if mask.test(2)? { if_true.z } else { if_false.z },
-        })
+    pub const fn select(mask: BVec3, if_true: Self, if_false: Self) -> Self {
+        Self::const_new(
+            if mask.x { if_true.x } else { if_false.x },
+            if mask.y { if_true.y } else { if_false.y },
+            if mask.z { if_true.z } else { if_false.z },
+        )
     }
 
     /// Creates a new vector from a list.
     #[staticmethod]
     #[inline]
-    pub fn from_array(a: [f32; 3]) -> Self {
+    pub const fn from_array(a: [f32; 3]) -> Self {
         Self::const_new(a[0], a[1], a[2])
     }
 
-    // constructor for splat values
+    /// Creates a vector with all elements set to `value`.
     #[staticmethod]
     #[inline(always)]
-    pub fn splat(value: f32) -> Vec3 {
+    pub const fn splat(value: f32) -> Vec3 {
         Vec3 { x: value, y: value, z: value }
     }
 
     /// `[x, y, z]`
     #[inline]
-    pub fn to_array(&self) -> [f32; 3] {
+    pub const fn to_array(&self) -> [f32; 3] {
         [self.x, self.y, self.z]
     }
 
+    /// Creates a 4D vector from `self` and the given `w` value.
     #[inline]
-    pub fn truncate(&self) -> Vec2 {
-        let s: gl=  (*self).into();
-        let g2: glVec2 = s.truncate();
-        g2.into()         
+    pub const fn extend(&self, w: f32) -> Vec4 {
+        Vec4::const_new(self.x, self.y, self.z, w)
+    }
+
+    /// Creates a 2D vector from the `x` and `y` elements of `self`, discarding `z`.
+    #[inline]
+    pub const fn truncate(&self) -> Vec2 {
+        Vec2::const_new(self.x, self.y)
     }
 
 
     /// Creates a 3D vector from `self` with the given value of `x`.
     #[inline]
-    pub fn with_x(&self, x: f32) -> Self {
+    pub const fn with_x(&self, x: f32) -> Self {
         Self::const_new(x, self.y, self.z)
     }
 
     /// Creates a 3D vector from `self` with the given value of `y`.
     #[inline]
-    pub fn with_y(&self, y: f32) -> Self {
+    pub const fn with_y(&self, y: f32) -> Self {
         Self::const_new(self.x, y, self.z)
     }
 
     /// Creates a 3D vector from `self` with the given value of `z`.
     #[inline]
-    pub fn with_z(&self, z: f32) -> Self {
+    pub const fn with_z(&self, z: f32) -> Self {
         Self::const_new(self.x, self.y, z)
     }
 
+    /// Computes the dot product of `self` and `rhs`.
     #[inline]
     pub fn dot(&self, rhs: Self) -> f32 {
         glam::Vec3::from(*self).dot(glam::Vec3::from(rhs))
@@ -416,7 +422,7 @@ impl Vec3 {
 
     /// Performs `math.isnan()` on each element of `self`, returning a vector mask of the results.
     ///
-    /// In other words, this computes `[math.isnan(x), math.isnan(y), math.isnan(z), math.isnan(w)]`.
+    /// In other words, this computes `[math.isnan(x), math.isnan(y), math.isnan(z)]`.
     #[inline]
     pub fn is_nan_mask(&self) -> BVec3 {
         let a: gl= (*self).into();
@@ -822,9 +828,8 @@ impl Vec3 {
     #[pyo3(name = "zero")]
     #[staticmethod]
     #[inline]
-    pub fn default() -> Self {
-        let a: gl = gl::default();
-        a.into()
+    pub const fn default() -> Self {
+        Self::const_splat(0.0)
     }
 
 
@@ -898,11 +903,32 @@ impl Vec3 {
     //    }
     //}
 
+    /// `float * Vec3` scales, `Quat * Vec3` rotates the vector.
     #[pyo3(name = "__rmul__")]
     #[inline]
-    pub fn rmul(&self, lhs: f32) -> Self {
+    pub fn rmul(&self, lhs: F32OrQuat) -> Self {
         let a: gl = (*self).into();
-        (lhs * a).into()
+        match lhs {
+            F32OrQuat::F32(lhs) => (lhs * a).into(),
+            F32OrQuat::Quat(lhs) => {
+                let q: glam::Quat = lhs.into();
+                (q * a).into()
+            }
+        }
+    }
+
+    #[pyo3(name = "__rtruediv__")]
+    #[inline]
+    pub fn rtruediv(&self, lhs: f32) -> Self {
+        let a: gl = (*self).into();
+        (lhs / a).into()
+    }
+
+    #[pyo3(name = "__neg__")]
+    #[inline]
+    pub fn neg(&self) -> Self {
+        let a: gl = (*self).into();
+        (-a).into()
     }
 
     #[pyo3(name = "__add__")]
@@ -1059,4 +1085,10 @@ impl From<gl> for Vec3 {
 pub enum Vec3OrF32 {
     Vec3(Vec3),
     F32(f32),
+}
+
+#[derive(FromPyObject)]
+pub enum F32OrQuat {
+    F32(f32),
+    Quat(Quat),
 }

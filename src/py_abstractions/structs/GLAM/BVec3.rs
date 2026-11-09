@@ -1,4 +1,3 @@
-
 use glam::BVec3 as gl;
 
 use pyo3::prelude::*;
@@ -33,13 +32,6 @@ impl BVec3 {
     pub const fn const_splat(value: bool) -> Self {
     BVec3 { x: value, y: value, z: value }
     }
-
-    /// Creates a new vector mask from a bool array.
-    #[inline]
-    #[must_use]
-    pub const fn from_array(a: [bool; 3]) -> Self {
-        Self { x: a[0],y :  a[1],z:  a[2]   }
-    }
 }
 
 const MASK: [u32; 2] = [0, 0xff_ff_ff_ff];
@@ -47,71 +39,87 @@ const MASK: [u32; 2] = [0, 0xff_ff_ff_ff];
 #[pymethods]
 impl BVec3 {
     #[new]
-    pub fn new(x: bool, y: bool, z: bool) -> Self {
+    pub const fn new(x: bool, y: bool, z: bool) -> Self {
         Self { x, y, z }
     }
 
     /// All false.
     #[classattr]
-    fn FALSE() -> BVec3 {
+    pub const fn FALSE() -> BVec3 {
         Self::const_splat(false)
     }
 
     /// All true.
     #[classattr]
-    fn TRUE() -> BVec3 {
+    pub const fn TRUE() -> BVec3 {
         Self::const_splat(true)
     }
 
+    /// Creates a vector mask with all elements set to `value`.
     #[staticmethod]
-    pub fn splat(value: bool) -> Self {
+    pub const fn splat(value: bool) -> Self {
         BVec3 { x: value, y: value, z: value }
     }
 
+    /// Creates a new vector mask from a list of 3 bools.
+    #[staticmethod]
     #[inline]
-    pub fn bitmask(&self) -> u32 {
+    pub const fn from_array(a: [bool; 3]) -> Self {
+        Self { x: a[0], y: a[1], z: a[2] }
+    }
+
+    /// Returns a bitmask with the lowest 3 bits set from the elements of `self`.
+    ///
+    /// A true element results in a `1` bit and a false element in a `0` bit.  Element `x` goes
+    /// into the first lowest bit, element `y` into the second, etc.
+    #[inline]
+    pub const fn bitmask(&self) -> u32 {
         (self.x as u32) | (self.y as u32) << 1 | (self.z as u32) << 2
     }
 
+    /// Returns true if any of the elements are true, false otherwise.
     #[inline]
-    pub fn any(&self) -> bool {
+    pub const fn any(&self) -> bool {
         self.x || self.y || self.z
     }
 
     /// Returns true if all the elements are true, false otherwise.
     #[inline]
-    pub fn all(&self) -> bool {
+    pub const fn all(&self) -> bool {
         self.x && self.y && self.z
     }
 
+    /// Returns the element at `index` (0, 1 or 2).
+    ///
+    /// Raises:
+    ///     BaseException: If `index` is greater than 2.
     #[inline]
     pub fn test(&self, index: usize) -> PyResult<bool> {
-        py_assert!(index == 0 || index == 1 || index == 2, "index out of bounds.");
-        match index {
-            0 => Ok(self.x),
-            1 => Ok(self.y),
-            2 => Ok(self.z),
-            _ => panic!("index out of bounds"),
-        }
+        py_assert!(index < 3, "index out of bounds.");
+        Ok(self.into_bool_array()[index])
     }
 
+    /// Returns a copy of `self` with the element at `index` (0, 1 or 2) set to `value`.
+    ///
+    /// Raises:
+    ///     BaseException: If `index` is greater than 2.
     #[inline]
-    pub fn set(&self, index: usize, value: bool) -> Self{
-        match index {
-            0 => Self::const_new(value, self.y, self.z),
-            1 => Self::const_new(self.x, value, self.z),
-            2 => Self::const_new(self.x, self.y, value),
-            _ => panic!("index out of bounds"),
-        }
+    pub fn set(&self, index: usize, value: bool) -> PyResult<Self> {
+        py_assert!(index < 3, "index out of bounds.");
+        let mut a = self.into_bool_array();
+        a[index] = value;
+        Ok(Self::from_array(a))
     }
 
+    /// `[x, y, z]`
     #[inline]
-    pub fn into_bool_array(&self) -> [bool; 3] {
+    pub const fn into_bool_array(&self) -> [bool; 3] {
         [self.x, self.y, self.z]
     }
 
+    /// `[x, y, z]`, with `True` as `0xFFFFFFFF` and `False` as `0`.
     #[inline]
-    pub fn into_u32_array(&self) -> [u32; 3] {
+    pub const fn into_u32_array(&self) -> [u32; 3] {
         [
             MASK[self.x as usize],
             MASK[self.y as usize],
@@ -119,8 +127,9 @@ impl BVec3 {
         ]
     }
 
+    /// Element-wise `and`. Same as `self & rhs`.
     #[inline]
-    pub fn bitand(&self, rhs: Self) -> Self {
+    pub const fn bitand(&self, rhs: Self) -> Self {
         Self {
             x: self.x & rhs.x,
             y: self.y & rhs.y,
@@ -128,8 +137,9 @@ impl BVec3 {
         }
     }
 
+    /// Element-wise `or`. Same as `self | rhs`.
     #[inline]
-    pub fn bitor(&self, rhs: Self) -> Self {
+    pub const fn bitor(&self, rhs: Self) -> Self {
         Self {
             x: self.x | rhs.x,
             y: self.y | rhs.y,
@@ -137,8 +147,9 @@ impl BVec3 {
         }
     }
 
+    /// Element-wise `xor`. Same as `self ^ rhs`.
     #[inline]
-    fn bitxor(&self, rhs: Self) -> Self {
+    pub const fn bitxor(&self, rhs: Self) -> Self {
         Self {
             x: self.x ^ rhs.x,
             y: self.y ^ rhs.y,
@@ -146,8 +157,9 @@ impl BVec3 {
         }
     }
 
+    /// Element-wise `not`. Same as `~self`.
     #[inline]
-    fn _not(&self) -> Self {
+    pub const fn _not(&self) -> Self {
         Self {
             x: !self.x,
             y: !self.y,
@@ -155,7 +167,21 @@ impl BVec3 {
         }
     }
 
+    const fn __and__(&self, rhs: Self) -> Self {
+        self.bitand(rhs)
+    }
 
+    const fn __or__(&self, rhs: Self) -> Self {
+        self.bitor(rhs)
+    }
+
+    const fn __xor__(&self, rhs: Self) -> Self {
+        self.bitxor(rhs)
+    }
+
+    const fn __invert__(&self) -> Self {
+        self._not()
+    }
 }
 
 

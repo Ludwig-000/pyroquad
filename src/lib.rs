@@ -118,7 +118,7 @@ pub mod _pyroquad {
 
     #[pymodule_export]
     pub use crate::py_abstractions::structs::GLAM::{
-        BVec2::BVec2, BVec3::BVec3, Mat4::Mat4, Quat::Quat, Vec2::Vec2, Vec3::Vec3, Vec4::Vec4};
+        BVec2::BVec2, BVec3::BVec3, BVec4::BVec4, Mat4::Mat4, Quat::Quat, Vec2::Vec2, Vec3::Vec3, Vec4::Vec4};
 
 
 

@@ -1,5 +1,6 @@
 
 use crate::py_abstractions::structs::GLAM::BVec2::BVec2;
+use crate::py_abstractions::structs::GLAM::Vec3::Vec3;
 use glam::Vec2 as gl;
 
 use pyo3::prelude::*;
@@ -8,7 +9,7 @@ use pyo3::prelude::*;
 
 //
 // A python abstraction for the Vec2 struct from the GLAM crate.
-// This file implements all functionality from Glam, replacing uses of BVec2 and Vec2 with the pyabstracted versions.
+// This file implements all functionality from Glam, replacing uses of BVec2, Vec2 and Vec3 with the pyabstracted versions.
 //
 #[cfg_attr(feature = "abi_314", pyclass(eq,str,frozen, immutable_type, from_py_object))]
 #[cfg_attr(not(feature = "abi_314"), pyclass(eq,str,frozen, from_py_object))]
@@ -39,84 +40,84 @@ impl Vec2 {
 #[pymethods]
 impl Vec2 {
     #[new]
-    pub fn new(x: f32, y: f32) -> Self {
+    pub const fn new(x: f32, y: f32) -> Self {
         Self { x, y}
     }
 
     /// A vector with all elements set to `0.0`.
     #[classattr]
-    pub fn ZERO() -> Vec2 {
+    pub const fn ZERO() -> Vec2 {
         Self::const_splat(0.0)
     }
 
     /// A vector with all elements set to `1.0`.
     #[classattr]
-    pub fn ONE() -> Vec2 {
+    pub const fn ONE() -> Vec2 {
         Self::const_splat(1.0)
     }
 
     /// A vector with all elements set to `-1.0`.
     #[classattr]
-    pub fn NEG_ONE() -> Vec2 {
+    pub const fn NEG_ONE() -> Vec2 {
         Self::const_splat(-1.0)
     }
 
     /// A vector with all elements set to the lowest finite 32-bit float.
     #[classattr]
-    pub fn MIN() -> Vec2 {
+    pub const fn MIN() -> Vec2 {
         Self::const_splat(f32::MIN)
     }
 
     /// A vector with all elements set to the largest finite 32-bit float.
     #[classattr]
-    pub fn MAX() -> Vec2 {
+    pub const fn MAX() -> Vec2 {
         Self::const_splat(f32::MAX)
     }
 
     /// A vector with all elements set to `float("nan")`.
     #[classattr]
-    pub fn NAN() -> Vec2 {
+    pub const fn NAN() -> Vec2 {
         Self::const_splat(f32::NAN)
     }
 
     /// A vector with all elements set to `float("inf")`.
     #[classattr]
-    pub fn INFINITY() -> Vec2 {
+    pub const fn INFINITY() -> Vec2 {
         Self::const_splat(f32::INFINITY)
     }
 
     /// A vector with all elements set to `float("-inf")`.
     #[classattr]
-    pub fn NEG_INFINITY() -> Vec2 {
+    pub const fn NEG_INFINITY() -> Vec2 {
         Self::const_splat(f32::NEG_INFINITY)
     }
 
     /// The unit vector in the X direction `(1.0, 0.0)`.
     #[classattr]
-    pub fn X() -> Vec2 {
+    pub const fn X() -> Vec2 {
         Self::const_new(1.0, 0.0)
     }
 
     /// The unit vector in the Y direction `(0.0, 1.0)`.
     #[classattr]
-    pub fn Y() -> Vec2 {
+    pub const fn Y() -> Vec2 {
         Self::const_new(0.0, 1.0)
     }
 
     /// The unit vector in the negative X direction `(-1.0, 0.0)`.
     #[classattr]
-    pub fn NEG_X() -> Vec2 {
-        Self::new(-1.0, 0.0)
+    pub const fn NEG_X() -> Vec2 {
+        Self::const_new(-1.0, 0.0)
     }
 
     /// The unit vector in the negative Y direction `(0.0, -1.0)`.
     #[classattr]
-    pub fn NEG_Y() -> Vec2 {
+    pub const fn NEG_Y() -> Vec2 {
         Self::const_new(0.0, -1.0)
     }
 
 
-    /// The X, Y, and Z unit vectors as a list `[X, Y, Z]`.
+    /// The X and Y unit vectors as a list `[X, Y]`.
     #[classattr]
     pub fn AXES() -> Vec<Vec2> {
         vec![Self::X(), Self::Y()]
@@ -131,47 +132,53 @@ impl Vec2 {
     /// uses the element from `if_false`.
     #[staticmethod]
     #[inline]
-    pub fn select(mask: &BVec2, if_true: Self, if_false: Self) -> PyResult<Self> {
-        
-        Ok(Self {
-            x: if mask.test(0)? { if_true.x } else { if_false.x },
-            y: if mask.test(1)? { if_true.y } else { if_false.y },
-        })
+    pub const fn select(mask: BVec2, if_true: Self, if_false: Self) -> Self {
+        Self::const_new(
+            if mask.x { if_true.x } else { if_false.x },
+            if mask.y { if_true.y } else { if_false.y },
+        )
     }
 
-    // constructor for splat values
+    /// Creates a vector with all elements set to `value`.
     #[staticmethod]
     #[inline(always)]
-    pub fn splat(value: f32) -> Vec2 {
+    pub const fn splat(value: f32) -> Vec2 {
         Vec2 { x: value, y: value}
     }
 
     /// Creates a new vector from a list.
     #[staticmethod]
     #[inline]
-    pub fn from_array(a: [f32; 2]) -> Self {
+    pub const fn from_array(a: [f32; 2]) -> Self {
         Self::const_new(a[0], a[1])
     }
 
-    /// `[x, y, z]`
+    /// `[x, y]`
     #[inline]
-    pub fn to_array(&self) -> [f32; 2] {
+    pub const fn to_array(&self) -> [f32; 2] {
         [self.x, self.y]
     }
 
 
-    /// Creates a 3D vector from `self` with the given value of `x`.
+    /// Creates a 3D vector from `self` and the given `z` value.
     #[inline]
-    pub fn with_x(&self, x: f32) -> Self {
+    pub const fn extend(&self, z: f32) -> Vec3 {
+        Vec3::const_new(self.x, self.y, z)
+    }
+
+    /// Creates a 2D vector from `self` with the given value of `x`.
+    #[inline]
+    pub const fn with_x(&self, x: f32) -> Self {
         Self::const_new(x, self.y)
     }
 
-    /// Creates a 3D vector from `self` with the given value of `y`.
+    /// Creates a 2D vector from `self` with the given value of `y`.
     #[inline]
-    pub fn with_y(&self, y: f32) -> Self {
+    pub const fn with_y(&self, y: f32) -> Self {
         Self::const_new(self.x, y)
     }
 
+    /// Computes the dot product of `self` and `rhs`.
     #[inline]
     pub fn dot(&self, rhs: Self) -> f32 {
         glam::Vec2::from(*self).dot(glam::Vec2::from(rhs))
@@ -354,10 +361,10 @@ impl Vec2 {
         a.copysign(b).into()    
     }
 
-    /// Returns a bitmask with the lowest 3 bits set to the sign bits from the elements of `self`.
+    /// Returns a bitmask with the lowest 2 bits set to the sign bits from the elements of `self`.
     ///
     /// A negative element results in a `1` bit and a positive element in a `0` bit.  Element `x` goes
-    /// into the first lowest bit, element `y` into the second, etc.
+    /// into the first lowest bit, element `y` into the second.
     #[inline]
     pub fn is_negative_bitmask(&self) -> u32 {
         let a: gl= (*self).into();
@@ -382,7 +389,7 @@ impl Vec2 {
 
     /// Performs `math.isnan()` on each element of `self`, returning a vector mask of the results.
     ///
-    /// In other words, this computes `[math.isnan(x), math.isnan(y), math.isnan(z), math.isnan(w)]`.
+    /// In other words, this computes `[math.isnan(x), math.isnan(y)]`.
     #[inline]
     pub fn is_nan_mask(&self) -> BVec2 {
         let a: gl= (*self).into();
@@ -680,6 +687,40 @@ impl Vec2 {
         a.to_angle()
     }
 
+    /// Creates a 2D vector containing `[cos(angle), sin(angle)]`. This can be used in
+    /// conjunction with the `rotate()` method, e.g.
+    /// `Vec2.from_angle(math.pi).rotate(Vec2.Y)` will create the vector `[-1, 0]`
+    /// and rotate `Vec2.Y` around it returning `-Vec2.Y`.
+    #[staticmethod]
+    #[inline]
+    pub fn from_angle(angle: f32) -> Self {
+        gl::from_angle(angle).into()
+    }
+
+    /// Returns a vector that is equal to `self` rotated by 90 degrees.
+    #[inline]
+    pub fn perp(&self) -> Self {
+        let a: gl = (*self).into();
+        a.perp().into()
+    }
+
+    /// The perpendicular dot product of `self` and `rhs`.
+    /// Also known as the wedge product, 2D cross product, and determinant.
+    #[inline]
+    pub fn perp_dot(&self, rhs: Self) -> f32 {
+        let a: gl = (*self).into();
+        a.perp_dot(rhs.into())
+    }
+
+    /// Returns `rhs` rotated by the angle of `self`. If `self` is normalized,
+    /// then this just rotation. This is what you usually want. Otherwise,
+    /// it will be like a rotation with a multiplication by `self`'s length.
+    #[inline]
+    pub fn rotate(&self, rhs: Self) -> Self {
+        let a: gl = (*self).into();
+        a.rotate(rhs.into()).into()
+    }
+
 
 
     /// Calculates the midpoint between `self` and `rhs`.
@@ -761,13 +802,12 @@ impl Vec2 {
 
 
 
-    /// The default `Vec2` is `[0.0, 0.0, 0.0]`.
+    /// The default `Vec2` is `[0.0, 0.0]`.
     #[pyo3(name = "zero")]
     #[staticmethod]
     #[inline]
-    pub fn default() -> Self {
-        let a: gl = gl::default();
-        a.into()
+    pub const fn default() -> Self {
+        Self::const_splat(0.0)
     }
 
 
@@ -807,6 +847,20 @@ impl Vec2 {
     //    }
     //}
 
+
+    #[pyo3(name = "__rtruediv__")]
+    #[inline]
+    pub fn rtruediv(&self, lhs: f32) -> Self {
+        let a: gl = (*self).into();
+        (lhs / a).into()
+    }
+
+    #[pyo3(name = "__neg__")]
+    #[inline]
+    pub fn neg(&self) -> Self {
+        let a: gl = (*self).into();
+        (-a).into()
+    }
 
     #[pyo3(name = "__mul__")]
     #[inline]

@@ -18,27 +18,6 @@ pub struct BVec2 {
     pub y: bool,
 }
 
-impl BVec2 {
-    // Const constructor for compile-time constants
-    #[inline(always)]
-    pub const fn const_new(x: bool, y: bool) -> Self {
-    BVec2 { x, y }
-    }
-
-
-    // Const constructor for splat values
-    #[inline(always)]
-    pub const fn const_splat(value: bool) -> Self {
-    BVec2 { x: value, y: value }
-    }
-
-    /// Creates a new vector mask from a bool array.
-    #[inline]
-    #[must_use]
-    pub const fn from_array(a: [bool; 2]) -> Self {
-        Self { x: a[0],y :  a[1] }
-    }
-}
 
 const MASK: [u32; 2] = [0, 0xff_ff_ff_ff];
 
@@ -46,105 +25,140 @@ const MASK: [u32; 2] = [0, 0xff_ff_ff_ff];
 impl BVec2 {
     
     #[new]
-    pub fn new(x: bool, y: bool) -> Self {
+    #[inline(always)]
+    pub const fn new(x: bool, y: bool) -> Self {
         Self { x, y }
     }
 
+
     /// All false.
     #[classattr]
-    fn FALSE() -> BVec2 {
-        Self::const_splat(false)
+    pub const fn FALSE() -> BVec2 {
+        Self::splat(false)
     }
 
     /// All true.
     #[classattr]
-    fn TRUE() -> BVec2 {
-        Self::const_splat(true)
+    pub const fn TRUE() -> BVec2 {
+        Self::splat(true)
     }
     
+    /// Creates a vector mask with all elements set to `value`.
     #[staticmethod]
-    pub fn splat(value: bool) -> Self {
+    pub const fn splat(value: bool) -> Self {
         BVec2 { x: value, y: value }
     }
-    
+
+    /// Creates a new vector mask from a list of 2 bools.
+    #[staticmethod]
     #[inline]
-    pub fn bitmask(&self) -> u32 {
+    pub const fn from_array(a: [bool; 2]) -> Self {
+        Self { x: a[0], y: a[1] }
+    }
+
+    /// Returns a bitmask with the lowest 2 bits set from the elements of `self`.
+    ///
+    /// A true element results in a `1` bit and a false element in a `0` bit.  Element `x` goes
+    /// into the first lowest bit, element `y` into the second.
+    #[inline]
+    pub const fn bitmask(&self) -> u32 {
         (self.x as u32) | (self.y as u32) << 1
     }
 
     /// Returns true if any of the elements are true, false otherwise.
     #[inline]
-    pub fn any(&self) -> bool {
+    pub const fn any(&self) -> bool {
         self.x || self.y
     }
 
     /// Returns true if all the elements are true, false otherwise.
     #[inline]
-    pub fn all(&self) -> bool {
+    pub const fn all(&self) -> bool {
         self.x && self.y
     }
 
-    /// Returns the value of index 1 or index 2.
+    /// Returns the element at `index` (0 or 1).
+    ///
+    /// Raises:
+    ///     BaseException: If `index` is greater than 1.
     #[inline]
     pub fn test(&self, index: usize) -> PyResult<bool> {
-        py_assert!(index == 0 || index == 1, "index out of bounds.");
-        match index {
-            0 => Ok(self.x),
-            1 => Ok(self.y),
-            _ => panic!("index out of bounds"),
-        }
+        py_assert!(index < 2, "index out of bounds.");
+        Ok(if index == 0 { self.x } else { self.y })
     }
 
-    /// Sets the value of index 1 or index 2.
+    /// Returns a copy of `self` with the element at `index` (0 or 1) set to `value`.
+    ///
+    /// Raises:
+    ///     BaseException: If `index` is greater than 1.
     #[inline]
-    pub fn set(&self, index: usize, value: bool)-> Self {
-        match index {
-            0 => Self::const_new(value, self.y),
-            1 => Self::const_new(self.x, value),
-            _ => panic!("index out of bounds"),
-        }
+    pub fn set(&self, index: usize, value: bool) -> PyResult<Self> {
+        py_assert!(index < 2, "index out of bounds.");
+        Ok(if index == 0 { Self::new(value, self.y) } else { Self::new(self.x, value) })
     }
 
+    /// `[x, y]`
     #[inline]
-    pub fn into_bool_array(&self) -> [bool; 2] {
+    pub const fn into_bool_array(&self) -> [bool; 2] {
         [self.x, self.y]
     }
 
+    /// `[x, y]`, with `True` as `0xFFFFFFFF` and `False` as `0`.
     #[inline]
-    pub fn into_u32_array(&self) -> [u32; 2] {
+    pub const fn into_u32_array(&self) -> [u32; 2] {
         [MASK[self.x as usize], MASK[self.y as usize]]
     }
 
+    /// Element-wise `and`. Same as `self & rhs`.
     #[inline]
-    pub fn bitand(&self, rhs: Self) -> Self {
+    pub const fn bitand(&self, rhs: Self) -> Self {
         Self {
             x: self.x & rhs.x,
             y: self.y & rhs.y,
         }
     }
 
+    /// Element-wise `or`. Same as `self | rhs`.
     #[inline]
-    pub fn bitor(&self, rhs: Self) -> Self {
+    pub const fn bitor(&self, rhs: Self) -> Self {
         Self {
             x: self.x | rhs.x,
             y: self.y | rhs.y,
         }
     }
 
+    /// Element-wise `xor`. Same as `self ^ rhs`.
     #[inline]
-    fn bitxor(&self, rhs: Self) -> Self {
+    pub const fn bitxor(&self, rhs: Self) -> Self {
         Self {
             x: self.x ^ rhs.x,
             y: self.y ^ rhs.y,
         }
     }
 
+    /// Element-wise `not`. Same as `~self`.
     #[inline]
-    fn _not(&self) -> Self {
+    pub const fn _not(&self) -> Self {
         Self {
             x: !self.x,
             y: !self.y,
         }
+    }
+
+    const fn __and__(&self, rhs: Self) -> Self {
+        self.bitand(rhs)
+    }
+
+    const fn __or__(&self, rhs: Self) -> Self {
+        self.bitor(rhs)
+    }
+
+    const fn __xor__(&self, rhs: Self) -> Self {
+        self.bitxor(rhs)
+    }
+
+    const fn __invert__(&self) -> Self {
+        self._not()
     }
 
 
