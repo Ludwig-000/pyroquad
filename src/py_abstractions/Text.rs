@@ -88,7 +88,7 @@ pub struct TextDimensions {
     #[pyo3(get,set)]
     pub height: f32,
     /// Height offset from the baseline of the text.
-    /// "draw_text(.., X, Y, ..)" will be rendered in a "Rect::new(X, Y - dimensions.offset_y, dimensions.width, dimensions.height)"
+    /// "draw_text(.., X, Y, ..)" will be rendered in a rectangle at `(X, Y - dimensions.offset_y)` with size `(dimensions.width, dimensions.height)`
     /// For reference check "text_measures" example.
     #[pyo3(get,set)]
     pub offset_y: f32,
@@ -114,6 +114,7 @@ impl From<TextDimensions> for mq::TextDimensions{
 }
 
 #[pyfunction]
+#[pyo3(signature = (text, font = None, font_size = 20, font_scale = 1.0))]
 pub fn measure_text(text: String, font: Option<Font>, font_size: u16, font_scale: f32)-> PyResult<TextDimensions>{
     let (sender, receiver) = PChannel::channel();
     COMMAND_QUEUE.push( Command::MeasureText { text, font: font.map(Into::into ), font_size, font_scale, sender });

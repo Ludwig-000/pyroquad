@@ -136,7 +136,7 @@ pub fn download_file(url: &str) -> PyResult<FileData> {
 /// In the browser this is a real `fetch`, waited on by suspending the Python
 /// stack through JSPI rather than by blocking the thread - blocking would stop
 /// the event loop that has to deliver the response in the first place.
-/// Prefer [`download_file_future`] when loading more than one thing: it lets
+/// Prefer `download_file_future()` when loading more than one thing: it lets
 /// the downloads overlap.
 #[cfg(target_os = "emscripten")]
 #[pyfunction]

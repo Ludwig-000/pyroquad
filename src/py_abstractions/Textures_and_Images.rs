@@ -70,8 +70,9 @@ impl Image {
         }
     }
 
-    /// Creates an Image filled with the provided [Color].
+    /// Creates an Image filled with the provided `Color`.
     #[staticmethod]
+    #[pyo3(signature = (width, height, color = Color::WHITE()))]
     pub fn gen_image_color(width: u16, height: u16, color: Color) -> Image {
         let mut bytes = vec![0; width as usize * height as usize * 4];
         for i in 0..width as usize * height as usize {
@@ -87,7 +88,7 @@ impl Image {
         }
     }
 
-    /// Updates this image from a slice of [Color]s.
+    /// Updates this image from a list of `Color`s.
     pub fn update(&mut self, colors: Vec<Color>) -> PyResult<()>{
         py_assert!(self.width as usize * self.height as usize == colors.len());
 
@@ -100,7 +101,7 @@ impl Image {
         Ok(())
     }
 
-    /// Returns this image's data as a slice of 4-byte arrays.
+    /// Returns this image's data as a list of 4-byte lists.
     pub fn get_image_data(&self) ->  Vec<[u8; 4]> {
         use std::slice;
 
@@ -132,7 +133,7 @@ impl Image {
         Ok(())
     }
 
-    /// Returns a pixel [Color] from this image.
+    /// Returns a pixel `Color` from this image.
     pub fn get_pixel(&self, x: u32, y: u32) -> PyResult<Color> {
         py_assert!(x < self.width as u32);
         py_assert!(y < self.height as u32);
@@ -312,10 +313,10 @@ impl Texture2D {
         Ok(res.into())
     }
 
-    /// Creates a Texture2D from a slice of bytes in an R,G,B,A sequence,
+    /// Creates a Texture2D from a list of bytes in an R,G,B,A sequence,
     /// with the given width and height.
     ///
-    /// # Example
+    /// Example:
     ///
     /// ```
     /// bytes = [255, 0, 0, 192, 0, 255, 0, 192, 0, 0, 255, 192, 255, 255, 255, 192]
@@ -330,7 +331,7 @@ impl Texture2D {
         Ok(res.into())
     }
 
-    /// Uploads [Image] data to this texture.
+    /// Uploads `Image` data to this texture.
     pub fn update(&self, image: Image) {
         let c = EngineTexImgEnum::TextureUpdate {  tex: (*self.texture).clone(), im: image.into() };
         COMMAND_QUEUE.push(Command::TexImEnum(c));
@@ -342,7 +343,7 @@ impl Texture2D {
         COMMAND_QUEUE.push(Command::TexImEnum(c));
     }
 
-    /// Uploads [Image] data to part of this texture.
+    /// Uploads `Image` data to part of this texture.
     pub fn update_part(
         &self,
         image: Image,
@@ -395,7 +396,7 @@ impl Texture2D {
         COMMAND_QUEUE.push(Command::TexImEnum(c));
     }
 
-    /// Returns an [Image] from the pixel data in this texture.
+    /// Returns an `Image` from the pixel data in this texture.
     ///
     /// This operation can be expensive.
     pub fn get_texture_data(&self) -> PyResult<Image> {

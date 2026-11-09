@@ -38,7 +38,7 @@ impl FileData{
     
     /// Loads file data from raw bytes.
     /// This is mostly useful to be compatible with other libraries,
-    /// which may return F.E. an audio file as Bytes.
+    /// which may return F.E. an audio file as `bytes`.
     /// 
     /// For more practical ways to load a file, look into 'Loading'.
     #[staticmethod]

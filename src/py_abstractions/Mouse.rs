@@ -78,7 +78,7 @@ pub fn get_mouse_position() -> Vec2 {
     mouse.into()
 }
 
-/// Return mouse position in range [-1; 1].
+/// Return mouse position in range [-1, 1].
 #[pyfunction]
 pub fn get_mouse_position_local() -> Vec2 {
     use crate::engine::FrameInfo as fi;
@@ -102,8 +102,8 @@ pub fn clear_input_queue() {
 }
 
 
-/// This is set to true by default, meaning touches will raise mouse events in addition to raising touch events.
-/// If set to false, touches won't affect mouse events.
+/// This is set to True by default, meaning touches will raise mouse events in addition to raising touch events.
+/// If set to False, touches won't affect mouse events.
 #[pyfunction]
 pub fn is_simulating_mouse_with_touch()-> PyResult<bool> {
     let (sender, receiver) = PChannel::channel();
@@ -113,8 +113,8 @@ pub fn is_simulating_mouse_with_touch()-> PyResult<bool> {
 
 
 
-/// This is set to true by default, meaning touches will raise mouse events in addition to raising touch events.
-/// If set to false, touches won't affect mouse events.
+/// This is set to True by default, meaning touches will raise mouse events in addition to raising touch events.
+/// If set to False, touches won't affect mouse events.
 #[pyfunction]
 pub fn simulate_mouse_with_touch(option: bool) {
     COMMAND_QUEUE.push( Command::SimulateMouseWithTouch(option));
@@ -131,7 +131,7 @@ pub fn touches() -> PyResult<Vec<Touch>> {
 }
 
 
-/// Return touches with positions in range [-1; 1].
+/// Return touches with positions in range [-1, 1].
 #[pyfunction]
 pub fn touches_local() -> PyResult<Vec<Touch>> {
     let (sender, receiver) = PChannel::channel();

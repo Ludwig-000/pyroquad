@@ -16,16 +16,16 @@ pub struct Config {
     #[pyo3(get, set)]
     pub window_title: String,
 
-    /// width in pixels. "fullscreen = true" will overwrite this.
+    /// width in pixels. "fullscreen=True" will overwrite this.
     #[pyo3(get, set)] 
     pub window_width: i32,
 
-    /// height in pixels. "fullscreen = true" will overwrite this.
+    /// height in pixels. "fullscreen=True" will overwrite this.
     #[pyo3(get, set)] 
     pub window_height: i32,
 
-    /// false -> creates a window with the before above selected width and heigt.
-    /// true -> creates a "windowed fullscreen" window with a resultion equal to the monitor resolution.
+    /// False -> creates a window with the before above selected width and heigt.
+    /// True -> creates a "windowed fullscreen" window with a resultion equal to the monitor resolution.
     #[pyo3(get, set)] 
     pub fullscreen: bool,
     

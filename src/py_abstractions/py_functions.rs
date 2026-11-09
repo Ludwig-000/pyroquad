@@ -174,33 +174,39 @@ pub fn draw_all_objects() {
 /// viewing the rectangle required a 2D Camera ( default )
 ///
 #[pyfunction]
+#[pyo3(signature = (x = 50.0, y = 50.0, w = 100.0, h = 100.0, color = Color::WHITE()))]
 pub fn draw_rectangle(x: f32, y: f32, w: f32, h: f32, color: Color) {
     COMMAND_QUEUE.push(Command::DrawRect { x, y, w, h,color: color.into()});
 }
 
 #[pyfunction]
+#[pyo3(signature = (x = 50.0, y = 50.0, w = 100.0, h = 100.0, thickness = 1.0, color = Color::WHITE()))]
 pub fn draw_rectangle_lines(x: f32, y: f32, w: f32, h: f32,thickness: f32,  color: Color) {
     COMMAND_QUEUE.push(Command::DrawRectLines { x, y, w, h,thickness,color: color.into()});
 }
 
 
 #[pyfunction]
+#[pyo3(signature = (v1 = Vec2::new(100.0, 50.0), v2 = Vec2::new(50.0, 150.0), v3 = Vec2::new(150.0, 150.0), color = Color::WHITE()))]
 pub fn draw_triangle(v1: Vec2, v2: Vec2, v3: Vec2, color: Color) {
     COMMAND_QUEUE.push(Command::DrawTriangle { v1: v1.into(), v2: v2.into(), v3: v3.into(), color: color.into() });
 }
 
 #[pyfunction]
+#[pyo3(signature = (v1 = Vec2::new(100.0, 50.0), v2 = Vec2::new(50.0, 150.0), v3 = Vec2::new(150.0, 150.0), thickness = 1.0, color = Color::WHITE()))]
 pub fn draw_triangle_lines(v1: Vec2, v2: Vec2, v3: Vec2, thickness: f32, color: Color) {
     COMMAND_QUEUE.push(Command::DrawTriangleLines { v1: v1.into(), v2: v2.into(), v3: v3.into(), thickness, color: color.into() });
 }
 
 #[pyfunction]
+#[pyo3(signature = (offset, e1, e2, e3, texture = None, color = Color::WHITE()))]
 pub fn draw_affine_parallelepiped(offset: Vec3, e1: Vec3,e2: Vec3,e3: Vec3,texture: Option<Texture2D>,color: Color) {
     
     COMMAND_QUEUE.push(Command::DrawAfflineParallelpiped { offset: offset.into(), e1: e1.into(), e2: e2.into(), e3: e3.into(), texture: texture.map(Into::into), color: color.into() });
 }
 
 #[pyfunction]
+#[pyo3(signature = (offset, e1, e2, texture = None, color = Color::WHITE()))]
 pub fn draw_affine_parallelogram(offset: Vec3, e1: Vec3,e2: Vec3,texture: Option<Texture2D>,color: Color) {
     
     COMMAND_QUEUE.push(Command::DrawAfflineParallogram { offset: offset.into(), e1: e1.into(), 
@@ -214,6 +220,7 @@ pub fn step_physics(distance: f32) {
 }
 
 #[pyfunction]
+#[pyo3(signature = (x = 100.0, y = 100.0, sides = 20, radius = 50.0, rotation = 0.0, thickness = 1.0, arc = 360.0, color = Color::WHITE()))]
 pub fn draw_arc( x: f32,
     y: f32,
     sides: u8,
@@ -236,6 +243,7 @@ pub fn draw_cube_wires( position: Vec3, size: Vec3, rotation: Vec3, color: Color
 }
 
 #[pyfunction]
+#[pyo3(signature = (position = Vec3::new(0.0, -0.5, 0.0), radius_top = 0.5, radius_bottom = 0.5, height = 1.0, texture = None, color = Color::WHITE()))]
 pub fn draw_cylinder( position: Vec3,
     radius_top: f32,
     radius_bottom: f32,
@@ -249,6 +257,7 @@ pub fn draw_cylinder( position: Vec3,
 
 
 #[pyfunction]
+#[pyo3(signature = (position = Vec3::new(0.0, -0.5, 0.0), radius_top = 0.5, radius_bottom = 0.5, height = 1.0, texture = None, color = Color::WHITE()))]
 pub fn draw_cylinder_wires( position: Vec3,
     radius_top: f32,
     radius_bottom: f32,
@@ -261,11 +270,13 @@ pub fn draw_cylinder_wires( position: Vec3,
 }
 
 #[pyfunction]
+#[pyo3(signature = (x = 100.0, y = 100.0, w = 50.0, h = 50.0, rotation = 0.0, color = Color::WHITE()))]
 pub fn draw_ellipse( x: f32, y: f32, w: f32, h: f32, rotation: f32, color: Color){
     COMMAND_QUEUE.push(Command::DrawEllipse { x, y, w, h, rotation, color: color.into()});
 }
 
 #[pyfunction]
+#[pyo3(signature = (x = 100.0, y = 100.0, w = 50.0, h = 50.0, rotation = 0.0, thickness = 1.0, color = Color::WHITE()))]
 pub fn draw_ellipse_lines( x: f32,
     y: f32,
     w: f32,
@@ -277,6 +288,7 @@ pub fn draw_ellipse_lines( x: f32,
 }
 
 #[pyfunction]
+#[pyo3(signature = (x = 100.0, y = 100.0, size = 50.0, border = 0.0, vertical = false, border_color = Color::WHITE(), fill_color = Color::WHITE()))]
 pub fn draw_hexagon( x: f32,
     y: f32,
     size: f32,
@@ -288,11 +300,13 @@ pub fn draw_hexagon( x: f32,
 }
 
 #[pyfunction]
+#[pyo3(signature = (start, end, color = Color::WHITE()))]
 pub fn draw_line_3d( start: Vec3, end: Vec3, color: Color){
     COMMAND_QUEUE.push(Command::DrawLine3D { start: start.into(), end: end.into(), color: color.into()});
 }
 
 #[pyfunction]
+#[pyo3(signature = (x1 = 50.0, y1 = 50.0, x2 = 150.0, y2 = 150.0, thickness = 1.0, color = Color::WHITE()))]
 pub fn draw_line(x1: f32, y1: f32, x2: f32, y2: f32, thickness: f32, color: Color){
     COMMAND_QUEUE.push(Command::DrawLine { x1, y1, x2, y2, thickness, color: color.into() });
 }
@@ -312,6 +326,7 @@ pub fn draw_grid(slices: u32, spacing: f32, axes_color: Color, other_color: Colo
 /// requires a 3d camera to be seen.
 ///
 #[pyfunction]
+#[pyo3(signature = (center=Vec3::ZERO(), size=Vec2::new(100.0,100.0), color = Color::WHITE(), texture = None))]
 pub fn draw_plane(center: Vec3, size: Vec2, color: Color, texture: Option<Texture2D>)  {
     let cen = mq::vec3( center.x,center.y,center.z);
     let siz = mq::vec2(size.x,size.y);
@@ -326,6 +341,7 @@ pub fn draw_plane(center: Vec3, size: Vec2, color: Color, texture: Option<Textur
 /// requires a 3d camera to be seen.
 ///
 #[pyfunction]
+#[pyo3(signature = (position = Vec3::ZERO(), size = Vec3::ONE(), color = Color::WHITE(), texture = None))]
 pub fn draw_cube(position: Vec3, size: Vec3, color: Color, texture: Option<Texture2D>) {
     let texture = texture.map( Into::into );
     COMMAND_QUEUE.push(  Command::DrawCube{pos: position.into(), size: size.into(), texture, color: color.into()} );
@@ -335,6 +351,7 @@ pub fn draw_cube(position: Vec3, size: Vec3, color: Color, texture: Option<Textu
 /// this is usually used at the start of a frame.
 ///
 #[pyfunction]
+#[pyo3(signature = (color = Color::BLACK()))]
 pub fn clear_background(color: Color) {
     COMMAND_QUEUE.push(Command::ClearBackground { color: color.into()});
 }
@@ -402,6 +419,7 @@ pub fn draw_text(text: String, x: f32, y: f32, color: Color, font_size: u16,
 }
 
 #[pyfunction]
+#[pyo3(signature = (text, font = None, font_size = 20, font_scale = 1.0, rotation = 0.0))]
 pub fn get_text_center(text: String, font: Option<Font>, font_size: u16, font_scale: f32, rotation: f32) -> PyResult<Vec2>{
     let (sender, receiver) = PChannel::PChannel::channel();
     COMMAND_QUEUE.push(Command::GetTextCenter { text, font: font.map(Into::into), font_size, font_scale, rotation, sender });
@@ -427,11 +445,13 @@ pub fn draw_multiline_text(text: String, x: f32, y: f32, font_size: u16, color: 
 /// for a more "round" circle, simply call `draw_poly()` with a greater ammount of sides.
 ///
 #[pyfunction]
+#[pyo3(signature = (x = 100.0, y = 100.0, r = 50.0, color = Color::WHITE()))]
 pub fn draw_circle(x: f32, y: f32, r: f32, color: Color) {
     COMMAND_QUEUE.push(Command::DrawPoly{ x, y, sides:20, radius:r, rotation:0.0, color: color.into()});
 }
 
 #[pyfunction]
+#[pyo3(signature = (x = 100.0, y = 100.0, r = 50.0, thickness = 1.0, color = Color::WHITE()))]
 pub fn draw_circle_lines(x: f32, y: f32, r: f32, thickness: f32, color: Color) {
     COMMAND_QUEUE.push(Command::DrawPolyLines{ x, y, sides:20, radius:r, rotation:0.0,thickness, color: color.into()});
 }
@@ -441,11 +461,13 @@ pub fn draw_circle_lines(x: f32, y: f32, r: f32, thickness: f32, color: Color) {
 /// requires a 2d camera to be seen.
 ///
 #[pyfunction]
+#[pyo3(signature = (x = 100.0, y = 100.0, sides = 20, radius = 50.0, rotation = 0.0, color = Color::WHITE()))]
 pub fn draw_poly(x: f32, y: f32, sides: u8, radius: f32, rotation: f32, color: Color) {
     COMMAND_QUEUE.push(Command::DrawPoly{ x, y, sides, radius, rotation, color: color.into()});
 }
 
 #[pyfunction]
+#[pyo3(signature = (x = 100.0, y = 100.0, sides = 20, radius = 50.0, rotation = 0.0, thickness = 1.0, color = Color::WHITE()))]
 pub fn draw_poly_lines(x: f32, y: f32, sides: u8, radius: f32, rotation: f32,thickness: f32, color: Color) {
     COMMAND_QUEUE.push(Command::DrawPolyLines { x, y, sides, radius, rotation, thickness, color: color.into() });
 }
@@ -673,28 +695,22 @@ pub fn cartesian_to_polar(cartesian: Vec2) -> Vec2{
 
 
 /// There are super common project layout like this:
-/// ```skip
+/// ```
 ///    .
 ///    ├── assets
 ///    ├── └── nice_texture.png
 ///    ├── src
-///    ├── └── main.rs
-///    └── Cargo.toml
+///    ├── └── main.py
+///    └── pyproject.toml
 /// ```
 /// when such a project being run on desktop assets should be referenced as
 /// "assets/nice_texture.png".
-/// While on web or android it usually is just "nice_texture.png".
+/// While on web it usually is just "nice_texture.png".
 /// The reason: on PC assets are being referenced relative to current active directory/executable path. In most IDEs its the root of the project.
-/// While on, say, android it is:
-/// ```skip
-/// [package.metadata.android]
-/// assets = "assets"
-/// ```
-/// And therefore on android assets are referenced from the root of "assets" folder.
 ///
 /// In the future there going to be some sort of meta-data file for PC as well.
 /// But right now to resolve this situation and keep pathes consistent across platforms
-/// `set_pc_assets_folder("assets");`call before first `load_file`/`load_texture` will allow using same pathes on PC and Android.
+/// `set_pc_assets_folder("assets")` call before first `load_file`/`load_texture` will allow using same pathes on PC and web.
 #[pyfunction]
 pub fn set_pc_assets_folder(path: String){
 
@@ -720,7 +736,7 @@ pub fn set_pc_assets_folder(path: String){
 /// ```
 /// # example
 /// def draw(objects: list[Rectangle | Circle]):
-///     batch_draw_shapes(objects) <- do this instead.
+///     batch_draw_shapes(objects) # <- do this instead.
 /// ```
 /// 
 /// 
@@ -741,14 +757,14 @@ pub fn batch_draw_shapes<'py>(input: Vec<Shape<'py>>){
 }
 
 /// Checks if the current device a mobile one. This check only runs for WASM target.
-/// on all other platform, this always returns false.
+/// on all other platform, this always returns False.
 #[pyfunction]
 pub fn is_mobile() -> bool {
     FrameInfo::IS_MOBILE.load(Ordering::Relaxed)
 }
 
 /// Checks if touch imput was detected. This check only runs for WASM target.
-/// on all other platform, this always returns false.
+/// on all other platform, this always returns False.
 #[pyfunction]
 pub fn is_browser_touch_detected() -> bool {
     FrameInfo::IS_BROWSER_TOUCH_DETECTED.load(Ordering::Relaxed)

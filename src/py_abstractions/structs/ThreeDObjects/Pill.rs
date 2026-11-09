@@ -34,7 +34,7 @@ pub struct Pill{
     cache: Option<ObjectDataCache::ThreeDObjCache>,
 
     /// a collection of physics-related methods, that can be applied to the object.
-    /// 'physics' will be set to Some() if the object is innitialized as a dynamic object.
+    /// 'physics' will not be `None` if the object is innitialized as a dynamic object.
     #[pyo3(get)]
     pub physics: Option<Py<Physics>>,
 }

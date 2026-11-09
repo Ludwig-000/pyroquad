@@ -63,31 +63,31 @@ impl Vec3 {
         Self::const_splat(-1.0)
     }
 
-    /// A vector with all elements set to `f32::MIN`.
+    /// A vector with all elements set to the lowest finite 32-bit float.
     #[classattr]
     pub fn MIN() -> Vec3 {
         Self::const_splat(f32::MIN)
     }
 
-    /// A vector with all elements set to `f32::MAX`.
+    /// A vector with all elements set to the largest finite 32-bit float.
     #[classattr]
     pub fn MAX() -> Vec3 {
         Self::const_splat(f32::MAX)
     }
 
-    /// A vector with all elements set to `f32::NAN`.
+    /// A vector with all elements set to `float("nan")`.
     #[classattr]
     pub fn NAN() -> Vec3 {
         Self::const_splat(f32::NAN)
     }
 
-    /// A vector with all elements set to `f32::INFINITY`.
+    /// A vector with all elements set to `float("inf")`.
     #[classattr]
     pub fn INFINITY() -> Vec3 {
         Self::const_splat(f32::INFINITY)
     }
 
-    /// A vector with all elements set to `f32::NEG_INFINITY`.
+    /// A vector with all elements set to `float("-inf")`.
     #[classattr]
     pub fn NEG_INFINITY() -> Vec3 {
         Self::const_splat(f32::NEG_INFINITY)
@@ -138,9 +138,9 @@ impl Vec3 {
 
 
     /// Creates a vector from the elements in `if_true` and `if_false`, selecting which to use
-    /// for each element of `self`.
+    /// for each element of `mask`.
     ///
-    /// A true element in the mask uses the corresponding element from `if_true`, and false
+    /// A `True` element in the mask uses the corresponding element from `if_true`, and `False`
     /// uses the element from `if_false`.
     #[staticmethod]
     #[inline]
@@ -153,7 +153,7 @@ impl Vec3 {
         })
     }
 
-    /// Creates a new vector from an array.
+    /// Creates a new vector from a list.
     #[staticmethod]
     #[inline]
     pub fn from_array(a: [f32; 3]) -> Self {
@@ -220,7 +220,7 @@ impl Vec3 {
 
     /// Returns a vector containing the minimum values for each element of `self` and `rhs`.
     ///
-    /// In other words this computes `[self.x.min(rhs.x), self.y.min(rhs.y), ..]`.
+    /// In other words this computes `[min(self.x, rhs.x), min(self.y, rhs.y), ...]`.
     #[inline]
     pub fn min(&self, rhs: Self) -> Self {
         let a: gl = (*self).into();
@@ -229,7 +229,7 @@ impl Vec3 {
 
     /// Returns a vector containing the maximum values for each element of `self` and `rhs`.
     ///
-    /// In other words this computes `[self.x.max(rhs.x), self.y.max(rhs.y), ..]`.
+    /// In other words this computes `[max(self.x, rhs.x), max(self.y, rhs.y), ...]`.
     #[inline]
     pub fn max(&self, rhs: Self) -> Self {
         let a: gl = (*self).into();
@@ -238,13 +238,12 @@ impl Vec3 {
 
 
     
-    /// Component-wise clamping of values, similar to [`f32::clamp`].
+    /// Component-wise clamping of values, similar to `max(min, min(x, max))` for a single float.
     ///
     /// Each element in `min` must be less-or-equal to the corresponding element in `max`.
     ///
-    /// # Panics
-    ///
-    /// Will panic if `min` is greater than `max` when `glam_assert` is enabled.
+    /// Raises:
+    ///     PanicException: If `min` is greater than `max` (only when built with the `glam_assert` feature).
     #[inline]
     pub fn clamp(&self, min: Self, max: Self) -> Self {
         let a: gl = (*self).into();
@@ -256,7 +255,7 @@ impl Vec3 {
 
     /// Returns the horizontal minimum of `self`.
     ///
-    /// In other words this computes `min(x, y, ..)`.
+    /// In other words this computes `min(x, y, ...)`.
     #[inline]
     pub fn min_element(&self) -> f32 {
         let a: gl=(*self).into();
@@ -265,7 +264,7 @@ impl Vec3 {
 
     /// Returns the horizontal maximum of `self`.
     ///
-    /// In other words this computes `max(x, y, ..)`.
+    /// In other words this computes `max(x, y, ...)`.
     #[inline]
     pub fn max_element(&self) -> f32 {
         let a: gl=(*self).into();
@@ -274,7 +273,7 @@ impl Vec3 {
 
     /// Returns the sum of all elements of `self`.
     ///
-    /// In other words, this computes `self.x + self.y + ..`.
+    /// In other words, this computes `self.x + self.y + ...`.
     #[inline]
     pub fn element_sum(&self) -> f32 {
         let a: gl=(*self).into();
@@ -283,7 +282,7 @@ impl Vec3 {
 
     /// Returns the product of all elements of `self`.
     ///
-    /// In other words, this computes `self.x * self.y * ..`.
+    /// In other words, this computes `self.x * self.y * ...`.
     #[inline]
     pub fn element_product(&self) -> f32 {
         let a: gl=(*self).into();
@@ -293,7 +292,7 @@ impl Vec3 {
     /// Returns a vector mask containing the result of a `==` comparison for each element of
     /// `self` and `rhs`.
     ///
-    /// In other words, this computes `[self.x == rhs.x, self.y == rhs.y, ..]` for all
+    /// In other words, this computes `[self.x == rhs.x, self.y == rhs.y, ...]` for all
     /// elements.
     #[inline]
     pub fn cmpeq(&self, rhs: Self) -> BVec3 {
@@ -306,7 +305,7 @@ impl Vec3 {
     /// Returns a vector mask containing the result of a `!=` comparison for each element of
     /// `self` and `rhs`.
     ///
-    /// In other words this computes `[self.x != rhs.x, self.y != rhs.y, ..]` for all
+    /// In other words this computes `[self.x != rhs.x, self.y != rhs.y, ...]` for all
     /// elements.
     #[inline]
     pub fn cmpne(&self, rhs: Self) -> BVec3 {
@@ -318,7 +317,7 @@ impl Vec3 {
     /// Returns a vector mask containing the result of a `>=` comparison for each element of
     /// `self` and `rhs`.
     ///
-    /// In other words this computes `[self.x >= rhs.x, self.y >= rhs.y, ..]` for all
+    /// In other words this computes `[self.x >= rhs.x, self.y >= rhs.y, ...]` for all
     /// elements.
     #[inline]
     pub fn cmpge(&self, rhs: Self) -> BVec3 {
@@ -330,7 +329,7 @@ impl Vec3 {
     /// Returns a vector mask containing the result of a `>` comparison for each element of
     /// `self` and `rhs`.
     ///
-    /// In other words this computes `[self.x > rhs.x, self.y > rhs.y, ..]` for all
+    /// In other words this computes `[self.x > rhs.x, self.y > rhs.y, ...]` for all
     /// elements.
     #[inline]
     pub fn cmpgt(&self, rhs: Self) -> BVec3 {
@@ -342,7 +341,7 @@ impl Vec3 {
     /// Returns a vector mask containing the result of a `<=` comparison for each element of
     /// `self` and `rhs`.
     ///
-    /// In other words this computes `[self.x <= rhs.x, self.y <= rhs.y, ..]` for all
+    /// In other words this computes `[self.x <= rhs.x, self.y <= rhs.y, ...]` for all
     /// elements.
     #[inline]
     pub fn cmple(&self, rhs: Self) -> BVec3 {
@@ -354,7 +353,7 @@ impl Vec3 {
     /// Returns a vector mask containing the result of a `<` comparison for each element of
     /// `self` and `rhs`.
     ///
-    /// In other words this computes `[self.x < rhs.x, self.y < rhs.y, ..]` for all
+    /// In other words this computes `[self.x < rhs.x, self.y < rhs.y, ...]` for all
     /// elements.
     #[inline]
     pub fn cmplt(&self, rhs: Self) -> BVec3 {
@@ -372,9 +371,9 @@ impl Vec3 {
 
     /// Returns a vector with elements representing the sign of `self`.
     ///
-    /// - `1.0` if the number is positive, `+0.0` or `INFINITY`
-    /// - `-1.0` if the number is negative, `-0.0` or `NEG_INFINITY`
-    /// - `NAN` if the number is `NAN`
+    /// - `1.0` if the number is positive, `+0.0` or `float("inf")`
+    /// - `-1.0` if the number is negative, `-0.0` or `float("-inf")`
+    /// - `float("nan")` if the number is `float("nan")`
     #[inline]
     pub fn signum(&self) -> Self {
         let a: gl= (*self).into();
@@ -400,24 +399,24 @@ impl Vec3 {
     }
 
 
-    /// Returns `true` if, and only if, all elements are finite.  If any element is either
-    /// `NaN`, positive or negative infinity, this will return `false`.
+    /// Returns `True` if, and only if, all elements are finite.  If any element is either
+    /// `NaN`, positive or negative infinity, this will return `False`.
     #[inline]
     pub fn is_finite(&self) -> bool {
         let a: gl= (*self).into();
         a.is_finite()  
     }
 
-    /// Returns `true` if any elements are `NaN`.
+    /// Returns `True` if any elements are `NaN`.
     #[inline]
     pub fn is_nan(&self) -> bool {
         let a: gl= (*self).into();
         a.is_nan()
     }
 
-    /// Performs `is_nan` on each element of self, returning a vector mask of the results.
+    /// Performs `math.isnan()` on each element of `self`, returning a vector mask of the results.
     ///
-    /// In other words, this computes `[x.is_nan(), y.is_nan(), z.is_nan(), w.is_nan()]`.
+    /// In other words, this computes `[math.isnan(x), math.isnan(y), math.isnan(z), math.isnan(w)]`.
     #[inline]
     pub fn is_nan_mask(&self) -> BVec3 {
         let a: gl= (*self).into();
@@ -468,7 +467,7 @@ impl Vec3 {
         a.distance_squared(b)
     }
 
-    /// Returns the element-wise quotient of [Euclidean division] of `self` by `rhs`.
+    /// Returns the element-wise quotient of Euclidean division of `self` by `rhs`.
     #[inline]
     pub fn div_euclid(&self, rhs: Self) -> Self {
         let a: gl= (*self).into();
@@ -476,9 +475,7 @@ impl Vec3 {
         a.div_euclid(b).into()
     }
 
-    /// Returns the element-wise remainder of [Euclidean division] of `self` by `rhs`.
-    ///
-    /// [Euclidean division]: f32::rem_euclid
+    /// Returns the element-wise remainder of Euclidean division of `self` by `rhs`.
     #[inline]
     pub fn rem_euclid(&self, rhs: Self) -> Self {
         let a: gl = (*self).into();
@@ -490,11 +487,10 @@ impl Vec3 {
     ///
     /// For valid results, `self` must _not_ be of length zero, nor very close to zero.
     ///
-    /// See also [`Self::try_normalize()`] and [`Self::normalize_or_zero()`].
+    /// See also `try_normalize()` and `normalize_or_zero()`.
     ///
-    /// Panics
-    ///
-    /// Will panic if `self` is zero length when `glam_assert` is enabled.
+    /// Raises:
+    ///     PanicException: If `self` is zero length (only when built with the `glam_assert` feature).
     #[inline]
     pub fn normalize(&self) -> Self {
         let a: gl = (*self).into();
@@ -506,7 +502,7 @@ impl Vec3 {
     /// In particular, if the input is zero (or very close to zero), or non-finite,
     /// the result of this operation will be `None`.
     ///
-    /// See also [`Self::normalize_or_zero()`].
+    /// See also `normalize_or_zero()`.
     #[inline]
     pub fn try_normalize(&self) -> Option<Self> {
         let a: gl = (*self).into();
@@ -520,7 +516,7 @@ impl Vec3 {
     /// In particular, if the input is zero (or very close to zero), or non-finite,
     /// the result of this operation will be the fallback value.
     ///
-    /// See also [`Self::try_normalize()`].
+    /// See also `try_normalize()`.
     #[inline]
     pub fn normalize_or(&self, fallback: Self) -> Self {
         let a: gl = (*self).into();
@@ -533,7 +529,7 @@ impl Vec3 {
     /// In particular, if the input is zero (or very close to zero), or non-finite,
     /// the result of this operation will be zero.
     ///
-    /// See also [`Self::try_normalize()`].
+    /// See also `try_normalize()`.
     #[inline]
     pub fn normalize_or_zero(&self) -> Self {
         let a: gl = (*self).into();
@@ -553,9 +549,8 @@ impl Vec3 {
     ///
     /// `rhs` must be of non-zero length.
     ///
-    /// # Panics
-    ///
-    /// Will panic if `rhs` is zero length when `glam_assert` is enabled.
+    /// Raises:
+    ///     PanicException: If `rhs` is zero length (only when built with the `glam_assert` feature).
     #[inline]
     pub fn project_onto(&self, rhs: Self) -> Self {
         let a: gl = (*self).into();
@@ -570,9 +565,8 @@ impl Vec3 {
     ///
     /// `rhs` must be of non-zero length.
     ///
-    /// # Panics
-    ///
-    /// Will panic if `rhs` has a length of zero when `glam_assert` is enabled.
+    /// Raises:
+    ///     PanicException: If `rhs` has a length of zero (only when built with the `glam_assert` feature).
     #[inline]
     pub fn reject_from(&self, rhs: Self) -> Self {
         let a: gl = (*self).into();
@@ -584,9 +578,8 @@ impl Vec3 {
     ///
     /// `rhs` must be normalized.
     ///
-    /// # Panics
-    ///
-    /// Will panic if `rhs` is not normalized when `glam_assert` is enabled.
+    /// Raises:
+    ///     PanicException: If `rhs` is not normalized (only when built with the `glam_assert` feature).
     #[inline]
     pub fn project_onto_normalized(&self, rhs: Self) -> Self {
         let a: gl = (*self).into();
@@ -601,9 +594,8 @@ impl Vec3 {
     ///
     /// `rhs` must be normalized.
     ///
-    /// # Panics
-    ///
-    /// Will panic if `rhs` is not normalized when `glam_assert` is enabled.
+    /// Raises:
+    ///     PanicException: If `rhs` is not normalized (only when built with the `glam_assert` feature).
     #[inline]
     pub fn reject_from_normalized(&self, rhs: Self) -> Self {
         let a: gl = (*self).into();
@@ -657,7 +649,7 @@ impl Vec3 {
 
     /// Returns a vector containing the fractional part of the vector as `self - self.floor()`.
     ///
-    /// Note that this differs from the Rust implementation of `fract` which returns
+    /// Note that this differs from `fract()`, which returns
     /// `self - self.trunc()`.
     ///
     /// Note that this is fast but not precise for large numbers.
@@ -725,7 +717,7 @@ impl Vec3 {
         a.midpoint(b).into()
     }
 
-    /// Returns true if the absolute difference of all elements between `self` and `rhs` is
+    /// Returns `True` if the absolute difference of all elements between `self` and `rhs` is
     /// less than or equal to `max_abs_diff`.
     ///
     /// This can be used to compare if two vectors contain similar elements. It works best when
@@ -743,9 +735,8 @@ impl Vec3 {
 
     /// Returns a vector with a length no less than `min` and no more than `max`
     ///
-    /// # Panics
-    ///
-    /// Will panic if `min` is greater than `max` when `glam_assert` is enabled.
+    /// Raises:
+    ///     PanicException: If `min` is greater than `max` (only when built with the `glam_assert` feature).
     #[inline]
     pub fn clamp_length(&self, min: f32, max: f32) -> Self {
         let a: gl = (*self).into();
@@ -796,7 +787,7 @@ impl Vec3 {
     /// The input vector must be finite and non-zero.
     ///
     /// The output vector is not necessarily unit length. For that use
-    /// [`Self::any_orthonormal_vector()`] instead.
+    /// `any_orthonormal_vector()` instead.
     #[inline]
     pub fn any_orthogonal_vector(&self) -> Self {
         let a: gl = (*self).into();
@@ -807,9 +798,8 @@ impl Vec3 {
     ///
     /// The input vector must be unit length.
     ///
-    /// # Panics
-    ///
-    /// Will panic if `self` is not normalized when `glam_assert` is enabled.
+    /// Raises:
+    ///     PanicException: If `self` is not normalized (only when built with the `glam_assert` feature).
     #[inline]
     pub fn any_orthonormal_vector(&self) -> Self {
         let a: gl = (*self).into();
@@ -819,9 +809,8 @@ impl Vec3 {
     /// Given a unit vector return two other vectors that together form an orthonormal
     /// basis. That is, all three vectors are orthogonal to each other and are normalized.
     ///
-    /// # Panics
-    ///
-    /// Will panic if `self` is not normalized when `glam_assert` is enabled.
+    /// Raises:
+    ///     PanicException: If `self` is not normalized (only when built with the `glam_assert` feature).
     #[inline]
     pub fn any_orthonormal_pair(&self) -> (Vec3, Vec3) {
         let a: gl = (*self).into();

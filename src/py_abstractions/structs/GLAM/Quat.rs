@@ -36,7 +36,7 @@ impl Quat{
         Self::from_xyzw(0.0, 0.0, 0.0, 1.0)
     }
 
-    /// All NANs.
+    /// All NaNs.
     #[classattr]
     pub fn NAN() -> Quat {
         Self::from_array([f32::NAN; 4])
@@ -47,24 +47,22 @@ impl Quat{
     /// This should generally not be called manually unless you know what you are doing.
     /// Use one of the other constructors instead such as `identity` or `from_axis_angle`.
     ///
-    /// `from_xyzw` is mostly used by unit tests and `serde` deserialization.
+    /// `from_xyzw` is mostly used by unit tests and deserialization.
     ///
-    /// # Preconditions
-    ///
-    /// This function does not check if the input is normalized, it is up to the user to
-    /// provide normalized input or to normalized the resulting quaternion.
+    /// Note:
+    ///     This function does not check if the input is normalized, it is up to the user to
+    ///     provide normalized input or to normalized the resulting quaternion.
     #[inline(always)]
     #[staticmethod]
     pub const fn from_xyzw(x: f32, y: f32, z: f32, w: f32) -> Self {
         Self { x, y, z, w }
     }
 
-    /// Creates a rotation quaternion from an array.
+    /// Creates a rotation quaternion from a list.
     ///
-    /// # Preconditions
-    ///
-    /// This function does not check if the input is normalized, it is up to the user to
-    /// provide normalized input or to normalized the resulting quaternion.
+    /// Note:
+    ///     This function does not check if the input is normalized, it is up to the user to
+    ///     provide normalized input or to normalized the resulting quaternion.
     #[inline]
     #[must_use]
     #[staticmethod]
@@ -74,10 +72,9 @@ impl Quat{
 
     /// Creates a new rotation quaternion from a 4D vector.
     ///
-    /// # Preconditions
-    ///
-    /// This function does not check if the input is normalized, it is up to the user to
-    /// provide normalized input or to normalized the resulting quaternion.
+    /// Note:
+    ///     This function does not check if the input is normalized, it is up to the user to
+    ///     provide normalized input or to normalized the resulting quaternion.
     #[inline]
     #[must_use]
     #[staticmethod]

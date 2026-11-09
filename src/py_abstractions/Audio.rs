@@ -58,6 +58,7 @@ impl Sound {
  
     }
 
+    #[pyo3(signature = (params = PlaySoundParams::new(false, 1.0)))]
     pub fn play_sound(&self, params: PlaySoundParams){ 
         COMMAND_QUEUE.push( Command::PlaySound { sound: au::Sound::from(self) , params: params.into() }  );
     }

@@ -37,6 +37,7 @@ pub struct Vertex {
 impl Vertex{
 
     #[new]
+    #[pyo3(signature = (position, uv, color = Color::WHITE()))]
     pub fn new(position: Vec3, uv: Vec2, color: Color)-> Vertex{
         Vertex{ 
             position: position.into(),
@@ -75,7 +76,7 @@ pub enum DrawMode{
 #[derive(Clone, Copy)]
 pub struct  GlPipeline(mq::GlPipeline);
 
-/// A simple datatype that holds a Vector of Vertices and a Vector of indices.
+/// A simple datatype that holds a list of vertices and a list of indices.
 /// using this Wrapper in conjunction with 'geometry()' avoids cloning any data.
 #[pyclass(from_py_object)]
 #[derive(Clone)]
@@ -165,6 +166,7 @@ pub fn is_depth_test_enabled() -> PyResult<bool> {
 // }
 
 #[pyfunction]
+#[pyo3(signature = (pipeline = None))]
 pub fn pipeline(pipeline: Option<GlPipeline>) {
     let c = GlEnum::Pipeline(pipeline);
     COMMAND_QUEUE.push(Command::GlEnum(c));
@@ -194,6 +196,7 @@ pub fn reset() {
 }
 
 #[pyfunction]
+#[pyo3(signature = (clip = None))]
 pub fn scissor(clip: Option<(i32, i32, i32, i32)>) {
     let c = GlEnum::Scissor(clip);
     COMMAND_QUEUE.push(Command::GlEnum(c));
@@ -206,12 +209,14 @@ pub fn set_texture(pipeline: GlPipeline, name: &str, texture: Texture2D) {
 }
 
 #[pyfunction]
+#[pyo3(signature = (texture = None))]
 pub fn texture(texture: Option<Texture2D>) {
     let c = GlEnum::Texture(texture);
     COMMAND_QUEUE.push(Command::GlEnum(c));
 }
 
 #[pyfunction]
+#[pyo3(signature = (viewport = None))]
 pub fn viewport(viewport: Option<(i32, i32, i32, i32)>) {
     let c = GlEnum::Viewport(viewport);
     COMMAND_QUEUE.push(Command::GlEnum(c));

@@ -39,7 +39,7 @@ impl From<&RenderTarget> for mq::RenderTarget{
 
 
 
-/// A shortcut to create a render target with no depth buffer and `sample_count: 4`
+/// A shortcut to create a render target with no depth buffer and `sample_count=4`
 #[pyfunction]
 pub fn render_target_msaa(width: u32, height: u32) -> PyResult<RenderTarget> {
     let (tx, rx) = PChannel::channel();
@@ -73,7 +73,7 @@ pub struct RenderTargetParams {
     #[pyo3(get, set)]
     pub sample_count: i32,
 
-    /// depth: true creates a depth render target attachment and allows
+    /// `depth=True` creates a depth render target attachment and allows
     /// such a render target being used for a depth-testing cameras
     #[pyo3(get, set)]
     pub depth: bool,

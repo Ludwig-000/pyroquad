@@ -15,21 +15,21 @@ use crate::engine::CoreLoop::Command;
 #[pyclass(from_py_object)]
 #[derive(Debug, Clone, Copy)]
 pub enum UniformType {
-    /// One 32-bit wide float (equivalent to `f32`)
+    /// One 32-bit wide float (equivalent to `float`)
     Float1,
-    /// Two 32-bit wide floats (equivalent to `[f32; 2]`)
+    /// Two 32-bit wide floats (equivalent to `[float, float]`)
     Float2,
-    /// Three 32-bit wide floats (equivalent to `[f32; 3]`)
+    /// Three 32-bit wide floats (equivalent to `[float, float, float]`)
     Float3,
-    /// Four 32-bit wide floats (equivalent to `[f32; 4]`)
+    /// Four 32-bit wide floats (equivalent to `[float, float, float, float]`)
     Float4,
-    /// One unsigned 32-bit integers (equivalent to `[u32; 1]`)
+    /// One unsigned 32-bit integers (equivalent to `[int]`)
     Int1,
-    /// Two unsigned 32-bit integers (equivalent to `[u32; 2]`)
+    /// Two unsigned 32-bit integers (equivalent to `[int, int]`)
     Int2,
-    /// Three unsigned 32-bit integers (equivalent to `[u32; 3]`)
+    /// Three unsigned 32-bit integers (equivalent to `[int, int, int]`)
     Int3,
-    /// Four unsigned 32-bit integers (equivalent to `[u32; 4]`)
+    /// Four unsigned 32-bit integers (equivalent to `[int, int, int, int]`)
     Int4,
     /// Four by four matrix of 32-bit floats
     Mat4,
