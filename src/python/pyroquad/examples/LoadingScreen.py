@@ -90,18 +90,19 @@ T = TypeVar("T")
 R = TypeVar("R")
 
 def loading_screen_future(
-    func: Callable[[T], Any],
+    func: Callable[[T], Future],
     args_list: Iterable[T],
     message: str = "Loading: ",
     show_rotating_square: bool = False
 ) -> list[Any]:
     """
     Launches all pyroquad futures, then periodically checks every input until all are resolved.
+    `func` must return a pyroquad future, e.g. `load_file_future` or `download_file_future`.
     """
-    futures = [func(arg) for arg in args_list]
-    total = len(futures)
-    
-    results = [None] * total
+    launched = [func(arg) for arg in args_list]
+    total = len(launched)
+
+    results: list[Any] = [None] * total
     pending_indices = list(range(total))
     
     pos = Vec2(100,1100)
@@ -148,7 +149,7 @@ def loading_screen_future(
         new_pending = []
         
         for i in pending_indices:
-            res = futures[i].poll()  # raises if the work failed
+            res = launched[i].poll()
 
             if res is Status.Pending:
                 new_pending.append(i)

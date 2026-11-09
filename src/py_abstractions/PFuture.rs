@@ -168,6 +168,51 @@ impl Future {
     fn done(&self, py: Python<'_>) -> PyResult<bool> {
         Ok(!matches!(&*self.update(py, Wait::Poll)?, State::Waiting(_)))
     }
+
+    /// Returns the result if it is there, otherwise `Status.Pending`. Never blocks.
+    /// Raises the work's exception if it failed.
+    ///
+    /// Typed as `object` here, so code can take any future. Every concrete future
+    /// overrides this with its exact type.
+    fn poll(&self, py: Python<'_>) -> PyResult<AnyResult> {
+        self.any_result(py, Wait::Poll)
+    }
+
+    /// Blocks until the result is there, or for at most `timeout` seconds.
+    /// Returns `Status.Pending` only if the timeout ran out. Raises the work's exception if it failed.
+    ///
+    /// Typed as `object` here, so code can take any future. Every concrete future
+    /// overrides this with its exact type.
+    #[pyo3(signature = (timeout = None))]
+    fn wait(&self, py: Python<'_>, timeout: Option<f64>) -> PyResult<AnyResult> {
+        self.any_result(py, Wait::from(timeout))
+    }
+}
+
+impl Future {
+    fn any_result(&self, py: Python<'_>, wait: Wait) -> PyResult<AnyResult> {
+        Ok(AnyResult(match self.resolve(py, wait)? {
+            Some(value) => value,
+            None => Status::Pending.into_pyobject(py)?.unbind(),
+        }))
+    }
+}
+
+/// What the base `Future.poll()` returns. Its own type only so the stubs say `object`
+/// (instead of `Any`): a valid supertype of every subclass's exact return type.
+pub struct AnyResult(Py<PyAny>);
+
+impl<'py> IntoPyObject<'py> for AnyResult {
+    type Target = PyAny;
+    type Output = Bound<'py, PyAny>;
+    type Error = std::convert::Infallible;
+
+    #[cfg(any(feature = "abi_314", feature = "abi_310", feature = "abi_39"))]
+    const OUTPUT_TYPE: pyo3::inspect::PyStaticExpr = pyo3::type_hint_identifier!("builtins", "object");
+
+    fn into_pyobject(self, py: Python<'py>) -> Result<Bound<'py, PyAny>, Self::Error> {
+        Ok(self.0.into_bound(py))
+    }
 }
 
 
