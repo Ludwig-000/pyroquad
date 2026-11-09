@@ -10,7 +10,7 @@ pub mod Camera;
 pub mod Config;
 pub mod MouseButton;
 pub mod KeyCode;
-pub mod Shader;
+pub mod Material;
 pub mod RenderTarget;
 pub mod Text;
 pub mod UniformType;

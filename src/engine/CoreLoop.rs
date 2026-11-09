@@ -14,6 +14,7 @@ use macroquad::prelude as mq;
 use macroquad::audio as au;
 use macroquad::text::TextDimensions;
 use macroquad::window::get_internal_gl;
+use crate::_pyroquad::ShaderSource;
 use crate::engine::CameraManager;
 use crate::engine::CameraManager::CamMemory;
 use crate::engine::CameraManager::Camera;
@@ -49,6 +50,10 @@ use crate::engine::Objects::ObjectManagement::ObjectStorage;
 use crate::engine::Objects::ObjectManagement::ObjectManagement;
 
 pub enum Command {
+    LoadMaterial{
+        shader: ShaderSource,
+        sender: PChannel::PSender<Result<mq::Material, PError>>,
+    },
     CreateMeshFromBytes{
         data: Vec<u8>,
         texture: Option<mq::Texture2D>,
@@ -456,8 +461,22 @@ fn attach_depth_stencil(pass: miniquad::RenderPass, width: u32, height: u32, sam
 /// Only a handful of arms ever `.await` - `NextFrame` and the asset loads.
 /// Every other command completes on the first poll, which is what lets the
 /// browser build run queries straight off the Python stack.
+#[inline(always)]
 pub async fn dispatch(command: Command, st: &mut EngineState) {
             match command {
+                Command::LoadMaterial { shader, sender } => {
+                    let mq_shader = match &shader {
+                        ShaderSource::Glsl { vertex, fragment } => mq::ShaderSource::Glsl {
+                            vertex: vertex.as_str(),
+                            fragment: fragment.as_str(),
+                        },
+                        ShaderSource::Msl { program } => mq::ShaderSource::Msl {
+                            program: program.as_str(),
+                        },
+                    };
+                    let params = mq::MaterialParams::default();
+                    let _ = sender.send(mq::load_material(mq_shader, params).map_err(Into::into));
+                }
                 Command::CreateMeshFromBytes{data, texture, sender}=>{
                     let mesh = Mesh::load_from_bytes(&data, texture.map(|t|t.into())).map_err(|e|{
                         PError::BasicErr(format!("invalid mesh: {e}"))

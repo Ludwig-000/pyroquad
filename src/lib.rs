@@ -136,7 +136,7 @@ pub mod _pyroquad {
     pub use crate::py_abstractions::structs::TwoDObjects::Rectangle::Rectangle;
 
     #[pymodule_export]
-    pub use crate::py_abstractions::Shader::{Shader, ShaderSource};
+    pub use crate::py_abstractions::Material::{Material, ShaderSource};
 
     #[pymodule_export]
     pub use crate::py_abstractions::KeyCode::KeyCode;
