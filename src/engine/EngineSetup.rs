@@ -18,8 +18,4 @@ pub fn setup_engine(){
         }
     }));
 
-
-    // compiles shaders
-	crate::engine::SHADERS::shaderLoader::shader_load();
-	
 }

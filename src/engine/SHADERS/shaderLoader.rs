@@ -3,8 +3,8 @@ use macroquad::material::{Material, MaterialParams};
 use macroquad::window::miniquad::{ShaderSource, PipelineParams, Comparison, UniformDesc, UniformType};
 use std::sync::{LazyLock, Mutex};
 
-pub fn shader_load() {
-    {
+pub fn shader_load() -> (mq::Material, mq::Material) {
+    let basic = {
         const FRAGMENT_SHADER_SRC: &str = include_str!("Basic/FRAG.frag");
         const VERTEX_SHADER_SRC: &str = include_str!("Basic/VERTEX.vert");
 
@@ -45,10 +45,10 @@ pub fn shader_load() {
         let lz = elev.cos() * azim.sin();
         let light_dir = mq::vec3(lx, ly, lz);
         material.set_uniform("LightDir", (light_dir.x, light_dir.y, light_dir.z));
-        store_shader(material);
-    }
+        material
+    };
 
-    {
+    let skybox = {
         const FRAG_SKYBOX: &str = include_str!("Skybox/FRAG.frag");
         const VERT_SKYBOX: &str = include_str!("Skybox/VERTEX.vert");
 
@@ -70,8 +70,10 @@ pub fn shader_load() {
                 ..Default::default()
             },
         ).unwrap();
-        store_shader(mat);
-    }
+        mat
+    };
+
+    (basic, skybox)
 }
 
 

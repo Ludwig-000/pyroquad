@@ -11,72 +11,12 @@ use crate::engine::CoreLoop::Command;
 
 
 
-
-#[pyclass(from_py_object)]
-#[derive(Debug, Clone, Copy)]
-pub enum UniformType {
-    /// One 32-bit wide float (equivalent to `float`)
-    Float1,
-    /// Two 32-bit wide floats (equivalent to `[float, float]`)
-    Float2,
-    /// Three 32-bit wide floats (equivalent to `[float, float, float]`)
-    Float3,
-    /// Four 32-bit wide floats (equivalent to `[float, float, float, float]`)
-    Float4,
-    /// One unsigned 32-bit integers (equivalent to `[int]`)
-    Int1,
-    /// Two unsigned 32-bit integers (equivalent to `[int, int]`)
-    Int2,
-    /// Three unsigned 32-bit integers (equivalent to `[int, int, int]`)
-    Int3,
-    /// Four unsigned 32-bit integers (equivalent to `[int, int, int, int]`)
-    Int4,
-    /// Four by four matrix of 32-bit floats
-    Mat4,
-}
-
-
-
-impl From<UniformType> for mq::UniformType {
-    fn from(ut: UniformType) -> Self {
-        match ut {
-            UniformType::Float1 => mq::UniformType::Float1,
-            UniformType::Float2 => mq::UniformType::Float2,
-            UniformType::Float3 => mq::UniformType::Float3,
-            UniformType::Float4 => mq::UniformType::Float4,
-            UniformType::Int1 => mq::UniformType::Int1,
-            UniformType::Int2 => mq::UniformType::Int2,
-            UniformType::Int3 => mq::UniformType::Int3,
-            UniformType::Int4 => mq::UniformType::Int4,
-            UniformType::Mat4 => mq::UniformType::Mat4,
-        }
-    }
-}
-impl From<mq::UniformType> for UniformType {
-    fn from(ut: mq::UniformType) -> Self {
-        match ut {
-            mq::UniformType::Float1 => UniformType::Float1,
-            mq::UniformType::Float2 => UniformType::Float2,
-            mq::UniformType::Float3 => UniformType::Float3,
-            mq::UniformType::Float4 => UniformType::Float4,
-            mq::UniformType::Int1 => UniformType::Int1,
-            mq::UniformType::Int2 => UniformType::Int2,
-            mq::UniformType::Int3 => UniformType::Int3,
-            mq::UniformType::Int4 => UniformType::Int4,
-            mq::UniformType::Mat4 => UniformType::Mat4,
-        }
-    }
-}
-
-
-
 /// Euler rotation sequences.
 ///
 /// The angles are applied starting from the right.
 /// E.g. XYZ will first apply the z-axis rotation.
 ///
 /// YXZ can be used for yaw (y-axis), pitch (x-axis), roll (z-axis).
-
 #[pyclass(from_py_object)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum EulerRot {

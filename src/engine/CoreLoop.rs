@@ -9,18 +9,24 @@ use crossbeam::queue::SegQueue;
 
 use macroquad::input::Touch;
 use macroquad::miniquad;
+
 use macroquad::models::DrawSphereParams;
 use macroquad::prelude as mq;
 use macroquad::audio as au;
 use macroquad::text::TextDimensions;
 use macroquad::window::get_internal_gl;
-use crate::_pyroquad::ShaderSource;
+use pyo3::PyErr;
+
+use crate::_pyroquad::UniformDesc;
+use crate::_pyroquad::UniformType;
 use crate::engine::CameraManager;
 use crate::engine::CameraManager::CamMemory;
 use crate::engine::CameraManager::Camera;
 use crate::engine::CameraManager::clone_camera3d;
 use crate::engine::CameraManager::set_camera;
 use crate::engine::CameraManager::set_default_camera;
+use crate::engine::Material::InnerMaterial;
+use crate::engine::Material::OuterMaterial;
 use crate::engine::MouseInsideScreen;
 use crate::engine::Objects::Cylinder::Cylinder;
 use crate::engine::Objects::ObjectManagement::ObjectStorage::ObjectKey;
@@ -31,10 +37,13 @@ use crate::engine::Objects::TwoDObjects::draw_circle;
 use crate::engine::Objects::TwoDObjects::draw_rect;
 use crate::engine::Objects::WireObjects::draw_cube_wires;
 use crate::engine::PChannel::PSender;
-use crate::engine::SHADERS::shader_manager as sm;
+use crate::engine::SHADERS::shader_manager::ShaderManager;
+use crate::engine::SHADERS::shader_manager::Premade_Shader_Type;
 use crate::engine::PError::PError;
 use crate::engine::PArc::PArc;
 use crate::engine::Objects::ObjectManagement::ObjectStorage::*;
+use crate::engine::SHADERS::shaderLoader;
+use crate::engine::SHADERS::shaderLoader::shader_load;
 use crate::py_abstractions::GL::GlEnum;
 use crate::py_abstractions::GL::implement_GlEnum;
 use crate::py_abstractions::Textures_and_Images::EngineTexImgEnum;
@@ -50,10 +59,33 @@ use crate::engine::Objects::ObjectManagement::ObjectStorage;
 use crate::engine::Objects::ObjectManagement::ObjectManagement;
 
 pub enum Command {
-    LoadMaterial{
-        shader: ShaderSource,
-        sender: PChannel::PSender<Result<mq::Material, PError>>,
+
+    SetMaterialUniform {
+        mat: OuterMaterial,
+        name: String,
+        /// one element for a plain uniform, `array_count` elements for an array.
+        values: Vec<UniformType>,
     },
+    StartUsingMaterial{
+        mat: OuterMaterial,
+    },
+    UseDefaultMaterial,
+    SetMaterialTexture {
+        mat: OuterMaterial,
+        name: String,
+        texture: PArc<mq::Texture2D>,
+    },
+    LoadMaterial{
+        vertex: String,
+        frag: String,
+        name: String,
+        uniform_desc: Vec<UniformDesc>,
+        /// names of the extra `sampler2D`s, besides the built-in `Texture`.
+        textures: Vec<String>,
+        pipeline_params: mq::PipelineParams,
+        sender: PChannel::PSender<Result<OuterMaterial, PError>>,
+    },
+
     CreateMeshFromBytes{
         data: Vec<u8>,
         texture: Option<mq::Texture2D>,
@@ -173,7 +205,7 @@ pub enum Command {
         sender: PChannel::PSender<ObjectKey>,
     },
 
-    DropThisItem(Arc<dyn Any + Send + Sync>), // drops it's item.  >_<
+    DropThisItem(Box<dyn Any + Send + Sync>), // drops it's item.  >_<
 
     LoadFile{ path: String, sender: PChannel::PSender<Result<Vec<u8>, PError>> },
     LoadSound{ path: String, sender: PChannel::PSender<Result<PArc<au::Sound>, PError>> },
@@ -371,22 +403,20 @@ pub static COMMAND_QUEUE: LazyLock<CommandQueue> = LazyLock::new(CommandQueue::n
 pub struct EngineState {
     pub object_storage: ObjectStorage::ObjectStorage,
     pub cam_memory: CamMemory,
+    pub shader_manager: ShaderManager
 }
 
 impl EngineState {
     pub fn new() -> Self {
+        let (basic_shader, skybox_shader)  = shader_load();
         Self {
             object_storage: ObjectStorage::ObjectStorage::new(),
             cam_memory: CamMemory::new(),
+            shader_manager: ShaderManager::new(basic_shader, skybox_shader)
         }
     }
 }
 
-impl Default for EngineState {
-    fn default() -> Self {
-        Self::new()
-    }
-}
 
 /// Drops what the GL backend can't do from render target params.
 ///
@@ -464,18 +494,30 @@ fn attach_depth_stencil(pass: miniquad::RenderPass, width: u32, height: u32, sam
 #[inline(always)]
 pub async fn dispatch(command: Command, st: &mut EngineState) {
             match command {
-                Command::LoadMaterial { shader, sender } => {
-                    let mq_shader = match &shader {
-                        ShaderSource::Glsl { vertex, fragment } => mq::ShaderSource::Glsl {
-                            vertex: vertex.as_str(),
-                            fragment: fragment.as_str(),
-                        },
-                        ShaderSource::Msl { program } => mq::ShaderSource::Msl {
-                            program: program.as_str(),
-                        },
-                    };
-                    let params = mq::MaterialParams::default();
-                    let _ = sender.send(mq::load_material(mq_shader, params).map_err(Into::into));
+                Command::LoadMaterial { vertex, frag, sender , name, uniform_desc, textures, pipeline_params} => {
+                    
+                    let res  = st.shader_manager.new_material(vertex, frag, name, uniform_desc, textures, pipeline_params);
+
+                    let _ = sender.send(res);
+                }
+                Command::StartUsingMaterial { mat } => {
+                    st.shader_manager.set_custom_shader(mat);
+                }
+                Command::UseDefaultMaterial => {
+                    st.shader_manager.use_default_material();
+                }
+                Command::SetMaterialTexture { mat, name, texture } => {
+                    let texture: mq::Texture2D = (*texture).clone();
+                    mat.inner.inner.set_texture(&name, texture.clone());
+                    // macroquad only keeps the raw GPU id, so the material holds the handle
+                    // until the texture is replaced or the material is dropped.
+                    mat.inner.bound_textures.lock().unwrap().insert(name, texture);
+                }
+                Command::SetMaterialUniform { mat, name, values } => {
+
+                    let mut words: Vec<f32> = vec![];
+                    for v in &values { v.write_words(&mut words); }
+                    mat.inner.inner.set_uniform_array(&name, &words[..]);
                 }
                 Command::CreateMeshFromBytes{data, texture, sender}=>{
                     let mesh = Mesh::load_from_bytes(&data, texture.map(|t|t.into())).map_err(|e|{
@@ -544,18 +586,18 @@ pub async fn dispatch(command: Command, st: &mut EngineState) {
                 }
                 Command::DrawPolyLines { x, y, sides, radius, rotation, thickness, color }
                     => {
-                        sm::switch_to_desired_shader(sm::ShaderKind::None, &None);
+                        st.shader_manager.set_desired_builtin_shader(Premade_Shader_Type::None, &None);
                         mq::draw_poly_lines(x, y, sides, radius, rotation, thickness, color)
                     }
                 Command::DrawAfflineParallogram { offset, e1, e2, texture, color }
                     => {
-                        sm::switch_to_desired_shader(sm::ShaderKind::None, &None);
+                        st.shader_manager.set_desired_builtin_shader(Premade_Shader_Type::None, &None);
                         mq::draw_affine_parallelogram(offset, e1, e2, texture.as_ref(), color)}
                 Command::DrawMultilineText { text, 
                     x, y, font_size, line_distance_factor, color, 
                     font_scale, font_scale_aspect, rotation, font } => {
 
-                        sm::switch_to_desired_shader(sm::ShaderKind::None, &None);
+                        st.shader_manager.set_desired_builtin_shader(Premade_Shader_Type::None, &None);
                         let params =  mq::TextParams{font: font.as_ref(), font_size, font_scale, font_scale_aspect, rotation, color};
                         let res = mq::draw_multiline_text_ex(&text, x, y,line_distance_factor, params );
                     }
@@ -566,7 +608,7 @@ pub async fn dispatch(command: Command, st: &mut EngineState) {
                 }
                 Command::DrawLine { x1, y1, x2, y2, thickness, color }
                     => {
-                        sm::switch_to_desired_shader(sm::ShaderKind::None, &None);
+                        st.shader_manager.set_desired_builtin_shader(Premade_Shader_Type::None, &None);
                         mq::draw_line(x1, y1, x2, y2, thickness, color)}
                 Command::TexImEnum(en)=> en.execute(),
                 Command::GlEnum(glenum)=> {
@@ -576,10 +618,10 @@ pub async fn dispatch(command: Command, st: &mut EngineState) {
                     implement_GlEnum(glenum, gl);
                 }
                 Command::DrawCircleFromPyClass(circle)=> {
-                    sm::switch_to_desired_shader(sm::ShaderKind::None, &None);
+                    st.shader_manager.set_desired_builtin_shader(Premade_Shader_Type::None, &None);
                     draw_circle(&circle)},
                 Command::DrawRectangleFromPyClass(rect)=> {
-                    sm::switch_to_desired_shader(sm::ShaderKind::None, &None);
+                    st.shader_manager.set_desired_builtin_shader(Premade_Shader_Type::None, &None);
                     draw_rect(&rect)},
                 Command::PhysicsEnum(phys,key )=> {
                     let handle = st.object_storage.get_handle(key).expect("No physics handle found, yet physics function was called.");
@@ -609,14 +651,14 @@ pub async fn dispatch(command: Command, st: &mut EngineState) {
                         let mat = mq::get_internal_gl();
                         matrix= mat.quad_gl.get_projection_matrix()
                     }
-                    sm::switch_to_desired_shader(sm::ShaderKind::Basic, &None);
+                    st.shader_manager.set_desired_builtin_shader(Premade_Shader_Type::Basic, &None);
                     ObjectManagement::draw_all_Objects(&st.object_storage, matrix);
                 }
                 Command::DrawObjectNow(obj_key)=> {
                     let gl = unsafe {
                         mq::get_internal_gl().quad_gl
                     };
-                    sm::switch_to_desired_shader(sm::ShaderKind::Basic, &None);
+                    st.shader_manager.set_desired_builtin_shader(Premade_Shader_Type::Basic, &None);
                     gl.draw_mode(mq::DrawMode::Triangles);
                     let obj=  st.object_storage.get(obj_key);
                     match obj {
@@ -794,11 +836,11 @@ pub async fn dispatch(command: Command, st: &mut EngineState) {
                 }
                 Command::DrawRectLines { x, y, w, h, thickness, color }
                     => {
-                        sm::switch_to_desired_shader(sm::ShaderKind::None, &None);
+                        st.shader_manager.set_desired_builtin_shader(Premade_Shader_Type::None, &None);
                         mq::draw_rectangle_lines(x, y, w, h, thickness, color)
                     },
                 Command::DrawRect { x, y, w, h, color} => {
-                    sm::switch_to_desired_shader(sm::ShaderKind::None, &None);
+                    st.shader_manager.set_desired_builtin_shader(Premade_Shader_Type::None, &None);
                     mq::draw_rectangle(
                         x,
                         y,
@@ -809,25 +851,25 @@ pub async fn dispatch(command: Command, st: &mut EngineState) {
                 }
                 Command::DrawTriangle { v1, v2, v3, color }
                     => {
-                        sm::switch_to_desired_shader(sm::ShaderKind::None, &None);
+                        st.shader_manager.set_desired_builtin_shader(Premade_Shader_Type::None, &None);
                         mq::draw_triangle(v1, v2, v3, color)
                     }
                 Command::DrawTriangleLines { v1, v2, v3, thickness, color }
                     => {
-                        sm::switch_to_desired_shader(sm::ShaderKind::None, &None);
+                        st.shader_manager.set_desired_builtin_shader(Premade_Shader_Type::None, &None);
                         mq::draw_triangle_lines(v1, v2, v3, thickness, color)
                     }
                 Command::DrawPlane { center, size, color, texture } => {
-                    sm::switch_to_desired_shader(sm::ShaderKind::None, &None);
+                    st.shader_manager.set_desired_builtin_shader(Premade_Shader_Type::None, &None);
                     let tex_ref = texture.as_ref();
                     mq::draw_plane(center,size,tex_ref,color);
                 }
                 Command::DrawGrid { slices, spacing, axes_color, other_color, center, rotation } => {
-                    sm::switch_to_desired_shader(sm::ShaderKind::None, &None);
+                    st.shader_manager.set_desired_builtin_shader(Premade_Shader_Type::None, &None);
                     mq::draw_grid_ex(slices, spacing, axes_color, other_color, center, rotation);
                 }
                 Command::DrawCube {pos,size,texture,color} => {
-                    sm::switch_to_desired_shader(sm::ShaderKind::Basic, &None);
+                    st.shader_manager.set_desired_builtin_shader(Premade_Shader_Type::Basic, &None);
                     mq::draw_cube(pos,size,texture.as_ref(),color)
                 }
                 Command::DrawSkyBox {texture, tint} => {
@@ -836,49 +878,49 @@ pub async fn dispatch(command: Command, st: &mut EngineState) {
                         Camera::Camera2D(_)=> panic!("should be 3d cam"),
                         Camera::Camera3D(_cam)=> clone_camera3d(_cam)
                     };
-                    sm::switch_to_desired_shader(sm::ShaderKind::SkyBox, &Some(cam));
+                    st.shader_manager.set_desired_builtin_shader(Premade_Shader_Type::SkyBox, &Some(cam));
                     mq::draw_sphere_ex(mq::Vec3::ZERO, 10.0, texture.as_ref(), tint,DrawSphereParams { rings: 100, slices: 100, draw_mode: mq::DrawMode::Triangles });
                 }
                 Command::DrawAfflineParallelpiped { offset, e1, e2, e3, texture, color } => {
-                    sm::switch_to_desired_shader(sm::ShaderKind::None, &None);
+                    st.shader_manager.set_desired_builtin_shader(Premade_Shader_Type::None, &None);
                     mq::draw_affine_parallelepiped(offset, e1, e2, e3, texture.as_ref(), color);
                 }
                 Command::DrawArc { x, y, sides, radius, rotation, thickness, arc, color } => {
-                    sm::switch_to_desired_shader(sm::ShaderKind::None, &None);
+                    st.shader_manager.set_desired_builtin_shader(Premade_Shader_Type::None, &None);
                     mq::draw_arc(x, y, sides, radius, rotation, thickness, arc, color);
                 }
         
                 Command::DrawCubeWires { position, size, rotation, color } => {
-                    sm::switch_to_desired_shader(sm::ShaderKind::None, &None);
+                    st.shader_manager.set_desired_builtin_shader(Premade_Shader_Type::None, &None);
                     draw_cube_wires(position, size, rotation, color);
                 }
                 Command::DrawCylinder { position, radius_top, radius_bottom, height, texture, color } => {
-                    sm::switch_to_desired_shader(sm::ShaderKind::Basic, &None);
+                    st.shader_manager.set_desired_builtin_shader(Premade_Shader_Type::Basic, &None);
                     mq::draw_cylinder(position, radius_top, radius_bottom, height, texture.as_ref(), color);
                 }
         
                 Command::DrawCylinderWires { position, radius_top, radius_bottom, height, texture, color } => {
-                    sm::switch_to_desired_shader(sm::ShaderKind::None, &None);
+                    st.shader_manager.set_desired_builtin_shader(Premade_Shader_Type::None, &None);
                     mq::draw_cylinder_wires(position, radius_top, radius_bottom, height, texture.as_ref(), color);
                 }
         
                 Command::DrawEllipse { x, y, w, h, rotation, color }    => {
-                    sm::switch_to_desired_shader(sm::ShaderKind::None, &None);
+                    st.shader_manager.set_desired_builtin_shader(Premade_Shader_Type::None, &None);
                     mq::draw_ellipse(x, y, w, h, rotation, color);
                 }
                 
                 Command::DrawEllipseLines { x, y, w, h, rotation, thickness, color }    => {
-                    sm::switch_to_desired_shader(sm::ShaderKind::None, &None);
+                    st.shader_manager.set_desired_builtin_shader(Premade_Shader_Type::None, &None);
                     mq::draw_ellipse_lines(x, y, w, h, rotation, thickness, color);
                 }
         
                 Command::DrawHexagon { x, y, size, border, vertical, border_color, fill_color } => {
-                    sm::switch_to_desired_shader(sm::ShaderKind::None, &None);
+                    st.shader_manager.set_desired_builtin_shader(Premade_Shader_Type::None, &None);
                     mq::draw_hexagon(x, y, size, border, vertical, border_color, fill_color);
                 }
         
                 Command::DrawLine3D { start, end, color } =>{
-                    sm::switch_to_desired_shader(sm::ShaderKind::None, &None);
+                    st.shader_manager.set_desired_builtin_shader(Premade_Shader_Type::None, &None);
                     mq::draw_line_3d(start, end, color);    
                 }
                 
@@ -905,7 +947,7 @@ pub async fn dispatch(command: Command, st: &mut EngineState) {
                 }
                 Command::DrawPoly { x, y, sides, radius, rotation, color }=>
                 {
-                    sm::switch_to_desired_shader(sm::ShaderKind::None, &None);
+                    st.shader_manager.set_desired_builtin_shader(Premade_Shader_Type::None, &None);
                     mq::draw_poly(x,y,sides,radius,rotation,color  );
                 }
                 Command::SetDefaultCamera() =>{ 
@@ -914,7 +956,7 @@ pub async fn dispatch(command: Command, st: &mut EngineState) {
         
                 Command::DrawTexture { texture,x,y,color}=>
                 {
-                    sm::switch_to_desired_shader(sm::ShaderKind::None, &None);
+                    st.shader_manager.set_desired_builtin_shader(Premade_Shader_Type::None, &None);
                     mq::draw_texture(&texture,x,y,color)
                 }
                 
@@ -927,7 +969,8 @@ pub async fn dispatch(command: Command, st: &mut EngineState) {
         
                 Command::NextFrame{physics_step, sender} => {
                     mq::next_frame().await;
-                    crate::engine::SHADERS::shader_manager::new_frame_shader_update();
+                    st.shader_manager.garbage_collect();
+                    st.shader_manager.new_frame_shader_update();
                     crate::engine::FrameInfo::update_frame_info();
 
                     let _ = sender.send(());
@@ -949,7 +992,7 @@ pub async fn dispatch(command: Command, st: &mut EngineState) {
                     font_scale_aspect, 
                     rotation, 
                     sender } =>{
-                        sm::switch_to_desired_shader(sm::ShaderKind::None, &None);
+                        st.shader_manager.set_desired_builtin_shader(Premade_Shader_Type::None, &None);
                         let font_options = mq::TextParams{
                             font: font.as_ref(),
                             font_size,

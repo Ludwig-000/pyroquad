@@ -136,7 +136,9 @@ pub mod _pyroquad {
     pub use crate::py_abstractions::structs::TwoDObjects::Rectangle::Rectangle;
 
     #[pymodule_export]
-    pub use crate::py_abstractions::Material::{Material, ShaderSource};
+    pub use crate::py_abstractions::Material::{Material, UniformType, UniformDesc, 
+        use_default_material // reset the material to the pq default.
+    };
 
     #[pymodule_export]
     pub use crate::py_abstractions::KeyCode::KeyCode;
@@ -144,7 +146,13 @@ pub mod _pyroquad {
     pub use crate::py_abstractions::MouseButton::MouseButton;
 
     #[pymodule_export]
-    pub use crate::py_abstractions::UniformType::{Comparison, EulerRot, UniformType};
+    pub use crate::py_abstractions::UniformType::{Comparison, EulerRot};
+
+    #[pymodule_export]
+    pub use crate::py_abstractions::PipelineParams::{
+        PipelineParams, CullFace, FrontFaceOrder, Equation, BlendValue, BlendFactor, BlendState,
+        StencilOp, StencilFaceState, StencilState, PrimitiveType,
+    };
 
     #[pymodule_export]
     pub use crate::py_abstractions::PFuture::Future;

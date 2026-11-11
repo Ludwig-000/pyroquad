@@ -1,5 +1,5 @@
+use std::mem::ManuallyDrop;
 use std::ops::{Deref, DerefMut};
-use std::thread;
 use std::sync::Arc;
 use crate::engine::CoreLoop::COMMAND_QUEUE;
 use crate::engine::CoreLoop::Command;
@@ -7,17 +7,18 @@ use std::fmt::{Debug, Formatter};
 
 /// Pythonic Arc.
 /// this Wrapper ensures the object gets dropped on the macroquad thread.
-/// (kinda)
 /// This is mostly useful for anything that implements 'Texture2D', since it has an
 /// unsafe destructor that panics if run on the python thread.
+///
+/// When the last handle is dropped, the bare `T` is taken out of the Arc and
+/// sent to the macroquad thread, which drops it there.
 pub struct PArc<T: Send + Sync + 'static>{
-    item: Arc<T>,
+    item: ManuallyDrop<Arc<T>>,
 }
 
 impl<T: Send + Sync + 'static> PArc<T>{
     pub fn new(item: T)-> Self{
-        let item  =Arc::new(item);
-        PArc {  item }
+        PArc { item: ManuallyDrop::new(Arc::new(item)) }
     }
 
     pub fn ptr_address(&self) -> usize {
@@ -42,36 +43,31 @@ impl<T: Send + Sync + 'static> DerefMut for PArc<T> {
 impl<T: Send + Sync + 'static> Drop for PArc<T> {
     fn drop(&mut self) {
 
-        let count = Arc::strong_count(&self.item);
-        if  count > 1  {return}
+        let arc = unsafe { ManuallyDrop::take(&mut self.item) };
 
-        
-        let cloned_arc  =self.item.clone();
-        COMMAND_QUEUE.push( Command::DropThisItem(cloned_arc)       );
+        if let Some(inner) = Arc::into_inner(arc) {
+            COMMAND_QUEUE.push(Command::DropThisItem(Box::new(inner)));
+        }
     }
 }
 
 
 impl<T: Send + Sync + 'static> Clone for PArc<T> {
     fn clone(&self) -> Self {
-        PArc {
-            item: self.item.clone()
-        }
+        PArc { item: ManuallyDrop::new(Arc::clone(&self.item)) }
     }
 }
 
 
 impl<T: Send + Sync + 'static + Debug> Debug for PArc<T> {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        self.item.fmt(f)
-        
+        (**self.item).fmt(f)
     }
 }
 
 
 impl<T: Send + Sync + 'static + PartialEq> PartialEq for PArc<T> {
     fn eq(&self, other: &Self) -> bool {
-        self.item == other.item
+        **self.item == **other.item
     }
 }
-

@@ -11,6 +11,7 @@ pub mod Config;
 pub mod MouseButton;
 pub mod KeyCode;
 pub mod Material;
+pub mod PipelineParams;
 pub mod RenderTarget;
 pub mod Text;
 pub mod UniformType;

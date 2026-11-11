@@ -255,7 +255,7 @@ pub async fn engine_loop() {
                     // returns control to Python - which must find its reply
                     // already waiting. (Natively the order is reversed, since
                     // there the engine thread keeps running afterwards.)
-                    crate::engine::SHADERS::shader_manager::new_frame_shader_update();
+                    with_state(|state| state.shader_manager.new_frame_shader_update());
                     crate::engine::FrameInfo::update_frame_info();
 
                     if let Some(step) = physics_step {
@@ -269,6 +269,9 @@ pub async fn engine_loop() {
                     // No `clear_background` after the yield, unlike natively:
                     // `offscreen_after_frame` clears the screen instead.
                     mq::next_frame().await;
+                    // Only now is the frame rendered, so only now may the
+                    // materials used in it be dropped.
+                    with_state(|state| state.shader_manager.garbage_collect());
                 }
 
                 other => {

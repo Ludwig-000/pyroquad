@@ -12,6 +12,7 @@ pub mod CameraManager;
 pub mod PAssert;
 pub mod PThreading;
 pub mod MouseInsideScreen;
+pub mod Material;
 pub mod Atomics;
 pub mod PDropGuard;
 #[cfg(target_os = "macos")]
