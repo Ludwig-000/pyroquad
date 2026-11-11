@@ -514,10 +514,9 @@ pub async fn dispatch(command: Command, st: &mut EngineState) {
                     mat.inner.bound_textures.lock().unwrap().insert(name, texture);
                 }
                 Command::SetMaterialUniform { mat, name, values } => {
-
                     let mut words: Vec<f32> = vec![];
                     for v in &values { v.write_words(&mut words); }
-                    mat.inner.inner.set_uniform_array(&name, &words[..]);
+                    mat.set_uniform(name, words);
                 }
                 Command::CreateMeshFromBytes{data, texture, sender}=>{
                     let mesh = Mesh::load_from_bytes(&data, texture.map(|t|t.into())).map_err(|e|{

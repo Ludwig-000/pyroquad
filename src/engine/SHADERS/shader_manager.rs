@@ -15,7 +15,8 @@ pub struct ShaderManager {
     current_shader: u64,
     shader_refs: Vec<OuterMaterial>, // keep a strong ref to all materials used this frame to prevent drops.
 
-    builtin_shader_overwritten_by_custom_shader: bool,
+    /// the material set with `start_using`, overriding the builtin shaders until `use_default_material`.
+    custom_material: Option<OuterMaterial>,
     
     top_shader_index: u64, // increases for each new material
     
@@ -28,7 +29,7 @@ impl ShaderManager {
         ShaderManager { 
             current_shader: 0, 
             shader_refs: Vec::new(),
-            builtin_shader_overwritten_by_custom_shader: false, 
+            custom_material: None,
             top_shader_index: 2 ,
             basic_shader, 
             skybox_shader 
@@ -39,7 +40,11 @@ impl ShaderManager {
     /// each draw call inherently either wants a 2d or 3d shader.
     /// custom shaders are designated on top of these.
     pub fn set_desired_builtin_shader(&mut self, shader: Premade_Shader_Type, current_cam: &Option<macroquad::prelude::Camera3D>){
-        if shader as u64 == self.current_shader || self.builtin_shader_overwritten_by_custom_shader {
+        if let Some(mat) = &self.custom_material {
+            mat.sync_uniforms();
+            return;
+        }
+        if shader as u64 == self.current_shader {
             return;
         }
 
@@ -87,7 +92,8 @@ impl ShaderManager {
             inner: shader,
             name: name.into_boxed_str(),
             index: self.top_shader_index,
-            cached_Uniforms: Vec::new(),
+            uniform_cache: Default::default(),
+            uniforms_dirty: Default::default(),
             textures: textures.into_iter().map(String::into_boxed_str).collect(),
             bound_textures: Default::default(),
         }))
@@ -95,28 +101,23 @@ impl ShaderManager {
 
 
     pub fn set_custom_shader(&mut self, mat: OuterMaterial) {
-        self.builtin_shader_overwritten_by_custom_shader = true;
-
-        if self.current_shader == mat.index() {
-            return;
+        if self.current_shader != mat.index() {
+            self.current_shader = mat.index();
+            mq::gl_use_material(&mat.inner.inner);
+            self.shader_refs.push(mat.clone());
         }
-        self.current_shader = mat.index();
-
-        mq::gl_use_material(&mat.inner.inner);
-
-        self.shader_refs.push(mat);
-
+        self.custom_material = Some(mat);
     }
 
     pub fn use_default_material(&mut self) {
-        self.builtin_shader_overwritten_by_custom_shader = false;
+        self.custom_material = None;
     }
 
     /// called inside next_frame
     pub fn new_frame_shader_update(&mut self) {
 
         self.current_shader = Premade_Shader_Type::None as u64;
-        self.builtin_shader_overwritten_by_custom_shader = false;
+        self.custom_material = None;
 
         mq::gl_use_default_material();
     }
