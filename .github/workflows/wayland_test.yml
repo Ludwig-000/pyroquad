@@ -24,7 +24,14 @@ jobs:
   wayland:
     name: Native Wayland Window
     # Pinned instead of ubuntu-latest: Weston's command-line flags change between releases.
-    runs-on: ubuntu-24.04
+    #
+    # Must ship libwayland >= 1.23 (26.04 has 1.24). miniquad 0.4.8 dlsym's two
+    # functions added in 1.23 (wl_display_create_queue_with_name, wl_event_queue_get_name)
+    # and panics without them, even though it never calls either. On ubuntu-24.04
+    # (libwayland 1.22) the Wayland backend can't start at all.
+    # TODO: patch those two declarations out of miniquad, then move this back to 24.04
+    # so the test covers older libwayland too.
+    runs-on: ubuntu-26.04
     timeout-minutes: 30
     env:
       RUST_BACKTRACE: 1
@@ -40,23 +47,28 @@ jobs:
         with:
           key: wayland-test
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-
       # The X11 dev packages are still needed to *build*: the crate links libX11
       # even though this test never talks to an X server.
       # The rest is what miniquad dlopens at runtime for Wayland, plus the compositor.
       - name: Install System Dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y libasound2-dev libx11-dev libxi-dev libgl1-mesa-dev libxcursor-dev \
-            libxinerama-dev libxrandr-dev pulseaudio \
+          sudo apt-get install -y libasound2-dev libx11-dev libxi-dev libgl-dev libxcursor-dev \
+            libxinerama-dev libxrandr-dev pulseaudio python3-venv \
             weston libwayland-client0 libwayland-egl1 libxkbcommon0 libegl1 libegl-mesa0 libgl1-mesa-dri
+          echo "libwayland-client: $(dpkg-query -W -f='${Version}' libwayland-client0)"
+          echo "weston: $(weston --version)"
+
+      # The distro's Python in a venv instead of actions/setup-python, which
+      # may not have builds for a brand-new runner image yet.
+      - name: Set up Python
+        run: |
+          python3 -m venv "$RUNNER_TEMP/venv"
+          echo "$RUNNER_TEMP/venv/bin" >> "$GITHUB_PATH"
 
       - name: Build and Install pyroquad
         run: |
+          python --version
           python -m pip install "maturin>=1.9,<2"
           maturin build --features abi_310 --out dist -i python
           python -m pip install --no-index --find-links dist pyroquad
