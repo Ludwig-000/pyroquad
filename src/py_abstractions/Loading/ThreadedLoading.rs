@@ -108,10 +108,14 @@ impl Loading {
         load::download_file_future(url)
     }
 
-    /// TODO: do not download if file exists already.
     #[staticmethod]
     pub fn download_file_and_save_and_load(url: String, filepath: String)-> PyResult<FileData>{
-        
+        use crate::py_abstractions::Loading::Loading::does_file_exist;
+
+        if does_file_exist(&filepath) {
+            return load_file(&filepath);
+        }
+
         let data = download_file(&url)?;
         write_to_file(&data, filepath)?;
         Ok(data)
@@ -138,39 +142,6 @@ impl Loading {
         FileDataFuture::new(rx)
     }
 
-
-    #[staticmethod]
-    pub fn load_multiple_files<'py>(py: Python<'py>, paths: &Bound<'_, PyDict>)-> PyResult<Bound<'py, PyDict>>{
-        let mut var_names: Vec<String> = Vec::new();
-        let mut path_names: Vec<String> = Vec::new();
-        
-        for (key, value) in paths {
-            let var_name: String = key.extract()?;
-            let file_path: String = value.extract()?;
-            var_names.push(var_name);
-            path_names.push(file_path);
-        }
-
-        let res: Vec<FileData> = threaded_map(path_names, &|s: String| {
-            load_file(&s) 
-        })?;
-
-        
-        
-        if var_names.len() != res.len() {
-            return Err(PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(
-                "Mismatch between variable names and file load results length."
-            ));
-        }
-
-
-        let result_dict = PyDict::new(py);
-
-        for (var_name, file) in var_names.into_iter().zip(res) {
-            result_dict.set_item(var_name, file)?;
-        }
-        Ok(result_dict)
-    }
 
 
 

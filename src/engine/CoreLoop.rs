@@ -433,6 +433,36 @@ fn supported_render_target_params(mut params: mq::RenderTargetParams) -> mq::Ren
     params
 }
 
+/// `mq::get_screen_data`, but read straight from the framebuffer with `glReadPixels`.
+///
+/// macroquad copies the screen into a texture with `glCopyTexImage2D(GL_RGBA)` first.
+/// On Wayland, miniquad creates an OpenGL ES context (no `eglBindAPI`) with an EGL config
+/// that has no alpha channel, and GLES refuses to copy RGBA out of an RGB framebuffer:
+/// the copy fails silently and every pixel reads back black. `glReadPixels` with
+/// `GL_RGBA`/`GL_UNSIGNED_BYTE` is guaranteed to work on desktop GL, GLES and WebGL alike,
+/// with or without alpha (missing alpha reads as 255).
+///
+/// Rows come out bottom-up, exactly like `mq::get_screen_data()`.
+fn read_screen_pixels() -> mq::Image {
+    use miniquad::gl::*;
+
+    let mut gl = unsafe { get_internal_gl() };
+    // Render everything queued so far; this also leaves the default framebuffer bound.
+    gl.flush();
+
+    let (w, h) = miniquad::window::screen_size();
+    let (width, height) = (w as u16, h as u16);
+    let mut bytes = vec![0u8; width as usize * height as usize * 4];
+    unsafe {
+        // RGBA8 rows are always a multiple of 4 bytes, so the default pack alignment (4) fits.
+        glReadPixels(
+            0, 0, width as i32, height as i32,
+            GL_RGBA, GL_UNSIGNED_BYTE, bytes.as_mut_ptr() as *mut _,
+        );
+    }
+    mq::Image { bytes, width, height }
+}
+
 const GL_DEPTH_STENCIL: u32 = 0x84F9;
 const GL_DEPTH24_STENCIL8: u32 = 0x88F0;
 const GL_DEPTH_STENCIL_ATTACHMENT: u32 = 0x821A;
@@ -941,7 +971,7 @@ pub async fn dispatch(command: Command, st: &mut EngineState) {
                         let _ = sender.send(res);
                         return;
                     }
-                    let res = mq::get_screen_data();
+                    let res = read_screen_pixels();
                     let _ = sender.send(res);
                 }
                 Command::DrawPoly { x, y, sides, radius, rotation, color }=>
