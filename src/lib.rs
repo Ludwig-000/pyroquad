@@ -112,7 +112,7 @@ pub mod _pyroquad {
     pub use crate::py_abstractions::Audio::{PlaySoundParams, Sound};
 
     #[pymodule_export]
-    pub use crate::py_abstractions::Config::Config;
+    pub use crate::py_abstractions::Config::{Config, LinuxConfig, LinuxBackend, LinuxX11Gl, WaylandDecorations};
 
 
 

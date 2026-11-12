@@ -1,0 +1,95 @@
+name: Wayland Test
+
+# Opens a native Wayland window (no X server at all) and uses it - see tests/wayland_test.py.
+#
+# The compositor is a headless Weston with the pixman (CPU) renderer. The engine
+# renders with Mesa's software GL (llvmpipe) and hands frames to Weston through
+# wl_shm, so no GPU is needed.
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+    branches: ["**"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: wayland-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  wayland:
+    name: Native Wayland Window
+    # Pinned instead of ubuntu-latest: Weston's command-line flags change between releases.
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    env:
+      RUST_BACKTRACE: 1
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Rust Cache
+        uses: Swatinem/rust-cache@v2
+        with:
+          key: wayland-test
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      # The X11 dev packages are still needed to *build*: the crate links libX11
+      # even though this test never talks to an X server.
+      # The rest is what miniquad dlopens at runtime for Wayland, plus the compositor.
+      - name: Install System Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libasound2-dev libx11-dev libxi-dev libgl1-mesa-dev libxcursor-dev \
+            libxinerama-dev libxrandr-dev pulseaudio \
+            weston libwayland-client0 libwayland-egl1 libxkbcommon0 libegl1 libegl-mesa0 libgl1-mesa-dri
+
+      - name: Build and Install pyroquad
+        run: |
+          python -m pip install "maturin>=1.9,<2"
+          maturin build --features abi_310 --out dist -i python
+          python -m pip install --no-index --find-links dist pyroquad
+
+      - name: Start Headless Weston
+        run: |
+          export XDG_RUNTIME_DIR="$RUNNER_TEMP/xdg-runtime"
+          mkdir -p "$XDG_RUNTIME_DIR" && chmod 700 "$XDG_RUNTIME_DIR"
+          echo "XDG_RUNTIME_DIR=$XDG_RUNTIME_DIR" >> "$GITHUB_ENV"
+          echo "WAYLAND_DISPLAY=wayland-ci" >> "$GITHUB_ENV"
+
+          weston --backend=headless --renderer=pixman --shell=kiosk --socket=wayland-ci \
+            --idle-time=0 --width=1024 --height=768 > "$RUNNER_TEMP/weston.log" 2>&1 &
+
+          for i in $(seq 1 50); do
+            [ -S "$XDG_RUNTIME_DIR/wayland-ci" ] && { echo "weston is up"; exit 0; }
+            sleep 0.2
+          done
+          echo "::error::weston did not create its socket"
+          cat "$RUNNER_TEMP/weston.log"
+          exit 1
+
+      - name: Wayland Window Test
+        env:
+          # Mesa: render on the CPU and present through wl_shm.
+          LIBGL_ALWAYS_SOFTWARE: "1"
+          EGL_PLATFORM: wayland
+        run: |
+          pulseaudio -D --exit-idle-time=-1 || true
+          # No X server may be reachable, so a silent fallback to X11 can't hide a broken Wayland path.
+          unset DISPLAY
+          timeout 180 python tests/wayland_test.py
+
+      - name: Weston Log
+        if: always()
+        run: cat "$RUNNER_TEMP/weston.log" || true
