@@ -2,8 +2,8 @@ name: Wayland Test
 
 # Opens a native Wayland window (no X server at all) and uses it - see tests/wayland_test.py.
 #
-# The compositor is a headless Weston with the pixman (CPU) renderer. The engine
-# renders with Mesa's software GL (llvmpipe) and hands frames to Weston through
+# The compositor is a headless sway with the pixman (CPU) renderer. The engine
+# renders with Mesa's software GL (llvmpipe) and hands frames to sway through
 # wl_shm, so no GPU is needed.
 
 on:
@@ -23,7 +23,7 @@ concurrency:
 jobs:
   wayland:
     name: Native Wayland Window
-    # Pinned instead of ubuntu-latest: Weston's command-line flags change between releases.
+    # Pinned instead of ubuntu-latest, so a new image can't silently change the compositor.
     #
     # Must ship libwayland >= 1.23 (26.04 has 1.24). miniquad 0.4.8 dlsym's two
     # functions added in 1.23 (wl_display_create_queue_with_name, wl_event_queue_get_name)
@@ -55,9 +55,9 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y libasound2-dev libx11-dev libxi-dev libgl-dev libxcursor-dev \
             libxinerama-dev libxrandr-dev pulseaudio python3-venv \
-            weston libwayland-client0 libwayland-egl1 libxkbcommon0 libegl1 libegl-mesa0 libgl1-mesa-dri
+            sway libwayland-client0 libwayland-egl1 libxkbcommon0 libegl1 libegl-mesa0 libgl1-mesa-dri
           echo "libwayland-client: $(dpkg-query -W -f='${Version}' libwayland-client0)"
-          echo "weston: $(weston --version)"
+          echo "sway: $(sway --version)"
 
       # The distro's Python in a venv instead of actions/setup-python, which
       # may not have builds for a brand-new runner image yet.
@@ -73,22 +73,35 @@ jobs:
           maturin build --features abi_310 --out dist -i python
           python -m pip install --no-index --find-links dist pyroquad
 
-      - name: Start Headless Weston
+      # sway rather than Weston: headless Weston has no input devices, so it
+      # advertises no wl_seat. miniquad 0.4.8 assumes a seat always exists and passes
+      # a null one to wl_data_device_manager.get_data_device, which kills the whole
+      # Wayland connection (EGL then fails to initialize). wlroots compositors always
+      # advertise a seat, even with no input devices - like every real desktop does.
+      - name: Start Headless Sway
+        env:
+          WLR_BACKENDS: headless
+          WLR_RENDERER: pixman
+          WLR_HEADLESS_OUTPUTS: "1"
         run: |
           export XDG_RUNTIME_DIR="$RUNNER_TEMP/xdg-runtime"
           mkdir -p "$XDG_RUNTIME_DIR" && chmod 700 "$XDG_RUNTIME_DIR"
           echo "XDG_RUNTIME_DIR=$XDG_RUNTIME_DIR" >> "$GITHUB_ENV"
-          echo "WAYLAND_DISPLAY=wayland-ci" >> "$GITHUB_ENV"
 
-          weston --backend=headless --renderer=pixman --shell=kiosk --socket=wayland-ci \
-            --idle-time=0 --width=1024 --height=768 > "$RUNNER_TEMP/weston.log" 2>&1 &
+          echo "output HEADLESS-1 resolution 1024x768" > "$RUNNER_TEMP/sway.conf"
+          sway -d -c "$RUNNER_TEMP/sway.conf" > "$RUNNER_TEMP/compositor.log" 2>&1 &
 
           for i in $(seq 1 50); do
-            [ -S "$XDG_RUNTIME_DIR/wayland-ci" ] && { echo "weston is up"; exit 0; }
+            SOCK=$(cd "$XDG_RUNTIME_DIR" && ls wayland-* 2>/dev/null | grep -v '\.lock$' | head -n1 || true)
+            if [ -n "$SOCK" ] && [ -S "$XDG_RUNTIME_DIR/$SOCK" ]; then
+              echo "sway is up on $SOCK"
+              echo "WAYLAND_DISPLAY=$SOCK" >> "$GITHUB_ENV"
+              exit 0
+            fi
             sleep 0.2
           done
-          echo "::error::weston did not create its socket"
-          cat "$RUNNER_TEMP/weston.log"
+          echo "::error::sway did not create its socket"
+          cat "$RUNNER_TEMP/compositor.log"
           exit 1
 
       - name: Wayland Window Test
@@ -102,6 +115,6 @@ jobs:
           unset DISPLAY
           timeout 180 python tests/wayland_test.py
 
-      - name: Weston Log
+      - name: Compositor Log
         if: always()
-        run: cat "$RUNNER_TEMP/weston.log" || true
+        run: tail -n 300 "$RUNNER_TEMP/compositor.log" || true

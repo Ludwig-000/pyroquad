@@ -1,7 +1,7 @@
 """Opens a native Wayland window and uses it: draws, reads pixels back, resizes, queries input.
 
 Run under a Wayland compositor with no X server (DISPLAY unset), e.g. the headless
-Weston started by .github/workflows/wayland_test.yml. The engine is forced to
+sway started by .github/workflows/wayland_test.yml. The engine is forced to
 LinuxBackend.WaylandOnly, so if Wayland doesn't work, it fails instead of falling back to X11.
 """
 import os
