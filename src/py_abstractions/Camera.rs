@@ -58,7 +58,7 @@ impl Camera2D {
         render_target = None,
         viewport = None
     ))]
-    fn new(
+    const fn new(
         rotation: f32,
         zoom: Vec2,
         target: Vec2,
@@ -283,7 +283,7 @@ impl Camera3D {
         z_near = 0.01,
         z_far = 10000.0,
     ))]
-    fn new(
+    const fn new(
         position: Vec3,
         target: Vec3,
         aspect: Option<f32>,

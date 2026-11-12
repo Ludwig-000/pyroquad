@@ -97,7 +97,7 @@ pub struct TextDimensions {
 #[pymethods]
 impl TextDimensions {
     #[new]
-    pub fn new(width: f32, height: f32, offset_y: f32) -> Self {
+    pub const fn new(width: f32, height: f32, offset_y: f32) -> Self {
        TextDimensions { width, height, offset_y }
     }
 }

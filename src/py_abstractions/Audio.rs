@@ -115,7 +115,7 @@ impl PlaySoundParams {
 
     #[new]
     #[pyo3(signature = ( looped = false, volume = 1.))]
-    pub fn new(looped: bool, volume: f32) -> Self {
+    pub const fn new(looped: bool, volume: f32) -> Self {
         Self { looped, volume }
     }
 

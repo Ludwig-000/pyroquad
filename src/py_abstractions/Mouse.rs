@@ -191,7 +191,7 @@ pub struct Touch{
 #[pymethods]
 impl Touch{
     #[new]
-    pub fn new(id: u64, phase: TouchPhase, position: Vec2) -> Touch{
+    pub const fn new(id: u64, phase: TouchPhase, position: Vec2) -> Touch{
         Touch{id, phase, position}
     }
 }

@@ -62,7 +62,7 @@ impl Image {
     }
     
     #[staticmethod]
-    pub fn empty() -> Image {
+    pub const fn empty() -> Image {
         Image {
             width: 0,
             height: 0,

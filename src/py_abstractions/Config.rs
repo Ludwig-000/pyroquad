@@ -83,7 +83,7 @@ impl Config {
         default_filter_mode= FilterMode::Linear,
         high_dpi= true,
     ))]
-    pub fn new(
+    pub const fn new(
         window_title: String,
         window_width: i32,
         window_height: i32,

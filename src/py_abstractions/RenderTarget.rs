@@ -7,6 +7,7 @@ use crate::engine::CoreLoop::COMMAND_QUEUE;
 use crate::engine::CoreLoop::Command;
  
 use crate::engine::PArc::PArc;
+use crate::py_abstractions::Textures_and_Images::Texture2D;
 
 
 #[pyclass(from_py_object)]
@@ -22,6 +23,17 @@ impl From<mq::RenderTarget> for RenderTarget{
     }
 }
 
+
+#[pymethods]
+impl RenderTarget {
+    /// The color texture this target renders into.
+    /// It shares the GPU memory with the target, so it always shows what was last
+    /// drawn into it. Use it to draw the result, or bind it to a `Material` for post-processing.
+    #[getter]
+    pub fn texture(&self) -> Texture2D {
+        self.render_target.texture.clone().into()
+    }
+}
 
 impl From<RenderTarget> for mq::RenderTarget{
     fn from(r: RenderTarget) -> Self {
@@ -84,7 +96,7 @@ impl RenderTargetParams {
 
     #[new]
     #[pyo3(signature = (sample_count = 1, depth = false))]
-    pub fn new(sample_count: i32, depth: bool) -> Self {
+    pub const fn new(sample_count: i32, depth: bool) -> Self {
         Self { sample_count, depth }
     }
 

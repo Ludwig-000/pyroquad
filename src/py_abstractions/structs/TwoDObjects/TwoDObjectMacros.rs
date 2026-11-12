@@ -82,7 +82,7 @@ Example:
                 }
 
                 /// returns if the object has a registered tick function
-                pub fn has_tick(&self)-> bool {
+                pub const fn has_tick(&self)-> bool {
                     if let Some(key) = self.function_key{
                         true
                     } else {

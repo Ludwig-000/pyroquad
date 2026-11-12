@@ -42,7 +42,7 @@ impl FileData{
     /// 
     /// For more practical ways to load a file, look into 'Loading'.
     #[staticmethod]
-    pub fn from_raw_bytes(bytes: Vec<u8>)-> Self{
+    pub const fn from_raw_bytes(bytes: Vec<u8>)-> Self{
         FileData { bytes}
     }
 

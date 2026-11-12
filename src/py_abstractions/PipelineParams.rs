@@ -145,7 +145,7 @@ pub struct BlendState {
 #[pymethods]
 impl BlendState {
     #[new]
-    fn new(equation: Equation, sfactor: BlendFactor, dfactor: BlendFactor) -> Self {
+    const fn new(equation: Equation, sfactor: BlendFactor, dfactor: BlendFactor) -> Self {
         BlendState { equation, sfactor, dfactor }
     }
 }
@@ -241,7 +241,7 @@ impl StencilFaceState {
         test_mask = u32::MAX,
         write_mask = u32::MAX,
     ))]
-    fn new(
+    const fn new(
         fail_op: StencilOp,
         depth_fail_op: StencilOp,
         pass_op: StencilOp,
@@ -282,7 +282,7 @@ pub struct StencilState {
 #[pymethods]
 impl StencilState {
     #[new]
-    fn new(front: StencilFaceState, back: StencilFaceState) -> Self {
+    const fn new(front: StencilFaceState, back: StencilFaceState) -> Self {
         StencilState { front, back }
     }
 }
@@ -368,7 +368,7 @@ impl PipelineParams {
         color_write = (true, true, true, true),
         primitive_type = PrimitiveType::Triangles,
     ))]
-    fn new(
+    const fn new(
         cull_face: CullFace,
         front_face_order: FrontFaceOrder,
         depth_test: Comparison,
