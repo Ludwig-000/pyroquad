@@ -118,11 +118,20 @@ jobs:
           # Mesa: render on the CPU and present through wl_shm.
           LIBGL_ALWAYS_SOFTWARE: "1"
           EGL_PLATFORM: wayland
+          WAYLAND_TEST_SCREENSHOT: ${{ runner.temp }}/wayland-frame.ppm
         run: |
           pulseaudio -D --exit-idle-time=-1 || true
           # No X server may be reachable, so a silent fallback to X11 can't hide a broken Wayland path.
           unset DISPLAY
           timeout 180 python tests/wayland_test.py
+
+      - name: Upload Read-Back Frame
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: wayland-frame
+          path: ${{ runner.temp }}/wayland-frame.ppm
+          if-no-files-found: ignore
 
       - name: Compositor Log
         if: always()

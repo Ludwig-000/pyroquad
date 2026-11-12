@@ -33,35 +33,84 @@ p.activate_engine(p.Config(
 ))
 print("window opened:", p.screen_width(), "x", p.screen_height(), flush=True)
 
-for _ in range(5):
+
+def screen_size():
+    return int(p.screen_width()), int(p.screen_height())
+
+
+# Tiling compositors (sway) resize the window right after it maps.
+# Keep presenting frames until the size has been stable for a while.
+last, stable = screen_size(), 0
+for _ in range(120):
+    p.clear_background(p.Color(0, 0, 1, 1))
     p.next_frame()
+    now = screen_size()
+    stable = stable + 1 if now == last else 0
+    last = now
+    if stable >= 10:
+        break
+SW, SH = last
+print("settled window size:", SW, "x", SH, flush=True)
 
 
 def pixel(img, x, y):
     """RGBA at (x, y) from the top-left. get_screen_data() rows come bottom-up."""
     sy = img.height - 1 - y
     i = (sy * img.width + x) * 4
-    return tuple(bytes(img.bytes)[i:i + 4])
+    return tuple(img_bytes[i:i + 4])
 
 
 def close(a, b, tol=8):
     return all(abs(x - y) <= tol for x, y in zip(a[:3], b[:3]))
 
 
+def describe(img):
+    """Where non-black pixels ended up - tells a size mismatch apart from an empty frame."""
+    w, h = img.width, img.height
+    xs, ys, count = [], [], 0
+    for y in range(0, h, 4):
+        row = (h - 1 - y) * w * 4
+        for x in range(0, w, 4):
+            if any(img_bytes[row + x * 4: row + x * 4 + 3]):
+                count += 1
+                xs.append(x)
+                ys.append(y)
+    total = ((w + 3) // 4) * ((h + 3) // 4)
+    print(f"non-black samples: {count}/{total}", flush=True)
+    if count:
+        print(f"non-black bbox (top-left origin): x {min(xs)}..{max(xs)}, y {min(ys)}..{max(ys)}", flush=True)
+
+
+def save_ppm(img, path):
+    """Top-down RGB dump, viewable with most image viewers."""
+    w, h = img.width, img.height
+    with open(path, "wb") as f:
+        f.write(f"P6 {w} {h} 255\n".encode())
+        for y in range(h):
+            row = (h - 1 - y) * w * 4
+            f.write(b"".join(img_bytes[row + x * 4: row + x * 4 + 3] for x in range(w)))
+
+
 # Draw a known picture and read it back from the GPU.
 for frame in range(3):
     p.clear_background(p.Color(0, 0, 1, 1))
     p.draw_rectangle(0, 0, 40, 40, p.Color(1, 0, 0, 1))
-    p.draw_circle(W / 2, H / 2, 30, p.Color(0, 1, 0, 1))
+    p.draw_circle(SW / 2, SH / 2, 30, p.Color(0, 1, 0, 1))
     if frame == 2:
         img = p.get_screen_data()
+        img_bytes = bytes(img.bytes)
     p.next_frame()
 
 print("framebuffer:", img.width, "x", img.height, flush=True)
+describe(img)
+shot = os.environ.get("WAYLAND_TEST_SCREENSHOT")
+if shot:
+    save_ppm(img, shot)
+    print("screenshot saved to", shot, flush=True)
 checks = {
     "top-left red rectangle": (pixel(img, 10, 10), (255, 0, 0)),
-    "green circle centre": (pixel(img, W // 2, H // 2), (0, 255, 0)),
-    "blue background": (pixel(img, W - 10, H - 10), (0, 0, 255)),
+    "green circle centre": (pixel(img, SW // 2, SH // 2), (0, 255, 0)),
+    "blue background": (pixel(img, SW - 10, SH - 10), (0, 0, 255)),
 }
 failed = False
 for name, (got, want) in checks.items():
