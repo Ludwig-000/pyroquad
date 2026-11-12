@@ -2,9 +2,9 @@ name: Wayland Test
 
 # Opens a native Wayland window (no X server at all) and uses it - see tests/wayland_test.py.
 #
-# The compositor is a headless sway with the pixman (CPU) renderer. The engine
-# renders with Mesa's software GL (llvmpipe) and hands frames to sway through
-# wl_shm, so no GPU is needed.
+# The compositor is sway with the pixman (CPU) renderer, nested in Xvfb (see the
+# "Start Sway" step for why). The engine renders with Mesa's software GL (llvmpipe)
+# and hands frames to sway through wl_shm, so no GPU is needed.
 
 on:
   push:
@@ -55,7 +55,7 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y libasound2-dev libx11-dev libxi-dev libgl-dev libxcursor-dev \
             libxinerama-dev libxrandr-dev pulseaudio python3-venv \
-            sway libwayland-client0 libwayland-egl1 libxkbcommon0 libegl1 libegl-mesa0 libgl1-mesa-dri
+            sway xvfb libwayland-client0 libwayland-egl1 libxkbcommon0 libegl1 libegl-mesa0 libgl1-mesa-dri
           echo "libwayland-client: $(dpkg-query -W -f='${Version}' libwayland-client0)"
           echo "sway: $(sway --version)"
 
@@ -73,23 +73,32 @@ jobs:
           maturin build --features abi_310 --out dist -i python
           python -m pip install --no-index --find-links dist pyroquad
 
-      # sway rather than Weston: headless Weston has no input devices, so it
-      # advertises no wl_seat. miniquad 0.4.8 assumes a seat always exists and passes
-      # a null one to wl_data_device_manager.get_data_device, which kills the whole
-      # Wayland connection (EGL then fails to initialize). wlroots compositors always
-      # advertise a seat, even with no input devices - like every real desktop does.
-      - name: Start Headless Sway
+      # miniquad 0.4.8 needs the compositor's seat to already have a pointer when the
+      # window is created: it passes the seat and the pointer straight into
+      # wl_data_device_manager.get_data_device and wp_cursor_shape_manager_v1.get_pointer.
+      # If either is null, libwayland kills the whole connection and EGL then fails
+      # to initialize. Every real desktop has a pointer, but a headless compositor
+      # has no input devices at all (no seat on Weston, an empty seat on sway).
+      #
+      # So sway runs nested in a virtual X server instead: wlroots' X11 backend always
+      # creates a keyboard and a pointer for its window. Only the compositor talks to
+      # X - the test itself runs with DISPLAY unset and sees nothing but Wayland.
+      - name: Start Sway (nested in Xvfb)
         env:
-          WLR_BACKENDS: headless
+          WLR_BACKENDS: x11
           WLR_RENDERER: pixman
-          WLR_HEADLESS_OUTPUTS: "1"
+          WLR_X11_OUTPUTS: "1"
         run: |
           export XDG_RUNTIME_DIR="$RUNNER_TEMP/xdg-runtime"
           mkdir -p "$XDG_RUNTIME_DIR" && chmod 700 "$XDG_RUNTIME_DIR"
           echo "XDG_RUNTIME_DIR=$XDG_RUNTIME_DIR" >> "$GITHUB_ENV"
 
-          echo "output HEADLESS-1 resolution 1024x768" > "$RUNNER_TEMP/sway.conf"
-          sway -d -c "$RUNNER_TEMP/sway.conf" > "$RUNNER_TEMP/compositor.log" 2>&1 &
+          Xvfb :99 -screen 0 1024x768x24 > "$RUNNER_TEMP/xvfb.log" 2>&1 &
+          for i in $(seq 1 50); do [ -S /tmp/.X11-unix/X99 ] && break; sleep 0.2; done
+
+          # No Xwayland: nothing inside the compositor should be able to reach X either.
+          echo "xwayland disable" > "$RUNNER_TEMP/sway.conf"
+          DISPLAY=:99 sway -d -c "$RUNNER_TEMP/sway.conf" > "$RUNNER_TEMP/compositor.log" 2>&1 &
 
           for i in $(seq 1 50); do
             SOCK=$(cd "$XDG_RUNTIME_DIR" && ls wayland-* 2>/dev/null | grep -v '\.lock$' | head -n1 || true)
@@ -117,4 +126,7 @@ jobs:
 
       - name: Compositor Log
         if: always()
-        run: tail -n 300 "$RUNNER_TEMP/compositor.log" || true
+        run: |
+          tail -n 300 "$RUNNER_TEMP/compositor.log" || true
+          echo "--- Xvfb ---"
+          cat "$RUNNER_TEMP/xvfb.log" || true
