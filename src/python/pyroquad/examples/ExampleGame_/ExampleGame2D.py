@@ -1761,11 +1761,11 @@ class Menue():
                 draw_text("Pyro Meadow",
                           (2194.0/2)-tileSize*7 , 
                           1234.0/2 - tileSize*3 +2, Color.ORANGE_RED,
-                          tileSize*25, fonts.get("dungeon_font"), font_scale=.1, font_scale_aspect=1)
+                          80, fonts.get("dungeon_font"), font_scale=1.0, font_scale_aspect=1)
                 draw_text("Pyro Meadow",
                           (2194.0/2)-tileSize*7, 
                           1234.0/2 - tileSize*3, Color.BLOOD_RED,
-                          tileSize*25, fonts.get("dungeon_font"), font_scale=.1)
+                          80, fonts.get("dungeon_font"), font_scale=1.0)
                 self.draw_mouse()
                 next_frame()
                 examples.limit_fps(60)
@@ -1800,7 +1800,7 @@ class Menue():
                 for item in self.pause_background:
                     item.draw()
                 draw_multiline_text("Game Paused.\nPress 'Escape' to return.",
-                          (2194.0/2)-tileSize*15, 1234.0/2 - tileSize*5,tileSize*20,Color.BLUE_VIOLET, fonts.get("dungeon_font"),0, None, .1
+                          (2194.0/2)-tileSize*15, 1234.0/2 - tileSize*5,64,Color.BLUE_VIOLET, fonts.get("dungeon_font"),0, None, 1.0
                           )
                 self.draw_mouse()
                 next_frame()
@@ -1851,7 +1851,7 @@ class Menue():
                 for item in self.death_background:
                     item.draw()
                 draw_multiline_text("You Have Died.\nWhat will you do?",
-                          (150), 1234.0/2 - tileSize*5,tileSize*20,Color.BLUE_VIOLET, fonts.get("dungeon_font"), 0, None, .1
+                          (150), 1234.0/2 - tileSize*5,64,Color.BLUE_VIOLET, fonts.get("dungeon_font"), 0, None, 1.0
                           )
                 self.draw_mouse()
                 next_frame()
