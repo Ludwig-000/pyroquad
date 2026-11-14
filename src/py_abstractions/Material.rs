@@ -3,6 +3,7 @@ use std::sync::Arc;
 use macroquad::prelude as mq;
 use pyo3::prelude::*;
 use pyo3::exceptions::PyValueError;
+use pyo3::sync::PyOnceLock;
 
 use crate::py_abstractions::PipelineParams::PipelineParams;
 
@@ -61,6 +62,37 @@ impl Material{
         })
     }
 
+
+    /// A general purpose color-grading pass over everything drawn so far.
+    /// Compiled the first time this is read; every read returns the same material.
+    ///
+    /// Draw any rectangle with it after the scene: it is stretched over the whole screen
+    /// (or render target) and grades every pixel. What is drawn after it is not graded.
+    /// ```
+    /// Material.COLOR_GRADING.set_uniform("saturation", UniformType.Float1([0.3]))
+    /// Material.COLOR_GRADING.start_using()
+    /// draw_rectangle(0, 0, 1, 1, Color.WHITE)
+    /// use_default_material()
+    /// ```
+    /// 
+    ///     uniform       type   neutral          what it does
+    ///     exposure      float  0.0              brightness in photographic stops: +1 doubles, -1 halves
+    ///     temperature   float  0.0              white balance, -1 cool (blue) .. +1 warm (orange)
+    ///     tint          float  0.0              white balance, -1 green .. +1 magenta
+    ///     contrast      float  1.0              pushes colors away from (>1) or toward (<1) mid grey
+    ///     brightness    float  0.0              added to every channel
+    ///     lift          vec3   (0, 0, 0)        raises the shadows per channel, leaves white alone
+    ///     gamma         vec3   (1, 1, 1)        bends the midtones per channel: >1 brighter, <1 darker
+    ///     gain          vec3   (1, 1, 1)        scales the highlights per channel, leaves black alone
+    ///     hue_shift     float  0.0              rotates every hue, in degrees
+    ///     saturation    float  1.0              0 is greyscale, >1 is more colorful
+    ///     intensity     float  1.0              blends from the original (0) to the graded result (1)
+    /// 
+    /// Uniforms and full source: `pyroquad/shaders/color_grading.py`.
+    #[classattr]
+    fn COLOR_GRADING() -> BuiltinMaterial {
+        BuiltinMaterial("color_grading")
+    }
 
     #[classattr]
     pub const fn DEFAULT_VERTEX_SHADER() -> &'static str {
@@ -187,6 +219,51 @@ impl Material{
 #[pyfunction]
 pub fn use_default_material(){
     COMMAND_QUEUE.push( Command::UseDefaultMaterial );
+}
+
+
+
+/// The value behind a built-in material attribute such as `Material.COLOR_GRADING`.
+///
+/// The material itself is described in Python, in `pyroquad/shaders/<module>.py`, so it can be
+/// read. This descriptor only compiles it, through `pyroquad.shaders._compile`, the first time
+/// the attribute is read, and keeps it.
+///
+/// It is declared in Rust, not attached from Python, so the generated stubs list the attribute
+/// and type checkers see a `Material` there.
+#[pyclass(frozen)]
+pub struct LazyMaterial {
+    module: &'static str,
+    material: PyOnceLock<Py<Material>>,
+}
+
+#[pymethods]
+impl LazyMaterial {
+    fn __get__(&self, py: Python<'_>, _instance: Option<&Bound<'_, PyAny>>, _owner: Option<&Bound<'_, PyAny>>) -> PyResult<Py<Material>> {
+        // a failed compile leaves the cell empty, so the next read tries again.
+        let mat = self.material.get_or_try_init(py, || -> PyResult<Py<Material>> {
+            py.import("pyroquad.shaders")?.call_method1("_compile", (self.module,))?.extract().map_err(Into::into)
+        })?;
+        Ok(mat.clone_ref(py))
+    }
+}
+
+/// What a built-in material classattr returns: becomes a `LazyMaterial`, but tells the stubs
+/// `Material`, which is what reading the attribute gives.
+pub struct BuiltinMaterial(&'static str);
+
+impl<'py> IntoPyObject<'py> for BuiltinMaterial {
+    type Target = LazyMaterial;
+    type Output = Bound<'py, LazyMaterial>;
+    type Error = PyErr;
+
+    // pyo3's "experimental-inspect" (stub generation) is only on in builds that pass an abi_* feature.
+    #[cfg(any(feature = "abi_314", feature = "abi_310", feature = "abi_39"))]
+    const OUTPUT_TYPE: pyo3::inspect::PyStaticExpr = <Material as pyo3::PyTypeInfo>::TYPE_HINT;
+
+    fn into_pyobject(self, py: Python<'py>) -> PyResult<Bound<'py, LazyMaterial>> {
+        Bound::new(py, LazyMaterial { module: self.0, material: PyOnceLock::new() })
+    }
 }
 
 
