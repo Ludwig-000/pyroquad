@@ -1305,7 +1305,9 @@ class Trigger():
         if not hasattr(visual, "animation_index"): visual.animation_index = 0 #type: ignore
         if not hasattr(visual, "last_animation_switch"): visual.last_animation_switch = time.time() #type: ignore
 
-        if visual.animation_index >= 7: return #type: ignore
+        if visual.animation_index >= 7: #type: ignore
+            if SceneManager.current_active_scene == visual.scene: LevelTriggers.teleporter_active = True #type: ignore
+            return
         now = time.time()
         if now - visual.last_animation_switch < 0.2: return #type: ignore
 
@@ -1317,6 +1319,7 @@ class Trigger():
 class LevelTriggers():
     triggers: list[Trigger]
     current_level: int
+    teleporter_active = False
     def __init__(self, level: int) -> None:
         self.load_new_triggers_for_area(level)
 
@@ -1349,6 +1352,7 @@ class LevelTriggers():
             trigger.hitbox.color = Color.INVISIBLE
     def load_new_triggers_for_area(self, area: int):
         self.current_level = area
+        LevelTriggers.teleporter_active = False
         self.triggers =  []
         if area == 0:
             r = Rectangle(Vec2(tileSize*47, tileSize*33),0,Vec2(tileSize*4,tileSize*1), Color.INVISIBLE)
@@ -1387,6 +1391,7 @@ class LevelTriggers():
             if trigger.name == name:
                 trigger.active = active
                 if trigger.active == True and trigger.visual_box and not trigger.visual_box.has_tick():
+                    if not hasattr(trigger.visual_box, "scene"): trigger.visual_box.scene = SceneManager.current_active_scene #type: ignore
                     trigger.visual_box.tick( Trigger.animate_transition )
                 return
         raise BaseException("Trigger not found")
@@ -1874,7 +1879,81 @@ class Menue():
         else:
             show_mouse(True)
 
+class ShaderManager():
+    def __init__(self):
+        self.glow = ShaderManager.__glow()
+        self.glow.set_uniform("uGlowPos", UniformType.Float2([500,500]))
+        self.color_grading = Material.COLOR_GRADING
+        self.color_grading.set_uniform("temperature", UniformType.Float1([-0.2]))
+        self.color_grading.set_uniform("tint", UniformType.Float1([0.1]))
+        self.color_grading.set_uniform("contrast", UniformType.Float1([0.85]))
 
+    def update_uniforms(self):
+        if SceneManager.current_active_scene >= 3:
+            self.color_grading.set_uniform("temperature", UniformType.Float1([-0.15]))
+            self.color_grading.set_uniform("tint", UniformType.Float1([0.1]))
+            self.color_grading.set_uniform("contrast", UniformType.Float1([0.9]))
+        else:
+            self.color_grading.set_uniform("temperature", UniformType.Float1([0]))
+            self.color_grading.set_uniform("tint", UniformType.Float1([0]))
+            self.color_grading.set_uniform("contrast", UniformType.Float1([1]))
+
+        pos = Vec2(0, 0)
+        for trigger in level_triggers.triggers:
+            if trigger.visual_box is not None:  # the teleporter; glow on its hitbox
+                box = trigger.visual_box
+                centre = Vec2((box.min_x() + box.max_x()) / 2, (box.min_y() + box.max_y()) / 2)
+                pos = Camera2D.world_to_screen(camera, centre)
+                break
+        # world_to_screen gives logical pixels, the shader works in real framebuffer pixels
+        pos = pos * screen_dpi_scale()
+        self.glow.set_uniform("uGlowPos", UniformType.Float2([pos.x, pos.y]))
+
+    @staticmethod
+    def __glow() -> Material:
+        vert = """#version 100
+        attribute vec3 position;
+        attribute vec2 texcoord;
+        attribute vec4 color0;
+
+        varying highp vec2 screen_uv;
+
+        void main() {
+            screen_uv = texcoord;
+            gl_Position = vec4(texcoord * 2.0 - 1.0, 0.0, 1.0);
+        }
+        """
+        frag = """#version 100
+        #ifdef GL_FRAGMENT_PRECISION_HIGH
+        precision highp float;
+        #else
+        precision mediump float;
+        #endif
+
+        varying vec2 screen_uv;
+        uniform vec2 uGlowPos;
+        uniform sampler2D _ScreenTexture;
+
+        const float RADIUS   = 300.0;
+        const float STRENGTH = 0.6;
+
+        void main() {
+            vec4 col = texture2D(_ScreenTexture, screen_uv);
+
+            float height = gl_FragCoord.y / screen_uv.y;
+            vec2 pixel   = vec2(gl_FragCoord.x, height - gl_FragCoord.y);
+
+            float dist = distance(pixel, uGlowPos);
+            float glow = 1.0 - smoothstep(0.0, RADIUS, dist);
+            vec3 c     = col.rgb * (1.0 + STRENGTH * glow);
+            gl_FragColor = vec4(c, col.a);
+        }
+        """
+        mat = Material(vertex_shader=vert, fragment_shader=frag,
+                       name="post_processing",
+                       uniform_descriptions=[UniformDesc.Float2("uGlowPos")],
+                       pipeline_params=PipelineParams())
+        return mat
 
 # profiler = Profiler(interval=0.1)
 # profiler.start()
@@ -1892,7 +1971,7 @@ examples.loading_screen(lambda a: a, [],"Initializing Scene")
 enemies: list[BasicEnemy | ProjectileEnemy] = []
 enemy_projectiles: list[EnemyProjectile] = []
 
-
+shader_manager = ShaderManager()
 menue = Menue()
 player = Player()
 hud = Hud()
@@ -1931,39 +2010,39 @@ def launch():
                 quit_program()
                 print("Bye")
                 break
-        # if KeyCode.L in get_keys_pressed():
-        #     val  = menue.start(2)
-        #     if val:
-        #         quit_program()
-        #         print("Bye")
-        #         break
-        # if KeyCode.O in get_keys_pressed():
-        #     enemies.append(
-        #         BasicEnemy(Vec2.splat(500), SceneManager.current_active_scene)
-        #     )
-        #     enemies.append(
-        #         ProjectileEnemy(Vec2.splat(500), SceneManager.current_active_scene, enemy_projectiles)
-        #     )
-        # if KeyCode.K in get_keys_pressed():
-        #     enemies.clear()
-        # if KeyCode.O in get_keys_pressed() and KeyCode.LeftShift in get_keys_down():
-        #     for i in range(10):
-        #         enemies.append(
-        #         BasicEnemy(Vec2.splat(500), SceneManager.current_active_scene)
-        #         )
+        if KeyCode.L in get_keys_pressed():
+            val  = menue.start(2)
+            if val:
+                quit_program()
+                print("Bye")
+                break
+        if KeyCode.O in get_keys_pressed():
+            enemies.append(
+                BasicEnemy(Vec2.splat(500), SceneManager.current_active_scene)
+            )
+            enemies.append(
+                ProjectileEnemy(Vec2.splat(500), SceneManager.current_active_scene, enemy_projectiles)
+            )
+        if KeyCode.K in get_keys_pressed():
+            enemies.clear()
+        if KeyCode.O in get_keys_pressed() and KeyCode.LeftShift in get_keys_down():
+            for i in range(10):
+                enemies.append(
+                BasicEnemy(Vec2.splat(500), SceneManager.current_active_scene)
+                )
 
-        # if KeyCode.Key0 in get_keys_pressed():
-        #     SceneManager.switch_scene(0, True)
-        # if KeyCode.Key1 in get_keys_pressed():
-        #     SceneManager.switch_scene(1, True)
-        # if KeyCode.Key2 in get_keys_pressed():
-        #     SceneManager.switch_scene(2, True)
-        # if KeyCode.Key3 in get_keys_pressed():
-        #     SceneManager.switch_scene(3, True)
-        # if KeyCode.Key4 in get_keys_pressed():
-        #     SceneManager.switch_scene(4, True)
-        # if KeyCode.Key5 in get_keys_pressed():
-        #     SceneManager.switch_scene(5, True)
+        if KeyCode.Key0 in get_keys_pressed():
+            SceneManager.switch_scene(0, True)
+        if KeyCode.Key1 in get_keys_pressed():
+            SceneManager.switch_scene(1, True)
+        if KeyCode.Key2 in get_keys_pressed():
+            SceneManager.switch_scene(2, True)
+        if KeyCode.Key3 in get_keys_pressed():
+            SceneManager.switch_scene(3, True)
+        if KeyCode.Key4 in get_keys_pressed():
+            SceneManager.switch_scene(4, True)
+        if KeyCode.Key5 in get_keys_pressed():
+            SceneManager.switch_scene(5, True)
 
 
         # logic
@@ -1996,6 +2075,7 @@ def launch():
         enemy_spawner.tick(enemies, get_delta_time())
         
         # drawing
+        shader_manager.update_uniforms()
         camera.set_camera()
         background.draw()
         for t in level_triggers.triggers: t.draw_visual()
@@ -2005,6 +2085,17 @@ def launch():
             [obj.visual for obj in destructible_manager.get(SceneManager.current_active_scene)],
             player
         )
+
+        if LevelTriggers.teleporter_active:
+            shader_manager.glow.start_using()
+            draw_rectangle()
+            use_default_material()
+
+        shader_manager.color_grading.start_using()
+        draw_rectangle()
+        use_default_material()
+
+
         enemy_spawner.draw_warnings()
         hud.draw(player)
         
